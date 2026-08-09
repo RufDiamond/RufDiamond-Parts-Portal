@@ -1,0 +1,157 @@
+/**
+ * Catalog domain types.
+ *
+ * These describe the shape the eventual API is expected to return. Nothing in
+ * here is storage-specific: the in-memory repository and the real backend must
+ * both satisfy these contracts.
+ */
+
+export type Currency = "CAD" | "USD";
+
+export type ModelStatus = "active" | "legacy" | "discontinued";
+
+export type FigureStatus = "published" | "draft" | "superseded";
+
+export type PartStatus = "active" | "superseded" | "obsolete" | "special-order";
+
+export type CompanyType = "customer" | "dealer";
+
+/** A machine family, e.g. Fat Truck. */
+export interface ProductLine {
+  id: string;
+  name: string;
+  manufacturer: string;
+  /** ISO 3166-1 alpha-2, e.g. "CA". */
+  country: string;
+  /** True when RufDiamond distributes the line rather than manufacturing it. */
+  isDistributed: boolean;
+}
+
+/** A machine within a product line, e.g. FT3 Wagon. */
+export interface Model {
+  id: string;
+  productLineId: string;
+  name: string;
+  status: ModelStatus;
+}
+
+/**
+ * A serial-number range of a model. Parts catalogues are cut by serial range,
+ * so the variant — not the model — is what a figure hangs off.
+ */
+export interface Variant {
+  id: string;
+  modelId: string;
+  /** Human-readable range as printed on the catalogue cover. */
+  label: string;
+  serialFrom: string | null;
+  /** Null means "and up" — the range is open-ended. */
+  serialTo: string | null;
+  catalogRevision: string;
+}
+
+/** A top-level grouping of figures, e.g. Hydraulic. Shared across variants. */
+export interface System {
+  id: string;
+  name: string;
+  sortOrder: number;
+}
+
+/** One drawing sheet: a plate with numbered callouts and a parts list. */
+export interface Figure {
+  id: string;
+  variantId: string;
+  systemId: string;
+  name: string;
+  /** Group number as printed, e.g. "1.1". Rendered as "FIG 1.1". */
+  groupNo: string;
+  /** Handle for the drawing asset; null while the plate is unattached. */
+  drawingFileId: string | null;
+  status: FigureStatus;
+}
+
+/** A stock item. Prices are list prices before any company discount. */
+export interface Part {
+  id: string;
+  partNumber: string;
+  description: string;
+  manufacturer: string | null;
+  listPrice: number;
+  currency: Currency;
+  /** Points at the replacement when this part has been superseded. */
+  supersededByPartId: string | null;
+  status: PartStatus;
+}
+
+/** A part's appearance on a figure, with the quantity used there. */
+export interface FigurePart {
+  id: string;
+  figureId: string;
+  partId: string;
+  qty: number;
+  remarks: string | null;
+  /** False for reference-only items that cannot be ordered separately. */
+  serviceable: boolean;
+}
+
+/**
+ * A numbered marker on a drawing. One figure part may have several callouts
+ * when the item appears more than once on the plate; those callouts share a
+ * number and highlight together.
+ */
+export interface Callout {
+  id: string;
+  figureId: string;
+  figurePartId: string;
+  number: number;
+  /** Percentage of drawing width, 0-100. Not pixels. */
+  x: number;
+  /** Percentage of drawing height, 0-100. Not pixels. */
+  y: number;
+}
+
+/** A customer or dealer account. Discount applies to list price. */
+export interface Company {
+  id: string;
+  name: string;
+  type: CompanyType;
+  /** Fraction, e.g. 0.15 for 15% off list. */
+  discountRate: number;
+}
+
+/**
+ * A line on an order. Part details are snapshotted at the time of ordering so
+ * later catalogue edits cannot rewrite order history.
+ */
+export interface OrderLine {
+  partId: string;
+  partNumberSnapshot: string;
+  descriptionSnapshot: string;
+  qty: number;
+  unitPriceSnapshot: number;
+  lineTotal: number;
+}
+
+/* ------------------------------------------------------------------ *
+ * Composite read models
+ *
+ * Shapes the UI reads but no single table owns. The backend is expected to
+ * assemble these server-side rather than making the client join.
+ * ------------------------------------------------------------------ */
+
+/** A parts-list row: the figure part, its part record, and its callout numbers. */
+export interface FigurePartRow {
+  figurePart: FigurePart;
+  part: Part;
+  /** Ascending, de-duplicated. Empty when the item has no marker on the plate. */
+  calloutNumbers: number[];
+}
+
+/** Everything needed to render one figure screen. */
+export interface FigureDetail {
+  figure: Figure;
+  system: System;
+  variant: Variant;
+  rows: FigurePartRow[];
+  callouts: Callout[];
+}

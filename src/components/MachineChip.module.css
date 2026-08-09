@@ -1,0 +1,59 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--hairline);
+  background: var(--sheet);
+}
+
+.identity {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.manufacturer {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.name {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.serial {
+  padding-left: var(--space-3);
+  border-left: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  color: var(--graphite);
+  white-space: nowrap;
+}
+
+.dismiss {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: var(--hairline);
+  background: var(--paper);
+  color: var(--graphite);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.dismiss:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}

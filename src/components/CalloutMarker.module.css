@@ -1,0 +1,43 @@
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--space-1);
+  border: var(--hairline-width) solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.marker:disabled {
+  cursor: default;
+}
+
+.default:hover:not(:disabled) {
+  background: var(--sheet);
+}
+
+.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.muted {
+  border-color: var(--rule);
+  color: var(--mid);
+}
+
+.muted:hover:not(:disabled) {
+  border-color: var(--graphite);
+  color: var(--graphite);
+}

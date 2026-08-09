@@ -1,0 +1,177 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.caption {
+  padding: 0 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--graphite);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--hairline);
+  vertical-align: baseline;
+}
+
+.table th:first-child,
+.table td:first-child {
+  padding-left: var(--space-2);
+}
+
+.table th:last-child,
+.table td:last-child {
+  padding-right: var(--space-2);
+}
+
+.table thead th {
+  border-bottom: var(--hairline-width) solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--graphite);
+  white-space: nowrap;
+}
+
+.row:hover {
+  background: var(--sheet);
+}
+
+/* Selection inverts the row. Every nested rule and border keys off
+   currentColor so the whole row flips together. */
+.row[data-active] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.row[data-active]:hover {
+  background: var(--ink);
+}
+
+.refCell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.refList {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* One badge per occurrence: a part fitted twice shows its number twice. */
+.refBadge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25rem;
+  padding: 0 2px;
+  border: var(--hairline-width) solid currentColor;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1.4;
+}
+
+.noRef {
+  font-family: var(--font-mono);
+  color: var(--mid);
+}
+
+.partNo {
+  width: 1%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.partButton {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+.partButton:hover {
+  box-shadow: inset 0 -1px 0 currentColor;
+}
+
+.description {
+  width: 100%;
+}
+
+.descriptionText {
+  color: inherit;
+}
+
+.flag {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.remarks {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-xs);
+  opacity: 0.7;
+}
+
+.num,
+.numHead {
+  text-align: right;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+}
+
+.qty {
+  opacity: 0.75;
+}
+
+.orderCell {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table tfoot td {
+  border-bottom: none;
+  padding-top: var(--space-4);
+  font-weight: 600;
+}
+
+.totalLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  text-align: right;
+  color: var(--graphite);
+}
