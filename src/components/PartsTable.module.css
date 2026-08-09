@@ -44,7 +44,9 @@
   white-space: nowrap;
 }
 
-.row:hover {
+/* Hovering a marker on the drawing lights the matching row, and vice versa. */
+.row:hover,
+.row[data-hovered] {
   background: var(--sheet);
 }
 
@@ -55,7 +57,8 @@
   color: var(--paper);
 }
 
-.row[data-active]:hover {
+.row[data-active]:hover,
+.row[data-active][data-hovered] {
   background: var(--ink);
 }
 

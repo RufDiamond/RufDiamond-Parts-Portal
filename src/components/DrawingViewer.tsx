@@ -24,13 +24,20 @@ export interface DrawingViewerProps {
   /** Resolved image URL. Until the backend serves drawings, leave undefined. */
   src?: string;
   markers: DrawingMarker[];
-  /** The selected part. Its markers go solid; the rest recede. */
-  activePartId?: string | null;
-  onActivatePart?: (partId: string | null) => void;
+  /**
+   * Selected parts. EVERY marker carrying one of these part ids goes solid —
+   * a part fitted in two places lights in both — and the rest recede.
+   */
+  selectedPartIds?: ReadonlySet<string>;
+  /** Part under the pointer, wherever the pointer is. */
+  hoveredPartId?: string | null;
+  onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
 }
 
 const ZOOM_STEPS = [1, 1.5, 2, 3] as const;
+
+const NO_SELECTION: ReadonlySet<string> = new Set();
 
 /**
  * The drawing plate with its callouts overlaid.
@@ -43,16 +50,21 @@ export function DrawingViewer({
   drawingFileId = null,
   src,
   markers,
-  activePartId = null,
-  onActivatePart,
+  selectedPartIds = NO_SELECTION,
+  hoveredPartId = null,
+  onTogglePart,
   onHoverPart,
 }: DrawingViewerProps) {
   const [zoomIndex, setZoomIndex] = useState(0);
   const zoom = ZOOM_STEPS[zoomIndex];
 
   const markerState = (partId: string) => {
-    if (!activePartId) return "default" as const;
-    return partId === activePartId ? ("active" as const) : ("muted" as const);
+    if (selectedPartIds.has(partId) || partId === hoveredPartId) {
+      return "active" as const;
+    }
+    // Once something is selected, everything else steps back so the chosen
+    // part reads at a glance.
+    return selectedPartIds.size > 0 ? ("muted" as const) : ("default" as const);
   };
 
   return (
@@ -115,12 +127,7 @@ export function DrawingViewer({
               state={markerState(marker.partId)}
               title={marker.label}
               onActivate={
-                onActivatePart
-                  ? () =>
-                      onActivatePart(
-                        activePartId === marker.partId ? null : marker.partId,
-                      )
-                  : undefined
+                onTogglePart ? () => onTogglePart(marker.partId) : undefined
               }
               onHoverChange={
                 onHoverPart

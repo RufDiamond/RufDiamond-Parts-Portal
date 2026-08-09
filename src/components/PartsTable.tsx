@@ -6,13 +6,17 @@ import type { Currency, FigurePartRow } from "@/types/catalog";
 import { QuantityStepper } from "./QuantityStepper";
 import styles from "./PartsTable.module.css";
 
+const NO_SELECTION: ReadonlySet<string> = new Set();
+
 export interface PartsTableProps {
   rows: FigurePartRow[];
   /** Currency shown in the column head. Defaults to the first row's currency. */
   currency?: Currency;
-  /** Selected part; its row inverts and its markers light on the drawing. */
-  activePartId?: string | null;
-  onActivatePart?: (partId: string | null) => void;
+  /** Selected parts; their rows invert and all their markers light. */
+  selectedPartIds?: ReadonlySet<string>;
+  /** Part under the pointer, including when it is hovered on the drawing. */
+  hoveredPartId?: string | null;
+  onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
   /** Part id to ordered quantity. Supplying this adds the Order column. */
   orderQuantities?: Record<string, number>;
@@ -31,8 +35,9 @@ export interface PartsTableProps {
 export function PartsTable({
   rows,
   currency,
-  activePartId = null,
-  onActivatePart,
+  selectedPartIds = NO_SELECTION,
+  hoveredPartId = null,
+  onTogglePart,
   onHoverPart,
   orderQuantities,
   onOrderQuantityChange,
@@ -46,12 +51,8 @@ export function PartsTable({
 
   const resolvedCurrency = currency ?? rows[0]?.part.currency ?? "CAD";
   const orderable = Boolean(orderQuantities && onOrderQuantityChange);
-  const selectable = Boolean(onActivatePart);
+  const selectable = Boolean(onTogglePart);
   const total = rows.reduce((sum, row) => sum + row.part.listPrice, 0);
-
-  const toggle = (partId: string) => {
-    onActivatePart?.(activePartId === partId ? null : partId);
-  };
 
   return (
     <table className={styles.table}>
@@ -78,14 +79,15 @@ export function PartsTable({
       <tbody>
         {rows.map((row) => {
           const { part, figurePart, calloutNumbers } = row;
-          const active = part.id === activePartId;
+          const active = selectedPartIds.has(part.id);
 
           return (
             <tr
               key={figurePart.id}
               className={styles.row}
               data-active={active || undefined}
-              onClick={selectable ? () => toggle(part.id) : undefined}
+              data-hovered={part.id === hoveredPartId || undefined}
+              onClick={selectable ? () => onTogglePart?.(part.id) : undefined}
               onMouseEnter={() => onHoverPart?.(part.id)}
               onMouseLeave={() => onHoverPart?.(null)}
             >
@@ -111,7 +113,7 @@ export function PartsTable({
                     onClick={(event) => {
                       // The row handles the click; stop it counting twice.
                       event.stopPropagation();
-                      toggle(part.id);
+                      onTogglePart?.(part.id);
                     }}
                     aria-pressed={active}
                   >
