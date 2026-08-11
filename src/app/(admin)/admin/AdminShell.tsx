@@ -11,11 +11,26 @@ export interface RecordField {
 const NAV: { id: string; label: string; count: string | null; href?: string }[] =
   [
     { id: "catalog", label: "Catalog", count: null, href: "/admin" },
-    { id: "models", label: "Models", count: null },
-    { id: "figures", label: "Figures", count: null },
-    { id: "parts", label: "Parts", count: null },
-    { id: "orders", label: "Orders", count: "5" },
-    { id: "publish", label: "Publishing", count: null },
+    {
+      id: "models",
+      label: "Models",
+      count: null,
+      href: "/admin/models/mdl-ft3-wagon",
+    },
+    {
+      id: "figures",
+      label: "Figures",
+      count: null,
+      href: "/admin/figures/fig-filters-1-1",
+    },
+    { id: "parts", label: "Parts", count: null, href: "/admin/parts" },
+    { id: "orders", label: "Orders", count: "5", href: "/admin/orders" },
+    {
+      id: "publish",
+      label: "Publishing",
+      count: null,
+      href: "/admin/publishing",
+    },
   ];
 
 export interface AdminShellProps {

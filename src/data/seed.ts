@@ -15,7 +15,11 @@ import type {
   System,
   Variant,
 } from "@/types/catalog";
-import type { AdminOrder, PublishChange } from "@/types/admin";
+import type {
+  AdminOrder,
+  PublishChange,
+  PublishRevision,
+} from "@/types/admin";
 
 const productLines: ProductLine[] = [
   {
@@ -140,6 +144,7 @@ const parts: Part[] = [
     listPrice: 279.7,
     currency: "CAD",
     supersededByPartId: null,
+    requires: [],
     status: "active",
   },
   {
@@ -150,6 +155,7 @@ const parts: Part[] = [
     listPrice: 215.33,
     currency: "CAD",
     supersededByPartId: null,
+    requires: [{ partId: "prt-31-00470", qty: 2 }],
     status: "active",
   },
   {
@@ -160,6 +166,7 @@ const parts: Part[] = [
     listPrice: 304.26,
     currency: "CAD",
     supersededByPartId: null,
+    requires: [],
     status: "active",
   },
   {
@@ -170,6 +177,29 @@ const parts: Part[] = [
     listPrice: 196.98,
     currency: "CAD",
     supersededByPartId: null,
+    requires: [],
+    status: "active",
+  },
+  {
+    id: "prt-35-00061",
+    partNumber: "35-00061",
+    description: "Air filter Donaldson, early",
+    manufacturer: "Donaldson",
+    listPrice: 188.4,
+    currency: "CAD",
+    supersededByPartId: "prt-35-00068",
+    requires: [],
+    status: "superseded",
+  },
+  {
+    id: "prt-31-00470",
+    partNumber: "31-00470",
+    description: "Fuel filter seal kit",
+    manufacturer: "Hatz",
+    listPrice: 22.1,
+    currency: "CAD",
+    supersededByPartId: null,
+    requires: [],
     status: "active",
   },
   {
@@ -180,6 +210,7 @@ const parts: Part[] = [
     listPrice: 80.65,
     currency: "CAD",
     supersededByPartId: null,
+    requires: [],
     status: "active",
   },
 ];
@@ -380,18 +411,36 @@ const publishReady: PublishChange[] = [
 
 const publishBlocked: PublishChange[] = [
   {
-    id: "pub-b1",
-    change: "FT3 Wagon — first release",
-    affects: "FT3 Wagon",
-    reason:
-      "Eleven of twelve systems have no figures imported. Filters FIG 1.1 is the only released plate.",
-  },
-  {
     id: "pub-b2",
     change: "IronHorse — first release",
     affects: "IronHorse",
     reason:
       "No parts export received. The manufacturer holds the drawing rights; request the export before importing.",
+  },
+];
+
+/** Published revisions, newest first. The first row is what customers see. */
+const publishHistory: PublishRevision[] = [
+  {
+    id: "rev-a",
+    revision: "REV A",
+    summary: "FT3 Wagon first import — Filters FIG 1.1",
+    by: "C. Kane",
+    when: "2026-07-24",
+  },
+  {
+    id: "rev-11-4",
+    revision: "REV 11.4",
+    summary: "Portal migration off the third-party platform",
+    by: "M. Tremblay",
+    when: "2026-06-30",
+  },
+  {
+    id: "rev-11-3",
+    revision: "REV 11.3",
+    summary: "Price list refresh — all lines",
+    by: "M. Tremblay",
+    when: "2026-04-02",
   },
 ];
 
@@ -407,4 +456,5 @@ export const seed = {
   orders,
   publishReady,
   publishBlocked,
+  publishHistory,
 };

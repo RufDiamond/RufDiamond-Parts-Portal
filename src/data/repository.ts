@@ -30,7 +30,10 @@ import type {
   CatalogSummary,
   ModelDetail,
   ModelFigure,
+  ModelSystemRow,
   PartFilters,
+  PartRef,
+  PublishChange,
   PublishQueue,
 } from "@/types/admin";
 
@@ -196,6 +199,30 @@ function partIdsForModel(modelId: string): Set<string> {
   );
 }
 
+/** Callouts on a figure that point at nothing. */
+function unmappedOnFigure(figureId: string): number {
+  const figurePartIds = new Set(
+    seed.figureParts.map((figurePart) => figurePart.id),
+  );
+  return seed.callouts.filter(
+    (callout) =>
+      callout.figureId === figureId &&
+      (callout.figurePartId === null ||
+        !figurePartIds.has(callout.figurePartId)),
+  ).length;
+}
+
+function toPartRef(partId: string, qty?: number): PartRef | null {
+  const part = seed.parts.find((candidate) => candidate.id === partId);
+  if (!part) return null;
+  return {
+    partId: part.id,
+    partNumber: part.partNumber,
+    description: part.description,
+    ...(qty === undefined ? {} : { qty }),
+  };
+}
+
 function toCatalogRow(model: Model): CatalogModelRow {
   const variants = seed.variants.filter(
     (variant) => variant.modelId === model.id,
@@ -272,13 +299,46 @@ export async function getModelDetail(
   );
   if (!productLine) return null;
 
+  const figures = figuresForModel(model.id);
+
+  const systems: ModelSystemRow[] = [...seed.systems]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((system) => {
+      const systemFigures = figures.filter(
+        (figure) => figure.systemId === system.id,
+      );
+      const figureIds = new Set(systemFigures.map((figure) => figure.id));
+
+      return {
+        system,
+        figureCount: systemFigures.length,
+        partCount: new Set(
+          seed.figureParts
+            .filter((figurePart) => figureIds.has(figurePart.figureId))
+            .map((figurePart) => figurePart.partId),
+        ).size,
+        unmappedCallouts: systemFigures.reduce(
+          (sum, figure) => sum + unmappedOnFigure(figure.id),
+          0,
+        ),
+      };
+    });
+
+  const figuresByVariant: Record<string, number> = {};
+  for (const figure of figures) {
+    figuresByVariant[figure.variantId] =
+      (figuresByVariant[figure.variantId] ?? 0) + 1;
+  }
+
   return detach({
     model,
     productLine,
     variants: seed.variants.filter((variant) => variant.modelId === model.id),
-    figureCount: figuresForModel(model.id).length,
+    figureCount: figures.length,
     partCount: partIdsForModel(model.id).size,
     state: model.catalogState,
+    systems,
+    figuresByVariant,
   });
 }
 
@@ -342,11 +402,35 @@ export async function getAllParts(
       ),
     ];
 
+    const supersedes = seed.parts.find(
+      (candidate) => candidate.supersededByPartId === part.id,
+    );
+
     return {
       part,
       systems,
       figures: usedFigures.map((figure) => figure.groupNo),
       totalQty: uses.reduce((sum, use) => sum + use.qty, 0),
+      remarks: [
+        ...new Set(
+          uses
+            .map((use) => use.remarks)
+            .filter((remark): remark is string => Boolean(remark)),
+        ),
+      ],
+      supersededBy: part.supersededByPartId
+        ? toPartRef(part.supersededByPartId)
+        : null,
+      supersedes: supersedes
+        ? {
+            partId: supersedes.id,
+            partNumber: supersedes.partNumber,
+            description: supersedes.description,
+          }
+        : null,
+      requires: part.requires
+        .map((requirement) => toPartRef(requirement.partId, requirement.qty))
+        .filter((ref): ref is PartRef => ref !== null),
       // Carried only for filtering; not part of the returned shape.
       _systemIds: usedFigures.map((figure) => figure.systemId),
     } as AdminPartRow & { _systemIds: string[] };
@@ -374,12 +458,27 @@ export async function getAllParts(
   filtered.sort((a, b) => a.part.partNumber.localeCompare(b.part.partNumber));
 
   return detach(
-    filtered.map(({ part, systems, figures, totalQty }) => ({
-      part,
-      systems,
-      figures,
-      totalQty,
-    })),
+    filtered.map(
+      ({
+        part,
+        systems,
+        figures,
+        totalQty,
+        remarks,
+        supersededBy,
+        supersedes,
+        requires,
+      }) => ({
+        part,
+        systems,
+        figures,
+        totalQty,
+        remarks,
+        supersededBy,
+        supersedes,
+        requires,
+      }),
+    ),
   );
 }
 
@@ -388,15 +487,40 @@ export async function getOrders(): Promise<AdminOrder[]> {
 }
 
 export async function getPublishQueue(): Promise<PublishQueue> {
-  const liveRevision = seed.figures.some(
-    (figure) => figure.status === "published",
-  )
-    ? `REV ${seed.variants[0]?.catalogRevision ?? "—"}`
-    : null;
+  const liveRevision = seed.publishHistory[0]?.revision ?? null;
+
+  /*
+   * A model with unmapped callouts cannot go live: a customer would meet a
+   * numbered marker with nothing behind it. Derived from the data rather than
+   * written down, so clearing the mapping clears the blocker.
+   */
+  const derivedBlockers: PublishChange[] = [];
+  for (const model of seed.models) {
+    if (model.catalogState !== "draft") continue;
+
+    const figures = figuresForModel(model.id);
+    const unmapped = figures.reduce(
+      (sum, figure) => sum + unmappedOnFigure(figure.id),
+      0,
+    );
+    if (unmapped === 0) continue;
+
+    const affectedFigures = figures.filter(
+      (figure) => unmappedOnFigure(figure.id) > 0,
+    );
+
+    derivedBlockers.push({
+      id: `blocked-${model.id}`,
+      change: `${model.name} — first release`,
+      affects: model.name,
+      reason: `${unmapped} ${unmapped === 1 ? "callout has" : "callouts have"} no part attached across ${affectedFigures.length} ${affectedFigures.length === 1 ? "figure" : "figures"} (${affectedFigures.map((figure) => `FIG ${figure.groupNo}`).join(", ")}). Finish the mapping in the figure editor.`,
+    });
+  }
 
   return detach({
     ready: seed.publishReady,
-    blocked: seed.publishBlocked,
+    blocked: [...derivedBlockers, ...seed.publishBlocked],
+    history: seed.publishHistory,
     environment: "Production",
     liveRevision,
   });

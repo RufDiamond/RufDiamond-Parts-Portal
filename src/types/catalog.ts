@@ -94,7 +94,18 @@ export interface Part {
   currency: Currency;
   /** Points at the replacement when this part has been superseded. */
   supersededByPartId: string | null;
+  /**
+   * Parts that must be ordered alongside this one — seal kits, washers. A
+   * part-level relationship, so it holds wherever the part appears.
+   */
+  requires: PartRequirement[];
   status: PartStatus;
+}
+
+/** "Also requires 31-00470 (2x)". */
+export interface PartRequirement {
+  partId: string;
+  qty: number;
 }
 
 /** A part's appearance on a figure, with the quantity used there. */

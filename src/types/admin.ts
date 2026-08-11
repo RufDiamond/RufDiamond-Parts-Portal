@@ -12,6 +12,7 @@ import type {
   Model,
   Part,
   ProductLine,
+  System,
   Variant,
 } from "./catalog";
 
@@ -52,6 +53,15 @@ export interface CatalogSummary {
   lastPublish: { revision: string; date: string } | null;
 }
 
+/** One row of the model editor's systems checklist. */
+export interface ModelSystemRow {
+  system: System;
+  figureCount: number;
+  partCount: number;
+  /** Callouts on this system's figures with no part attached. */
+  unmappedCallouts: number;
+}
+
 export interface ModelDetail {
   model: Model;
   productLine: ProductLine;
@@ -59,6 +69,10 @@ export interface ModelDetail {
   figureCount: number;
   partCount: number;
   state: CatalogState;
+  /** All twelve systems, whether or not this model carries figures for them. */
+  systems: ModelSystemRow[];
+  /** Figures per variant id, for the serial-variant table. */
+  figuresByVariant: Record<string, number>;
 }
 
 export interface PartFilters {
@@ -67,6 +81,15 @@ export interface PartFilters {
   systemId?: string;
   /** Restrict to one part status. */
   status?: Part["status"];
+}
+
+/** A part reference resolved to something printable. */
+export interface PartRef {
+  partId: string;
+  partNumber: string;
+  description: string;
+  /** Present on "also requires" links. */
+  qty?: number;
 }
 
 /** A part as the admin list shows it, with where it is used. */
@@ -78,6 +101,14 @@ export interface AdminPartRow {
   figures: string[];
   /** Total quantity across all figures it appears on. */
   totalQty: number;
+  /** Distinct remarks from the figures this part appears on. */
+  remarks: string[];
+  /** The record that replaces this one. */
+  supersededBy: PartRef | null;
+  /** The record this one replaces — the other side of the same link. */
+  supersedes: PartRef | null;
+  /** Parts that must be ordered alongside. */
+  requires: PartRef[];
 }
 
 export type OrderState =
@@ -111,9 +142,21 @@ export interface PublishChange {
   reason?: string;
 }
 
+/** A revision that reached customers. */
+export interface PublishRevision {
+  id: string;
+  revision: string;
+  summary: string;
+  by: string;
+  /** ISO date. */
+  when: string;
+}
+
 export interface PublishQueue {
   ready: PublishChange[];
   blocked: PublishChange[];
+  /** Newest first; the first entry is live. */
+  history: PublishRevision[];
   environment: string;
   liveRevision: string | null;
 }

@@ -1,0 +1,44 @@
+/* Elevation is a 2px frame over a scrim, never a shadow. */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--scrim);
+}
+
+.dialog {
+  width: 520px;
+  background: var(--paper);
+  border: var(--rule-medium) solid var(--ink);
+}
+
+.dialogHead {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.dialogTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dialogBody {
+  padding: 18px;
+}
+
+.dialogCopy {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.dialogFoot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 14px 18px;
+  border-top: 1px solid var(--rule);
+}
