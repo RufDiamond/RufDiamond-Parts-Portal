@@ -1,0 +1,153 @@
+/* Split screen: the ink panel states what the catalogue is, the paper panel
+   takes the credentials. Fixed 620px form column, per the reference. */
+.page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 620px;
+  min-height: 100vh;
+  min-width: 1440px;
+}
+
+.pitch {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  background: var(--surface-inverse);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.wordmark {
+  font: var(--weight-semibold) var(--text-lg) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.wordmarkSub {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--graphite);
+  font: var(--type-body-sm);
+  color: var(--mid);
+}
+
+.pitchBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  max-width: 46ch;
+}
+
+.eyebrowInverse {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.display {
+  font: var(--type-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--paper);
+}
+
+.pitchCopy {
+  font: var(--type-body);
+  color: var(--mid);
+}
+
+/* Three-field strip along the foot of the ink panel. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: var(--rule-medium) solid var(--graphite);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-4);
+}
+
+.fact:first-child {
+  padding-left: 0;
+}
+
+.fact + .fact {
+  border-left: 1px solid var(--graphite);
+}
+
+.factValue {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  color: var(--paper);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-16) var(--space-12);
+  background: var(--paper);
+  border-left: var(--rule-medium) solid var(--ink);
+}
+
+.formHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-5);
+  border-bottom: var(--border-thick);
+}
+
+.formTitle {
+  font: var(--type-h1);
+  letter-spacing: var(--tracking-display);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.input {
+  width: 100%;
+  height: var(--control-height-lg);
+  padding: 0 var(--control-padding-x);
+  border: var(--border-thin);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--ink);
+  background: var(--sheet);
+}
+
+.submitArea {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.note {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}

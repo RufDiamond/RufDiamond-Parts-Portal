@@ -1,53 +1,41 @@
-import type { ReactNode } from "react";
 import styles from "./TitleBlock.module.css";
 
-export interface TitleBlockMeta {
+export interface TitleBlockField {
   label: string;
   value: string;
 }
 
 export interface TitleBlockProps {
-  /** Small mono line above the title — the section or document class. */
-  eyebrow?: string;
-  title: string;
-  subtitle?: string;
-  /** Drawing-sheet style field list: revision, serial range, sheet count. */
-  meta?: TitleBlockMeta[];
-  actions?: ReactNode;
+  fields: TitleBlockField[];
+  /** Fix to the foot of the window. Used for the shell-wide block. */
+  pinned?: boolean;
+  /** Shorter rows, for the pinned bar. */
+  dense?: boolean;
 }
 
 /**
- * The header of a screen, modelled on the title block of an engineering
- * drawing: what this sheet is, and the fields that identify it.
+ * A drawing title block — NOT a page heading. The reference carries a pinned,
+ * dense one at the foot of every screen after sign-in, and a three-field one
+ * directly beneath each figure drawing.
  */
 export function TitleBlock({
-  eyebrow,
-  title,
-  subtitle,
-  meta,
-  actions,
+  fields,
+  pinned = false,
+  dense = false,
 }: TitleBlockProps) {
   return (
-    <header className={styles.block}>
-      <div className={styles.heading}>
-        <div>
-          {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
-          <h1 className={styles.title}>{title}</h1>
-          {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+    <div
+      className={`${styles.block} ${pinned ? styles.pinned : ""} ${dense ? styles.dense : ""}`}
+      style={{ gridTemplateColumns: `repeat(${fields.length}, minmax(0, 1fr))` }}
+    >
+      {fields.map((field) => (
+        <div key={field.label} className={styles.field}>
+          <span className={styles.label}>{field.label}</span>
+          <span className={styles.value} title={field.value}>
+            {field.value}
+          </span>
         </div>
-        {actions ? <div className={styles.actions}>{actions}</div> : null}
-      </div>
-
-      {meta?.length ? (
-        <dl className={styles.meta}>
-          {meta.map((field) => (
-            <div key={field.label} className={styles.field}>
-              <dt className={styles.fieldLabel}>{field.label}</dt>
-              <dd className={styles.fieldValue}>{field.value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-    </header>
+      ))}
+    </div>
   );
 }

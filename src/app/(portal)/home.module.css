@@ -1,0 +1,145 @@
+.copy {
+  font: var(--type-body);
+  color: var(--text-secondary);
+}
+
+.modeBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.searchRow {
+  display: flex;
+  gap: 0;
+}
+
+.searchInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--control-height-lg);
+  padding: 0 var(--control-padding-x);
+  border: var(--border-thin);
+  border-right: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--ink);
+  background: var(--sheet);
+}
+
+/* Chrome paints the native clear control blue — the one colour this system
+   does not have. */
+.searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tryRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.tryValues {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  color: var(--text-secondary);
+}
+
+/* Mode 2: the three steps, numbered with callout squares. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-thin);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: var(--border-thin);
+  font: var(--type-body-sm);
+}
+
+/* Results and recently-viewed share the row grid. */
+.rowList {
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 240px 24px;
+  align-items: center;
+  gap: var(--space-6);
+  width: 100%;
+  min-height: var(--row-height);
+  padding: 0 var(--space-4);
+  background: var(--paper);
+  border: 0;
+  border-bottom: var(--border-thin);
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.row:hover {
+  background: var(--sheet);
+  border-bottom: var(--border-thin);
+}
+
+.rowRef {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+}
+
+.rowLabel {
+  font: var(--type-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowWhere {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.rowChevron {
+  color: var(--graphite);
+}
+
+/* Search result rows carry a price and an add control instead. */
+.resultRow {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr) 140px 120px auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: var(--row-height);
+  padding: var(--space-2) var(--space-4);
+  background: var(--paper);
+  border-bottom: var(--border-thin);
+}
+
+.resultNum {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: right;
+}
+
+.resultMaker {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}

@@ -1,43 +1,174 @@
 /*
  * RufDiamond Parts Portal — design tokens.
- * Monochrome only. No accent colour is defined here, and none should be
- * introduced downstream: emphasis comes from weight, size, and rules.
+ *
+ * Transcribed from design-reference/customer.html. Names and values match the
+ * approved system; do not diverge without a reference update.
  */
 
 :root {
-  /* Greyscale ramp, darkest to lightest */
-  --ink: #0a0a0a; /* primary text */
-  --graphite: #5a5a58; /* secondary text */
-  --mid: #9a9a96; /* tertiary text, disabled */
-  --rule: #d8d8d4; /* hairline borders */
-  --sheet: #f2f2f0; /* recessed surfaces */
-  --paper: #ffffff; /* base surface */
+  /* ── Base values. Five, and only five. ────────────────────────────────
+     No sixth value, no accent hue, no tint. State is carried by weight,
+     fill, rule thickness and iconography — never by colour. */
+  --ink: #0a0a0a; /* text, filled states, rules that must dominate */
+  --graphite: #5a5a58; /* secondary text, metadata, inactive icon */
+  --mid: #9a9a96; /* placeholder, disabled text, hatch stroke */
+  --rule: #d8d8d4; /* hairlines, dividers, table grid, borders */
+  --sheet: #f2f2f0; /* page ground, inset wells, zebra rows */
+  --paper: #ffffff; /* the only pure white: raised surfaces, inputs */
 
-  /* Type */
-  --font-sans: var(--font-plus-jakarta-sans), system-ui, sans-serif;
-  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
+  /* ── Semantic aliases ────────────────────────────────────────────── */
+  --text-primary: var(--ink);
+  --text-secondary: var(--graphite);
+  --text-muted: var(--mid);
+  --text-inverse: var(--paper);
+  --text-disabled: var(--mid);
+  --text-link: var(--ink);
 
-  --text-xs: 0.6875rem; /* 11px — labels, column heads */
-  --text-sm: 0.8125rem; /* 13px — table body */
-  --text-base: 0.9375rem; /* 15px — prose */
-  --text-lg: 1.25rem; /* 20px — screen title */
+  --surface-page: var(--sheet);
+  --surface-card: var(--paper);
+  --surface-well: var(--sheet);
+  --surface-inverse: var(--ink);
+  --surface-hover: var(--sheet);
+  --surface-drawing: var(--paper);
 
-  --leading-tight: 1.2;
+  --border-hairline: var(--rule);
+  --border-strong: var(--ink);
+  --border-focus: var(--ink);
+
+  --status-hatch-stroke: var(--mid);
+
+  /* ── Type ──────────────────────────────────────────────────────────
+     Site floor is 14px; body is 16px. Gloved hands, poor light. */
+  --font-ui: var(--font-plus-jakarta-sans), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, "SF Mono", Menlo,
+    monospace;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 22px;
+  --text-xl: 28px;
+  --text-2xl: 36px;
+  --text-3xl: 48px;
+
+  --leading-tight: 1.1;
+  --leading-snug: 1.25;
   --leading-normal: 1.5;
+  --leading-loose: 1.65;
 
-  --tracking-label: 0.08em; /* uppercase labels only */
+  --tracking-eyebrow: 0.14em; /* mono small caps — the house label style */
+  --tracking-mono: 0.02em;
+  --tracking-display: -0.02em;
+  --tracking-normal: 0;
 
-  /* Space — 4px base */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
+  --type-display: var(--weight-bold) var(--text-3xl) / var(--leading-tight)
+    var(--font-ui);
+  --type-h1: var(--weight-bold) var(--text-2xl) / var(--leading-tight)
+    var(--font-ui);
+  --type-h2: var(--weight-semibold) var(--text-xl) / var(--leading-snug)
+    var(--font-ui);
+  --type-h3: var(--weight-semibold) var(--text-lg) / var(--leading-snug)
+    var(--font-ui);
+  --type-body: var(--weight-regular) var(--text-base) / var(--leading-normal)
+    var(--font-ui);
+  --type-body-sm: var(--weight-regular) var(--text-sm) / var(--leading-normal)
+    var(--font-ui);
+  --type-identifier: var(--weight-medium) var(--text-sm) / var(--leading-snug)
+    var(--font-mono);
+  --type-identifier-lg: var(--weight-medium) var(--text-md) /
+    var(--leading-snug) var(--font-mono);
+  --type-eyebrow: var(--weight-semibold) var(--text-xs) / var(--leading-snug)
+    var(--font-mono);
 
-  /* Form */
-  --radius: 0; /* zero, everywhere */
-  --hairline-width: 1px;
-  --hairline: var(--hairline-width) solid var(--rule);
+  /* ── Space. 4px grid; the generous end is the default (gloves). ───── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  --target-min: 44px;
+  --target-lg: 56px;
+
+  --control-height-sm: 36px;
+  --control-height-md: 44px;
+  --control-height-lg: 56px;
+  --control-padding-x: var(--space-5);
+
+  --row-height: 56px;
+  --row-padding-x: var(--space-4);
+
+  --gutter-page: var(--space-8);
+  --gutter-column: var(--space-6);
+  --content-max: 1440px;
+
+  /* ── Form. Zero radius. Everywhere. ───────────────────────────────── */
+  --radius-none: 0;
+  --radius: 0;
+
+  --hairline: 1px;
+  --rule-medium: 2px;
+  --rule-heavy: 3px; /* selected-row left rule, warning left rule */
+  --rule-frame: 2px; /* title-block outer frame */
+
+  --border-thin: var(--hairline) solid var(--border-hairline);
+  --border-thick: var(--rule-medium) solid var(--border-strong);
+  --border-frame: var(--rule-frame) solid var(--border-strong);
+
+  /* No shadow system. Elevation is expressed with rules, not blur. */
+  --shadow-none: none;
+  --scrim: rgba(10, 10, 10, 0.55);
+
+  --focus-ring: 2px solid var(--ink);
+  --focus-offset: 2px;
+
+  /* ── Motion. Instruments snap. ────────────────────────────────────── */
+  --duration-fast: 80ms;
+  --duration-base: 120ms;
+  --duration-slow: 180ms;
+  --ease-mechanical: cubic-bezier(0.2, 0, 0.4, 1);
+  --transition-state: background-color var(--duration-fast) linear,
+    border-color var(--duration-fast) linear,
+    color var(--duration-fast) linear;
+
+  /* ── Drawing patterns ─────────────────────────────────────────────── */
+  --hatch-45: repeating-linear-gradient(
+    45deg,
+    transparent 0,
+    transparent 5px,
+    var(--status-hatch-stroke) 5px,
+    var(--status-hatch-stroke) 6px
+  );
+  --grid-10: linear-gradient(
+      to right,
+      var(--rule) 0,
+      var(--rule) 1px,
+      transparent 1px,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--rule) 0,
+      var(--rule) 1px,
+      transparent 1px,
+      transparent 100%
+    );
+  --grid-size: 40px;
+
+  --callout-size: 28px;
+  --callout-size-lg: 36px;
 }

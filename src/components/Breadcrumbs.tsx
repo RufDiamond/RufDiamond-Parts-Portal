@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./Breadcrumbs.module.css";
 
 export interface Crumb {
@@ -10,13 +11,7 @@ export interface BreadcrumbsProps {
   items: Crumb[];
 }
 
-/**
- * Catalogue trail: product line / model / variant / system / figure.
- *
- * Uses plain anchors rather than `next/link` because no routes exist yet and
- * typed routes would reject the string hrefs. Swap the `<a>` for `<Link>` once
- * the route tree is in place — the props do not change.
- */
+/** Catalogue trail: machine / systems / system / figure. */
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
     <nav aria-label="Breadcrumb" className={styles.nav}>
@@ -27,9 +22,9 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           return (
             <li key={`${item.label}-${index}`} className={styles.item}>
               {item.href && !isLast ? (
-                <a href={item.href} className={styles.link}>
+                <Link href={item.href} className={styles.link}>
                   {item.label}
-                </a>
+                </Link>
               ) : (
                 <span
                   className={styles.current}

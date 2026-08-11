@@ -1,47 +1,60 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--text-sm);
-}
-
-.caption {
-  padding: 0 0 var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  text-align: left;
-  color: var(--graphite);
+  font: var(--type-body-sm);
 }
 
 .table th,
 .table td {
   padding: var(--space-3) var(--space-4);
-  border-bottom: var(--hairline);
-  vertical-align: baseline;
+  border-bottom: var(--border-thin);
+  vertical-align: middle;
+  text-align: left;
 }
 
-.table th:first-child,
-.table td:first-child {
-  padding-left: var(--space-2);
-}
-
-.table th:last-child,
-.table td:last-child {
-  padding-right: var(--space-2);
+.table tbody tr {
+  height: var(--row-height);
 }
 
 .table thead th {
-  border-bottom: var(--hairline-width) solid var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-label);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-thick);
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  text-align: left;
-  color: var(--graphite);
+  color: var(--text-secondary);
   white-space: nowrap;
+}
+
+.tickHead,
+.tick {
+  width: 44px;
+  padding-right: 0;
+}
+
+.refHead,
+.ref {
+  width: 72px;
+}
+
+.partNoHead,
+.partNo {
+  width: 130px;
+}
+
+.numHead,
+.priceHead {
+  text-align: right;
+}
+
+.priceHead {
+  width: 130px;
+}
+
+.row {
+  background: var(--paper);
+  transition: var(--transition-state);
 }
 
 /* Hovering a marker on the drawing lights the matching row, and vice versa. */
@@ -50,21 +63,18 @@
   background: var(--sheet);
 }
 
-/* Selection inverts the row. Every nested rule and border keys off
-   currentColor so the whole row flips together. */
+/* Selected rows carry the heavy left rule, per the reference. Fill stays
+   light so the callout squares in the Ref cell can invert instead. */
 .row[data-active] {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--sheet);
+  box-shadow: inset var(--rule-heavy) 0 0 0 var(--ink);
 }
 
-.row[data-active]:hover,
-.row[data-active][data-hovered] {
-  background: var(--ink);
-}
-
-.refCell {
-  width: 1%;
-  white-space: nowrap;
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ink);
+  cursor: pointer;
 }
 
 .refList {
@@ -73,39 +83,22 @@
   gap: var(--space-1);
 }
 
-/* One badge per occurrence: a part fitted twice shows its number twice. */
-.refBadge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 1.25rem;
-  padding: 0 2px;
-  border: var(--hairline-width) solid currentColor;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  line-height: 1.4;
-}
-
 .noRef {
-  font-family: var(--font-mono);
-  color: var(--mid);
+  font: var(--type-identifier);
+  color: var(--text-muted);
 }
 
 .partNo {
-  width: 1%;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: 500;
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  text-align: left;
   white-space: nowrap;
 }
 
 .partButton {
   padding: 0;
-  border: none;
+  border: 0;
   background: none;
   color: inherit;
   font: inherit;
@@ -118,63 +111,23 @@
 }
 
 .description {
-  width: 100%;
+  font: var(--type-body-sm);
 }
 
-.descriptionText {
-  color: inherit;
-}
-
-.flag {
-  margin-left: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  opacity: 0.6;
-}
-
-.remarks {
+/* Block, not flex: the cell has to stay a table-cell for the columns to line
+   up, so the sub-lines stack on their own. */
+.note {
   display: block;
   margin-top: 2px;
-  font-size: var(--text-xs);
-  opacity: 0.7;
-}
-
-.num,
-.numHead {
-  text-align: right;
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
 }
 
 .num {
-  font-family: var(--font-mono);
+  text-align: right;
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
   white-space: nowrap;
-}
-
-.qty {
-  opacity: 0.75;
-}
-
-.orderCell {
-  width: 1%;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.table tfoot td {
-  border-bottom: none;
-  padding-top: var(--space-4);
-  font-weight: 600;
-}
-
-.totalLabel {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  text-align: right;
-  color: var(--graphite);
 }

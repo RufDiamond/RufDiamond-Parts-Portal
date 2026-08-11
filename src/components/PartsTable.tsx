@@ -3,74 +3,77 @@
 import type { ReactNode } from "react";
 import { formatAmount } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
-import { QuantityStepper } from "./QuantityStepper";
+import { CalloutMarker } from "./CalloutMarker";
 import styles from "./PartsTable.module.css";
-
-const NO_SELECTION: ReadonlySet<string> = new Set();
 
 export interface PartsTableProps {
   rows: FigurePartRow[];
   /** Currency shown in the column head. Defaults to the first row's currency. */
   currency?: Currency;
-  /** Selected parts; their rows invert and all their markers light. */
+  /**
+   * Parts whose callouts are lit. Clicking a row toggles membership; every
+   * marker for that part responds, not just the first.
+   */
   selectedPartIds?: ReadonlySet<string>;
-  /** Part under the pointer, including when it is hovered on the drawing. */
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
-  /** Part id to ordered quantity. Supplying this adds the Order column. */
-  orderQuantities?: Record<string, number>;
-  onOrderQuantityChange?: (partId: string, qty: number) => void;
-  /** Shown in place of the table body when there are no rows. */
+  /**
+   * Part ids already on the request list. Supplying this adds the tick column:
+   * ticking adds or removes the part, which is separate from selection.
+   */
+  requestedPartIds?: ReadonlySet<string>;
+  onToggleRequested?: (partId: string) => void;
   emptyState?: ReactNode;
-  caption?: string;
-  /** Sums the Cost CAD column. Off by default. */
-  showTotal?: boolean;
+  showPrices?: boolean;
 }
 
+const NO_SET: ReadonlySet<string> = new Set();
+
 /**
- * The parts list for a figure. Callout numbers, part numbers, quantities and
- * costs are mono with tabular figures so every column aligns.
+ * The parts list for a figure, keyed to the drawing.
+ *
+ * Two distinct gestures, as the reference specifies: tick a row to put it on
+ * the request list; click a row to light every callout for that part.
  */
 export function PartsTable({
   rows,
   currency,
-  selectedPartIds = NO_SELECTION,
+  selectedPartIds = NO_SET,
   hoveredPartId = null,
   onTogglePart,
   onHoverPart,
-  orderQuantities,
-  onOrderQuantityChange,
+  requestedPartIds,
+  onToggleRequested,
   emptyState,
-  caption,
-  showTotal = false,
+  showPrices = true,
 }: PartsTableProps) {
   if (rows.length === 0 && emptyState) {
     return <>{emptyState}</>;
   }
 
   const resolvedCurrency = currency ?? rows[0]?.part.currency ?? "CAD";
-  const orderable = Boolean(orderQuantities && onOrderQuantityChange);
+  const tickable = Boolean(requestedPartIds && onToggleRequested);
   const selectable = Boolean(onTogglePart);
-  const total = rows.reduce((sum, row) => sum + row.part.listPrice, 0);
 
   return (
     <table className={styles.table}>
-      {caption ? <caption className={styles.caption}>{caption}</caption> : null}
       <thead>
         <tr>
-          <th scope="col">Ref</th>
-          <th scope="col">Part no.</th>
+          {tickable ? <th scope="col" className={styles.tickHead} /> : null}
+          <th scope="col" className={styles.refHead}>
+            Ref
+          </th>
+          <th scope="col" className={styles.partNoHead}>
+            Part no.
+          </th>
           <th scope="col">Description</th>
           <th scope="col" className={styles.numHead}>
             Qty
           </th>
-          <th scope="col" className={styles.numHead}>
-            Cost {resolvedCurrency}
-          </th>
-          {orderable ? (
-            <th scope="col" className={styles.numHead}>
-              Order
+          {showPrices ? (
+            <th scope="col" className={styles.priceHead}>
+              Price {resolvedCurrency}
             </th>
           ) : null}
         </tr>
@@ -80,6 +83,7 @@ export function PartsTable({
         {rows.map((row) => {
           const { part, figurePart, calloutNumbers } = row;
           const active = selectedPartIds.has(part.id);
+          const requested = requestedPartIds?.has(part.id) ?? false;
 
           return (
             <tr
@@ -91,15 +95,33 @@ export function PartsTable({
               onMouseEnter={() => onHoverPart?.(part.id)}
               onMouseLeave={() => onHoverPart?.(null)}
             >
-              <td className={styles.refCell}>
+              {tickable ? (
+                <td
+                  className={styles.tick}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    className={styles.checkbox}
+                    checked={requested}
+                    onChange={() => onToggleRequested?.(part.id)}
+                    aria-label={`Add ${part.partNumber} to the request list`}
+                  />
+                </td>
+              ) : null}
+
+              <td className={styles.ref}>
                 <span className={styles.refList}>
                   {calloutNumbers.length === 0 ? (
                     <span className={styles.noRef}>&mdash;</span>
                   ) : (
                     calloutNumbers.map((number) => (
-                      <span key={number} className={styles.refBadge}>
-                        {number}
-                      </span>
+                      <CalloutMarker
+                        key={number}
+                        number={number}
+                        size="sm"
+                        state={active ? "active" : "default"}
+                      />
                     ))
                   )}
                 </span>
@@ -125,57 +147,29 @@ export function PartsTable({
               </th>
 
               <td className={styles.description}>
-                <span className={styles.descriptionText}>
-                  {part.description}
-                </span>
+                <span>{part.description}</span>
                 {part.status === "active" ? null : (
-                  <span className={styles.flag}>{part.status}</span>
+                  <span className={styles.note}>{part.status}</span>
                 )}
                 {figurePart.serviceable ? null : (
-                  <span className={styles.flag}>reference only</span>
+                  <span className={styles.note}>Reference only</span>
                 )}
                 {figurePart.remarks ? (
-                  <span className={styles.remarks}>{figurePart.remarks}</span>
+                  <span className={styles.note}>{figurePart.remarks}</span>
                 ) : null}
               </td>
 
-              <td className={`${styles.num} ${styles.qty}`}>{figurePart.qty}</td>
+              <td className={styles.num}>{figurePart.qty}</td>
 
-              <td className={styles.num}>
-                {formatAmount(part.listPrice, part.currency)}
-              </td>
-
-              {orderable ? (
-                <td
-                  className={styles.orderCell}
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <QuantityStepper
-                    label={`Order quantity for ${part.partNumber}`}
-                    value={orderQuantities?.[part.id] ?? 0}
-                    onChange={(next) => onOrderQuantityChange?.(part.id, next)}
-                    disabled={!figurePart.serviceable}
-                  />
+              {showPrices ? (
+                <td className={styles.num}>
+                  {formatAmount(part.listPrice, part.currency)}
                 </td>
               ) : null}
             </tr>
           );
         })}
       </tbody>
-
-      {showTotal && rows.length > 0 ? (
-        <tfoot>
-          <tr>
-            {/* Ref, Part no., Description */}
-            <td colSpan={3} />
-            <td className={styles.totalLabel}>Total</td>
-            <td className={styles.num}>
-              {formatAmount(total, resolvedCurrency)}
-            </td>
-            {orderable ? <td /> : null}
-          </tr>
-        </tfoot>
-      ) : null}
     </table>
   );
 }

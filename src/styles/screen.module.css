@@ -1,0 +1,129 @@
+/* Frame shared by every screen inside the portal shell. The bottom padding
+   clears the pinned title block. */
+.screen {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter-page) 120px;
+}
+
+/* Breadcrumbs sit above the page header, on their own line. */
+.trail {
+  padding-top: var(--space-5);
+}
+
+.section {
+  margin-top: var(--space-8);
+}
+
+/* Contents grids. Designed at 1440; no mobile view yet. */
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gutter-column);
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter-column);
+}
+
+/* The two-column split the reference uses on most screens. */
+.split75 {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--gutter-column);
+  align-items: start;
+}
+
+.split57 {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--gutter-column);
+  align-items: start;
+}
+
+.split84 {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: var(--gutter-column);
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.loading {
+  padding: var(--space-12) 0;
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Buttons. Height is the 44px minimum target — the interface is used with
+   gloves on. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: var(--control-height-md);
+  padding: 0 var(--control-padding-x);
+  border: var(--hairline) solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--weight-semibold) var(--text-sm) / 1 var(--font-ui);
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.button:disabled {
+  border-color: var(--rule);
+  color: var(--mid);
+  cursor: default;
+}
+
+.buttonPrimary {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Ghost: no frame until you reach for it. */
+.buttonGhost {
+  border-color: transparent;
+  background: transparent;
+}
+
+.buttonGhost:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.buttonLg {
+  height: var(--control-height-lg);
+}
+
+.buttonFull {
+  width: 100%;
+}
+
+/* Links styled as buttons need the global underline removed. */
+.button,
+.button:hover {
+  border-bottom-style: solid;
+  text-decoration: none;
+}

@@ -1,14 +1,14 @@
 "use client";
 
+import { Icon, type IconName } from "./Icon";
 import styles from "./SystemTile.module.css";
 
 export interface SystemTileProps {
   name: string;
-  /** Position in the contents list, rendered as a two-digit index. */
-  index?: number;
   figureCount: number;
-  selected?: boolean;
-  /** Renders an anchor. Ignored when `onSelect` is given. */
+  icon?: IconName;
+  /** Catalogue revision, for the "empty in revision" note. */
+  revision?: string;
   href?: string;
   onSelect?: () => void;
 }
@@ -16,9 +16,9 @@ export interface SystemTileProps {
 /** One entry in the systems contents grid. */
 export function SystemTile({
   name,
-  index,
   figureCount,
-  selected = false,
+  icon = "box",
+  revision,
   href,
   onSelect,
 }: SystemTileProps) {
@@ -26,26 +26,21 @@ export function SystemTile({
 
   const body = (
     <>
-      {index === undefined ? null : (
-        <span className={styles.index}>{String(index).padStart(2, "0")}</span>
-      )}
+      <Icon name={icon} size="lg" />
       <span className={styles.name}>{name}</span>
-      <span className={empty ? styles.countEmpty : styles.count}>
-        {empty ? "No figures" : `${figureCount} ${figureCount === 1 ? "figure" : "figures"}`}
+      <span className={styles.foot}>
+        {empty
+          ? `Empty in revision ${revision ?? "—"}`
+          : `${figureCount} ${figureCount === 1 ? "figure" : "figures"}`}
       </span>
     </>
   );
 
-  const className = `${styles.tile} ${selected ? styles.selected : ""}`;
+  const className = `${styles.tile} ${empty ? styles.empty : ""}`;
 
   if (onSelect) {
     return (
-      <button
-        type="button"
-        className={className}
-        onClick={onSelect}
-        aria-pressed={selected}
-      >
+      <button type="button" className={className} onClick={onSelect}>
         {body}
       </button>
     );
@@ -53,7 +48,7 @@ export function SystemTile({
 
   if (href) {
     return (
-      <a href={href} className={className} aria-current={selected ? "page" : undefined}>
+      <a href={href} className={className}>
         {body}
       </a>
     );

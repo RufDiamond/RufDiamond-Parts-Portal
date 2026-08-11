@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "./Icon";
 import styles from "./QuantityStepper.module.css";
 
 export interface QuantityStepperProps {
@@ -54,7 +55,7 @@ export function QuantityStepper({
         disabled={disabled || value <= min}
         aria-label={`Decrease ${label}`}
       >
-        &minus;
+        <Icon name="minus" size="sm" />
       </button>
       <input
         className={styles.input}
@@ -77,7 +78,7 @@ export function QuantityStepper({
         disabled={disabled || value >= max}
         aria-label={`Increase ${label}`}
       >
-        +
+        <Icon name="plus" size="sm" />
       </button>
     </div>
   );

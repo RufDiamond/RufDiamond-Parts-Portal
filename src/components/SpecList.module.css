@@ -1,0 +1,32 @@
+.list {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: var(--border-thin);
+}
+
+.columns2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--space-6);
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-thin);
+}
+
+.label {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}
+
+.value {
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-align: right;
+}

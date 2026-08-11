@@ -1,0 +1,130 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 220px;
+  padding: var(--space-6);
+  background: var(--paper);
+  border: var(--border-frame);
+  font-family: inherit;
+  text-align: left;
+  color: var(--ink);
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.tile:hover {
+  background: var(--sheet);
+}
+
+/* Not published: recessed, and plainly out of reach. */
+.tileLocked {
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  cursor: not-allowed;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.naming {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.name {
+  font: var(--type-h1);
+  letter-spacing: var(--tracking-display);
+}
+
+.tileLocked .name {
+  color: var(--mid);
+}
+
+.desc {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}
+
+.tileLocked .desc {
+  color: var(--mid);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding-top: var(--space-4);
+  border-top: var(--border-thin);
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.tileLocked .foot {
+  border-top-color: var(--rule);
+  color: var(--mid);
+}
+
+.serialCopy {
+  font: var(--type-body);
+  color: var(--text-secondary);
+}
+
+.serialList {
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-thin);
+  margin-top: var(--space-3);
+}
+
+.serialRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) 0;
+  border: 0;
+  border-bottom: var(--border-thin);
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.radio {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ink);
+}
+
+.serialText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serialLabel {
+  font: var(--type-body);
+}
+
+.serialMeta {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}
+
+.serialActions {
+  display: flex;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+}

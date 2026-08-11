@@ -1,21 +1,30 @@
+/* The numbered reference marker from the drawing. Square, never a circle. */
 .marker {
-  position: absolute;
-  transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 var(--space-1);
-  border: var(--hairline-width) solid var(--ink);
+  width: var(--callout-size);
+  height: var(--callout-size);
+  padding: 0;
+  border: var(--hairline) solid var(--ink);
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  line-height: 1;
   cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.sm {
+  width: 20px;
+  height: 20px;
+  font: var(--weight-semibold) var(--text-2xs) / 1 var(--font-mono);
+}
+
+/* Pinned to a drawing: percentage placement, so it tracks the plate. */
+.placed {
+  position: absolute;
+  transform: translate(-50%, -50%);
 }
 
 .marker:disabled {

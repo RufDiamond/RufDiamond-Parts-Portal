@@ -1,0 +1,150 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0 var(--space-6);
+  background: var(--surface-inverse);
+  white-space: nowrap;
+}
+
+.left,
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.right {
+  gap: var(--space-3);
+  flex: 0 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  border: 0;
+}
+
+.brand:hover {
+  border: 0;
+}
+
+.wordmark {
+  font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.product {
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--graphite);
+  font: var(--type-body-sm);
+  color: var(--mid);
+}
+
+/* Machine in context, framed against the ink bar. */
+.machine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 40px;
+  padding: 0 var(--space-1) 0 14px;
+  border: 1px solid var(--graphite);
+  min-width: 0;
+}
+
+.machineLabel {
+  font: var(--weight-medium) var(--text-xs) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  color: var(--paper);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.change {
+  height: 32px;
+  padding: 0 var(--space-3);
+  background: transparent;
+  border: 1px solid var(--graphite);
+  color: var(--paper);
+  font: var(--weight-semibold) var(--text-xs) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.change:hover {
+  background: var(--graphite);
+}
+
+.headerButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: 1px solid var(--graphite);
+  color: var(--paper);
+  font: var(--weight-semibold) var(--text-sm) / 1 var(--font-ui);
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.headerButton:hover {
+  background: var(--graphite);
+  border: 1px solid var(--graphite);
+}
+
+.count {
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--weight-semibold) var(--text-xs) / 1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.divider {
+  width: 1px;
+  height: 32px;
+  background: var(--graphite);
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.accountName {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--paper);
+}
+
+.accountNo {
+  font: var(--weight-medium) var(--text-2xs) / 1.2 var(--font-mono);
+  letter-spacing: var(--tracking-mono);
+  color: var(--mid);
+}

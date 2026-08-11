@@ -1,0 +1,36 @@
+/* Drawing left, parts right — 5fr / 7fr, per the reference. Designed at
+   1440; no mobile view yet. */
+.sheetColumn {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: calc(64px + var(--space-6));
+}
+
+.listColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Footer bar under the parts list. */
+.listFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-top: var(--border-thick);
+  background: var(--paper);
+}
+
+.listFootNote {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}
+
+.added {
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}

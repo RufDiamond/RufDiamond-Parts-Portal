@@ -1,7 +1,6 @@
 .nav {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.02em;
+  font: var(--type-identifier);
+  letter-spacing: var(--tracking-mono);
 }
 
 .list {
@@ -17,18 +16,17 @@
 }
 
 .link {
-  color: var(--graphite);
-  text-decoration: none;
+  color: var(--text-secondary);
+  border-bottom: 0;
 }
 
 .link:hover {
   color: var(--ink);
-  box-shadow: inset 0 -1px 0 var(--ink);
+  border-bottom: var(--rule-medium) solid var(--ink);
 }
 
 .current {
   color: var(--ink);
-  font-weight: 500;
 }
 
 .separator {
