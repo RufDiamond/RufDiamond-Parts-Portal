@@ -116,7 +116,12 @@ export interface FigurePart {
 export interface Callout {
   id: string;
   figureId: string;
-  figurePartId: string;
+  /**
+   * The figure part this marker points at, or null when the import has left a
+   * number on the plate with nothing attached yet. Unmapped callouts are the
+   * admin's work queue, and are not shown to customers.
+   */
+  figurePartId: string | null;
   number: number;
   /** Percentage of drawing width, 0-100. Not pixels. */
   x: number;

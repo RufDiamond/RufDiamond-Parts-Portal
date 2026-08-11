@@ -234,6 +234,10 @@ const figureParts: FigurePart[] = [
  * AND 4 — in the FT3 Wagon export a part appearing at two positions carries a
  * distinct PNC for each. Both still resolve to the same part, so selecting
  * that row must light both markers.
+ *
+ * Callouts 5 and 6 came in from the export with no part attached: the plate
+ * numbers them, but nothing has been mapped yet. They are the outstanding
+ * work the hotspot editor exists to clear.
  */
 const callouts: Callout[] = [
   {
@@ -271,7 +275,7 @@ const callouts: Callout[] = [
   {
     id: "co-1-1-05",
     figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-04",
+    figurePartId: null,
     number: 5,
     x: 21,
     y: 69,
@@ -279,7 +283,7 @@ const callouts: Callout[] = [
   {
     id: "co-1-1-06",
     figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-05",
+    figurePartId: null,
     number: 6,
     x: 57,
     y: 83,

@@ -230,7 +230,8 @@ export async function getCatalogSummary(): Promise<CatalogSummary> {
     seed.figureParts.map((figurePart) => figurePart.id),
   );
   const unmappedCallouts = seed.callouts.filter(
-    (callout) => !figurePartIds.has(callout.figurePartId),
+    (callout) =>
+      callout.figurePartId === null || !figurePartIds.has(callout.figurePartId),
   ).length;
 
   const withData = seed.models.filter(

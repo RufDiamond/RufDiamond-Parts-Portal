@@ -50,6 +50,8 @@ export function buildCalloutIndex(
 
   const index = new Map<string, Callout[]>();
   for (const callout of callouts) {
+    if (callout.figurePartId === null) continue;
+
     const partId = partIdByFigurePartId.get(callout.figurePartId);
     if (!partId) continue;
 

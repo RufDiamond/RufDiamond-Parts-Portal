@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import styles from "./admin.module.css";
 
@@ -6,15 +7,16 @@ export interface RecordField {
   value: string;
 }
 
-/** Nav rail entries. Only the catalogue screen exists so far. */
-const NAV = [
-  { id: "catalog", label: "Catalog", count: null as string | null },
-  { id: "models", label: "Models", count: null },
-  { id: "figures", label: "Figures", count: null },
-  { id: "parts", label: "Parts", count: null },
-  { id: "orders", label: "Orders", count: "5" },
-  { id: "publish", label: "Publishing", count: null },
-];
+/** Nav rail entries. `href` is set only where the screen has been built. */
+const NAV: { id: string; label: string; count: string | null; href?: string }[] =
+  [
+    { id: "catalog", label: "Catalog", count: null, href: "/admin" },
+    { id: "models", label: "Models", count: null },
+    { id: "figures", label: "Figures", count: null },
+    { id: "parts", label: "Parts", count: null },
+    { id: "orders", label: "Orders", count: "5" },
+    { id: "publish", label: "Publishing", count: null },
+  ];
 
 export interface AdminShellProps {
   /** Which nav entry is lit. */
@@ -52,20 +54,49 @@ export function AdminShell({
           <nav className={styles.nav}>
             {NAV.map((item) => {
               const isActive = item.id === active;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  className={`${styles.navItem} ${isActive ? styles.navItemActive : ""} ${isActive ? "" : styles.navItemPending}`}
-                  aria-current={isActive ? "page" : undefined}
-                  aria-disabled={isActive ? undefined : true}
-                  disabled={!isActive}
-                  title={isActive ? undefined : "Not built yet"}
-                >
+              const body = (
+                <>
                   <span>{item.label}</span>
                   {item.count ? (
                     <span className={styles.navCount}>{item.count}</span>
                   ) : null}
+                </>
+              );
+
+              if (isActive) {
+                return (
+                  <span
+                    key={item.id}
+                    className={`${styles.navItem} ${styles.navItemActive}`}
+                    aria-current="page"
+                  >
+                    {body}
+                  </span>
+                );
+              }
+
+              if (item.href) {
+                return (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    className={styles.navItem}
+                  >
+                    {body}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`${styles.navItem} ${styles.navItemPending}`}
+                  aria-disabled
+                  disabled
+                  title="Not built yet"
+                >
+                  {body}
                 </button>
               );
             })}

@@ -16,6 +16,10 @@ export function buildDrawingMarkers(
 
   const markers: DrawingMarker[] = [];
   for (const callout of callouts) {
+    // A callout with nothing attached has no part to point at, so it is not
+    // drawn for customers. The admin editor is where those get mapped.
+    if (callout.figurePartId === null) continue;
+
     const row = rowByFigurePartId.get(callout.figurePartId);
     if (!row) continue;
 

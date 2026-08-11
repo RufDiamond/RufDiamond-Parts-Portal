@@ -132,7 +132,9 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
         <div className={styles.sheetColumn}>
           <DrawingViewer
             label={`Sheet ${sheet} — exploded view`}
-            count={`${callouts.length} callouts · ${rows.length} parts`}
+            // Only mapped callouts are drawable, so count those rather than
+            // every number the import left on the plate.
+            count={`${markers.length} callouts · ${rows.length} parts`}
             note={
               figure.drawingFileId
                 ? `Drawing ${figure.drawingFileId} not available in this build`
