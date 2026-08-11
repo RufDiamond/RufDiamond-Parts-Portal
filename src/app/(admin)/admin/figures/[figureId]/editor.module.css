@@ -431,3 +431,31 @@
   border-color: var(--ink);
   color: var(--ink);
 }
+
+/* Armed for placement: the plate is the target, so say so with the cursor. */
+.plateArmed {
+  cursor: crosshair;
+  border-color: var(--ink);
+}
+
+.mapSub {
+  margin: 6px 0 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--graphite);
+}
+
+.detachInline {
+  margin-left: var(--space-2);
+  padding: 2px 7px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--graphite);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.detachInline:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}

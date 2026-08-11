@@ -199,17 +199,40 @@ function partIdsForModel(modelId: string): Set<string> {
   );
 }
 
-/** Callouts on a figure that point at nothing. */
-function unmappedOnFigure(figureId: string): number {
+/**
+ * What a figure's callouts are still missing, split by reason.
+ *
+ * The export supplies the PNC-to-part mapping but no coordinates, so `unplaced`
+ * is the ordinary outstanding work. `partless` is the exception, where the
+ * export row was incomplete. Either gap keeps the figure unpublishable.
+ */
+function calloutGaps(figureId: string): {
+  unplaced: number;
+  partless: number;
+  incomplete: number;
+} {
   const figurePartIds = new Set(
     seed.figureParts.map((figurePart) => figurePart.id),
   );
-  return seed.callouts.filter(
-    (callout) =>
-      callout.figureId === figureId &&
-      (callout.figurePartId === null ||
-        !figurePartIds.has(callout.figurePartId)),
-  ).length;
+  const callouts = seed.callouts.filter(
+    (callout) => callout.figureId === figureId,
+  );
+
+  const isUnplaced = (x: number | null, y: number | null) =>
+    x === null || y === null;
+  const isPartless = (figurePartId: string | null) =>
+    figurePartId === null || !figurePartIds.has(figurePartId);
+
+  return {
+    unplaced: callouts.filter((callout) => isUnplaced(callout.x, callout.y))
+      .length,
+    partless: callouts.filter((callout) => isPartless(callout.figurePartId))
+      .length,
+    incomplete: callouts.filter(
+      (callout) =>
+        isUnplaced(callout.x, callout.y) || isPartless(callout.figurePartId),
+    ).length,
+  };
 }
 
 function toPartRef(partId: string, qty?: number): PartRef | null {
@@ -251,15 +274,12 @@ export async function getCatalogSummary(): Promise<CatalogSummary> {
       .map(toCatalogRow),
   }));
 
-  // A callout is unmapped when it points at a figure part that no longer
-  // exists — the import left a number on the plate with nothing behind it.
-  const figurePartIds = new Set(
-    seed.figureParts.map((figurePart) => figurePart.id),
+  // "Unmapped" means not yet publishable: no position on the plate, or no
+  // part behind the number.
+  const unmappedCallouts = seed.figures.reduce(
+    (sum, figure) => sum + calloutGaps(figure.id).incomplete,
+    0,
   );
-  const unmappedCallouts = seed.callouts.filter(
-    (callout) =>
-      callout.figurePartId === null || !figurePartIds.has(callout.figurePartId),
-  ).length;
 
   const withData = seed.models.filter(
     (model) =>
@@ -318,7 +338,7 @@ export async function getModelDetail(
             .map((figurePart) => figurePart.partId),
         ).size,
         unmappedCallouts: systemFigures.reduce(
-          (sum, figure) => sum + unmappedOnFigure(figure.id),
+          (sum, figure) => sum + calloutGaps(figure.id).incomplete,
           0,
         ),
       };
@@ -499,21 +519,40 @@ export async function getPublishQueue(): Promise<PublishQueue> {
     if (model.catalogState !== "draft") continue;
 
     const figures = figuresForModel(model.id);
-    const unmapped = figures.reduce(
-      (sum, figure) => sum + unmappedOnFigure(figure.id),
-      0,
+    const totals = figures.reduce(
+      (sum, figure) => {
+        const gaps = calloutGaps(figure.id);
+        return {
+          unplaced: sum.unplaced + gaps.unplaced,
+          partless: sum.partless + gaps.partless,
+        };
+      },
+      { unplaced: 0, partless: 0 },
     );
-    if (unmapped === 0) continue;
+    if (totals.unplaced === 0 && totals.partless === 0) continue;
 
     const affectedFigures = figures.filter(
-      (figure) => unmappedOnFigure(figure.id) > 0,
+      (figure) => calloutGaps(figure.id).incomplete > 0,
     );
+
+    // Lead with the coordinates: that is what an import is actually missing.
+    const reasons: string[] = [];
+    if (totals.unplaced > 0) {
+      reasons.push(
+        `${totals.unplaced} ${totals.unplaced === 1 ? "callout has" : "callouts have"} no position on the drawing`,
+      );
+    }
+    if (totals.partless > 0) {
+      reasons.push(
+        `${totals.partless} ${totals.partless === 1 ? "has" : "have"} no part attached`,
+      );
+    }
 
     derivedBlockers.push({
       id: `blocked-${model.id}`,
       change: `${model.name} — first release`,
       affects: model.name,
-      reason: `${unmapped} ${unmapped === 1 ? "callout has" : "callouts have"} no part attached across ${affectedFigures.length} ${affectedFigures.length === 1 ? "figure" : "figures"} (${affectedFigures.map((figure) => `FIG ${figure.groupNo}`).join(", ")}). Finish the mapping in the figure editor.`,
+      reason: `${reasons.join(", and ")} across ${affectedFigures.length} ${affectedFigures.length === 1 ? "figure" : "figures"} (${affectedFigures.map((figure) => `FIG ${figure.groupNo}`).join(", ")}). Place the markers in the figure editor.`,
     });
   }
 

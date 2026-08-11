@@ -128,16 +128,22 @@ export interface Callout {
   id: string;
   figureId: string;
   /**
-   * The figure part this marker points at, or null when the import has left a
-   * number on the plate with nothing attached yet. Unmapped callouts are the
-   * admin's work queue, and are not shown to customers.
+   * The figure part this marker points at. Normally supplied by the import,
+   * which carries the PNC-to-part mapping; null only where the export was
+   * incomplete. Attaching a part is the editor's secondary path.
    */
   figurePartId: string | null;
   number: number;
-  /** Percentage of drawing width, 0-100. Not pixels. */
-  x: number;
-  /** Percentage of drawing height, 0-100. Not pixels. */
-  y: number;
+  /**
+   * Position on the plate, as percentages of drawing width and height, 0-100.
+   * Never pixels — the drawing can be replaced at another resolution.
+   *
+   * Null until someone places the marker. The export carries no coordinates,
+   * so this is what an imported callout is missing and what the hotspot editor
+   * exists to fill in.
+   */
+  x: number | null;
+  y: number | null;
 }
 
 /** A customer or dealer account. Discount applies to list price. */

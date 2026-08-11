@@ -259,16 +259,19 @@ const figureParts: FigurePart[] = [
 ];
 
 /**
- * One callout per position, numbered sequentially down the plate.
+ * One callout per position, numbered from the PNC column of the export.
+ *
+ * The export carries the PNC-to-part mapping but no coordinates, so an
+ * imported callout knows its part and not its position. Placing markers is the
+ * work the hotspot editor exists to do:
+ *
+ *   1-4  placed and parted — the state everything ends up in
+ *   5    part attached, no position yet — the ordinary outstanding case
+ *   6    neither, because the export row was incomplete — the exception
  *
  * The hydraulic oil cartridge is fitted in two places, so it owns callouts 3
- * AND 4 — in the FT3 Wagon export a part appearing at two positions carries a
- * distinct PNC for each. Both still resolve to the same part, so selecting
- * that row must light both markers.
- *
- * Callouts 5 and 6 came in from the export with no part attached: the plate
- * numbers them, but nothing has been mapped yet. They are the outstanding
- * work the hotspot editor exists to clear.
+ * AND 4: a part at two positions carries a distinct PNC for each. Both resolve
+ * to the same part, so selecting that row must light both markers.
  */
 const callouts: Callout[] = [
   {
@@ -306,18 +309,18 @@ const callouts: Callout[] = [
   {
     id: "co-1-1-05",
     figureId: "fig-filters-1-1",
-    figurePartId: null,
+    figurePartId: "fp-1-1-04",
     number: 5,
-    x: 21,
-    y: 69,
+    x: null,
+    y: null,
   },
   {
     id: "co-1-1-06",
     figureId: "fig-filters-1-1",
     figurePartId: null,
     number: 6,
-    x: 57,
-    y: 83,
+    x: null,
+    y: null,
   },
 ];
 

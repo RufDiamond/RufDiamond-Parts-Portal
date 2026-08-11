@@ -16,8 +16,10 @@ export function buildDrawingMarkers(
 
   const markers: DrawingMarker[] = [];
   for (const callout of callouts) {
-    // A callout with nothing attached has no part to point at, so it is not
-    // drawn for customers. The admin editor is where those get mapped.
+    // A marker needs both a position to sit at and a part to point at. Either
+    // gap keeps it off the plate — and off the customer's screen, since a
+    // figure in that state cannot be published.
+    if (callout.x === null || callout.y === null) continue;
     if (callout.figurePartId === null) continue;
 
     const row = rowByFigurePartId.get(callout.figurePartId);

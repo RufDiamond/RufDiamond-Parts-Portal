@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 import { getAllParts } from "@/data/repository";
 import { formatAmount, formatFigureRef } from "@/lib/format";
 import { useAsync } from "@/state/useAsync";
@@ -14,16 +14,20 @@ import styles from "./editor.module.css";
 /** Placeholder until accounts exist. */
 const OPERATOR = "C. Kane";
 
-/** What a callout has attached. Null means the plate numbers it, nothing more. */
-interface Attachment {
-  partId: string;
+/** What the editor knows about one callout. */
+interface CalloutState {
+  /** Percentages of the plate, or null until the marker is placed. */
+  x: number | null;
+  y: number | null;
+  /** Normally supplied by the import; null where the export was incomplete. */
+  partId: string | null;
   qty: number;
 }
 
 interface EditorState {
-  /** Callout id → attachment, or null when unmapped. */
-  map: Record<string, Attachment | null>;
+  map: Record<string, CalloutState>;
   selectedCalloutId: string | null;
+  /** Only used by the secondary attach-a-part path. */
   pickedPartId: string | null;
   qty: string;
   /** Set by "Mark figure complete"; any later edit clears it. */
@@ -32,6 +36,8 @@ interface EditorState {
 
 type EditorAction =
   | { type: "select"; calloutId: string }
+  | { type: "place"; x: number; y: number }
+  | { type: "clearPosition"; calloutId: string }
   | { type: "pick"; partId: string }
   | { type: "setQty"; qty: string }
   | { type: "attach" }
@@ -41,14 +47,49 @@ type EditorAction =
 
 function reducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
-    case "select":
+    case "select": {
+      const current = state.map[action.calloutId];
       return {
         ...state,
         selectedCalloutId: action.calloutId,
-        // Offer the current attachment as the starting point, so re-picking
-        // an already-mapped callout is a correction rather than a reset.
-        pickedPartId: state.map[action.calloutId]?.partId ?? null,
-        qty: String(state.map[action.calloutId]?.qty ?? 1),
+        pickedPartId: current?.partId ?? null,
+        qty: String(current?.qty ?? 1),
+      };
+    }
+
+    case "place": {
+      const { selectedCalloutId } = state;
+      if (!selectedCalloutId) return state;
+
+      return {
+        ...state,
+        map: {
+          ...state.map,
+          [selectedCalloutId]: {
+            ...state.map[selectedCalloutId],
+            x: action.x,
+            y: action.y,
+          },
+        },
+        // Placing is a run of small actions, so selection clears ready for the
+        // next callout rather than staying armed over the plate.
+        selectedCalloutId: null,
+        complete: false,
+      };
+    }
+
+    case "clearPosition":
+      return {
+        ...state,
+        map: {
+          ...state.map,
+          [action.calloutId]: {
+            ...state.map[action.calloutId],
+            x: null,
+            y: null,
+          },
+        },
+        complete: false,
       };
 
     case "pick":
@@ -61,15 +102,18 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
       const { selectedCalloutId, pickedPartId } = state;
       if (!selectedCalloutId || !pickedPartId) return state;
 
-      const qty = Math.max(1, Number.parseInt(state.qty, 10) || 1);
-
       return {
         ...state,
-        map: { ...state.map, [selectedCalloutId]: { partId: pickedPartId, qty } },
-        selectedCalloutId: null,
+        map: {
+          ...state.map,
+          [selectedCalloutId]: {
+            ...state.map[selectedCalloutId],
+            partId: pickedPartId,
+            qty: Math.max(1, Number.parseInt(state.qty, 10) || 1),
+          },
+        },
         pickedPartId: null,
         qty: "1",
-        // The figure has changed, so a previous completion no longer holds.
         complete: false,
       };
     }
@@ -77,7 +121,14 @@ function reducer(state: EditorState, action: EditorAction): EditorState {
     case "detach":
       return {
         ...state,
-        map: { ...state.map, [action.calloutId]: null },
+        map: {
+          ...state.map,
+          [action.calloutId]: {
+            ...state.map[action.calloutId],
+            partId: null,
+            qty: 1,
+          },
+        },
         complete: false,
       };
 
@@ -102,6 +153,7 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
   const { figure, system, variant, rows, callouts } = detail;
 
   const [query, setQuery] = useState("");
+  const plateRef = useRef<HTMLDivElement>(null);
 
   const [state, dispatch] = useReducer(reducer, undefined, () => ({
     map: Object.fromEntries(
@@ -111,7 +163,12 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
         );
         return [
           callout.id,
-          row ? { partId: row.part.id, qty: row.figurePart.qty } : null,
+          {
+            x: callout.x,
+            y: callout.y,
+            partId: row?.part.id ?? null,
+            qty: row?.figurePart.qty ?? 1,
+          },
         ];
       }),
     ),
@@ -121,8 +178,6 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
     complete: false,
   }));
 
-  // Search goes through the repository so it matches whatever the backend
-  // will do, rather than reimplementing the matching here.
   const run = useCallback(
     () => getAllParts(query.trim() ? { query } : {}),
     [query],
@@ -135,20 +190,53 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
     [parts],
   );
 
-  const mappedCount = callouts.filter(
-    (callout) => state.map[callout.id],
+  const placedCount = callouts.filter(
+    (callout) => state.map[callout.id]?.x !== null,
   ).length;
-  const allMapped = mappedCount === callouts.length;
+  const partlessCount = callouts.filter(
+    (callout) => state.map[callout.id]?.partId === null,
+  ).length;
 
-  /** How many callouts on THIS figure already carry a given part. */
+  // Both conditions gate publication, so both gate completion.
+  const canComplete =
+    placedCount === callouts.length && partlessCount === 0;
+
+  const selected = callouts.find(
+    (callout) => callout.id === state.selectedCalloutId,
+  );
+  const selectedState = selected ? state.map[selected.id] : undefined;
+
+  const selectCallout = (calloutId: string) => {
+    setQuery("");
+    dispatch({ type: "select", calloutId });
+  };
+
+  /**
+   * The primary gesture: click the plate to give the selected callout a
+   * position. Stored as percentages of the plate, never pixels, so the
+   * drawing can be replaced at another resolution.
+   */
+  const placeAtClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!state.selectedCalloutId || !plateRef.current) return;
+
+    const rect = plateRef.current.getBoundingClientRect();
+    const round = (value: number) => Math.round(value * 10) / 10;
+    const clamp = (value: number) => Math.min(100, Math.max(0, value));
+
+    dispatch({
+      type: "place",
+      x: round(clamp(((event.clientX - rect.left) / rect.width) * 100)),
+      y: round(clamp(((event.clientY - rect.top) / rect.height) * 100)),
+    });
+  };
+
   const attachedCount = (partId: string) =>
     callouts.filter((callout) => state.map[callout.id]?.partId === partId)
       .length;
 
-  /** Other callout numbers carrying the same part — a fact, not a conflict. */
   const othersWithSamePart = (calloutId: string) => {
     const attached = state.map[calloutId];
-    if (!attached) return [];
+    if (!attached?.partId) return [];
     return callouts
       .filter(
         (callout) =>
@@ -158,20 +246,8 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
       .map((callout) => callout.number);
   };
 
-  /**
-   * Selecting a callout starts a fresh pick, so the search box resets too —
-   * otherwise a filter from the previous callout silently hides most parts.
-   */
-  const selectCallout = (calloutId: string) => {
-    setQuery("");
-    dispatch({ type: "select", calloutId });
-  };
-
-  const selected = callouts.find(
-    (callout) => callout.id === state.selectedCalloutId,
-  );
-  const canAttach = Boolean(state.selectedCalloutId && state.pickedPartId);
   const figureRef = formatFigureRef(figure.groupNo);
+  const unplaced = callouts.length - placedCount;
 
   return (
     <AdminShell
@@ -184,8 +260,8 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
         { label: "Figure", value: figureRef },
         { label: "State", value: state.complete ? "Complete" : "Draft" },
         {
-          label: "Mapped",
-          value: `${mappedCount} / ${callouts.length} callouts`,
+          label: "Placed",
+          value: `${placedCount} / ${callouts.length} callouts`,
         },
       ]}
       actions={
@@ -200,12 +276,21 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
           </button>
           <button
             type="button"
-            className={`${shell.button} ${allMapped ? shell.buttonPrimary : ""}`}
-            disabled={!allMapped || state.complete}
+            className={`${shell.button} ${canComplete ? shell.buttonPrimary : ""}`}
+            disabled={!canComplete || state.complete}
             title={
-              allMapped
-                ? "Every callout has a part"
-                : `${callouts.length - mappedCount} callouts still have no part attached`
+              canComplete
+                ? "Every callout has a position and a part"
+                : [
+                    unplaced > 0
+                      ? `${unplaced} ${unplaced === 1 ? "callout has" : "callouts have"} no position`
+                      : null,
+                    partlessCount > 0
+                      ? `${partlessCount} ${partlessCount === 1 ? "has" : "have"} no part attached`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join("; ")
             }
             onClick={() => dispatch({ type: "markComplete" })}
           >
@@ -215,42 +300,56 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
       }
     >
       <p className={styles.intro}>
-        Select a callout on the drawing, then attach the part it points at. A
-        part may be attached to more than one callout in the same figure — a
+        The import brings the callout numbers and the parts they point at, but
+        not where they sit on the plate. Select a callout, then click the
+        drawing to place its marker. A part may key more than one callout — a
         repeated part is a valid mapping, not an error. Nothing publishes until
-        every callout has a part.
+        every callout has both a position and a part.
       </p>
 
       <div className={styles.editor}>
         <div className={styles.plateColumn}>
-          <div className={styles.plate}>
+          <div
+            ref={plateRef}
+            className={`${styles.plate} ${state.selectedCalloutId ? styles.plateArmed : ""}`}
+            onClick={placeAtClick}
+          >
             <span className={styles.plateNote}>
-              {figure.drawingFileId
-                ? `Drawing ${figure.drawingFileId}`
-                : `Assembly drawing not supplied — callouts positioned to ${figureRef}`}
+              {selected
+                ? `Click to place callout ${selected.number}`
+                : figure.drawingFileId
+                  ? `Drawing ${figure.drawingFileId}`
+                  : `Assembly drawing not supplied — callouts placed against ${figureRef}`}
             </span>
 
             {callouts.map((callout) => {
-              const isMapped = Boolean(state.map[callout.id]);
+              const current = state.map[callout.id];
+              if (!current || current.x === null || current.y === null) {
+                return null;
+              }
+
               const isSelected = callout.id === state.selectedCalloutId;
-              const part = state.map[callout.id]
-                ? partById.get(state.map[callout.id]!.partId)
+              const part = current.partId
+                ? partById.get(current.partId)
                 : undefined;
 
               return (
                 <button
                   key={callout.id}
                   type="button"
-                  // Percentages of the plate, never pixels.
-                  style={{ left: `${callout.x}%`, top: `${callout.y}%` }}
-                  className={`${styles.marker} ${isMapped ? "" : styles.markerUnmapped} ${isSelected ? styles.markerSelected : ""}`}
+                  style={{ left: `${current.x}%`, top: `${current.y}%` }}
+                  className={`${styles.marker} ${part ? "" : styles.markerUnmapped} ${isSelected ? styles.markerSelected : ""}`}
                   aria-pressed={isSelected}
                   title={
                     part
                       ? `Callout ${callout.number}: ${part.partNumber} — ${part.description}`
                       : `Callout ${callout.number}: no part attached`
                   }
-                  onClick={() => selectCallout(callout.id)}
+                  onClick={(event) => {
+                    // Selecting a placed marker must not also re-place it.
+                    event.stopPropagation();
+                    selectCallout(callout.id);
+                  }}
                 >
                   {callout.number}
                 </button>
@@ -261,9 +360,9 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
           <div className={styles.legend}>
             <span className={styles.legendMark}>i</span>
             <span>
-              Dashed callouts have no part attached. They stay hidden from
-              customers until mapped. Solid callouts are mapped; the filled
-              callout is the one selected.
+              Only placed callouts appear on the plate. A dashed marker has a
+              position but no part attached; the filled marker is the one
+              selected. Unplaced callouts are listed on the right.
             </span>
           </div>
         </div>
@@ -272,23 +371,33 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
           <div className={styles.mapHead}>
             <p className={styles.mapEyebrow}>Callout mapping</p>
             <p className={styles.mapCount}>
-              {mappedCount} of {callouts.length} mapped
+              {placedCount} of {callouts.length} placed
             </p>
             <div className={styles.progress}>
               <i
                 className={styles.progressFill}
                 style={{
-                  width: `${(mappedCount / Math.max(1, callouts.length)) * 100}%`,
+                  width: `${(placedCount / Math.max(1, callouts.length)) * 100}%`,
                 }}
               />
             </div>
+            {partlessCount > 0 ? (
+              <p className={styles.mapSub}>
+                {partlessCount}{" "}
+                {partlessCount === 1 ? "callout has" : "callouts have"} no part
+                attached
+              </p>
+            ) : null}
           </div>
 
           <div className={styles.rows}>
             {callouts.map((callout) => {
-              const attached = state.map[callout.id];
-              const part = attached ? partById.get(attached.partId) : undefined;
+              const current = state.map[callout.id];
+              const part = current?.partId
+                ? partById.get(current.partId)
+                : undefined;
               const isSelected = callout.id === state.selectedCalloutId;
+              const isPlaced = Boolean(current && current.x !== null);
               const others = othersWithSamePart(callout.id);
 
               return (
@@ -306,20 +415,22 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
                   }}
                 >
                   <span
-                    className={`${styles.rowNum} ${attached ? styles.rowNumMapped : ""}`}
+                    className={`${styles.rowNum} ${isPlaced ? styles.rowNumMapped : ""}`}
                   >
                     {callout.number}
                   </span>
 
                   <span className={styles.rowBody}>
                     <span className={styles.rowLabel}>
-                      Callout {callout.number} · {callout.x}% × {callout.y}%
+                      {isPlaced && current
+                        ? `Placed at ${current.x}% × ${current.y}%`
+                        : "Not placed"}
                     </span>
                     <span
-                      className={`${styles.rowPart} ${attached ? "" : styles.rowPartEmpty}`}
+                      className={`${styles.rowPart} ${part ? "" : styles.rowPartEmpty}`}
                     >
-                      {part && attached
-                        ? `${part.partNumber} · ${part.description}${attached.qty > 1 ? `  ×${attached.qty}` : ""}`
+                      {part && current
+                        ? `${part.partNumber} · ${part.description}${current.qty > 1 ? `  ×${current.qty}` : ""}`
                         : "No part attached"}
                     </span>
                     {others.length > 0 ? (
@@ -329,16 +440,20 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
                     ) : null}
                   </span>
 
-                  {attached ? (
+                  {isPlaced ? (
                     <button
                       type="button"
                       className={styles.detach}
+                      title="Take the marker off the plate"
                       onClick={(event) => {
                         event.stopPropagation();
-                        dispatch({ type: "detach", calloutId: callout.id });
+                        dispatch({
+                          type: "clearPosition",
+                          calloutId: callout.id,
+                        });
                       }}
                     >
-                      Detach
+                      Unplace
                     </button>
                   ) : null}
                 </div>
@@ -347,96 +462,127 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
           </div>
 
           <div className={styles.attach}>
-            <p className={styles.attachEyebrow}>Attach a part</p>
-
-            {!selected ? (
-              <p className={styles.attachHint}>
-                Select a callout on the drawing to begin.
-              </p>
+            {!selected || !selectedState ? (
+              <>
+                <p className={styles.attachEyebrow}>Place a callout</p>
+                <p className={styles.attachHint}>
+                  Select a callout to place it on the drawing.
+                </p>
+              </>
             ) : (
               <div>
+                <p className={styles.attachEyebrow}>Callout {selected.number}</p>
                 <p className={styles.attachTarget}>
-                  Callout {selected.number} — {selected.x}% × {selected.y}%
+                  {selectedState.x === null
+                    ? "Click the drawing to place this marker."
+                    : `Placed at ${selectedState.x}% × ${selectedState.y}%. Click the drawing again to move it.`}
                 </p>
 
-                <input
-                  className={styles.search}
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Search part number or description"
-                  aria-label="Search parts"
-                />
-
-                <div className={styles.picker}>
-                  {pickerParts.length === 0 ? (
-                    <p className={styles.pickerEmpty}>
-                      No part matches that search.
+                {/* Secondary path: only offered where the import left no part. */}
+                {selectedState.partId === null ? (
+                  <>
+                    <p className={styles.attachEyebrow}>Attach a part</p>
+                    <p className={styles.attachHint}>
+                      This callout arrived without a part — the export row was
+                      incomplete.
                     </p>
-                  ) : (
-                    pickerParts.map(({ part }) => {
-                      const used = attachedCount(part.id);
-                      const isActive = part.id === state.pickedPartId;
 
-                      return (
-                        <button
-                          key={part.id}
-                          type="button"
-                          className={`${styles.pickerRow} ${isActive ? styles.pickerRowActive : ""}`}
-                          aria-pressed={isActive}
-                          onClick={() =>
-                            dispatch({ type: "pick", partId: part.id })
-                          }
-                        >
-                          <span className={styles.pickerNo}>
-                            {part.partNumber}
-                          </span>
-                          <span className={styles.pickerDesc}>
-                            {part.description}
-                            {used > 0 ? (
-                              <span className={styles.pickerUsed}>
-                                Attached at {used}{" "}
-                                {used === 1 ? "callout" : "callouts"} in this
-                                figure
-                              </span>
-                            ) : null}
-                          </span>
-                          <span className={styles.pickerPrice}>
-                            {formatAmount(part.listPrice, part.currency)}
-                          </span>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-
-                <div className={styles.attachControls}>
-                  <div className={styles.qtyField}>
-                    <label className={styles.qtyLabel} htmlFor="attach-qty">
-                      Qty
-                    </label>
                     <input
-                      id="attach-qty"
-                      className={styles.qtyInput}
-                      inputMode="numeric"
-                      value={state.qty}
-                      onChange={(event) =>
-                        dispatch({ type: "setQty", qty: event.target.value })
-                      }
+                      className={styles.search}
+                      type="search"
+                      value={query}
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Search part number or description"
+                      aria-label="Search parts"
                     />
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.attachButton}
-                    disabled={!canAttach}
-                    title={canAttach ? undefined : "Pick a part first"}
-                    onClick={() => dispatch({ type: "attach" })}
-                  >
-                    {canAttach
-                      ? `Attach to callout ${selected.number}`
-                      : "Pick a part"}
-                  </button>
-                </div>
+
+                    <div className={styles.picker}>
+                      {pickerParts.length === 0 ? (
+                        <p className={styles.pickerEmpty}>
+                          No part matches that search.
+                        </p>
+                      ) : (
+                        pickerParts.map(({ part }) => {
+                          const used = attachedCount(part.id);
+                          const isActive = part.id === state.pickedPartId;
+
+                          return (
+                            <button
+                              key={part.id}
+                              type="button"
+                              className={`${styles.pickerRow} ${isActive ? styles.pickerRowActive : ""}`}
+                              aria-pressed={isActive}
+                              onClick={() =>
+                                dispatch({ type: "pick", partId: part.id })
+                              }
+                            >
+                              <span className={styles.pickerNo}>
+                                {part.partNumber}
+                              </span>
+                              <span className={styles.pickerDesc}>
+                                {part.description}
+                                {used > 0 ? (
+                                  <span className={styles.pickerUsed}>
+                                    Attached at {used}{" "}
+                                    {used === 1 ? "callout" : "callouts"} in this
+                                    figure
+                                  </span>
+                                ) : null}
+                              </span>
+                              <span className={styles.pickerPrice}>
+                                {formatAmount(part.listPrice, part.currency)}
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className={styles.attachControls}>
+                      <div className={styles.qtyField}>
+                        <label className={styles.qtyLabel} htmlFor="attach-qty">
+                          Qty
+                        </label>
+                        <input
+                          id="attach-qty"
+                          className={styles.qtyInput}
+                          inputMode="numeric"
+                          value={state.qty}
+                          onChange={(event) =>
+                            dispatch({ type: "setQty", qty: event.target.value })
+                          }
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className={styles.attachButton}
+                        disabled={!state.pickedPartId}
+                        title={
+                          state.pickedPartId ? undefined : "Pick a part first"
+                        }
+                        onClick={() => dispatch({ type: "attach" })}
+                      >
+                        {state.pickedPartId
+                          ? `Attach to callout ${selected.number}`
+                          : "Pick a part"}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles.attachHint}>
+                    Part {partById.get(selectedState.partId)?.partNumber ?? "—"}{" "}
+                    · {partById.get(selectedState.partId)?.description ?? ""}
+                    <button
+                      type="button"
+                      className={styles.detachInline}
+                      onClick={() =>
+                        dispatch({ type: "detach", calloutId: selected.id })
+                      }
+                    >
+                      Detach
+                    </button>
+                  </p>
+                )}
 
                 <button
                   type="button"
