@@ -28,6 +28,7 @@ export default function RequestPage() {
     itemCount,
     company,
     discountRate,
+    linesHydrated,
     listTotal,
     discountApplied,
     netTotal,
@@ -50,6 +51,15 @@ export default function RequestPage() {
     const confirmation = submit();
     if (confirmation) router.push("/request/confirmed");
   };
+
+  // Don't flash "nothing here" while the stored list is still being read.
+  if (!linesHydrated) {
+    return (
+      <main className={screen.screen}>
+        <p className={screen.loading}>Loading…</p>
+      </main>
+    );
+  }
 
   if (lines.length === 0) {
     return (
@@ -97,7 +107,11 @@ export default function RequestPage() {
 
       <div className={screen.split84}>
         <Panel
-          eyebrow={`Fat Truck ${machineName} · ${selectedVariant?.label ?? ""}`}
+          eyebrow={
+            selectedVariant
+              ? `Fat Truck ${machineName} · ${selectedVariant.label}`
+              : `Fat Truck ${machineName}`
+          }
           title="Selected parts"
           padding="none"
           frame="strong"

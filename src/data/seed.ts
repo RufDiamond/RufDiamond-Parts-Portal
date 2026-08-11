@@ -171,9 +171,12 @@ const figureParts: FigurePart[] = [
 ];
 
 /**
- * Callout 3 appears twice — the hydraulic oil cartridge is fitted in two
- * places on the plate. Both markers carry the same number and must highlight
- * together when the row is selected.
+ * One callout per position, numbered sequentially down the plate.
+ *
+ * The hydraulic oil cartridge is fitted in two places, so it owns callouts 3
+ * AND 4 — in the FT3 Wagon export a part appearing at two positions carries a
+ * distinct PNC for each. Both still resolve to the same part, so selecting
+ * that row must light both markers.
  */
 const callouts: Callout[] = [
   {
@@ -193,7 +196,7 @@ const callouts: Callout[] = [
     y: 18,
   },
   {
-    id: "co-1-1-03a",
+    id: "co-1-1-03",
     figureId: "fig-filters-1-1",
     figurePartId: "fp-1-1-03",
     number: 3,
@@ -201,26 +204,26 @@ const callouts: Callout[] = [
     y: 52,
   },
   {
-    id: "co-1-1-03b",
+    id: "co-1-1-04",
     figureId: "fig-filters-1-1",
     figurePartId: "fp-1-1-03",
-    number: 3,
+    number: 4,
     x: 75,
     y: 61,
   },
   {
-    id: "co-1-1-04",
+    id: "co-1-1-05",
     figureId: "fig-filters-1-1",
     figurePartId: "fp-1-1-04",
-    number: 4,
+    number: 5,
     x: 21,
     y: 69,
   },
   {
-    id: "co-1-1-05",
+    id: "co-1-1-06",
     figureId: "fig-filters-1-1",
     figurePartId: "fp-1-1-05",
-    number: 5,
+    number: 6,
     x: 57,
     y: 83,
   },

@@ -23,6 +23,12 @@ import type { FigureDetail } from "@/types/catalog";
 import screen from "@/styles/screen.module.css";
 import styles from "./figure.module.css";
 
+/** "3 and 4", or "3, 4 and 5". */
+function formatList(numbers: number[]): string {
+  if (numbers.length <= 1) return String(numbers[0] ?? "—");
+  return `${numbers.slice(0, -1).join(", ")} and ${numbers[numbers.length - 1]}`;
+}
+
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
   /** Sheet number as printed, e.g. "01 / 01". */
@@ -154,9 +160,9 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
               severity="critical"
               title="Two positions"
             >
-              {row.part.description} {row.part.partNumber} is fitted at{" "}
-              {calloutsForPart(row.part.id).length} positions on this sheet.
-              Replace both at the same service interval.
+              {row.part.description} {row.part.partNumber} is fitted at
+              callouts {formatList(row.calloutNumbers)}. Replace all of them at
+              the same service interval.
             </WarningPanel>
           ))}
 

@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { Company, Currency, OrderLine, Part } from "@/types/catalog";
 
+export const LINES_STORAGE_KEY = "rdpp:request:v1";
 export const CONFIRMATION_STORAGE_KEY = "rdpp:last-request:v1";
 
 /** What a caller hands to `addParts` — the part, and how many of it. */
@@ -46,9 +47,17 @@ export interface RequestState {
   lines: OrderLine[];
   /** Taken from the first part added; reset when the list empties. */
   currency: Currency;
+  /** False until the stored request list has been read. */
+  linesHydrated: boolean;
   lastConfirmation: RequestConfirmation | null;
   /** False until the stored confirmation has been read. */
   confirmationHydrated: boolean;
+}
+
+/** The slice of state that survives a refresh. */
+export interface StoredRequest {
+  lines: OrderLine[];
+  currency: Currency;
 }
 
 export type RequestAction =
@@ -57,11 +66,13 @@ export type RequestAction =
   | { type: "remove"; partId: string }
   | { type: "clear" }
   | { type: "submit"; confirmation: RequestConfirmation }
+  | { type: "hydrateLines"; stored: StoredRequest | null }
   | { type: "hydrateConfirmation"; confirmation: RequestConfirmation | null };
 
 export const initialRequestState: RequestState = {
   lines: [],
   currency: "CAD",
+  linesHydrated: false,
   lastConfirmation: null,
   confirmationHydrated: false,
 };
@@ -164,6 +175,16 @@ export function requestReducer(
         lastConfirmation: action.confirmation,
       };
 
+    case "hydrateLines":
+      // Anything added before the read landed wins over the stored list.
+      if (state.lines.length > 0) return { ...state, linesHydrated: true };
+      return {
+        ...state,
+        linesHydrated: true,
+        lines: action.stored?.lines ?? [],
+        currency: action.stored?.currency ?? "CAD",
+      };
+
     case "hydrateConfirmation":
       return {
         ...state,
@@ -207,6 +228,55 @@ export function buildReference(now: Date, seed: number): string {
   return `RDP-${stamp}-${suffix}`;
 }
 
+function isOrderLine(value: unknown): value is OrderLine {
+  if (typeof value !== "object" || value === null) return false;
+  const line = value as Partial<OrderLine>;
+  return (
+    typeof line.partId === "string" &&
+    typeof line.partNumberSnapshot === "string" &&
+    typeof line.descriptionSnapshot === "string" &&
+    typeof line.qty === "number" &&
+    typeof line.unitPriceSnapshot === "number" &&
+    typeof line.lineTotal === "number"
+  );
+}
+
+export function readStoredRequest(): StoredRequest | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(LINES_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return null;
+
+    const candidate = parsed as Partial<StoredRequest>;
+    if (!Array.isArray(candidate.lines)) return null;
+
+    // Drop anything malformed rather than failing the whole read: a partial
+    // list beats an empty one when someone is twenty lines in.
+    const lines = candidate.lines.filter(isOrderLine);
+    const currency = candidate.currency === "USD" ? "USD" : "CAD";
+
+    return { lines, currency };
+  } catch {
+    return null;
+  }
+}
+
+export function writeStoredRequest(value: StoredRequest): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (value.lines.length === 0) {
+      window.sessionStorage.removeItem(LINES_STORAGE_KEY);
+    } else {
+      window.sessionStorage.setItem(LINES_STORAGE_KEY, JSON.stringify(value));
+    }
+  } catch {
+    // Persistence is a convenience; never let it break the request.
+  }
+}
+
 function readStoredConfirmation(): RequestConfirmation | null {
   if (typeof window === "undefined") return null;
   try {
@@ -248,6 +318,8 @@ export interface RequestContextValue extends RequestTotals {
   /** The account the discount comes from. Null until accounts exist. */
   company: Company | null;
   discountRate: number;
+  /** False until the stored list has been read; guards the empty state. */
+  linesHydrated: boolean;
   lastConfirmation: RequestConfirmation | null;
   confirmationHydrated: boolean;
   addParts: (parts: RequestPartInput[]) => void;
@@ -277,8 +349,21 @@ export function RequestProvider({
 }: RequestProviderProps) {
   const [state, dispatch] = useReducer(requestReducer, initialRequestState);
 
+  // A twenty-line request built on a mine site must survive an accidental
+  // refresh. Read after mount — the server cannot see sessionStorage.
+  useEffect(() => {
+    dispatch({ type: "hydrateLines", stored: readStoredRequest() });
+  }, []);
+
+  useEffect(() => {
+    // Don't write before the read has happened, or the empty initial state
+    // would wipe what is already stored.
+    if (!state.linesHydrated) return;
+    writeStoredRequest({ lines: state.lines, currency: state.currency });
+  }, [state.linesHydrated, state.lines, state.currency]);
+
   // The confirmation outlives the request list so /request/confirmed survives
-  // a refresh. Read after mount — the server cannot see sessionStorage.
+  // a refresh too.
   useEffect(() => {
     dispatch({
       type: "hydrateConfirmation",
@@ -344,6 +429,7 @@ export function RequestProvider({
       itemCount,
       company,
       discountRate,
+      linesHydrated: state.linesHydrated,
       lastConfirmation: state.lastConfirmation,
       confirmationHydrated: state.confirmationHydrated,
       ...totals,
@@ -356,6 +442,7 @@ export function RequestProvider({
     [
       state.lines,
       state.currency,
+      state.linesHydrated,
       state.lastConfirmation,
       state.confirmationHydrated,
       itemCount,

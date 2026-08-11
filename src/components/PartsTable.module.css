@@ -33,9 +33,11 @@
   padding-right: 0;
 }
 
+/* Wide enough for two callout squares side by side — a part fitted twice
+   shows both its numbers inline, not stacked. */
 .refHead,
 .ref {
-  width: 72px;
+  width: 96px;
 }
 
 .partNoHead,
