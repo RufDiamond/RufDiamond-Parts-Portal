@@ -15,6 +15,7 @@ import type {
   System,
   Variant,
 } from "@/types/catalog";
+import type { AdminOrder, PublishChange } from "@/types/admin";
 
 const productLines: ProductLine[] = [
   {
@@ -24,14 +25,70 @@ const productLines: ProductLine[] = [
     country: "CA",
     isDistributed: true,
   },
+  {
+    id: "pl-agilis",
+    name: "Agilis",
+    manufacturer: "Agilis AB",
+    country: "SE",
+    isDistributed: true,
+  },
+  {
+    id: "pl-ironhorse",
+    name: "IronHorse",
+    manufacturer: "IronHorse AB",
+    country: "SE",
+    isDistributed: true,
+  },
 ];
 
+/**
+ * The registered roster. Only FT3 Wagon has had an export imported; the rest
+ * are registered so the admin can see what is outstanding, and are what the
+ * customer machine picker shows as not yet available.
+ *
+ * IronHorse has no models registered at all — its database is in preparation.
+ */
 const models: Model[] = [
   {
     id: "mdl-ft3-wagon",
     productLineId: "pl-fat-truck",
     name: "FT3 Wagon",
     status: "active",
+    // Only one of twelve systems has been populated, so the catalogue is not
+    // publishable yet.
+    catalogState: "draft",
+    updatedAt: "2026-07-24",
+  },
+  ...[
+    "2.8 Pickup",
+    "2.8C",
+    "2.8 Wagon",
+    "8X8 Hauler",
+    "8X8 Wagon",
+    "2.4P",
+  ].map<Model>((name) => ({
+    id: `mdl-ft-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+    productLineId: "pl-fat-truck",
+    name,
+    status: "active",
+    catalogState: "awaiting-import",
+    updatedAt: null,
+  })),
+  {
+    id: "mdl-agilis-4",
+    productLineId: "pl-agilis",
+    name: "Agilis 4",
+    status: "active",
+    catalogState: "awaiting-import",
+    updatedAt: null,
+  },
+  {
+    id: "mdl-agilis-8",
+    productLineId: "pl-agilis",
+    name: "Agilis 8",
+    status: "active",
+    catalogState: "awaiting-import",
+    updatedAt: null,
   },
 ];
 
@@ -229,6 +286,111 @@ const callouts: Callout[] = [
   },
 ];
 
+/** Orders raised against the pilot catalogue. Admin-side read only. */
+const orders: AdminOrder[] = [
+  {
+    id: "ord-0418",
+    reference: "RD-2026-0418",
+    customer: "Agnico Eagle · Macassa",
+    productLine: "Fat Truck",
+    model: "FT3 Wagon",
+    serialRange: "99FT3WXXXXXX and up",
+    lines: 4,
+    valueCad: 613.84,
+    discountTier: "Tier 2 · mine site 12%",
+    state: "new",
+  },
+  {
+    id: "ord-0417",
+    reference: "RD-2026-0417",
+    customer: "Vale · Creighton",
+    productLine: "Fat Truck",
+    model: "FT3 Wagon",
+    serialRange: "99FT3WXXXXXX and up",
+    lines: 11,
+    valueCad: 8204.1,
+    discountTier: "Tier 1 · fleet 18%",
+    state: "new",
+  },
+  {
+    id: "ord-0416",
+    reference: "RD-2026-0416",
+    customer: "Hydro One · Sudbury",
+    productLine: "Fat Truck",
+    model: "FT3 Wagon",
+    serialRange: "99FT3WXXXXXX and up",
+    lines: 2,
+    valueCad: 4566.94,
+    discountTier: "Tier 3 · list",
+    state: "quoted",
+  },
+  {
+    id: "ord-0415",
+    reference: "RD-2026-0415",
+    customer: "Glencore · Sudbury INO",
+    productLine: "Fat Truck",
+    model: "FT3 Wagon",
+    serialRange: "99FT3WXXXXXX and up",
+    lines: 6,
+    valueCad: 1092.3,
+    discountTier: "Tier 2 · mine site 12%",
+    state: "shipped",
+  },
+  {
+    id: "ord-0414",
+    reference: "RD-2026-0414",
+    customer: "Detour Lake · emergency response",
+    productLine: "Fat Truck",
+    model: "FT3 Wagon",
+    serialRange: "99FT3WXXXXXX and up",
+    lines: 3,
+    valueCad: 9128.55,
+    discountTier: "Tier 1 · fleet 18%",
+    state: "requires-dealer-approval",
+  },
+];
+
+const publishReady: PublishChange[] = [
+  {
+    id: "pub-r1",
+    change: "Price update — 41 Filters and Engine records",
+    affects: "FT3 Wagon",
+    by: "C. Kane",
+    when: "2026-07-26 11:20",
+  },
+  {
+    id: "pub-r2",
+    change: "35-00061 superseded by 35-00068",
+    affects: "FT3 Wagon · Filters",
+    by: "C. Kane",
+    when: "2026-07-26 10:04",
+  },
+  {
+    id: "pub-r3",
+    change: "Frame assy FIG 7.2 callout corrections",
+    affects: "FT3 Wagon · Frame assy",
+    by: "M. Tremblay",
+    when: "2026-07-25 15:38",
+  },
+];
+
+const publishBlocked: PublishChange[] = [
+  {
+    id: "pub-b1",
+    change: "FT3 Wagon — first release",
+    affects: "FT3 Wagon",
+    reason:
+      "Eleven of twelve systems have no figures imported. Filters FIG 1.1 is the only released plate.",
+  },
+  {
+    id: "pub-b2",
+    change: "IronHorse — first release",
+    affects: "IronHorse",
+    reason:
+      "No parts export received. The manufacturer holds the drawing rights; request the export before importing.",
+  },
+];
+
 export const seed = {
   productLines,
   models,
@@ -238,4 +400,7 @@ export const seed = {
   parts,
   figureParts,
   callouts,
+  orders,
+  publishReady,
+  publishBlocked,
 };

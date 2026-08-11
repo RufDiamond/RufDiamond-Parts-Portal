@@ -1,0 +1,195 @@
+/* Stat strip: cells separated by a 1px grid gap over a rule-coloured ground,
+   so the dividers are the rule itself. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  margin: 0 0 26px;
+  border: 1px solid var(--rule);
+  background: var(--rule);
+}
+
+.stat {
+  padding: 15px;
+  background: var(--paper);
+}
+
+.statLabel {
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.statValue {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.statSub {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--graphite);
+}
+
+.group {
+  margin-bottom: 26px;
+}
+
+.groupLine {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--graphite);
+}
+
+.table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+
+.colSerial {
+  width: 300px;
+}
+
+.colNum {
+  width: 90px;
+  text-align: right;
+}
+
+.colStatus {
+  width: 140px;
+}
+
+.colUpdated {
+  width: 130px;
+}
+
+.colAction {
+  width: 80px;
+  text-align: right;
+}
+
+.model {
+  font-weight: 400;
+}
+
+/* The one model carrying data reads heavier than the rest of the roster. */
+.modelWithData {
+  font-weight: 600;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--mid);
+}
+
+/* ── Status chips. Monochrome: fill, rule style and hatch carry the state. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 7px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Live — solid ink fill. */
+.chipLive {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Draft — dashed outline. */
+.chipDraft {
+  border-color: var(--graphite);
+  border-style: dashed;
+  background: var(--paper);
+  color: var(--graphite);
+}
+
+/* Awaiting import — 45-degree hatch. */
+.chipAwaiting {
+  border-color: var(--ink);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    var(--sheet) 3px,
+    var(--sheet) 6px
+  );
+  color: var(--ink);
+}
+
+/* Not registered — recessed, nothing to act on. */
+.chipNotRegistered {
+  border-color: var(--rule);
+  background: var(--sheet);
+  color: var(--graphite);
+}
+
+/* Footnote, hatched with a heavy left rule. */
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 78ch;
+  padding: 10px 12px;
+  border-left: var(--rule-heavy) solid var(--ink);
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    var(--sheet) 4px,
+    var(--sheet) 8px
+  );
+  font-size: 12px;
+}
+
+.noteMark {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}

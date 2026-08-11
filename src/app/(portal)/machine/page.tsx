@@ -1,18 +1,28 @@
-import { getModels, getVariants } from "@/data/repository";
+import { getModels, getProductLines, getVariants } from "@/data/repository";
 import { PageHeader } from "@/components";
 import screen from "@/styles/screen.module.css";
 import { MachinePicker } from "./MachinePicker";
 
 export default async function MachinePage() {
-  const models = await getModels();
+  const [models, productLines] = await Promise.all([
+    getModels(),
+    getProductLines(),
+  ]);
+
+  // The customer portal covers the Fat Truck line; the other lines the
+  // distributor carries are admin-side only until they have a catalogue.
+  const fatTruck = productLines.find((line) => line.name === "Fat Truck");
   const catalogued = await Promise.all(
-    models.map(async (model) => ({
-      model,
-      variants: await getVariants(model.id),
-    })),
+    models
+      .filter((model) => model.productLineId === fatTruck?.id)
+      .map(async (model) => ({
+        model,
+        variants: await getVariants(model.id),
+      })),
   );
 
-  const revision = catalogued[0]?.variants[0]?.catalogRevision;
+  const revision = catalogued.flatMap((entry) => entry.variants)[0]
+    ?.catalogRevision;
 
   return (
     <main className={screen.screen}>
@@ -26,7 +36,7 @@ export default async function MachinePage() {
           ) : null
         }
       />
-      <MachinePicker catalogued={catalogued} />
+      <MachinePicker catalogued={catalogued} lineName={fatTruck?.name ?? ""} />
     </main>
   );
 }

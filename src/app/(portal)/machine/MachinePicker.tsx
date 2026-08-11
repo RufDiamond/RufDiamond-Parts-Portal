@@ -13,24 +13,17 @@ export interface CataloguedModel {
   variants: Variant[];
 }
 
-/**
- * The rest of the Fat Truck lineup. Not in the catalogue yet, so they are
- * shown but not selectable.
- */
-const PHASE_TWO_MODELS = [
-  "2.8 Pickup",
-  "2.8C",
-  "2.8 Wagon",
-  "8X8 Hauler",
-  "8X8 Wagon",
-  "2.4P",
-];
-
 export function MachinePicker({
   catalogued,
+  lineName,
 }: {
   catalogued: CataloguedModel[];
+  lineName: string;
 }) {
+  // A model is selectable once an export has given it a serial range.
+  const available = catalogued.filter((entry) => entry.variants.length > 0);
+  const awaiting = catalogued.filter((entry) => entry.variants.length === 0);
+
   const router = useRouter();
   const { setMachine } = useMachine();
   const [chosen, setChosen] = useState<CataloguedModel | null>(null);
@@ -50,7 +43,7 @@ export function MachinePicker({
   return (
     <>
       <div className={screen.grid3}>
-        {catalogued.map(({ model, variants }) => (
+        {available.map(({ model, variants }) => (
           <button
             key={model.id}
             type="button"
@@ -62,7 +55,7 @@ export function MachinePicker({
             aria-pressed={chosen?.model.id === model.id}
           >
             <span className={styles.head}>
-              <span className="eyebrow">Fat Truck</span>
+              <span className="eyebrow">{lineName}</span>
               <Badge variant="solid">In catalog</Badge>
             </span>
             <span className={styles.naming}>
@@ -79,16 +72,16 @@ export function MachinePicker({
           </button>
         ))}
 
-        {PHASE_TWO_MODELS.map((name) => (
-          <div key={name} className={`${styles.tile} ${styles.tileLocked}`}>
+        {awaiting.map(({ model }) => (
+          <div key={model.id} className={`${styles.tile} ${styles.tileLocked}`}>
             <span className={styles.head}>
-              <span className="eyebrow">Fat Truck</span>
+              <span className="eyebrow">{lineName}</span>
               <Badge variant="quiet">Coming in phase two</Badge>
             </span>
             <span className={styles.naming}>
-              <span className={styles.name}>{name}</span>
+              <span className={styles.name}>{model.name}</span>
               <span className={styles.desc}>
-                Fat Truck line · catalogue in preparation
+                {lineName} line · catalogue in preparation
               </span>
             </span>
             <span className={styles.foot}>Not published</span>

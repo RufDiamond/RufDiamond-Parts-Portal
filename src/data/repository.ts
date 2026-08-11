@@ -22,6 +22,17 @@ import type {
   System,
   Variant,
 } from "@/types/catalog";
+import type {
+  AdminOrder,
+  AdminPartRow,
+  CatalogLineGroup,
+  CatalogModelRow,
+  CatalogSummary,
+  ModelDetail,
+  ModelFigure,
+  PartFilters,
+  PublishQueue,
+} from "@/types/admin";
 
 /** Hand back a detached copy so no caller can reach into the seed. */
 function detach<T>(value: T): T {
@@ -156,4 +167,236 @@ function compareGroupNo(a: string, b: string): number {
     if (diff) return diff;
   }
   return a.localeCompare(b);
+}
+
+/* ------------------------------------------------------------------ *
+ * Catalog admin
+ *
+ * Read-only views over the same seed. Same seam rule as the customer side:
+ * async, detached copies, and the only module that touches `seed`.
+ * ------------------------------------------------------------------ */
+
+/** Figures across every variant of a model. */
+function figuresForModel(modelId: string): Figure[] {
+  const variantIds = new Set(
+    seed.variants
+      .filter((variant) => variant.modelId === modelId)
+      .map((variant) => variant.id),
+  );
+  return seed.figures.filter((figure) => variantIds.has(figure.variantId));
+}
+
+/** Distinct part records reachable from a model's figures. */
+function partIdsForModel(modelId: string): Set<string> {
+  const figureIds = new Set(figuresForModel(modelId).map((figure) => figure.id));
+  return new Set(
+    seed.figureParts
+      .filter((figurePart) => figureIds.has(figurePart.figureId))
+      .map((figurePart) => figurePart.partId),
+  );
+}
+
+function toCatalogRow(model: Model): CatalogModelRow {
+  const variants = seed.variants.filter(
+    (variant) => variant.modelId === model.id,
+  );
+
+  return {
+    modelId: model.id,
+    name: model.name,
+    serialRange: variants[0]?.label ?? null,
+    figures: figuresForModel(model.id).length,
+    parts: partIdsForModel(model.id).size,
+    state: model.catalogState,
+    updatedAt: model.updatedAt,
+  };
+}
+
+/**
+ * Everything the catalogue screen shows: the stat strip, and the registered
+ * models grouped under their product line.
+ */
+export async function getCatalogSummary(): Promise<CatalogSummary> {
+  const groups: CatalogLineGroup[] = seed.productLines.map((productLine) => ({
+    productLine,
+    models: seed.models
+      .filter((model) => model.productLineId === productLine.id)
+      .map(toCatalogRow),
+  }));
+
+  // A callout is unmapped when it points at a figure part that no longer
+  // exists — the import left a number on the plate with nothing behind it.
+  const figurePartIds = new Set(
+    seed.figureParts.map((figurePart) => figurePart.id),
+  );
+  const unmappedCallouts = seed.callouts.filter(
+    (callout) => !figurePartIds.has(callout.figurePartId),
+  ).length;
+
+  const withData = seed.models.filter(
+    (model) =>
+      model.catalogState === "live" || model.catalogState === "draft",
+  ).length;
+
+  const published = seed.figures.some(
+    (figure) => figure.status === "published",
+  );
+
+  return detach({
+    stats: {
+      modelsWithData: withData,
+      modelsRegistered: seed.models.length,
+      figures: seed.figures.length,
+      partRecords: seed.parts.length,
+      unmappedCallouts,
+    },
+    groups,
+    lastPublish: published
+      ? {
+          revision: `REV ${seed.variants[0]?.catalogRevision ?? "—"}`,
+          date: seed.models.find((model) => model.updatedAt)?.updatedAt ?? "—",
+        }
+      : null,
+  });
+}
+
+export async function getModelDetail(
+  modelId: string,
+): Promise<ModelDetail | null> {
+  const model = seed.models.find((candidate) => candidate.id === modelId);
+  if (!model) return null;
+
+  const productLine = seed.productLines.find(
+    (candidate) => candidate.id === model.productLineId,
+  );
+  if (!productLine) return null;
+
+  return detach({
+    model,
+    productLine,
+    variants: seed.variants.filter((variant) => variant.modelId === model.id),
+    figureCount: figuresForModel(model.id).length,
+    partCount: partIdsForModel(model.id).size,
+    state: model.catalogState,
+  });
+}
+
+/** Figures for a model, with the variant and system each belongs to. */
+export async function getFiguresForModel(
+  modelId: string,
+): Promise<ModelFigure[]> {
+  const rows: ModelFigure[] = [];
+
+  for (const figure of figuresForModel(modelId)) {
+    const variant = seed.variants.find(
+      (candidate) => candidate.id === figure.variantId,
+    );
+    const system = seed.systems.find(
+      (candidate) => candidate.id === figure.systemId,
+    );
+    if (!variant || !system) continue;
+
+    rows.push({
+      figure,
+      variant,
+      systemName: system.name,
+      partCount: seed.figureParts.filter(
+        (figurePart) => figurePart.figureId === figure.id,
+      ).length,
+      calloutCount: seed.callouts.filter(
+        (callout) => callout.figureId === figure.id,
+      ).length,
+    });
+  }
+
+  rows.sort((a, b) => compareGroupNo(a.figure.groupNo, b.figure.groupNo));
+  return detach(rows);
+}
+
+/** Every part record, with where it is used. Filters are all optional. */
+export async function getAllParts(
+  filters: PartFilters = {},
+): Promise<AdminPartRow[]> {
+  const { query, systemId, status } = filters;
+  const trimmed = query?.trim().toLowerCase() ?? "";
+  const loose = stripSeparators(trimmed);
+
+  const rows: AdminPartRow[] = seed.parts.map((part) => {
+    const uses = seed.figureParts.filter(
+      (figurePart) => figurePart.partId === part.id,
+    );
+
+    const usedFigures = uses
+      .map((use) => seed.figures.find((figure) => figure.id === use.figureId))
+      .filter((figure): figure is Figure => Boolean(figure));
+
+    const systems = [
+      ...new Set(
+        usedFigures
+          .map(
+            (figure) =>
+              seed.systems.find((system) => system.id === figure.systemId)?.name,
+          )
+          .filter((name): name is string => Boolean(name)),
+      ),
+    ];
+
+    return {
+      part,
+      systems,
+      figures: usedFigures.map((figure) => figure.groupNo),
+      totalQty: uses.reduce((sum, use) => sum + use.qty, 0),
+      // Carried only for filtering; not part of the returned shape.
+      _systemIds: usedFigures.map((figure) => figure.systemId),
+    } as AdminPartRow & { _systemIds: string[] };
+  });
+
+  const filtered = rows.filter((row) => {
+    if (status && row.part.status !== status) return false;
+
+    if (systemId) {
+      const ids = (row as AdminPartRow & { _systemIds: string[] })._systemIds;
+      if (!ids.includes(systemId)) return false;
+    }
+
+    if (trimmed) {
+      const number = stripSeparators(row.part.partNumber.toLowerCase());
+      const matches =
+        number.includes(loose) ||
+        row.part.description.toLowerCase().includes(trimmed);
+      if (!matches) return false;
+    }
+
+    return true;
+  });
+
+  filtered.sort((a, b) => a.part.partNumber.localeCompare(b.part.partNumber));
+
+  return detach(
+    filtered.map(({ part, systems, figures, totalQty }) => ({
+      part,
+      systems,
+      figures,
+      totalQty,
+    })),
+  );
+}
+
+export async function getOrders(): Promise<AdminOrder[]> {
+  return detach(seed.orders);
+}
+
+export async function getPublishQueue(): Promise<PublishQueue> {
+  const liveRevision = seed.figures.some(
+    (figure) => figure.status === "published",
+  )
+    ? `REV ${seed.variants[0]?.catalogRevision ?? "—"}`
+    : null;
+
+  return detach({
+    ready: seed.publishReady,
+    blocked: seed.publishBlocked,
+    environment: "Production",
+    liveRevision,
+  });
 }

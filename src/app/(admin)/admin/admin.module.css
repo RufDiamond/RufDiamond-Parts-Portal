@@ -1,0 +1,220 @@
+/* Admin console chrome. Fixed 1440 canvas, per the reference — this is a
+   desk tool, not a site-side screen. */
+.page {
+  width: 1440px;
+  margin: 0 auto;
+  padding: var(--space-6) 0;
+  background: var(--sheet);
+}
+
+.console {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  width: 1392px;
+  min-height: 920px;
+  margin: 0 var(--space-6);
+  border: 1px solid var(--ink);
+  background: var(--paper);
+}
+
+/* ── Left nav rail ────────────────────────────────────────────────── */
+.rail {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ink);
+}
+
+.railHead {
+  padding: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.railSub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-2) 0;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 9px 14px;
+  border: none;
+  border-left: 3px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.navItem:hover {
+  background: var(--sheet);
+}
+
+.navItemActive {
+  background: var(--sheet);
+  border-left-color: var(--ink);
+  font-weight: 600;
+}
+
+/* Screens not built yet: visible, so the shape of the console is legible,
+   but plainly not reachable. */
+.navItemPending {
+  color: var(--mid);
+  cursor: not-allowed;
+}
+
+.navItemPending:hover {
+  background: transparent;
+}
+
+.navCount {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0 5px;
+}
+
+.navItemPending .navCount {
+  background: var(--mid);
+}
+
+.railFoot {
+  padding: 12px 14px;
+  border-top: 1px solid var(--rule);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--graphite);
+}
+
+/* ── Content column ───────────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.screenHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.screenTitle {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.screenActions {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.body {
+  flex: 1;
+  padding: 22px;
+}
+
+/* ── Record bar ───────────────────────────────────────────────────── */
+.recordBar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) 1.4fr;
+  margin: 0;
+  border-top: var(--rule-medium) solid var(--ink);
+  background: var(--paper);
+  position: sticky;
+  bottom: 0;
+}
+
+.recordCell {
+  padding: 10px 14px;
+  border-right: 1px solid var(--rule);
+}
+
+.recordCell:last-child {
+  border-right: none;
+}
+
+.recordLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.recordValue {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────── */
+.button {
+  padding: 5px 10px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--graphite);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-state);
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.buttonPrimary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background: var(--graphite);
+  border-color: var(--graphite);
+  color: var(--paper);
+}
+
+.button:disabled {
+  border-color: var(--rule);
+  color: var(--mid);
+  cursor: not-allowed;
+}

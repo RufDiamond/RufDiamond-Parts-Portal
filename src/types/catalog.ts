@@ -27,12 +27,26 @@ export interface ProductLine {
   isDistributed: boolean;
 }
 
+/**
+ * Where a model sits in the import → publish pipeline. Distinct from
+ * `ModelStatus`, which is the machine's lifecycle, not the catalogue's.
+ */
+export type CatalogState =
+  | "live"
+  | "draft"
+  | "awaiting-import"
+  | "not-registered";
+
 /** A machine within a product line, e.g. FT3 Wagon. */
 export interface Model {
   id: string;
   productLineId: string;
   name: string;
   status: ModelStatus;
+  /** Read by the catalog admin; the customer side never branches on it. */
+  catalogState: CatalogState;
+  /** ISO date of the last catalogue import or edit. Null when never imported. */
+  updatedAt: string | null;
 }
 
 /**
