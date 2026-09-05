@@ -78,11 +78,13 @@ at confidence 0.3 with the inference recorded, and neither is servable.
 Both defects are in the delivery, not in the catalog: the PDF's own pages 2, 3
 and 4 are correct. Re-exporting the plates would fix them.
 
-**The PDF has since been deleted from `~/Downloads`.** The transcriptions in
-`src/import/catalog-source.ts` and `src/import/pilot-tables.ts` are currently
-the project's only copy of its content, and they cover the contents page and
-four figures out of forty-seven. Getting the file back is the largest
-outstanding dependency.
+**The PDF now lives in the repository.** It went missing from `~/Downloads`
+mid-build — moved into a `Maestro/` subfolder — at a point where the
+transcriptions in `src/import/catalog-source.ts` and `pilot-tables.ts` were the
+project's only copy of any of its content. It is now held at
+`docs/source/96-00073-parts-catalog-ft3-rev2.pdf`, `sha256 00698197a467…`, and
+the importer reads it from there rather than from a path outside the
+repository.
 
 **Filenames are not figure identity.** System 11's PNGs are numbered one below
 the PDF's, because the PDF inserts `11.1 Battery` ahead of them. The PDF's own

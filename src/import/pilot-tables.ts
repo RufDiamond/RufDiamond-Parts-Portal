@@ -5,12 +5,11 @@
  * trivial figure, one with `NOT SHOWN` rows, one that is itself an option,
  * and one with more not-shown rows than shown.
  *
- * PROVENANCE. These rows were read from pages 1–4 of
- * `96-00073 - Parts_catalog_FT3-REV.2.pdf`, which has no text layer, so every
- * value came through a vision read rather than a parse. The PDF was
- * subsequently deleted from `~/Downloads`; these transcriptions are currently
- * the only copy of its content in the project, and they have NOT been checked
- * against the document a second time.
+ * PROVENANCE. These rows were read from pages 1–4 of the source catalog, now
+ * held at `docs/source/96-00073-parts-catalog-ft3-rev2.pdf`
+ * (`sha256 00698197a467…`, 54 pages). It has no text layer, so every value
+ * came through a vision read rather than a parse, and none of them has been
+ * checked against the document a second time.
  *
  * That is exactly why they load as `extraction_row` records first. Nothing
  * here is trusted: part numbers are format-checked, rows that fail are held,

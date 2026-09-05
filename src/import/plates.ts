@@ -19,7 +19,14 @@ import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
 
-export const PLATE_SOURCE_DIR = "/Users/athifshaffy/Downloads/FT3W - SCHEMATICS";
+/**
+ * Where a delivery is read from. The September 2026 delivery has already been
+ * copied into `PLATE_PUBLIC_DIR` and committed, so this only matters when a
+ * new one arrives — set `PLATE_SOURCE_DIR` to point at it. The default is
+ * where the first delivery landed, and files there have moved once already.
+ */
+export const PLATE_SOURCE_DIR =
+  process.env.PLATE_SOURCE_DIR ?? "/Users/athifshaffy/Downloads/FT3W - SCHEMATICS";
 export const PLATE_PUBLIC_DIR = "public/drawings/ft3w";
 
 export interface PlateFile {
