@@ -100,11 +100,21 @@
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   justify-self: start;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-4);
   background: var(--deck-surface);
   color: var(--ink);
   text-decoration: none;
+}
+
+/* The emblem reads only on a light ground, so the brand sits on a white plate. */
+.brandMark {
+  width: auto;
+  height: 40px;
+  object-fit: contain;
 }
 
 .wordmark {

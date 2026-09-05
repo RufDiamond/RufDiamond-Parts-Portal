@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -168,6 +169,20 @@ export function PortalShell({ children, date }: PortalShellProps) {
       <div className={styles.main}>
         <header className={styles.header}>
           <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
+            {/*
+              * The emblem only. The supplied logo's wordmark is drawn white on
+              * a white ground, so it cannot be shown on this light plate — the
+              * wordmark is set as type until a usable version arrives. See
+              * clients.md.
+              */}
+            <Image
+              src="/brand/logo-mark.png"
+              alt=""
+              width={233}
+              height={320}
+              className={styles.brandMark}
+              priority
+            />
             <b className={styles.wordmark}>RUF DIAMOND</b>
           </Link>
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>

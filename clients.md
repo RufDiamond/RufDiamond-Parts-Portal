@@ -90,6 +90,24 @@ reuse the same render. Are those placeholders, and can RUFDiamond supply a
 photograph per model? We are using the deck's images meanwhile, resized for
 web.
 
+### 1.4b Logo files supplied are unusable as a wordmark — DECIDE
+`full logo.png` and `cursor-logo.png` were supplied on 5 September.
+
+- **`cursor-logo.png`** — the diamond emblem. Fine, installed as the browser
+  tab icon at `src/app/icon.png`.
+- **`full logo.png`** (1276x581, matching the deck's 169x76 header slot) is
+  **internally inconsistent**: the emblem is drawn for a light ground (black
+  outline, white inner diamond) while the wordmark beside it is **white on a
+  white background**. The right 817 pixels contain no pixel below 250
+  luminance, so the wordmark is not recoverable from this file.
+- On a light plate the wordmark is invisible; on the portal's `#262626` ground
+  the emblem collapses, because its outline is black and its inner diamond
+  turns dark.
+
+**Needed:** the logo as **SVG**, or a PNG with a transparent background, in two
+variants — one for light surfaces and one reversed for dark. Meanwhile the
+header shows the emblem on a white plate with the wordmark set as type.
+
 ### 1.5 Hero images are missing from the deck — BLOCKING (for the login screen)
 The login screen (slide 1) carries two large photographs down the left. Both
 are **linked, not embedded**, so they did not travel with the file — the deck
