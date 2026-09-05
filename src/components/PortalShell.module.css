@@ -141,13 +141,19 @@
   white-space: nowrap;
 }
 
-/* The content column sits inside a single hairline panel, as on every screen. */
+/* Content sits inside a single hairline panel. Home is the exception: its
+   cards float on the perspective plate with no frame around them. */
 .content {
   flex: 1;
   min-width: 0;
   margin: 0 var(--space-5) var(--space-5);
   padding: var(--space-4);
   border: 1px solid var(--deck-panel);
+}
+
+.contentBare {
+  padding: 0;
+  border: 0;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────── */

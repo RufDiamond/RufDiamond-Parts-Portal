@@ -189,7 +189,13 @@ export function PortalShell({ children, date }: PortalShellProps) {
           <span className={styles.date}>{date}</span>
         </header>
 
-        <div className={styles.content}>{children}</div>
+        <div
+          className={`${styles.content} ${
+            pathname === "/" ? styles.contentBare : ""
+          }`}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );
