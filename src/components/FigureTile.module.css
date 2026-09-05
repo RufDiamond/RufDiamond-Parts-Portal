@@ -99,3 +99,21 @@
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+
+/* The plate itself as the thumbnail, sat on the drawing grid. */
+.previewPlate {
+  position: absolute;
+  inset: var(--space-2);
+  width: calc(100% - var(--space-4));
+  height: calc(100% - var(--space-4));
+  object-fit: contain;
+}
+
+/* With a plate behind it the sheet number cannot sit centred over the art. */
+.previewLabelOnPlate {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-1);
+  padding: 2px var(--space-1);
+  background: var(--paper);
+}

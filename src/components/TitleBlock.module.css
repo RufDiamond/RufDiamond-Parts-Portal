@@ -54,3 +54,42 @@
 .dense .value {
   font: var(--weight-medium) var(--text-xs) / 1.3 var(--font-mono);
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   Five cells across a phone gives each about 70px, which is narrower than
+   the values they hold. Fold to two columns, then one. */
+
+@media (max-width: 900px) {
+  .block,
+  .pinned {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .field {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  /* The last row's cells would otherwise carry a rule into empty space. */
+  .field:nth-child(3n) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .block,
+  .pinned {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .field:nth-child(3n) {
+    border-right: var(--border-thin);
+  }
+
+  .field:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .dense .label {
+    font-size: 9px;
+  }
+}

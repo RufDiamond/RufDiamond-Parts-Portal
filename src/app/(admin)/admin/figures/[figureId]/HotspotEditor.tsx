@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useReducer, useRef, useState } from "react";
 import { getAllParts } from "@/data/repository";
-import { formatAmount, formatFigureRef } from "@/lib/format";
+import { formatPrice, formatFigureRef } from "@/lib/format";
 import { useAsync } from "@/state/useAsync";
 import type { AdminPartRow } from "@/types/admin";
 import type { FigureDetail } from "@/types/catalog";
@@ -150,7 +150,7 @@ export interface HotspotEditorProps {
 }
 
 export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
-  const { figure, system, variant, rows, callouts } = detail;
+  const { figure, drawing, system, variant, rows, callouts } = detail;
 
   const [query, setQuery] = useState("");
   const plateRef = useRef<HTMLDivElement>(null);
@@ -312,15 +312,35 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
           <div
             ref={plateRef}
             className={`${styles.plate} ${state.selectedCalloutId ? styles.plateArmed : ""}`}
+            // Coordinates are read off this box as percentages, so it must
+            // carry the plate's own aspect ratio. Any other shape letterboxes
+            // the drawing and every placement lands off target.
+            style={
+              drawing
+                ? { aspectRatio: `${drawing.width} / ${drawing.height}` }
+                : undefined
+            }
             onClick={placeAtClick}
           >
-            <span className={styles.plateNote}>
-              {selected
-                ? `Click to place callout ${selected.number}`
-                : figure.drawingFileId
-                  ? `Drawing ${figure.drawingFileId}`
+            {drawing ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={drawing.storagePath}
+                alt={`${figureRef} ${figure.name}`}
+                className={styles.plateImage}
+                draggable={false}
+              />
+            ) : null}
+
+            {selected || !drawing ? (
+              <span
+                className={`${styles.plateNote} ${drawing ? styles.plateHint : ""}`}
+              >
+                {selected
+                  ? `Click to place callout ${selected.number}`
                   : `Assembly drawing not supplied — callouts placed against ${figureRef}`}
-            </span>
+              </span>
+            ) : null}
 
             {callouts.map((callout) => {
               const current = state.map[callout.id];
@@ -530,7 +550,7 @@ export function HotspotEditor({ detail, parts, sheet }: HotspotEditorProps) {
                                 ) : null}
                               </span>
                               <span className={styles.pickerPrice}>
-                                {formatAmount(part.listPrice, part.currency)}
+                                {formatPrice(part.listPrice, part.currency)}
                               </span>
                             </button>
                           );

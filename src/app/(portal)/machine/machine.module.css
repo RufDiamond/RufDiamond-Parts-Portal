@@ -128,3 +128,22 @@
   gap: var(--space-3);
   padding-top: var(--space-5);
 }
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .tile {
+    min-height: 0;
+    padding: var(--space-4);
+  }
+
+  .name {
+    font: var(--weight-bold) var(--text-xl) / var(--leading-tight)
+      var(--font-ui);
+    letter-spacing: var(--tracking-display);
+  }
+
+  .serialActions {
+    flex-direction: column;
+  }
+}

@@ -5,16 +5,20 @@
  * is what the backend developer deletes when the real API lands.
  */
 
-import type {
-  Callout,
-  Figure,
-  FigurePart,
-  Model,
-  Part,
-  ProductLine,
-  System,
-  Variant,
-} from "@/types/catalog";
+import type { Model, ProductLine, System, Variant } from "@/types/catalog";
+/*
+ * Parts, figures, plates and callouts are GENERATED from the client's export
+ * and schematics pack — see `ft3-wagon.ts`. What stays hand-written here is
+ * what no export supplies: the product lines, the model roster, and the
+ * admin-side order and publishing fixtures.
+ */
+import {
+  callouts,
+  drawingFiles,
+  figureParts,
+  figures,
+  parts,
+} from "./ft3-wagon";
 import type {
   AdminOrder,
   PublishChange,
@@ -123,206 +127,7 @@ const systems: System[] = [
   { id: "sys-tire-inflation", name: "Tire inflation system", sortOrder: 120 },
 ];
 
-const figures: Figure[] = [
-  {
-    id: "fig-filters-1-1",
-    variantId: "var-ft3-wagon-99ft3w",
-    systemId: "sys-filters",
-    name: "Filters",
-    groupNo: "1.1",
-    drawingFileId: null,
-    status: "published",
-  },
-];
 
-const parts: Part[] = [
-  {
-    id: "prt-36-00304",
-    partNumber: "36-00304",
-    description: "Air filter element powersports",
-    manufacturer: null,
-    listPrice: 279.7,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [],
-    status: "active",
-  },
-  {
-    id: "prt-31-00469",
-    partNumber: "31-00469",
-    description: "Hatz fuel filter element with seals",
-    manufacturer: "Hatz",
-    listPrice: 215.33,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [{ partId: "prt-31-00470", qty: 2 }],
-    status: "active",
-  },
-  {
-    id: "prt-56-00007",
-    partNumber: "56-00007",
-    description: "Hydraulic oil cartridge",
-    manufacturer: null,
-    listPrice: 304.26,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [],
-    status: "active",
-  },
-  {
-    id: "prt-35-00068",
-    partNumber: "35-00068",
-    description: "Air filter Donaldson",
-    manufacturer: "Donaldson",
-    listPrice: 196.98,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [],
-    status: "active",
-  },
-  {
-    id: "prt-35-00061",
-    partNumber: "35-00061",
-    description: "Air filter Donaldson, early",
-    manufacturer: "Donaldson",
-    listPrice: 188.4,
-    currency: "CAD",
-    supersededByPartId: "prt-35-00068",
-    requires: [],
-    status: "superseded",
-  },
-  {
-    id: "prt-31-00470",
-    partNumber: "31-00470",
-    description: "Fuel filter seal kit",
-    manufacturer: "Hatz",
-    listPrice: 22.1,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [],
-    status: "active",
-  },
-  {
-    id: "prt-30-00040",
-    partNumber: "30-00040",
-    description: "Hatz oil filter",
-    manufacturer: "Hatz",
-    listPrice: 80.65,
-    currency: "CAD",
-    supersededByPartId: null,
-    requires: [],
-    status: "active",
-  },
-];
-
-const figureParts: FigurePart[] = [
-  {
-    id: "fp-1-1-01",
-    figureId: "fig-filters-1-1",
-    partId: "prt-36-00304",
-    qty: 1,
-    remarks: null,
-    serviceable: true,
-  },
-  {
-    id: "fp-1-1-02",
-    figureId: "fig-filters-1-1",
-    partId: "prt-31-00469",
-    qty: 1,
-    remarks: null,
-    serviceable: true,
-  },
-  {
-    id: "fp-1-1-03",
-    figureId: "fig-filters-1-1",
-    partId: "prt-56-00007",
-    qty: 2,
-    remarks: "One per hydraulic return manifold",
-    serviceable: true,
-  },
-  {
-    id: "fp-1-1-04",
-    figureId: "fig-filters-1-1",
-    partId: "prt-35-00068",
-    qty: 1,
-    remarks: null,
-    serviceable: true,
-  },
-  {
-    id: "fp-1-1-05",
-    figureId: "fig-filters-1-1",
-    partId: "prt-30-00040",
-    qty: 1,
-    remarks: null,
-    serviceable: true,
-  },
-];
-
-/**
- * One callout per position, numbered from the PNC column of the export.
- *
- * The export carries the PNC-to-part mapping but no coordinates, so an
- * imported callout knows its part and not its position. Placing markers is the
- * work the hotspot editor exists to do:
- *
- *   1-4  placed and parted — the state everything ends up in
- *   5    part attached, no position yet — the ordinary outstanding case
- *   6    neither, because the export row was incomplete — the exception
- *
- * The hydraulic oil cartridge is fitted in two places, so it owns callouts 3
- * AND 4: a part at two positions carries a distinct PNC for each. Both resolve
- * to the same part, so selecting that row must light both markers.
- */
-const callouts: Callout[] = [
-  {
-    id: "co-1-1-01",
-    figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-01",
-    number: 1,
-    x: 27,
-    y: 22,
-  },
-  {
-    id: "co-1-1-02",
-    figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-02",
-    number: 2,
-    x: 63,
-    y: 18,
-  },
-  {
-    id: "co-1-1-03",
-    figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-03",
-    number: 3,
-    x: 44,
-    y: 52,
-  },
-  {
-    id: "co-1-1-04",
-    figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-03",
-    number: 4,
-    x: 75,
-    y: 61,
-  },
-  {
-    id: "co-1-1-05",
-    figureId: "fig-filters-1-1",
-    figurePartId: "fp-1-1-04",
-    number: 5,
-    x: null,
-    y: null,
-  },
-  {
-    id: "co-1-1-06",
-    figureId: "fig-filters-1-1",
-    figurePartId: null,
-    number: 6,
-    x: null,
-    y: null,
-  },
-];
 
 /** Orders raised against the pilot catalogue. Admin-side read only. */
 const orders: AdminOrder[] = [
@@ -453,6 +258,7 @@ export const seed = {
   variants,
   systems,
   figures,
+  drawingFiles,
   parts,
   figureParts,
   callouts,

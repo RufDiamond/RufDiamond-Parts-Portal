@@ -70,7 +70,7 @@ export function PublishingBoard({ queue }: { queue: PublishQueue }) {
       </p>
 
       <p className={catalog.sectionLabel}>Ready to publish</p>
-      <table className={catalog.table} style={{ marginBottom: 28 }}>
+      <div className={catalog.tableScroll}><table className={catalog.table} style={{ marginBottom: 28 }}>
         <thead>
           <tr>
             <th scope="col">Change</th>
@@ -95,10 +95,10 @@ export function PublishingBoard({ queue }: { queue: PublishQueue }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
 
       <p className={catalog.sectionLabel}>Blocked</p>
-      <table className={catalog.table} style={{ marginBottom: 16 }}>
+      <div className={catalog.tableScroll}><table className={catalog.table} style={{ marginBottom: 16 }}>
         <thead>
           <tr>
             <th scope="col">Change</th>
@@ -132,7 +132,7 @@ export function PublishingBoard({ queue }: { queue: PublishQueue }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
 
       <div className={catalog.note} style={{ marginBottom: 28, maxWidth: "80ch" }}>
         <span className={catalog.noteMark}>!</span>
@@ -144,7 +144,7 @@ export function PublishingBoard({ queue }: { queue: PublishQueue }) {
       </div>
 
       <p className={catalog.sectionLabel}>Publish history</p>
-      <table className={catalog.table}>
+      <div className={catalog.tableScroll}><table className={catalog.table}>
         <thead>
           <tr>
             <th scope="col" style={{ width: 160 }}>
@@ -197,7 +197,7 @@ export function PublishingBoard({ queue }: { queue: PublishQueue }) {
             );
           })}
         </tbody>
-      </table>
+      </table></div>
 
       {rollbackTarget ? (
         <div

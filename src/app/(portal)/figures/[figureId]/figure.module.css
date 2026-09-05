@@ -34,3 +34,51 @@
   font: var(--type-body-sm);
   color: var(--text-secondary);
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   Drawing above, parts below. Sticky is dropped: once the columns stack,
+   pinning the drawing would push the list off the screen. */
+
+@media (max-width: 900px) {
+  .sheetColumn {
+    position: static;
+  }
+
+  .listFoot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .toolbarActions > * {
+    flex: 1 1 auto;
+  }
+}
+
+/* Figure loaded, parts not yet imported. */
+.listEmpty {
+  margin: 0;
+  padding: var(--space-6) var(--space-5);
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+  border-bottom: var(--border-thin);
+}
+
+/* Callout numbers exist but have no position on the plate yet. */
+.plateNotice {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+  border: var(--border-thin);
+  border-top: 0;
+  background: var(--surface-well);
+}

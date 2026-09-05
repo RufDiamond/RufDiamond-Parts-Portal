@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { CalloutMarker, EmptyState, Icon, Panel } from "@/components";
 import { searchParts } from "@/data/repository";
-import { formatAmount } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import { useAsync } from "@/state/useAsync";
 import { useRequest } from "@/state/RequestContext";
 import screen from "@/styles/screen.module.css";
@@ -79,7 +79,7 @@ export function SearchPanel() {
                     {part.manufacturer ?? "—"}
                   </span>
                   <span className={styles.resultNum}>
-                    {formatAmount(part.listPrice, part.currency)}
+                    {formatPrice(part.listPrice, part.currency)}
                   </span>
                   <button
                     type="button"

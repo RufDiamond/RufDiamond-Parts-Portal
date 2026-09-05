@@ -21,6 +21,8 @@ export interface FigureTileProps {
   sheet?: string;
   /** True when the plate drawing has not been attached yet. */
   drawingMissing?: boolean;
+  /** Thumbnail of the plate itself, when one is attached. */
+  drawingSrc?: string;
   href?: string;
   onSelect?: () => void;
 }
@@ -34,6 +36,7 @@ export function FigureTile({
   calloutCount,
   sheet,
   drawingMissing = false,
+  drawingSrc,
   href,
   onSelect,
 }: FigureTileProps) {
@@ -56,7 +59,13 @@ export function FigureTile({
         className={`${styles.preview} ${drawingMissing ? styles.previewMissing : ""}`}
       >
         {drawingMissing ? null : <span className={styles.previewTrim} />}
-        <span className={styles.previewLabel}>
+        {drawingSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={drawingSrc} alt="" className={styles.previewPlate} />
+        ) : null}
+        <span
+          className={`${styles.previewLabel} ${drawingSrc ? styles.previewLabelOnPlate : ""}`}
+        >
           {drawingMissing ? "No sheet" : `Sheet ${sheet ?? "—"}`}
         </span>
       </span>

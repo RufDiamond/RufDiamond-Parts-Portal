@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { formatAmount } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
 import { CalloutMarker } from "./CalloutMarker";
 import styles from "./PartsTable.module.css";
@@ -57,8 +57,12 @@ export function PartsTable({
   const selectable = Boolean(onTogglePart);
 
   return (
-    <table className={styles.table}>
-      <thead>
+    // Below about 700px the columns cannot all fit at a legible size. The
+    // table scrolls inside its own frame rather than squeezing the figures,
+    // which have to stay aligned to be read.
+    <div className={styles.scroller}>
+      <table className={styles.table}>
+        <thead>
         <tr>
           {tickable ? <th scope="col" className={styles.tickHead} /> : null}
           <th scope="col" className={styles.refHead}>
@@ -163,13 +167,14 @@ export function PartsTable({
 
               {showPrices ? (
                 <td className={styles.num}>
-                  {formatAmount(part.listPrice, part.currency)}
+                  {formatPrice(part.listPrice, part.currency)}
                 </td>
               ) : null}
             </tr>
           );
         })}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
   );
 }

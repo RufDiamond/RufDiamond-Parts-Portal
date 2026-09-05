@@ -1,7 +1,10 @@
 /* Admin console chrome. Fixed 1440 canvas, per the reference — this is a
    desk tool, not a site-side screen. */
+/* The console is a desk tool designed at 1440. It now fills whatever width it
+   is given up to that, rather than demanding it. */
 .page {
-  width: 1440px;
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
   padding: var(--space-6) 0;
   background: var(--sheet);
@@ -10,7 +13,6 @@
 .console {
   display: grid;
   grid-template-columns: 196px minmax(0, 1fr);
-  width: 1392px;
   min-height: 920px;
   margin: 0 var(--space-6);
   border: 1px solid var(--ink);
@@ -217,4 +219,118 @@
   border-color: var(--rule);
   color: var(--mid);
   cursor: not-allowed;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   This console is a desk tool: the reference designs it at 1440 and its
+   tables carry more columns than a phone can show. It stays usable rather
+   than becoming a phone interface — the rail turns into a scrolling strip
+   of tabs, and wide tables scroll inside their own frame. */
+
+@media (max-width: 1100px) {
+  .page {
+    padding: var(--space-4) 0;
+  }
+
+  .console {
+    margin: 0 var(--space-4);
+    min-height: 0;
+  }
+
+  .body {
+    padding: var(--space-5);
+  }
+}
+
+@media (max-width: 900px) {
+  .console {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Rail becomes a horizontal tab strip above the content. */
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0;
+  }
+
+  .navItem {
+    flex: 0 0 auto;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    padding: var(--space-3) var(--space-4);
+    white-space: nowrap;
+  }
+
+  .navItemActive {
+    border-left: 0;
+    border-bottom-color: var(--ink);
+  }
+
+  /* The operator footer belongs beside the wordmark once the rail is a strip. */
+  .railHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .railFoot {
+    display: none;
+  }
+
+  .screenHead {
+    flex-wrap: wrap;
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .screenActions {
+    flex-wrap: wrap;
+  }
+
+  /* Five record cells on a narrow screen is three characters each. */
+  .recordBar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .recordCell:nth-child(3n) {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .console {
+    margin: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .page {
+    padding: 0 0 var(--space-4);
+  }
+
+  .body {
+    padding: var(--space-4);
+  }
+
+  .recordBar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recordCell:nth-child(3n) {
+    border-right: 1px solid var(--rule);
+  }
+
+  .recordCell:nth-child(2n) {
+    border-right: 0;
+  }
+
+  .screenActions > * {
+    flex: 1 1 auto;
+  }
 }

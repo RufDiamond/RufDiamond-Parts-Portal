@@ -13,6 +13,7 @@
 
 import { seed } from "@/data/seed";
 import type {
+  DrawingFile,
   Figure,
   FigureDetail,
   FigurePartRow,
@@ -130,7 +131,22 @@ export async function getFigureDetail(
     return a.part.partNumber.localeCompare(b.part.partNumber);
   });
 
-  return detach({ figure, system, variant, rows, callouts });
+  const drawing =
+    seed.drawingFiles.find(
+      (candidate) => candidate.id === figure.drawingFileId,
+    ) ?? null;
+
+  return detach({ figure, drawing, system, variant, rows, callouts });
+}
+
+export async function getDrawingFile(
+  drawingFileId: string,
+): Promise<DrawingFile | null> {
+  return (
+    detach(
+      seed.drawingFiles.find((file) => file.id === drawingFileId),
+    ) ?? null
+  );
 }
 
 /**

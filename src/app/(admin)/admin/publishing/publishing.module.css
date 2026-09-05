@@ -42,3 +42,23 @@
   padding: 14px 18px;
   border-top: 1px solid var(--rule);
 }
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .scrim {
+    padding: var(--space-4);
+  }
+
+  .dialog {
+    width: 100%;
+  }
+
+  .dialogFoot {
+    flex-direction: column-reverse;
+  }
+
+  .dialogFoot > * {
+    width: 100%;
+  }
+}

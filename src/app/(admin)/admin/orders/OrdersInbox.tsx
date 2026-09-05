@@ -60,7 +60,7 @@ export function OrdersInbox({ orders }: { orders: AdminOrder[] }) {
         </button>
       }
     >
-      <table className={catalog.table}>
+      <div className={catalog.tableScroll}><table className={catalog.table}>
         <thead>
           <tr>
             <th scope="col" style={{ width: 130 }}>
@@ -114,7 +114,7 @@ export function OrdersInbox({ orders }: { orders: AdminOrder[] }) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
 
       <div className={catalog.note} style={{ marginTop: 18, maxWidth: "80ch" }}>
         <span className={catalog.noteMark}>i</span>

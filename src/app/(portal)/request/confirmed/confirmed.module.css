@@ -60,3 +60,58 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .head {
+    display: none;
+  }
+
+  .line {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-4);
+  }
+
+  /* Part number and line total lead; description and qty follow. */
+  .line > :nth-child(2) {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+
+  .line > :nth-child(3) {
+    order: 4;
+    text-align: left;
+  }
+
+  .totals {
+    min-width: 0;
+  }
+
+  .footer {
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 600px) {
+  .reference {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+
+  .referenceValue {
+    font-size: var(--text-lg);
+    word-break: break-all;
+  }
+
+  .referenceDate {
+    margin-left: 0;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

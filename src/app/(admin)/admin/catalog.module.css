@@ -335,3 +335,52 @@
   margin: 0 0 4px;
   font-size: 13px;
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   These tables carry six to eight columns of record data. Below a laptop
+   they scroll inside their own frame: dropping columns would hide the
+   figures someone came here to check. */
+
+.tableScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableScroll .table {
+  min-width: 860px;
+}
+
+@media (max-width: 900px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filters {
+    flex-wrap: wrap;
+  }
+
+  .filterInput,
+  .filterSelect {
+    min-width: 0;
+    flex: 1 1 200px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .statValue {
+    font-size: 22px;
+  }
+
+  .note {
+    max-width: none;
+  }
+}

@@ -84,6 +84,25 @@ export interface Figure {
   status: FigureStatus;
 }
 
+/**
+ * An uploaded drawing plate. Callout `x`/`y` are percentages of this file's
+ * dimensions, so replacing it at another resolution does not detach the
+ * markers — the dimensions are recorded for reference, not for positioning.
+ */
+export interface DrawingFile {
+  id: string;
+  /** Original filename as supplied, kept so an upload can be traced back. */
+  filename: string;
+  format: "png" | "jpg" | "svg" | "pdf";
+  /** Where the asset is served from. Object storage once that lands. */
+  storagePath: string;
+  width: number;
+  height: number;
+  /** ISO date. */
+  uploadedAt: string;
+  version: number;
+}
+
 /** A stock item. Prices are list prices before any company discount. */
 export interface Part {
   id: string;
@@ -144,6 +163,18 @@ export interface Callout {
    */
   x: number | null;
   y: number | null;
+  /**
+   * The part's own artwork on the plate, as an SVG path in the same 0-100
+   * percentage space as `x`/`y`. Selecting the callout fills this shape, so
+   * the part itself lights rather than only its marker.
+   *
+   * Null wherever the shape could not be recovered, which is often: the plates
+   * are flat renders, so a part is only separable when its outline is closed.
+   * The renderer falls back to marker-only highlighting and must never require
+   * this. Vector plates would make it exact everywhere — see
+   * `docs/drawing-source-review.md`.
+   */
+  maskPath: string | null;
 }
 
 /** A customer or dealer account. Discount applies to list price. */
@@ -186,6 +217,8 @@ export interface FigurePartRow {
 /** Everything needed to render one figure screen. */
 export interface FigureDetail {
   figure: Figure;
+  /** The resolved plate, or null while the figure has no drawing attached. */
+  drawing: DrawingFile | null;
   system: System;
   variant: Variant;
   rows: FigurePartRow[];

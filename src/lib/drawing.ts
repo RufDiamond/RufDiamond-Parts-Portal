@@ -31,6 +31,10 @@ export function buildDrawingMarkers(
       x: callout.x,
       y: callout.y,
       partId: row.part.id,
+      // Absent wherever the part's outline could not be recovered from the
+      // flat plate, which is the common case. Highlighting degrades to the
+      // marker alone rather than failing.
+      maskPath: callout.maskPath ?? undefined,
       label: `${row.part.partNumber} — ${row.part.description}`,
     });
   }
