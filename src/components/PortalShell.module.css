@@ -1,17 +1,24 @@
 /*
- * Portal chrome per the V2 deck: icon rail left, header across the top.
- * White ground, black text, hairline rules — the deck carries no brand palette
- * of its own beyond the RUF Diamond red.
+ * Portal chrome — measured from the V2 deck, slides 5, 10 and 14.
+ *
+ * The portal is dark. Slide ground is #262626; the rail's icons sit on white
+ * cards; the title is white; the date sits in a grey pill. Deck geometry at
+ * 1280x720: rail x=4 w=72, header band 90px, content inset to x=94 w=1165.
+ * Reproduced proportionally rather than as fixed pixels, since this is a
+ * browser and not a 16:9 slide.
  */
 
 .shell {
   display: grid;
   grid-template-columns: var(--rail-width) minmax(0, 1fr);
   min-height: 100vh;
-  background: var(--paper);
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
 }
 
-/* ── Rail ─────────────────────────────────────────────────────────── */
+/* ── Rail ─────────────────────────────────────────────────────────────
+   The deck groups the nine buttons onto three white cards: Home, then the
+   three product lines with quote and order status, then the utilities. */
 
 .rail {
   position: sticky;
@@ -20,40 +27,43 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-3) 0;
-  border-right: var(--border-thin);
-  background: var(--paper);
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-4);
   overflow-y: auto;
+}
+
+.railGroup {
+  display: flex;
+  flex-direction: column;
+  background: var(--deck-surface);
 }
 
 .railItem {
   display: grid;
   justify-items: center;
   gap: 2px;
-  padding: var(--space-2) var(--space-1);
-  color: var(--text-primary);
+  padding: var(--space-2) 2px;
+  color: var(--ink);
   text-decoration: none;
-  border-left: 3px solid transparent;
+  border: 1px solid transparent;
   transition: var(--transition-state);
 }
 
 .railItem:hover {
-  background: var(--surface-well);
+  background: var(--sheet);
 }
 
+/*
+ * "Each time a user clicks a button, the button's outline/border must be
+ * highlighted to clearly indicate that the corresponding section has been
+ * selected." — slide 3. So selection is an outline, not a fill.
+ */
 .railItemActive {
-  border-left-color: var(--select);
-  background: var(--surface-well);
+  border-color: var(--select);
 }
 
-.railItemActive .railIcon {
-  color: var(--select);
-}
-
-/* Present but not yet built — legible, and obviously not a dead control. */
 .railItemPending {
-  color: var(--text-muted);
+  color: var(--mid);
   cursor: default;
 }
 
@@ -67,8 +77,8 @@
 }
 
 .railLabel {
-  font: var(--weight-semibold) var(--text-2xs) / 1.15 var(--font-ui);
-  letter-spacing: 0.03em;
+  font: var(--weight-bold) var(--deck-rail-label) / 1.15 var(--font-ui);
+  letter-spacing: 0.02em;
   text-align: center;
   text-transform: uppercase;
 }
@@ -86,14 +96,15 @@
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-4) var(--gutter-page);
-  border-bottom: var(--border-thin);
+  padding: var(--space-3) var(--space-5);
 }
 
 .brand {
   justify-self: start;
+  padding: var(--space-3) var(--space-4);
+  background: var(--deck-surface);
+  color: var(--ink);
   text-decoration: none;
-  color: var(--text-primary);
 }
 
 .wordmark {
@@ -104,28 +115,32 @@
 .title {
   margin: 0;
   justify-self: center;
-  font: var(--weight-bold) var(--text-xl) / 1.1 var(--font-ui);
+  font: var(--weight-bold) var(--deck-title) / 1.05 var(--font-ui);
   letter-spacing: 0.01em;
   text-transform: uppercase;
   text-align: center;
+  color: var(--deck-on-dark);
 }
 
 .date {
   justify-self: end;
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-4);
+  background: var(--deck-pill);
+  color: var(--deck-pill-text);
+  font: var(--weight-regular) var(--deck-button-text) / 1.4 var(--font-ui);
   white-space: nowrap;
 }
 
+/* The content column sits inside a single hairline panel, as on every screen. */
 .content {
   flex: 1;
   min-width: 0;
-  padding: var(--space-5) var(--gutter-page) var(--space-10);
+  margin: 0 var(--space-5) var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--deck-panel);
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────
-   Below tablet the rail lies down as a scrolling strip across the top, so
-   the content keeps the full width. */
+/* ── Responsive ───────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
   .shell {
@@ -136,23 +151,19 @@
     position: static;
     height: auto;
     flex-direction: row;
-    gap: 0;
-    padding: 0;
-    border-right: 0;
-    border-bottom: var(--border-thin);
+    gap: var(--space-2);
+    padding: var(--space-2);
     overflow-x: auto;
+  }
+
+  .railGroup {
+    flex: 0 0 auto;
+    flex-direction: row;
   }
 
   .railItem {
     flex: 0 0 auto;
-    min-width: 86px;
-    border-left: 0;
-    border-bottom: 3px solid transparent;
-  }
-
-  .railItemActive {
-    border-left-color: transparent;
-    border-bottom-color: var(--select);
+    min-width: 84px;
   }
 }
 
@@ -171,6 +182,11 @@
   }
 
   .title {
-    font: var(--weight-bold) var(--text-md) / 1.15 var(--font-ui);
+    font: var(--weight-bold) var(--text-lg) / 1.15 var(--font-ui);
+  }
+
+  .content {
+    margin: 0 var(--space-3) var(--space-4);
+    padding: var(--space-3);
   }
 }

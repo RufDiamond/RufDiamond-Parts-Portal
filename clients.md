@@ -52,7 +52,25 @@ the Orders inbox becomes Quote Status admin with Factory Price and Customer
 Price side by side. Better to design those against the new flow than against
 the screens we have today.
 
-### 1.2 Typeface licensing — DECIDE
+### 1.2 The portal is dark, not light — CORRECTED
+Recorded because an earlier build had it wrong. Every slide sets its own
+background to theme `tx1` at `lumMod 85% / lumOff 15%`, which resolves to
+**`#262626`**. The palette measured from the slides:
+
+| Token | Value | Used for |
+|---|---|---|
+| ground | `#262626` | every screen's background |
+| panel outline | `#7F7F7F` | 1px rule around content panels |
+| surface | `#FFFFFF` | rail cards, drawing plate, parts table |
+| button | `#747474` fill, `#E6E9EC` 0.8px edge | toolbar and actions, white bold 12pt |
+| date pill | `#D0D0D0` with `#747474` text | header, top right |
+| table header | `#E8E8E8` | parts table head |
+
+Title is white, 28pt. Rail labels are bold 8pt. Slide 3 states that selection
+is shown by **highlighting a button's outline**, so active navigation is an
+outline, not a fill.
+
+### 1.3 Typeface licensing — DECIDE
 The deck sets its text in **Biome** (472 of 524 runs). Biome is a licensed
 Monotype family and a web licence is separate from a desktop one.
 
@@ -65,20 +83,20 @@ palette — the portal's colours are being taken from the screens themselves:
 white ground, black text, grey table headers, RUF Diamond red as the single
 accent, sampled as `#D0212E` from the wordmark on the parts catalogue cover.
 
-### 1.3 Model photographs — CONFIRM
+### 1.4 Model photographs — CONFIRM
 Seven Fat Truck models are shown on the deck's model grid, but the deck
 contains only **five distinct photographs**: 2.8 Wagon, 2.8C and FT3 Wagon all
 reuse the same render. Are those placeholders, and can RUFDiamond supply a
 photograph per model? We are using the deck's images meanwhile, resized for
 web.
 
-### 1.4 Hero images are missing from the deck — BLOCKING (for the login screen)
+### 1.5 Hero images are missing from the deck — BLOCKING (for the login screen)
 The login screen (slide 1) carries two large photographs down the left. Both
 are **linked, not embedded**, so they did not travel with the file — the deck
 references them from the designer's own machine. We are showing a placeholder
 panel meanwhile. Please send those two images, or say what should sit there.
 
-### 1.5 The PDF export arrived corrupted — BLOCKING (for design fidelity)
+### 1.6 The PDF export arrived corrupted — BLOCKING (for design fidelity)
 `PDF Screens New RD Parts Portal - V2 - 30-SEP-2026.pdf` cannot be opened: it
 contains **19,871,315 UTF-8 replacement characters**, meaning the binary was
 decoded as text somewhere in transit. Every compressed stream is destroyed and
@@ -90,7 +108,7 @@ in directly. Do not route it through anything that treats it as text.
 
 Meanwhile the screens are being read from the PPTX, which is intact.
 
-### 1.6 Dealer logo — CONFIRM
+### 1.7 Dealer logo — CONFIRM
 Slide 53 shows a "Dealer Logo" placeholder on the customer quote request, and
 the screens carry a logo block top-left. Is that RUFDiamond's own mark
 everywhere, or does a dealer's own logo appear for their users?

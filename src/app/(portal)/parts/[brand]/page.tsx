@@ -19,13 +19,13 @@ const BRANDS: Record<string, string> = {
  * no entry renders without a photo rather than with a broken image.
  */
 const PHOTOS: Record<string, string> = {
-  "mdl-ft3-wagon": "/models/ft3-wagon.jpg",
-  "mdl-ft-2-8-pickup": "/models/ft-2-8-pickup.jpg",
-  "mdl-ft-2-8c": "/models/ft-2-8c.jpg",
-  "mdl-ft-2-8-wagon": "/models/ft-2-8-wagon.jpg",
-  "mdl-ft-8x8-hauler": "/models/ft-8x8-hauler.jpg",
-  "mdl-ft-8x8-wagon": "/models/ft-8x8-wagon.jpg",
-  "mdl-ft-2-4p": "/models/ft-2-4p.jpg",
+  "mdl-ft3-wagon": "/models/ft3-wagon.png",
+  "mdl-ft-2-8-pickup": "/models/ft-2-8-pickup.png",
+  "mdl-ft-2-8c": "/models/ft-2-8c.png",
+  "mdl-ft-2-8-wagon": "/models/ft-2-8-wagon.png",
+  "mdl-ft-8x8-hauler": "/models/ft-8x8-hauler.png",
+  "mdl-ft-8x8-wagon": "/models/ft-8x8-wagon.png",
+  "mdl-ft-2-4p": "/models/ft-2-4p.png",
 };
 
 export default async function BrandPage({

@@ -28,8 +28,11 @@ interface NavItem {
   external?: string;
 }
 
-const NAV: NavItem[] = [
+const NAV_GROUPS: NavItem[][] = [
+  [
   { id: "home", icon: "home", label: "Home", href: "/" },
+  ],
+  [
   {
     id: "fat-truck",
     icon: "truck",
@@ -58,6 +61,8 @@ const NAV: NavItem[] = [
     label: "Order status",
     href: "/orders",
   },
+  ],
+  [
   { id: "technical", icon: "cog", label: "Technical", sub: "info" },
   {
     id: "support",
@@ -71,6 +76,7 @@ const NAV: NavItem[] = [
     label: "Website",
     external: "https://www.rufdiamond.com",
   },
+  ],
 ];
 
 function isActive(pathname: string, item: NavItem): boolean {
@@ -96,7 +102,9 @@ export function PortalShell({ children, date }: PortalShellProps) {
   return (
     <div className={styles.shell}>
       <nav className={styles.rail} aria-label="Portal sections">
-        {NAV.map((item) => {
+        {NAV_GROUPS.map((group, groupIndex) => (
+          <div key={groupIndex} className={styles.railGroup}>
+        {group.map((item) => {
           const body = (
             <>
               <Icon name={item.icon} size="lg" className={styles.railIcon} />
@@ -153,6 +161,8 @@ export function PortalShell({ children, date }: PortalShellProps) {
             </Link>
           );
         })}
+          </div>
+        ))}
       </nav>
 
       <div className={styles.main}>

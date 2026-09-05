@@ -49,16 +49,17 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
 
   return (
     <div className={styles.screen}>
-      <p className={styles.label}>Search by model:</p>
+      <div className={styles.gridPanel}>
+        <p className={styles.label}>Search by model:</p>
 
-      {models.length === 0 ? (
+        {models.length === 0 ? (
         <p className={styles.empty}>
           No models are registered for {productLine.name} yet. The parts data
           for this line has not been received from the factory.
         </p>
-      ) : (
-        <div className={styles.grid}>
-          {models.map((entry, index) => {
+        ) : (
+          <div className={styles.grid}>
+            {models.map((entry, index) => {
             const ready = entry.figureCount > 0 && entry.variants.length > 0;
             return (
               <button
@@ -96,9 +97,10 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
                 )}
               </button>
             );
-          })}
-        </div>
-      )}
+            })}
+          </div>
+        )}
+      </div>
 
       <div className={styles.searches}>
         <form
