@@ -45,8 +45,8 @@ export default function HomePage() {
           <Image
             src="/home/icon-guide.png"
             alt=""
-            width={128}
-            height={128}
+            width={480}
+            height={216}
             className={styles.cardIcon}
           />
         </section>
@@ -62,8 +62,8 @@ export default function HomePage() {
           <Image
             src="/home/icon-pdf.png"
             alt=""
-            width={128}
-            height={58}
+            width={480}
+            height={480}
             className={styles.cardIcon}
           />
         </section>
