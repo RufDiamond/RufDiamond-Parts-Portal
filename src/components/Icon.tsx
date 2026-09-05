@@ -25,7 +25,18 @@ export type IconName =
   | "truck"
   | "package"
   | "waves"
-  | "circle-dot";
+  | "circle-dot"
+  | "home"
+  | "receipt"
+  | "truck-delivery"
+  | "mail"
+  | "globe"
+  | "cart"
+  | "crop"
+  | "file-pdf"
+  | "chevron-left"
+  | "chevrons-left"
+  | "chevrons-right";
 
 export type IconSize = "sm" | "md" | "lg";
 
@@ -49,6 +60,75 @@ const PATHS: Record<IconName, React.ReactNode> = {
     </>
   ),
   "chevron-right": <path d="M9 5l7 7-7 7" />,
+  "chevron-left": <path d="M15 5l-7 7 7 7" />,
+  "chevrons-left": (
+    <>
+      <path d="M11 5l-7 7 7 7" />
+      <path d="M19 5l-7 7 7 7" />
+    </>
+  ),
+  "chevrons-right": (
+    <>
+      <path d="M13 5l7 7-7 7" />
+      <path d="M5 5l7 7-7 7" />
+    </>
+  ),
+  home: (
+    <>
+      <path d="M3 11l9-7 9 7" />
+      <path d="M5 10v10h14V10" />
+      <path d="M10 20v-6h4v6" />
+    </>
+  ),
+  receipt: (
+    <>
+      <path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z" />
+      <path d="M9 8h6" />
+      <path d="M9 12h6" />
+    </>
+  ),
+  "truck-delivery": (
+    <>
+      <path d="M3 6h11v9H3z" />
+      <path d="M14 9h4l3 3v3h-7z" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="17" cy="18" r="2" />
+    </>
+  ),
+  mail: (
+    <>
+      <path d="M3 5h18v14H3z" />
+      <path d="M3 6l9 7 9-7" />
+    </>
+  ),
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3z" />
+    </>
+  ),
+  cart: (
+    <>
+      <path d="M3 4h2l2.4 10h9.8l2-7H6" />
+      <circle cx="9" cy="19" r="1.6" />
+      <circle cx="17" cy="19" r="1.6" />
+    </>
+  ),
+  crop: (
+    <>
+      <path d="M6 2v16h16" />
+      <path d="M2 6h16v16" />
+    </>
+  ),
+  "file-pdf": (
+    <>
+      <path d="M6 2h8l4 4v16H6z" />
+      <path d="M14 2v4h4" />
+      <path d="M9 13h6" />
+      <path d="M9 17h6" />
+    </>
+  ),
   check: <path d="M4 12.5l5 5L20 6.5" />,
   plus: (
     <>

@@ -25,6 +25,7 @@ export { MachineChip } from "./MachineChip";
 export type { MachineChipProps } from "./MachineChip";
 
 export { PageHeader } from "./PageHeader";
+export { PortalShell } from "./PortalShell";
 export type { PageHeaderProps } from "./PageHeader";
 
 export { Panel } from "./Panel";

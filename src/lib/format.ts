@@ -19,15 +19,15 @@ export function formatAmount(value: number, currency: Currency): string {
 }
 
 /**
- * Money for display, or an em dash where no price was supplied.
+ * Money for display.
  *
- * 263 of the 536 parts in the FT3 Wagon export carry `UNIT PRICE (CAD)` of 0 —
- * mostly fasteners, but also the hydraulic motor. Zero is not a real price in
- * this catalogue, so it means "not supplied" and must never be rendered as
- * `0.00`: a customer reading that orders a motor expecting it free.
+ * 263 of the 536 parts in the FT3 Wagon export carry `UNIT PRICE (CAD)` of 0.
+ * The client's decision is to print what the export holds, so a missing price
+ * shows as `0.00` exactly as it does in the spreadsheet and in the design deck.
+ * See `clients.md` — filling those prices is an open item with RUFDiamond.
  */
 export function formatPrice(value: number, currency: Currency): string {
-  return value === 0 ? "—" : formatAmount(value, currency);
+  return formatAmount(value, currency);
 }
 
 /** "FIG 1.1" */

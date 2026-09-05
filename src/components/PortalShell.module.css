@@ -1,0 +1,176 @@
+/*
+ * Portal chrome per the V2 deck: icon rail left, header across the top.
+ * White ground, black text, hairline rules — the deck carries no brand palette
+ * of its own beyond the RUF Diamond red.
+ */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail-width) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+/* ── Rail ─────────────────────────────────────────────────────────── */
+
+.rail {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) 0;
+  border-right: var(--border-thin);
+  background: var(--paper);
+  overflow-y: auto;
+}
+
+.railItem {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-1);
+  color: var(--text-primary);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: var(--transition-state);
+}
+
+.railItem:hover {
+  background: var(--surface-well);
+}
+
+.railItemActive {
+  border-left-color: var(--select);
+  background: var(--surface-well);
+}
+
+.railItemActive .railIcon {
+  color: var(--select);
+}
+
+/* Present but not yet built — legible, and obviously not a dead control. */
+.railItemPending {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.railItemPending:hover {
+  background: transparent;
+}
+
+.railIcon {
+  width: 30px;
+  height: 30px;
+}
+
+.railLabel {
+  font: var(--weight-semibold) var(--text-2xs) / 1.15 var(--font-ui);
+  letter-spacing: 0.03em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--gutter-page);
+  border-bottom: var(--border-thin);
+}
+
+.brand {
+  justify-self: start;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.wordmark {
+  font: var(--weight-bold) var(--text-md) / 1 var(--font-ui);
+  letter-spacing: 0.1em;
+}
+
+.title {
+  margin: 0;
+  justify-self: center;
+  font: var(--weight-bold) var(--text-xl) / 1.1 var(--font-ui);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.date {
+  justify-self: end;
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-5) var(--gutter-page) var(--space-10);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   Below tablet the rail lies down as a scrolling strip across the top, so
+   the content keeps the full width. */
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    gap: 0;
+    padding: 0;
+    border-right: 0;
+    border-bottom: var(--border-thin);
+    overflow-x: auto;
+  }
+
+  .railItem {
+    flex: 0 0 auto;
+    min-width: 86px;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+  }
+
+  .railItemActive {
+    border-left-color: transparent;
+    border-bottom-color: var(--select);
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: var(--space-2);
+    text-align: center;
+  }
+
+  .brand,
+  .title,
+  .date {
+    justify-self: center;
+  }
+
+  .title {
+    font: var(--weight-bold) var(--text-md) / 1.15 var(--font-ui);
+  }
+}
