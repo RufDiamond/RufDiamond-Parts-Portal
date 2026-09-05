@@ -10,6 +10,17 @@ Status key: **BLOCKING** stops work · **DECIDE** shapes work already underway �
 
 ## 1. Design and front end
 
+### 1.0 The admin console has been removed — DECIDE
+On instruction, the admin console was removed from the front end because the
+V2 deck covers the customer side only. **Its behaviour is recorded in
+`docs/admin-features.md`** and the code remains in git at commit `1fe7668`.
+No data-layer code was removed.
+
+This is the one decision with a schedule cost attached: the **figure / hotspot
+editor** went with it, and that is the tool used to place callout markers.
+**566 of 572 markers are still unplaced.** Nothing can place them until that
+screen is rebuilt, so designs for it are the highest-priority admin item.
+
 ### 1.1 Screens with no design — DECIDE
 The V2 deck (`Screens New RD Parts Portal - V2 - 30-SEP-2026.pptx`, 56 slides)
 covers the customer side only. These are built or needed and have no design:
@@ -61,7 +72,25 @@ reuse the same render. Are those placeholders, and can RUFDiamond supply a
 photograph per model? We are using the deck's images meanwhile, resized for
 web.
 
-### 1.4 Dealer logo — CONFIRM
+### 1.4 Hero images are missing from the deck — BLOCKING (for the login screen)
+The login screen (slide 1) carries two large photographs down the left. Both
+are **linked, not embedded**, so they did not travel with the file — the deck
+references them from the designer's own machine. We are showing a placeholder
+panel meanwhile. Please send those two images, or say what should sit there.
+
+### 1.5 The PDF export arrived corrupted — BLOCKING (for design fidelity)
+`PDF Screens New RD Parts Portal - V2 - 30-SEP-2026.pdf` cannot be opened: it
+contains **19,871,315 UTF-8 replacement characters**, meaning the binary was
+decoded as text somewhere in transit. Every compressed stream is destroyed and
+all 56 pages render blank. The file is 88 MB where the original was ~49 MB —
+the inflation is the corruption itself.
+
+To send a good copy: export from Keynote to the Desktop, then drag that file
+in directly. Do not route it through anything that treats it as text.
+
+Meanwhile the screens are being read from the PPTX, which is intact.
+
+### 1.6 Dealer logo — CONFIRM
 Slide 53 shows a "Dealer Logo" placeholder on the customer quote request, and
 the screens carry a logo block top-left. Is that RUFDiamond's own mark
 everywhere, or does a dealer's own logo appear for their users?

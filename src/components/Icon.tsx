@@ -36,7 +36,9 @@ export type IconName =
   | "file-pdf"
   | "chevron-left"
   | "chevrons-left"
-  | "chevrons-right";
+  | "chevrons-right"
+  | "lock"
+  | "user-plus";
 
 export type IconSize = "sm" | "md" | "lg";
 
@@ -71,6 +73,21 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M13 5l7 7-7 7" />
       <path d="M5 5l7 7-7 7" />
+    </>
+  ),
+  lock: (
+    <>
+      <path d="M5 11h14v10H5z" />
+      <path d="M8 11V7a4 4 0 018 0v4" />
+      <path d="M12 15v2" />
+    </>
+  ),
+  "user-plus": (
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+      <path d="M18 9v6" />
+      <path d="M15 12h6" />
     </>
   ),
   home: (
