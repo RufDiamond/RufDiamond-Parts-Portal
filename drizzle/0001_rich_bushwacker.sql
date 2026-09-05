@@ -1,0 +1,1 @@
+ALTER TABLE "figure" ADD COLUMN "printed_group_no" text;

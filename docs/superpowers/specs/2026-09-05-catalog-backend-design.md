@@ -54,6 +54,36 @@ Three figures have no plate: `5.3 Wheel pods assembly - optional`,
 `6.15 Safety and tools`, `11.1 Battery`. These are chased from Zeal Motor, not
 worked around.
 
+### 1.2 Defects found in the delivery while building this
+
+Two more, found by the importer rather than by reading the folder listing.
+
+**`2.1` and `2.2` are the same image.** `FAT TRUCK FT3W 2-1 BUMPER AND HITCH
+RECEIVER.png` and `FAT TRUCK FT3W 2-2 BUMPER AND WINCH.png` are byte-identical
+(`sha256 dee6f9df…`), and both show the winch bumper — the content of 2.2. The
+plate for `2.1 Bumper and hitch receiver` was never delivered. So the delivery
+holds **43 distinct drawings, not 44**, and **four** figures lack a plate.
+
+Which of the two names is wrong is not derivable, so the importer attaches
+neither and reports the pair. A byte-identical duplicate check runs over every
+delivery from now on: silently attaching one of them would put the winch
+drawing under the hitch receiver's parts list, where every marker resolves to
+the wrong part.
+
+**`3.1`'s plate has empty callout circles.** Two of its four markers were
+delivered with no numeral inside them. The circles are locatable, but their
+numbers can only be inferred from where the leader lines point. Both are stored
+at confidence 0.3 with the inference recorded, and neither is servable.
+
+Both defects are in the delivery, not in the catalog: the PDF's own pages 2, 3
+and 4 are correct. Re-exporting the plates would fix them.
+
+**The PDF has since been deleted from `~/Downloads`.** The transcriptions in
+`src/import/catalog-source.ts` and `src/import/pilot-tables.ts` are currently
+the project's only copy of its content, and they cover the contents page and
+four figures out of forty-seven. Getting the file back is the largest
+outstanding dependency.
+
 **Filenames are not figure identity.** System 11's PNGs are numbered one below
 the PDF's, because the PDF inserts `11.1 Battery` ahead of them. The PDF's own
 TOC numbers two different figures `11.5` and skips `11.4`, and its page
@@ -412,7 +442,8 @@ The design is wrong unless these hold against the real files.
 | Migration from empty | Runs clean, tables created in FK order |
 | Import run twice | Second run updates; no duplicate parts, figures or callouts |
 | Figure count | 47 figures across 12 systems |
-| Plate count | 44 drawing files attached; 5.3, 6.15 and 11.1 without |
+| Plate count | 43 distinct images stored; 2.1, 5.3, 6.15 and 11.1 without a plate |
+| Duplicate plates | The 2.1/2.2 pair is reported and neither is attached |
 | FIG 1.1 | 6 rows, 6 callouts, all shown |
 | FIG 2.1 | 9 rows, 7 callouts; items 8 and 9 `shown = false` |
 | FIG 2.2 | 17 rows, 12 callouts; figure carries `option_part_id` → `88-00262` |
@@ -443,8 +474,9 @@ Newly raised:
   `Database_FT3_Wagon_-_14-JUL-2026.xlsx` is produced, or RUFDiamond supplies a
   part-number-to-price CSV. Until one arrives the catalog is browsable and not
   orderable.
-- **Will Zeal Motor supply the three missing plates**, and can they supply
-  drawings at better than 1280×720? Marker placement accuracy is bounded by
-  plate resolution.
+- **Will Zeal Motor re-export the plates?** Four figures have none, `2.1` was
+  sent as a duplicate of `2.2`, and `3.1`'s numerals are missing from two of
+  its circles. Can they also supply better than 1280×720? Marker placement
+  accuracy is bounded by plate resolution.
 - **Is `96-00073 Rev 2` the revision RUFDiamond sells against?** The whole
   import is keyed to it.
