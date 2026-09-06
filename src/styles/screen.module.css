@@ -77,7 +77,7 @@
   background: var(--paper);
   color: var(--ink);
   font: var(--weight-semibold) var(--text-sm) / 1 var(--font-ui);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 

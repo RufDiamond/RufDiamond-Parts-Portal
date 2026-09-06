@@ -71,7 +71,7 @@
   border: 0;
   background: none;
   color: var(--deck-on-dark);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .pagerStep:disabled {
@@ -100,7 +100,7 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -189,7 +189,7 @@
   background: var(--deck-button);
   color: var(--deck-on-dark);
   font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 /* Nothing imported for this figure yet. */

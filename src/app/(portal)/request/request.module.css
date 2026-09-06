@@ -60,7 +60,7 @@
   border: 0;
   background: transparent;
   color: var(--graphite);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 

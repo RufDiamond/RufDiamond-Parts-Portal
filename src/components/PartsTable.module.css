@@ -87,7 +87,7 @@
 
 .row {
   background: var(--paper);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -121,7 +121,7 @@
   width: 14px;
   height: 14px;
   accent-color: var(--select);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .ref {

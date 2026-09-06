@@ -1,180 +1,221 @@
 /*
- * Portal login — slide 1. Imagery down the left, account access on the right.
+ * Portal login — slide 1.
+ *
+ * One dark screen. The RUF Diamond emblem is oversized and bleeds off the left
+ * edge; the wordmark and title sit across the top; account access is a column
+ * on the right.
  */
 
 .screen {
-  display: grid;
-  grid-template-columns: 44fr 56fr;
-  min-height: 100vh;
-  background: var(--paper);
-}
-
-/* ── Hero ─────────────────────────────────────────────────────────── */
-
-.hero {
+  container-type: inline-size;
   position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
+}
+
+/* The mark, cropped by the screen edge as the deck has it. */
+.emblem {
+  position: absolute;
+  top: 50%;
+  left: -3cqw;
+  width: 29cqw;
+  height: auto;
+  transform: translateY(-50%);
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
   display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: var(--space-3);
-  padding: var(--space-10);
-  background: var(--ink);
-  color: var(--paper);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 30cqw);
+  align-content: start;
+  gap: 3cqw;
+  min-height: 100vh;
+  padding: 3cqw 4cqw 3cqw 31cqw;
 }
 
-.heroMark {
-  font: var(--weight-bold) var(--text-2xl) / 1 var(--font-ui);
-  letter-spacing: 0.12em;
+/* ── Masthead ─────────────────────────────────────────────────────── */
+
+.masthead {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: start;
+  column-gap: 2cqw;
 }
 
-.heroNote {
-  font: var(--type-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--mid);
-}
-
-/* ── Panel ────────────────────────────────────────────────────────── */
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  padding: var(--space-6) var(--space-10) var(--space-10);
-}
-
-.panelHead {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--space-3);
-}
-
-.date {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.wordmark {
+  grid-column: 1;
+  width: 30cqw;
+  height: auto;
+  object-fit: contain;
 }
 
 .flag {
-  width: 32px;
-  height: 32px;
-  object-fit: cover;
+  grid-column: 2;
+  align-self: end;
+  width: 5cqw;
+  height: auto;
+  margin-bottom: 0.6cqw;
+  object-fit: contain;
+}
+
+.dateBlock {
+  grid-column: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.calendar {
+  width: 3.4cqw;
+  height: 3.4cqw;
+  object-fit: contain;
+}
+
+.date {
+  padding: var(--space-1) var(--space-4);
+  background: var(--deck-pill);
+  color: var(--deck-pill-text);
+  font: var(--weight-regular) 1.15cqw / 1.4 var(--font-ui);
+  white-space: nowrap;
 }
 
 .title {
-  margin: 0;
-  font: var(--weight-bold) var(--text-2xl) / 1.05 var(--font-ui);
-  text-transform: uppercase;
+  grid-column: 1 / 3;
+  grid-row: 2;
+  margin: 0.4cqw 0 0;
+  font: var(--weight-bold) 3.4cqw / 1 var(--font-ui);
   letter-spacing: 0.01em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-/* ── Form ─────────────────────────────────────────────────────────── */
+/* ── Account access ───────────────────────────────────────────────── */
 
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-  max-width: 440px;
+  grid-column: 2;
+  display: grid;
+  align-content: start;
+  gap: 1.4cqw;
 }
 
 .formTitle {
   margin: 0;
-  font: var(--type-body);
-  color: var(--text-secondary);
+  font: var(--weight-regular) 1.3cqw / 1.3 var(--font-ui);
+  text-align: right;
 }
 
 .field {
   display: grid;
-  gap: var(--space-2);
+  gap: 0.5cqw;
 }
 
 .label {
-  font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui);
+  font: var(--weight-bold) 1.3cqw / 1.2 var(--font-ui);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .input,
 .select {
   width: 100%;
-  height: var(--control-height-md);
+  height: 2.6cqw;
+  min-height: 32px;
   padding: 0 var(--space-3);
-  border: var(--border-thin);
+  border: 1px solid var(--deck-panel);
+  border-radius: 3px;
   background: var(--paper);
-  font: var(--type-body);
-  color: var(--text-primary);
+  font: var(--weight-regular) 1.1cqw / 1 var(--font-ui);
+  color: var(--ink);
+}
+
+.input::placeholder {
+  font-style: italic;
+  color: var(--text-muted);
 }
 
 .input:focus-visible,
 .select:focus-visible {
-  outline: 2px solid var(--border-focus);
+  outline: 2px solid var(--select);
   outline-offset: -2px;
-}
-
-.hint {
-  margin: 0;
-  font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-ui);
-  font-style: italic;
-  color: var(--text-secondary);
 }
 
 .linkRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
+  justify-content: flex-end;
+  gap: var(--space-2);
   margin: 0;
 }
 
 .link {
-  font: var(--type-body-sm);
-  color: var(--text-primary);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border-hairline);
+  font: var(--weight-regular) 1.2cqw / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
 }
 
 .link:hover {
-  border-bottom-color: var(--select);
   color: var(--select);
 }
 
 .linkIcon {
-  flex: 0 0 auto;
-  color: var(--text-secondary);
+  width: 2cqw;
+  height: 2cqw;
+  object-fit: contain;
 }
 
 .submit {
-  align-self: flex-start;
-  min-width: 180px;
-  height: var(--control-height-md);
-  padding: 0 var(--space-6);
-  border: var(--border-thin);
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper);
-  font: var(--weight-semibold) var(--text-base) / 1 var(--font-ui);
-  cursor: pointer;
+  width: 100%;
+  height: 2.8cqw;
+  min-height: 36px;
+  border: 1px solid var(--deck-panel);
+  border-radius: 3px;
+  background: var(--deck-pill);
+  color: var(--ink);
+  font: var(--weight-bold) 1.4cqw / 1 var(--font-ui);
   transition: var(--transition-state);
 }
 
 .submit:hover {
-  background: var(--select);
-  border-color: var(--select);
+  background: var(--paper);
 }
 
-/* ── Responsive ───────────────────────────────────────────────────── */
+/* ── Narrow screens ───────────────────────────────────────────────── */
 
-@media (max-width: 900px) {
-  .screen {
+@media (max-width: 820px) {
+  .emblem {
+    display: none;
+  }
+
+  .inner {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-5) var(--gutter-page);
   }
 
-  .hero {
-    min-height: 200px;
-    padding: var(--space-8);
+  .masthead {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-2);
   }
 
-  .panel {
-    padding: var(--space-5) var(--gutter-page) var(--space-10);
-  }
+  .wordmark { width: 200px; }
+  .flag { width: 40px; margin-top: 0; }
+  .dateBlock { grid-column: 2; justify-self: end; }
+  .calendar { width: 28px; height: 28px; }
+  .date { font: var(--type-body-sm); }
+  .title { grid-column: 1 / -1; font: var(--weight-bold) var(--text-xl) / 1.1 var(--font-ui); }
+
+  .form { grid-column: 1; }
+  .formTitle,
+  .linkRow { text-align: left; justify-content: flex-start; }
+  .label { font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui); }
+  .input, .select { font: var(--type-body-sm); }
+  .link { font: var(--type-body-sm); }
+  .linkIcon { width: 22px; height: 22px; }
+  .submit { font: var(--weight-bold) var(--text-base) / 1 var(--font-ui); }
 }

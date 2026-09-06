@@ -38,7 +38,7 @@
   color: var(--deck-on-dark);
   font: inherit;
   text-align: center;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -132,7 +132,7 @@
   border: var(--border-thin);
   background: var(--paper);
   color: var(--text-primary);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 

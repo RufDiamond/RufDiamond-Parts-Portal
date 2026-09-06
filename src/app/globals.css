@@ -14,9 +14,7 @@ html {
 }
 
 body {
-  /* The supplied mark as the pointer. 32px is the practical ceiling — larger
-     images are ignored outright by most browsers. */
-  cursor: url("/brand/cursor.png") 4 2, auto;
+  cursor: var(--cursor-mark);
 
   min-height: 100%;
   /* A wide table or drawing must scroll inside its own container, never take
@@ -107,4 +105,27 @@ img {
   letter-spacing: var(--tracking-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+/*
+ * The mark is the pointer everywhere, including over anything clickable — the
+ * deck shows one cursor, not two.
+ */
+a,
+button,
+select,
+summary,
+label,
+[role="button"],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: var(--cursor-pointer);
+}
+
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input:not([type]),
+textarea {
+  cursor: var(--cursor-text);
 }
