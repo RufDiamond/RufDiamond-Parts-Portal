@@ -1,7 +1,17 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import cabin from "../../../../public/systems/cabin.png";
+import cowlingFender from "../../../../public/systems/cowling-fender.png";
+import driveSystem from "../../../../public/systems/drive-system.png";
+import electric from "../../../../public/systems/electric.png";
+import engine from "../../../../public/systems/engine.png";
+import filters from "../../../../public/systems/filters.png";
+import frameAssy from "../../../../public/systems/frame-assy.png";
+import fuelSystem from "../../../../public/systems/fuel-system.png";
+import hydraulic from "../../../../public/systems/hydraulic.png";
+import tireWheel from "../../../../public/systems/tire-wheel.png";
 import { useCallback } from "react";
 import { Trail } from "@/components";
 import { getFigures, getSystems } from "@/data/repository";
@@ -9,23 +19,29 @@ import { useAsync } from "@/state/useAsync";
 import { useMachine } from "@/state/MachineContext";
 import styles from "./tiles.module.css";
 
-/** Artwork per system, as the deck draws them. */
-const ICONS: Record<string, string> = {
-  "sys-filters": "filters",
-  "sys-frame-assy": "frame-assy",
-  "sys-drive-system": "drive-system",
-  "sys-hydraulic": "hydraulic",
-  "sys-tire-wheel": "tire-wheel",
-  "sys-cabin": "cabin",
-  "sys-cowling-fender": "cowling-fender",
-  "sys-engine": "engine",
-  "sys-fuel-system": "fuel-system",
-  "sys-electric": "electric",
+/**
+ * Artwork per system, as the deck draws them.
+ *
+ * Imported rather than referenced by path so the build fingerprints each file:
+ * redrawing a mark changes its URL, and no one is left looking at a cached
+ * copy of the old one.
+ */
+const ICONS: Record<string, StaticImageData> = {
+  "sys-filters": filters,
+  "sys-frame-assy": frameAssy,
+  "sys-drive-system": driveSystem,
+  "sys-hydraulic": hydraulic,
+  "sys-tire-wheel": tireWheel,
+  "sys-cabin": cabin,
+  "sys-cowling-fender": cowlingFender,
+  "sys-engine": engine,
+  "sys-fuel-system": fuelSystem,
+  "sys-electric": electric,
   // The deck draws ten system tiles; FT3 Wagon carries twelve. Tire inflation
   // (section 10) and Accessories (section 12) reuse the nearest mark until
   // artwork is supplied — see clients.md.
-  "sys-tire-inflation": "tire-wheel",
-  "sys-accessories": "frame-assy",
+  "sys-tire-inflation": tireWheel,
+  "sys-accessories": frameAssy,
 };
 
 /**
@@ -94,13 +110,7 @@ export function SystemsGrid() {
             <>
               <span className={styles.art}>
                 {icon ? (
-                  <Image
-                    src={`/systems/${icon}.png`}
-                    alt=""
-                    width={220}
-                    height={220}
-                    className={styles.icon}
-                  />
+                  <Image src={icon} alt="" className={styles.icon} />
                 ) : null}
               </span>
               <span className={styles.label}>

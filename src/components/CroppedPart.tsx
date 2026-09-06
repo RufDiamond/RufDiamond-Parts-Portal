@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect } from "react";
 import styles from "./CroppedPart.module.css";
 
 /** A region of the plate, in fractions of its width and height. */
@@ -27,6 +28,11 @@ export interface CroppedPartProps {
  * The region is shown by scaling the plate behind a window rather than
  * producing a new image, so it stays as sharp as the source allows and needs
  * no canvas work.
+ *
+ * Print and Export to PDF both go through the browser's print dialogue. While
+ * the panel is open it marks the document, and the print rules in globals.css
+ * drop everything but this sheet — otherwise the whole portal prints round a
+ * blank frame, because a CSS background does not print by default.
  */
 export function CroppedPart({
   src,
@@ -35,6 +41,11 @@ export function CroppedPart({
   date,
   onClose,
 }: CroppedPartProps) {
+  useEffect(() => {
+    document.body.classList.add("printing-crop");
+    return () => document.body.classList.remove("printing-crop");
+  }, []);
+
   const w = Math.max(rect.w, 0.02);
   const h = Math.max(rect.h, 0.02);
 
@@ -51,7 +62,7 @@ export function CroppedPart({
 
   return (
     <div className={styles.overlay} role="dialog" aria-label="Cropped part">
-      <div className={styles.panel}>
+      <div className={styles.panel} data-crop-sheet>
         <header className={styles.head}>
           <div className={styles.brand}>
             <Image
@@ -63,7 +74,7 @@ export function CroppedPart({
             />
           </div>
 
-          <div className={styles.actions}>
+          <div className={styles.actions} data-crop-hide>
             <button
               type="button"
               className={styles.action}

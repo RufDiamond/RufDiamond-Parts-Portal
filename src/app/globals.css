@@ -129,3 +129,59 @@ input:not([type]),
 textarea {
   cursor: var(--cursor-text);
 }
+
+/* ---------------------------------------------------------------------------
+   Print
+   --------------------------------------------------------------------------- */
+
+/*
+ * The cropped-part panel prints on its own. Without this the browser lays out
+ * the whole portal — rail, header, parts list — and leaves the crop itself
+ * blank, because the region is painted as a CSS background and backgrounds are
+ * dropped from print by default.
+ *
+ * Everything is hidden by visibility rather than display so the sheet keeps its
+ * place in the flow; the sheet is then pinned to the page and the rest of the
+ * document is clipped away.
+ */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body.printing-crop {
+    height: auto;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  body.printing-crop * {
+    visibility: hidden;
+    box-shadow: none;
+  }
+
+  body.printing-crop [data-crop-sheet],
+  body.printing-crop [data-crop-sheet] * {
+    visibility: visible;
+    /* Keep the plate, the amber edge and the mark — this is the artefact. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body.printing-crop [data-crop-sheet] {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  /* Buttons are no use on paper. */
+  body.printing-crop [data-crop-hide] {
+    display: none;
+  }
+}
