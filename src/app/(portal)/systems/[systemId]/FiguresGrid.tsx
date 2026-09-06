@@ -30,6 +30,14 @@ async function load(variantId: string, systemId: string) {
   };
 }
 
+/**
+ * A figure's number exactly as the catalogue writes it: "FIG- 6.1" reads 6.1.
+ * The badge holds a fixed corner slot, so nothing needs padding to line up.
+ */
+function figureNumber(groupNo: string): string {
+  return groupNo.replace(/^\s*FIG-?\s*/i, "").trim();
+}
+
 /** Figures within a system — slide 13. */
 export function FiguresGrid({ systemId }: { systemId: string }) {
   const { hydrated, selectedModel, selectedVariant } = useMachine();
@@ -80,6 +88,7 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
             href={`/figures/${figure.id}`}
             className={styles.tile}
           >
+            <span className={styles.badge}>{figureNumber(figure.groupNo)}</span>
             <span className={styles.art}>
               {plate ? (
                 <Image

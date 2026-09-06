@@ -102,12 +102,15 @@ export function SystemsGrid() {
       <Trail steps={[{ label: machine }]} />
       <div className={styles.grid}>
         {(data ?? []).map(({ system, figureCount, number }) => {
-          const label = `${number ?? ""} ${system.name}`.trim();
+          const label = system.name;
           const icon = ICONS[system.id];
           const ready = figureCount > 0;
 
           const body = (
             <>
+              {number === null ? null : (
+                <span className={styles.badge}>{number}</span>
+              )}
               <span className={styles.art}>
                 {icon ? (
                   <Image src={icon} alt="" className={styles.icon} />

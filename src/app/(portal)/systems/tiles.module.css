@@ -32,6 +32,7 @@
 }
 
 .tile {
+  position: relative;
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: var(--space-3);
@@ -49,10 +50,52 @@
   border-color: var(--select);
 }
 
+/*
+ * The section number, in the corner rather than run into the label.
+ *
+ * The deck sets it inline — "1 FILTERS" — which reads as part of the name and
+ * leaves the numbers ragged, because the labels are centred and the names are
+ * different lengths. Held in a fixed corner slot and set in the mono face they
+ * line up down the grid and can be scanned on their own, and the label is left
+ * to say only what the section is.
+ */
+.badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) 10px / 1 var(--font-mono);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  transition: var(--transition-state);
+}
+
+.tile:hover .badge {
+  background: var(--select);
+}
+
+.tilePending .badge {
+  background: var(--deck-pill);
+  color: var(--deck-pill-text);
+}
+
+.tilePending:hover .badge {
+  background: var(--deck-pill);
+}
+
 .art {
   display: grid;
   place-items: center;
   min-height: 92px;
+  /* Room for the badge, so a wide mark never runs under it. */
+  padding: 0 var(--space-3);
 }
 
 .icon {
