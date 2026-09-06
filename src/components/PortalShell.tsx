@@ -103,24 +103,36 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
   return (
     <div className={styles.shell}>
-      <nav className={styles.rail} aria-label="Portal sections">
-        <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
-          {/*
-            * The emblem only. The supplied logo's wordmark is drawn white on a
-            * white ground, so it cannot be shown on this light plate — see
-            * clients.md.
-            */}
-          <Image
-            src="/brand/logo-mark.png"
-            alt=""
-            width={233}
-            height={320}
-            className={styles.brandMark}
-            priority
-          />
-          <b className={styles.wordmark}>RUF DIAMOND</b>
-        </Link>
+      {/*
+        * The mark runs across the head of the rail and on into the header, as
+        * the deck has it. The emblem is the supplied artwork inverted so it
+        * reads on the dark ground; the wordmark is set as type because the
+        * supplied file's wordmark is white on a white ground and did not
+        * survive — see clients.md.
+        */}
+      <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
+        <Image
+          src="/brand/logo-mark-dark.png"
+          alt=""
+          width={306}
+          height={420}
+          className={styles.brandMark}
+          priority
+        />
+        <span className={styles.wordmark}>
+          <b>RUF</b>
+          <b>DIAMOND</b>
+        </span>
+        <Image
+          src="/brand/flag-ca.jpg"
+          alt="Canada"
+          width={60}
+          height={60}
+          className={styles.flag}
+        />
+      </Link>
 
+      <nav className={styles.rail} aria-label="Portal sections">
         {NAV_GROUPS.map((group, index) => (
           <div key={index} className={styles.railGroup}>
             {group.map((item) => {
@@ -190,16 +202,18 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
       <div className={styles.main}>
         <header className={styles.header}>
-          <Image
-            src="/brand/flag-ca.jpg"
-            alt="Canada"
-            width={60}
-            height={60}
-            className={styles.flag}
-          />
-
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>
-          <span className={styles.date}>{date}</span>
+
+          <span className={styles.dateBlock}>
+            <Image
+              src="/brand/calendar.png"
+              alt=""
+              width={200}
+              height={200}
+              className={styles.calendar}
+            />
+            <span className={styles.date}>{date}</span>
+          </span>
         </header>
 
         <div

@@ -104,9 +104,15 @@ web.
   the emblem collapses, because its outline is black and its inner diamond
   turns dark.
 
-**Needed:** the logo as **SVG**, or a PNG with a transparent background, in two
-variants — one for light surfaces and one reversed for dark. Meanwhile the
-header shows the emblem on a white plate with the wordmark set as type.
+**What we are doing meanwhile:** the emblem is keyed off its white ground and
+**inverted**, so its outline reads white on the portal's dark background, which
+is how the deck shows it. The wordmark is set as type in white, because the
+supplied file's wordmark pixels do not exist.
+
+**Still needed:** the logo as **SVG**, or a PNG with a transparent background,
+in two variants — one for light surfaces and one reversed for dark. The
+wordmark's actual letterforms are distressed/stencilled in the deck and type
+only approximates them.
 
 ### 1.5 Hero images are missing from the deck — BLOCKING (for the login screen)
 The login screen (slide 1) carries two large photographs down the left. Both
