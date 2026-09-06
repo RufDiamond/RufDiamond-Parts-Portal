@@ -15,7 +15,7 @@ describe("PostgreSQL domain constraints", () => {
     await expect(postgres.migrate()).resolves.toBeUndefined();
     await expect(postgres.migrate()).resolves.toBeUndefined();
     const result = await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations");
-    expect(result.rows[0].count).toBe(4);
+    expect(result.rows[0].count).toBe(5);
     expect((await postgres.pool.query("select count(*)::int as count from capability")).rows[0].count).toBe(45);
   });
 
@@ -234,7 +234,7 @@ describe("PostgreSQL domain constraints", () => {
       const drawing = randomUUID();
       await connection.withTransaction(async tx => {
         await tx.insert(schema.publicationRelease).values({ id: release, modelId: source.model, revision: 1, sourceChecksum: 'a'.repeat(64) });
-        await tx.insert(schema.releaseDrawing).values({ releaseId: release, id: drawing, workingId: drawing, objectKey: drawing, filename: 'drawing.svg', mediaType: 'image/svg+xml', bytes: 100n, sha256: 'a'.repeat(64) });
+        await tx.insert(schema.releaseDrawing).values({ releaseId: release, id: drawing, workingId: drawing, objectKey: drawing, filename: 'drawing.svg', mediaType: 'image/svg+xml', bytes: BigInt(100), sha256: 'a'.repeat(64) });
         await tx.insert(schema.releaseModel).values({ releaseId: release, id: source.model, workingId: source.model, productLineId: source.line, productLineName: 'Fat Truck', name: 'FT3', status: 'active' });
         await tx.insert(schema.releaseVariant).values({ releaseId: release, id: source.variant, workingId: source.variant, modelId: source.model, label: 'Wagon' });
         await tx.insert(schema.releaseSystem).values({ releaseId: release, id: source.system, workingId: source.system, modelId: source.model, name: 'Filters' });
@@ -308,7 +308,7 @@ describe("PostgreSQL domain constraints", () => {
     }
   });
 
-  it.each(['job_id', 'source_row_key', 'source_payload'])('protects import staging %s while permitting normalized-field review', async field => {
+  it.each(['job_id', 'source_row_key', 'source_payload', 'deletion'])('protects import staging %s while permitting normalized-field review', async field => {
     const source = await fixture();
     const { user } = await account();
     const job = randomUUID();
@@ -317,7 +317,10 @@ describe("PostgreSQL domain constraints", () => {
     for (const [id, checksum] of [[job, 'a'], [otherJob, 'b']]) await postgres.pool.query("insert into import_job(id,model_id,variant_id,source_checksum,object_key,actor_id) values($1,$2,$3,repeat($4,64),$5,$6)", [id, source.model, source.variant, checksum, id, user]);
     await postgres.pool.query("insert into import_staging_row(id,job_id,source_row_key,source_payload,normalized_fields) values($1,$2,'row-a','{\"PART NO\":\"P\"}','{\"partNumber\":\"P\"}')", [row, job]);
     const replacement = field === 'job_id' ? otherJob : field === 'source_row_key' ? 'row-b' : '{"PART NO":"changed"}';
-    await expect(postgres.pool.query(`update import_staging_row set ${field}=$2 where id=$1`, [row, replacement])).rejects.toMatchObject({ code: '23514' });
+    const mutation = field === 'deletion'
+      ? postgres.pool.query("delete from import_staging_row where id=$1", [row])
+      : postgres.pool.query(`update import_staging_row set ${field}=$2 where id=$1`, [row, replacement]);
+    await expect(mutation).rejects.toMatchObject({ code: '23514' });
     await postgres.pool.query("update import_staging_row set normalized_fields='{\"partNumber\":\"P-corrected\"}',version=version+1 where id=$1", [row]);
     expect((await postgres.pool.query("select job_id,source_row_key,source_payload,normalized_fields,version from import_staging_row where id=$1", [row])).rows[0]).toEqual({ job_id: job, source_row_key: 'row-a', source_payload: { 'PART NO': 'P' }, normalized_fields: { partNumber: 'P-corrected' }, version: 2 });
   });

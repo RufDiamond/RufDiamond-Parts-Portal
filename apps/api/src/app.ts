@@ -4,7 +4,7 @@ import type { AppConfig } from "./config.js";
 import { registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
 import { registerRequestContext } from "./plugins/request-context.js";
 
-export interface AppDependencies {}
+export type AppDependencies = Record<string, never>;
 
 export interface BuildAppOptions {
   config: AppConfig;

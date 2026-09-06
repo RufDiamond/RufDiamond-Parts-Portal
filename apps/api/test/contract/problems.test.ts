@@ -24,6 +24,53 @@ afterEach(async () => {
 });
 
 describe("problem responses", () => {
+  it.each([
+    ["malformed JSON", "application/json", '{"secret":"parser-input",'],
+    ["unsupported content type", "application/x-unsupported", "parser-input"],
+    ["empty JSON", "application/json", ""],
+  ])("returns a safe client problem for %s", async (_scenario, contentType, payload) => {
+    const app = await buildApp({ config });
+    apps.push(app);
+    app.post("/test/body", async () => ({ status: "ok" }));
+
+    const response = await app.inject({ method: "POST", url: "/test/body", headers: { "content-type": contentType }, payload });
+    const problem = response.json();
+
+    expect(response.statusCode).toBe(400);
+    expect(response.headers["content-type"]).toContain("application/problem+json");
+    expect(problem).toMatchObject({ code: "INVALID_REQUEST", status: 400, title: "Invalid request", detail: "The request is invalid.", instance: "/test/body" });
+    expect(response.headers["x-request-id"]).toBe(problem.requestId);
+    expect(response.body).not.toMatch(/stack|Error:|parser-input|application\/x-unsupported/);
+  });
+
+  it.each(["invalid content length", "body exceeds limit"])("returns a safe client problem when %s", async scenario => {
+    const app = await buildApp({ config });
+    apps.push(app);
+    app.post("/test/body", { bodyLimit: 128 }, async () => ({ status: "ok" }));
+    const response = await app.inject({
+      method: "POST", url: "/test/body",
+      headers: { "content-type": "application/json", ...(scenario === "invalid content length" ? { "content-length": "1" } : {}) },
+      payload: scenario === "invalid content length" ? "{}" : JSON.stringify({ value: "x".repeat(256) }),
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toMatchObject({ code: "INVALID_REQUEST", status: 400, detail: "The request is invalid." });
+    expect(response.headers["content-type"]).toContain("application/problem+json");
+    expect(response.headers["x-request-id"]).toBe(response.json().requestId);
+    expect(response.body).not.toMatch(/stack|Error:|FST_ERR/);
+  });
+
+  it("keeps unknown exceptions generic even when they claim a client status", async () => {
+    const app = await buildApp({ config });
+    apps.push(app);
+    app.get("/test/unexpected", async () => {
+      throw Object.assign(new Error("SQL internal-secret"), { statusCode: 400, code: "UNEXPECTED_FAILURE" });
+    });
+    const response = await app.inject({ method: "GET", url: "/test/unexpected" });
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toMatchObject({ code: "INTERNAL_ERROR", status: 500, detail: "An unexpected error occurred." });
+    expect(response.body).not.toMatch(/stack|SQL|internal-secret|UNEXPECTED_FAILURE/);
+  });
+
   it("returns an RFC 9457 problem with the request ID for unknown routes", async () => {
     const app = await buildApp({ config });
     apps.push(app);

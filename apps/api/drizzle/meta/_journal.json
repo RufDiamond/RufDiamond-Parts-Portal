@@ -29,6 +29,13 @@
       "when": 1788694507435,
       "tag": "0004_schema_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1788695462371,
+      "tag": "0005_contract_status_and_staging",
+      "breakpoints": true
     }
   ]
 }

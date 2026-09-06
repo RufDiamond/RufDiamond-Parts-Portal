@@ -65,6 +65,19 @@ function isValidationError(error: unknown): error is FastifyError {
 
 export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof Error && "code" in error && [
+      "FST_ERR_CTP_INVALID_JSON_BODY",
+      "FST_ERR_CTP_EMPTY_JSON_BODY",
+      "FST_ERR_CTP_INVALID_MEDIA_TYPE",
+      "FST_ERR_CTP_INVALID_CONTENT_LENGTH",
+      "FST_ERR_CTP_BODY_TOO_LARGE",
+    ].includes(String(error.code))) {
+      return reply
+        .type("application/problem+json")
+        .code(400)
+        .send(problem(request, "INVALID_REQUEST", 400, "Invalid request", "The request is invalid."));
+    }
+
     if (isValidationError(error)) {
       return reply
         .type("application/problem+json")

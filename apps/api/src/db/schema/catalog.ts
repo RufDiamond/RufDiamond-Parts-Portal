@@ -42,8 +42,8 @@ export const figure = pgTable("figure", {
 export const part = pgTable("part", {
   id: id(), partNumber: text("part_number").notNull(), normalizedPartNumber: text("normalized_part_number").notNull().unique(), description: text("description").notNull(), manufacturer: text("manufacturer"),
   listPrice: money("list_price"), currency: text("currency").notNull().default("CAD"), supersededByPartId: uuid("superseded_by_part_id").references((): AnyPgColumn => part.id),
-  status: text("status", { enum: ["active", "superseded", "discontinued"] }).notNull().default("active"), ...mutable(),
-}, t => [versionCheck(t), currencyCheck(t.currency), check("part_price_nonnegative", sql`${t.listPrice} >= 0 AND ${t.listPrice} < 'Infinity'::numeric`), check("part_status", sql`${t.status} IN ('active','superseded','discontinued')`), check("part_no_self_supersession", sql`${t.supersededByPartId} <> ${t.id}`), check("part_number_normalized", sql`${t.normalizedPartNumber} = upper(btrim(${t.partNumber})) AND ${t.normalizedPartNumber} <> ''`)]);
+  status: text("status", { enum: ["active", "superseded", "obsolete", "special-order"] }).notNull().default("active"), ...mutable(),
+}, t => [versionCheck(t), currencyCheck(t.currency), check("part_price_nonnegative", sql`${t.listPrice} >= 0 AND ${t.listPrice} < 'Infinity'::numeric`), check("part_status", sql`${t.status} IN ('active','superseded','obsolete','special-order')`), check("part_no_self_supersession", sql`${t.supersededByPartId} <> ${t.id}`), check("part_number_normalized", sql`${t.normalizedPartNumber} = upper(btrim(${t.partNumber})) AND ${t.normalizedPartNumber} <> ''`)]);
 
 export const partRequires = pgTable("part_requires", {
   partId: uuid("part_id").notNull().references(() => part.id), requiredPartId: uuid("required_part_id").notNull().references(() => part.id), qty: integer("qty").notNull(),

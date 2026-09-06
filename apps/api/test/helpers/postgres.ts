@@ -25,7 +25,7 @@ export async function startPostgres() {
   return {
     pool,
     connectionString: container.getConnectionUri(),
-    migrate: () => migrate(drizzle(pool), { migrationsFolder }),
+    migrate: (folder = migrationsFolder) => migrate(drizzle(pool), { migrationsFolder: folder }),
     async stop() {
       await pool.end();
       await container.stop();
