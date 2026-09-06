@@ -135,13 +135,30 @@
 /* ── The two surfaces ─────────────────────────────────────────────── */
 
 .split {
-  /* the collapse control is positioned against this, not against the plate */
+  /* the handle is positioned against this, not against the plate */
   position: relative;
   display: grid;
-  grid-template-columns: 41fr 59fr;
+  /*
+   * Set from the handle. Custom properties rather than the shorthand, so the
+   * stacked layout below can still override the columns outright.
+   */
+  grid-template-columns:
+    minmax(0, var(--split-left, 41fr))
+    minmax(0, var(--split-right, 59fr));
   gap: 6px;
   align-items: stretch;
   min-height: 0;
+}
+
+/* While the handle is being dragged, nothing else should select or hover. */
+.splitResizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* The handle keeps the pointer — it has captured it. */
+.splitResizing *:not(.divider) {
+  pointer-events: none;
 }
 
 .plate,
@@ -174,11 +191,11 @@
   color: var(--text-secondary);
 }
 
-/* The collapse control the deck puts between the two surfaces. */
+/* The handle the deck puts between the two surfaces. */
 .divider {
   position: absolute;
   top: 50%;
-  left: calc(41% - 7px);
+  left: calc(var(--split-at, 41%) - 11px);
   z-index: 3;
   display: grid;
   place-items: center;
@@ -190,7 +207,38 @@
   background: var(--deck-button);
   color: var(--deck-on-dark);
   font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
-  cursor: var(--cursor-pointer);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+/*
+ * A knob 22px across is a small target for a drag, so the grab area is a full
+ * height strip behind it. It carries no paint — only the knob is seen.
+ */
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 100vh;
+  max-height: 640px;
+  transform: translate(-50%, -50%);
+}
+
+.divider:hover,
+.divider:focus-visible {
+  background: var(--graphite);
+  outline: none;
+}
+
+.divider:focus-visible {
+  box-shadow: 0 0 0 2px var(--select);
+}
+
+/* The knob must stay above its own grab strip. */
+.divider > span {
+  position: relative;
 }
 
 /* Nothing imported for this figure yet. */
@@ -202,6 +250,7 @@
 }
 
 @media (max-width: 900px) {
+  /* Stacked: one column, and nothing to drag. */
   .split {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import {
   CroppedPart,
   DrawingViewer,
@@ -19,6 +26,21 @@ import type { FigureDetail } from "@/types/catalog";
 import styles from "./figure.module.css";
 
 const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
+
+/*
+ * The split between the drawing and the parts list, as a percentage of the
+ * width. The deck draws it at 41/59; the handle moves it, stopping before
+ * either side is too narrow to read.
+ */
+const SPLIT_DEFAULT = 41;
+const SPLIT_MIN = 24;
+const SPLIT_MAX = 76;
+/** One press of an arrow key. */
+const SPLIT_STEP = 2;
+
+function clampSplit(value: number): number {
+  return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, value));
+}
 
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
@@ -106,6 +128,29 @@ export function FigureWorkspace({
   // The drag origin lives in a ref, not in state: mousedown and mouseup can
   // both land before React re-renders, and a state value would still read as
   // null by the time the release is handled.
+  const splitRef = useRef<HTMLDivElement>(null);
+  const [split, setSplit] = useState(SPLIT_DEFAULT);
+  /*
+   * Whether the handle is being dragged. Held in a ref as well as in state:
+   * the first pointermove can arrive before React has re-rendered, so a state
+   * flag alone would read false and the opening moves would be dropped.
+   */
+  const resizingRef = useRef(false);
+  /*
+   * A drag ends in a click on whatever is under the pointer — a parts row, if
+   * the handle was pulled that far — so the click that closes a drag is
+   * swallowed before it can select anything.
+   */
+  const swallowClickRef = useRef(false);
+  const [resizing, setResizing] = useState(false);
+
+  /** Where the pointer is, as a share of the split's width. */
+  const splitFromPointer = useCallback((clientX: number) => {
+    const box = splitRef.current?.getBoundingClientRect();
+    if (!box || box.width === 0) return;
+    setSplit(clampSplit(((clientX - box.left) / box.width) * 100));
+  }, []);
+
   const dragRef = useRef<{ x: number; y: number } | null>(null);
   const [marquee, setMarquee] = useState<CropRect | null>(null);
   const [crop, setCrop] = useState<CropRect | null>(null);
@@ -319,7 +364,23 @@ export function FigureWorkspace({
         </button>
       </div>
 
-      <div className={styles.split}>
+      <div
+        ref={splitRef}
+        className={`${styles.split} ${resizing ? styles.splitResizing : ""}`}
+        onClickCapture={(event) => {
+          if (!swallowClickRef.current) return;
+          swallowClickRef.current = false;
+          event.stopPropagation();
+          event.preventDefault();
+        }}
+        style={
+          {
+            "--split-left": `${split}fr`,
+            "--split-right": `${100 - split}fr`,
+            "--split-at": `${split}%`,
+          } as CSSProperties
+        }
+      >
         <div
           ref={plateRef}
           className={`${styles.plate} ${cropping ? styles.plateArmed : ""}`}
@@ -396,15 +457,63 @@ export function FigureWorkspace({
           ) : null}
         </div>
 
-        <button
-          type="button"
+        {/*
+          The handle the deck draws between the two surfaces. Dragging it moves
+          the split; the arrow keys move it a step at a time and a double-click
+          puts it back where the deck has it.
+        */}
+        <div
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Width of the drawing"
+          aria-valuenow={Math.round(split)}
+          aria-valuemin={SPLIT_MIN}
+          aria-valuemax={SPLIT_MAX}
+          tabIndex={0}
           className={styles.divider}
-          aria-label="Collapse the drawing"
-          title="Collapse — available in a later phase"
-          disabled
+          title="Drag to set the width of the drawing"
+          onPointerDown={(event) => {
+            event.preventDefault();
+            event.currentTarget.setPointerCapture(event.pointerId);
+            resizingRef.current = true;
+            setResizing(true);
+          }}
+          onPointerMove={(event) => {
+            if (!resizingRef.current) return;
+            swallowClickRef.current = true;
+            splitFromPointer(event.clientX);
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+            resizingRef.current = false;
+            setResizing(false);
+          }}
+          onPointerCancel={() => {
+            resizingRef.current = false;
+            setResizing(false);
+          }}
+          onDoubleClick={() => setSplit(SPLIT_DEFAULT)}
+          onKeyDown={(event) => {
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              setSplit((v) => clampSplit(v - SPLIT_STEP));
+            } else if (event.key === "ArrowRight") {
+              event.preventDefault();
+              setSplit((v) => clampSplit(v + SPLIT_STEP));
+            } else if (event.key === "Home") {
+              event.preventDefault();
+              setSplit(SPLIT_MIN);
+            } else if (event.key === "End") {
+              event.preventDefault();
+              setSplit(SPLIT_MAX);
+            } else if (event.key === "Enter") {
+              event.preventDefault();
+              setSplit(SPLIT_DEFAULT);
+            }
+          }}
         >
-          &#10096;&#10097;
-        </button>
+          <span aria-hidden="true">&#10096;&#10097;</span>
+        </div>
 
         <div className={styles.list}>
           {rows.length === 0 ? (
