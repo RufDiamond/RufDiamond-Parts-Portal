@@ -1,0 +1,23 @@
+# Local development only. Production primary and normal backups belong in Canada.
+# WAL archiving, encrypted off-provider backups, and restore verification are deployment work.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: rufdiamond
+      POSTGRES_USER: rufdiamond
+      POSTGRES_PASSWORD: local-development-only
+      TZ: UTC
+      PGTZ: UTC
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rufdiamond -d rufdiamond"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  postgres_data:

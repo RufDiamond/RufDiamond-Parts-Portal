@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788678000000,
+      "tag": "0001_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788678000001,
+      "tag": "0002_release_snapshots",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788678000002,
+      "tag": "0003_identity_orders_operations",
+      "breakpoints": true
+    }
+  ]
+}
