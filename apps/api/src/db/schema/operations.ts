@@ -2,22 +2,35 @@ import { sql } from "drizzle-orm";
 import { check, foreignKey, index, integer, jsonb, pgTable, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
 import { model, part, variant } from "./catalog.js";
 import { appUser, company } from "./identity.js";
-import { publicationRelease, releasePart } from "./releases.js";
+import { publicationRelease, releasePart, releaseVariant } from "./releases.js";
 import { checksumCheck, currencyCheck, id, money, mutable, rate, time, versionCheck } from "./common.js";
 
 export const order = pgTable("order", {
   id: id(), companyId: uuid("company_id").notNull().references(() => company.id), submittedByUserId: uuid("submitted_by_user_id").notNull().references(() => appUser.id),
-  dealerCompanyId: uuid("dealer_company_id").references(() => company.id), variantId: uuid("variant_id").notNull().references(() => variant.id), releaseId: uuid("release_id").references(() => publicationRelease.id),
+  dealerCompanyId: uuid("dealer_company_id").references(() => company.id), variantId: uuid("variant_id").notNull().references(() => variant.id), releaseId: uuid("release_id").notNull().references(() => publicationRelease.id),
   reference: text("reference"), kind: text("kind", { enum: ["request_for_quote"] }).notNull().default("request_for_quote"),
   status: text("status", { enum: ["submitted", "quoted", "confirmed", "fulfilled", "cancelled"] }).notNull().default("submitted"),
   currency: text("currency").notNull(), listTotal: money("list_total").notNull(), discountRate: rate("discount_rate").notNull().default("0"), discountApplied: money("discount_applied").notNull(), netTotal: money("net_total").notNull(), submittedAt: time("submitted_at"), ...mutable(),
-}, t => [index("order_company_submitted").on(t.companyId, t.submittedAt, t.id), versionCheck(t), currencyCheck(t.currency), check("order_kind", sql`${t.kind} = 'request_for_quote'`), check("order_status", sql`${t.status} IN ('submitted','quoted','confirmed','fulfilled','cancelled')`), check("order_amounts", sql`${t.listTotal} >= 0 AND ${t.listTotal} < 'Infinity'::numeric AND ${t.discountApplied} BETWEEN 0 AND ${t.listTotal} AND ${t.discountRate} BETWEEN 0 AND 1 AND ${t.netTotal} = ${t.listTotal} - ${t.discountApplied}`)]);
+}, t => [
+  index("order_company_submitted").on(t.companyId, t.submittedAt, t.id),
+  unique("order_id_release").on(t.id, t.releaseId),
+  foreignKey({ name: "order_variant_in_release", columns: [t.releaseId, t.variantId], foreignColumns: [releaseVariant.releaseId, releaseVariant.workingId] }),
+  versionCheck(t), currencyCheck(t.currency),
+  check("order_kind", sql`${t.kind} = 'request_for_quote'`),
+  check("order_status", sql`${t.status} IN ('submitted','quoted','confirmed','fulfilled','cancelled')`),
+  check("order_amounts", sql`${t.listTotal} >= 0 AND ${t.listTotal} < 'Infinity'::numeric AND ${t.discountApplied} BETWEEN 0 AND ${t.listTotal} AND ${t.discountRate} BETWEEN 0 AND 1 AND ${t.netTotal} = ${t.listTotal} - ${t.discountApplied}`),
+]);
 
 export const orderLine = pgTable("order_line", {
   id: id(), orderId: uuid("order_id").notNull().references(() => order.id), partId: uuid("part_id").notNull().references(() => part.id),
-  releaseId: uuid("release_id"), releasePartId: uuid("release_part_id"), partNumberSnapshot: text("part_number_snapshot").notNull(), descriptionSnapshot: text("description_snapshot").notNull(),
+  releaseId: uuid("release_id").notNull(), releasePartId: uuid("release_part_id").notNull(), partNumberSnapshot: text("part_number_snapshot").notNull(), descriptionSnapshot: text("description_snapshot").notNull(),
   qty: integer("qty").notNull(), unitPriceSnapshot: money("unit_price_snapshot").notNull(), lineTotal: money("line_total").notNull(), ...mutable(),
-}, t => [index("order_line_order").on(t.orderId), versionCheck(t), foreignKey({ columns: [t.releaseId, t.releasePartId], foreignColumns: [releasePart.releaseId, releasePart.id] }), check("order_line_release_pair", sql`(${t.releaseId} IS NULL) = (${t.releasePartId} IS NULL)`), check("order_line_amounts", sql`${t.qty} > 0 AND ${t.unitPriceSnapshot} >= 0 AND ${t.unitPriceSnapshot} < 'Infinity'::numeric AND ${t.lineTotal} = round(${t.qty} * ${t.unitPriceSnapshot},2)`)]);
+}, t => [
+  index("order_line_order").on(t.orderId), versionCheck(t),
+  foreignKey({ name: "order_line_parent_release", columns: [t.orderId, t.releaseId], foreignColumns: [order.id, order.releaseId] }),
+  foreignKey({ name: "order_line_released_part_trace", columns: [t.releaseId, t.releasePartId, t.partId], foreignColumns: [releasePart.releaseId, releasePart.id, releasePart.workingId] }),
+  check("order_line_amounts", sql`${t.qty} > 0 AND ${t.unitPriceSnapshot} >= 0 AND ${t.unitPriceSnapshot} < 'Infinity'::numeric AND ${t.lineTotal} = round(${t.qty} * ${t.unitPriceSnapshot},2)`),
+]);
 
 export const importJob = pgTable("import_job", {
   id: id(), modelId: uuid("model_id").notNull().references(() => model.id), variantId: uuid("variant_id").notNull(), sourceChecksum: text("source_checksum").notNull(), objectKey: text("object_key").notNull().unique(), filename: text("filename"),
@@ -47,4 +60,4 @@ export const outboxEvent = pgTable("outbox_event", {
 export const idempotencyRecord = pgTable("idempotency_record", {
   actorId: uuid("actor_id").notNull().references(() => appUser.id), operation: text("operation").notNull(), key: text("key").notNull(), requestHash: text("request_hash").notNull(),
   status: text("status", { enum: ["in_progress", "completed"] }).notNull().default("in_progress"), response: jsonb("response"), responseStatus: integer("response_status"), expiresAt: time("expires_at"), ...mutable(),
-}, t => [primaryKey({ columns: [t.actorId, t.operation, t.key] }), versionCheck(t), checksumCheck(t.requestHash), check("idempotency_key_nonempty", sql`length(${t.operation}) > 0 AND length(${t.key}) BETWEEN 1 AND 255`), check("idempotency_state", sql`(${t.status} = 'in_progress' AND ${t.response} IS NULL AND ${t.responseStatus} IS NULL) OR (${t.status} = 'completed' AND ${t.response} IS NOT NULL AND ${t.responseStatus} BETWEEN 100 AND 599)`)]);
+}, t => [primaryKey({ columns: [t.actorId, t.operation, t.key] }), versionCheck(t), checksumCheck(t.requestHash), check("idempotency_key_nonempty", sql`length(${t.operation}) > 0 AND length(${t.key}) BETWEEN 1 AND 255`), check("idempotency_state", sql`(${t.status} = 'in_progress' AND ${t.response} IS NULL AND ${t.responseStatus} IS NULL) OR (${t.status} = 'completed' AND ${t.response} IS NOT NULL AND ${t.responseStatus} IS NOT NULL AND ${t.responseStatus} BETWEEN 100 AND 599)`)]);

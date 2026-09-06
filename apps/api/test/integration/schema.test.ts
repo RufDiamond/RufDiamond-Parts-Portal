@@ -15,7 +15,7 @@ describe("PostgreSQL domain constraints", () => {
     await expect(postgres.migrate()).resolves.toBeUndefined();
     await expect(postgres.migrate()).resolves.toBeUndefined();
     const result = await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations");
-    expect(result.rows[0].count).toBe(3);
+    expect(result.rows[0].count).toBe(4);
     expect((await postgres.pool.query("select count(*)::int as count from capability")).rows[0].count).toBe(45);
   });
 
@@ -92,14 +92,32 @@ describe("PostgreSQL domain constraints", () => {
     return { company, user };
   }
 
+  async function orderRelease(source: Awaited<ReturnType<typeof fixture>>) {
+    const release = randomUUID();
+    const releasedModel = randomUUID();
+    const releasedVariant = randomUUID();
+    const releasedPart = randomUUID();
+    const connection = createDatabase(postgres.connectionString);
+    try {
+      await connection.withTransaction(async tx => {
+        await tx.insert(schema.publicationRelease).values({ id: release, modelId: source.model, revision: 1, sourceChecksum: 'a'.repeat(64) });
+        await tx.insert(schema.releaseModel).values({ releaseId: release, id: releasedModel, workingId: source.model, productLineId: source.line, productLineName: 'Fat Truck', name: 'FT3', status: 'active' });
+        await tx.insert(schema.releaseVariant).values({ releaseId: release, id: releasedVariant, workingId: source.variant, modelId: releasedModel, label: 'Wagon' });
+        await tx.insert(schema.releasePart).values({ releaseId: release, id: releasedPart, workingId: source.part, partNumber: 'P', description: 'Filter', listPrice: '12.34', currency: 'CAD' });
+      });
+      return { release, releasedPart };
+    } finally { await connection.close(); }
+  }
+
   it("enforces decimal money, positive order quantities, and immutable submitted snapshots", async () => {
     const ids = await fixture();
     const { company, user } = await account();
     const order = randomUUID();
-    await postgres.pool.query('insert into "order"(id,company_id,submitted_by_user_id,variant_id,currency,list_total,discount_applied,net_total) values($1,$2,$3,$4,\'CAD\',24.68,2.47,22.21)', [order, company, user, ids.variant]);
+    const { release, releasedPart } = await orderRelease(ids);
+    await postgres.pool.query('insert into "order"(id,company_id,submitted_by_user_id,variant_id,release_id,currency,list_total,discount_applied,net_total) values($1,$2,$3,$4,$5,\'CAD\',24.68,2.47,22.21)', [order, company, user, ids.variant, release]);
     await expect(postgres.pool.query("update company set discount_rate=1.01 where id=$1", [company])).rejects.toMatchObject({ code: "23514" });
-    await expect(postgres.pool.query('insert into order_line(order_id,part_id,part_number_snapshot,description_snapshot,qty,unit_price_snapshot,line_total) values($1,$2,\'P\',\'Filter\',0,12.34,0)', [order, ids.part])).rejects.toMatchObject({ code: "23514" });
-    await postgres.pool.query("insert into order_line(order_id,part_id,part_number_snapshot,description_snapshot,qty,unit_price_snapshot,line_total) values($1,$2,'P','Filter',2,12.34,24.68)", [order, ids.part]);
+    await expect(postgres.pool.query('insert into order_line(order_id,part_id,release_id,release_part_id,part_number_snapshot,description_snapshot,qty,unit_price_snapshot,line_total) values($1,$2,$3,$4,\'P\',\'Filter\',0,12.34,0)', [order, ids.part, release, releasedPart])).rejects.toMatchObject({ code: "23514" });
+    await postgres.pool.query("insert into order_line(order_id,part_id,release_id,release_part_id,part_number_snapshot,description_snapshot,qty,unit_price_snapshot,line_total) values($1,$2,$3,$4,'P','Filter',2,12.34,24.68)", [order, ids.part, release, releasedPart]);
     await postgres.pool.query('update "order" set submitted_at=now() where id=$1', [order]);
     await postgres.pool.query("update part set list_price=99.99 where id=$1", [ids.part]);
     expect((await postgres.pool.query("select unit_price_snapshot from order_line where order_id=$1", [order])).rows[0].unit_price_snapshot).toBe("12.34");
@@ -248,5 +266,59 @@ describe("PostgreSQL domain constraints", () => {
         await expect(postgres.pool.query(`update ${table} set release_id=release_id where release_id=$1`, [a.release])).rejects.toMatchObject({ code: '23514' });
       }
     } finally { await connection.close(); }
+  });
+
+  it.each(['cross-release line', 'mismatched working part', 'variant outside release', 'missing order release', 'missing line release'])('rejects RFQ reference corruption: %s', async scenario => {
+    const a = await fixture();
+    const b = await fixture();
+    const releaseA = await orderRelease(a);
+    const releaseB = await orderRelease(b);
+    const { company, user } = await account();
+    const order = randomUUID();
+    const insertOrder = (variantId: string, releaseId: string | null) => postgres.pool.query('insert into "order"(id,company_id,submitted_by_user_id,variant_id,release_id,currency,list_total,discount_applied,net_total) values($1,$2,$3,$4,$5,\'CAD\',12.34,0,12.34)', [order, company, user, variantId, releaseId]);
+    if (scenario === 'variant outside release') {
+      await expect(insertOrder(b.variant, releaseA.release)).rejects.toMatchObject({ code: '23503' });
+      return;
+    }
+    if (scenario === 'missing order release') {
+      await expect(insertOrder(a.variant, null)).rejects.toMatchObject({ code: '23502' });
+      return;
+    }
+    await insertOrder(a.variant, releaseA.release);
+    const insertLine = (partId: string, releaseId: string | null, releasedPartId: string | null) => postgres.pool.query("insert into order_line(order_id,part_id,release_id,release_part_id,part_number_snapshot,description_snapshot,qty,unit_price_snapshot,line_total) values($1,$2,$3,$4,'P','Filter',1,12.34,12.34)", [order, partId, releaseId, releasedPartId]);
+    if (scenario === 'cross-release line') {
+      await expect(insertLine(b.part, releaseB.release, releaseB.releasedPart)).rejects.toMatchObject({ code: '23503' });
+    } else if (scenario === 'mismatched working part') {
+      await expect(insertLine(a.otherPart, releaseA.release, releaseA.releasedPart)).rejects.toMatchObject({ code: '23503' });
+    } else {
+      await expect(insertLine(a.part, null, null)).rejects.toMatchObject({ code: '23502' });
+    }
+    await insertLine(a.part, releaseA.release, releaseA.releasedPart);
+  });
+
+  it.each(['insert', 'complete'])('requires an HTTP response status when idempotency records %s as completed', async operation => {
+    const { user } = await account();
+    if (operation === 'insert') {
+      await expect(postgres.pool.query("insert into idempotency_record(actor_id,operation,key,request_hash,status,response) values($1,'orders.submit','missing-status',repeat('a',64),'completed','{}')", [user])).rejects.toMatchObject({ code: '23514' });
+    } else {
+      await postgres.pool.query("insert into idempotency_record(actor_id,operation,key,request_hash) values($1,'orders.submit','missing-status',repeat('a',64))", [user]);
+      await expect(postgres.pool.query("update idempotency_record set status='completed',response='{}' where actor_id=$1", [user])).rejects.toMatchObject({ code: '23514' });
+      await postgres.pool.query("update idempotency_record set status='completed',response='{}',response_status=201 where actor_id=$1", [user]);
+      expect((await postgres.pool.query("select response_status from idempotency_record where actor_id=$1", [user])).rows[0].response_status).toBe(201);
+    }
+  });
+
+  it.each(['job_id', 'source_row_key', 'source_payload'])('protects import staging %s while permitting normalized-field review', async field => {
+    const source = await fixture();
+    const { user } = await account();
+    const job = randomUUID();
+    const otherJob = randomUUID();
+    const row = randomUUID();
+    for (const [id, checksum] of [[job, 'a'], [otherJob, 'b']]) await postgres.pool.query("insert into import_job(id,model_id,variant_id,source_checksum,object_key,actor_id) values($1,$2,$3,repeat($4,64),$5,$6)", [id, source.model, source.variant, checksum, id, user]);
+    await postgres.pool.query("insert into import_staging_row(id,job_id,source_row_key,source_payload,normalized_fields) values($1,$2,'row-a','{\"PART NO\":\"P\"}','{\"partNumber\":\"P\"}')", [row, job]);
+    const replacement = field === 'job_id' ? otherJob : field === 'source_row_key' ? 'row-b' : '{"PART NO":"changed"}';
+    await expect(postgres.pool.query(`update import_staging_row set ${field}=$2 where id=$1`, [row, replacement])).rejects.toMatchObject({ code: '23514' });
+    await postgres.pool.query("update import_staging_row set normalized_fields='{\"partNumber\":\"P-corrected\"}',version=version+1 where id=$1", [row]);
+    expect((await postgres.pool.query("select job_id,source_row_key,source_payload,normalized_fields,version from import_staging_row where id=$1", [row])).rows[0]).toEqual({ job_id: job, source_row_key: 'row-a', source_payload: { 'PART NO': 'P' }, normalized_fields: { partNumber: 'P-corrected' }, version: 2 });
   });
 });
