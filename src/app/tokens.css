@@ -143,9 +143,10 @@
 
   --rail-width: 104px;
 
-  /* The RUF Diamond mark with its neon halo, as the deck draws the pointer.
-     32px is the practical ceiling — larger cursors are ignored outright. The
-     same mark is used over clickable things, so the pointer never changes. */
+  /* The RUF Diamond mark with its neon halo, as the deck draws the pointer —
+     tilted -145 degrees to match. 32px is the practical ceiling; larger
+     cursors are ignored outright. The same mark is used over clickable things,
+     so the pointer never changes. Hotspot sits top-left, like an arrow. */
   --cursor-mark: url("/brand/cursor.png") 6 4, auto;
   --cursor-pointer: url("/brand/cursor.png") 6 4, pointer;
   --cursor-text: url("/brand/cursor.png") 6 4, text;
