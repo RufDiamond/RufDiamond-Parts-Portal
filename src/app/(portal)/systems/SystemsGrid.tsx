@@ -71,7 +71,7 @@ export function SystemsGrid() {
   if (!selectedModel || !selectedVariant) {
     return (
       <div className={styles.screen}>
-        <Trail steps={["No machine selected"]} />
+        <Trail steps={[{ label: "No machine selected" }]} />
         <p className={styles.empty}>
           The catalogue is cut by serial range, so choose a machine first.{" "}
           <Link href="/parts/fat-truck">Select a machine</Link>.
@@ -84,7 +84,7 @@ export function SystemsGrid() {
 
   return (
     <div className={styles.screen}>
-      <Trail steps={[machine]} />
+      <Trail steps={[{ label: machine }]} />
       <div className={styles.grid}>
         {(data ?? []).map(({ system, figureCount }) => {
           const label = `${NUMBERS[system.id] ?? ""} ${system.name}`.trim();

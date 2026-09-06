@@ -2,8 +2,14 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { DrawingViewer, PartsTable, Trail } from "@/components";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CroppedPart,
+  DrawingViewer,
+  PartsTable,
+  Trail,
+  type CropRect,
+} from "@/components";
 import { buildDrawingMarkers } from "@/lib/drawing";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
@@ -106,6 +112,36 @@ export function FigureWorkspace({
       return ZOOM_STEPS[Math.min(ZOOM_STEPS.length - 1, Math.max(0, next))];
     });
 
+  /*
+   * Crop. Arming the tool lets the reader drag a marquee over the plate; on
+   * release the region opens enlarged in its own panel — slides 31 to 33. The
+   * rectangle is kept in fractions of the plate so it survives any zoom.
+   */
+  const plateRef = useRef<HTMLDivElement>(null);
+  const [cropping, setCropping] = useState(false);
+  // The drag origin lives in a ref, not in state: mousedown and mouseup can
+  // both land before React re-renders, and a state value would still read as
+  // null by the time the release is handled.
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const [marquee, setMarquee] = useState<CropRect | null>(null);
+  const [crop, setCrop] = useState<CropRect | null>(null);
+
+  const pointFromEvent = (event: React.MouseEvent) => {
+    const box = plateRef.current?.getBoundingClientRect();
+    if (!box) return null;
+    return {
+      x: Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)),
+      y: Math.min(1, Math.max(0, (event.clientY - box.top) / box.height)),
+    };
+  };
+
+  const rectBetween = (a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    w: Math.abs(a.x - b.x),
+    h: Math.abs(a.y - b.y),
+  });
+
   /** Hand the figure's parts list to the reader's mail client. */
   const emailFigure = () => {
     const lines = rows.map(
@@ -131,9 +167,12 @@ export function FigureWorkspace({
     <div className={styles.screen}>
       <Trail
         steps={[
-          `Fat Truck ${machineName}`,
-          `${systemNumber} ${system.name}`.trim(),
-          figure.name,
+          { label: `Fat Truck ${machineName}`, href: "/systems" },
+          {
+            label: `${systemNumber} ${system.name}`.trim(),
+            href: `/systems/${system.id}`,
+          },
+          { label: figure.name },
         ]}
       />
 
@@ -183,9 +222,14 @@ export function FigureWorkspace({
         <button
           type="button"
           className={`${styles.button} ${styles.iconButton}`}
-          title="Crop a region — available in a later phase"
+          onClick={() => {
+            setCropping((on) => !on);
+            setMarquee(null);
+          }}
+          title={cropping ? "Cancel the crop" : "Crop a region of the plate"}
           aria-label="Crop a region"
-          disabled
+          aria-pressed={cropping}
+          data-armed={cropping || undefined}
         >
           <Image src="/toolbar/crop.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
@@ -229,8 +273,12 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
-        <button type="button" className={styles.button} disabled
-          title="The quote flow is a later phase">
+        <button
+          type="button"
+          className={styles.button}
+          onClick={() => router.push("/request")}
+          title="Review the cart and request a quote"
+        >
           <Image src="/toolbar/quote.png" alt="" width={40} height={52}
             className={styles.buttonIcon} />
           Request a quote
@@ -287,7 +335,46 @@ export function FigureWorkspace({
       </div>
 
       <div className={styles.split}>
-        <div className={styles.plate}>
+        <div
+          ref={plateRef}
+          className={`${styles.plate} ${cropping ? styles.plateArmed : ""}`}
+          onMouseDown={(event) => {
+            if (!cropping) return;
+            const p = pointFromEvent(event);
+            if (!p) return;
+            event.preventDefault();
+            dragRef.current = p;
+            setMarquee({ x: p.x, y: p.y, w: 0, h: 0 });
+          }}
+          onMouseMove={(event) => {
+            const origin = dragRef.current;
+            if (!cropping || !origin) return;
+            const p = pointFromEvent(event);
+            if (p) setMarquee(rectBetween(origin, p));
+          }}
+          onMouseUp={(event) => {
+            const origin = dragRef.current;
+            if (!cropping || !origin) return;
+            // Derive the rectangle from where the button was released rather
+            // than from the last move: a drag can finish without any
+            // intermediate mousemove ever firing.
+            const end = pointFromEvent(event);
+            const rect = end ? rectBetween(origin, end) : marquee;
+            dragRef.current = null;
+            setMarquee(null);
+            // Ignore a stray click; a crop needs a real area.
+            if (rect && rect.w > 0.02 && rect.h > 0.02) {
+              setCrop(rect);
+              setCropping(false);
+            }
+          }}
+          onMouseLeave={() => {
+            if (dragRef.current) {
+              dragRef.current = null;
+              setMarquee(null);
+            }
+          }}
+        >
           <DrawingViewer
             label={`Sheet ${sheet}`}
             src={drawing?.storagePath}
@@ -301,6 +388,18 @@ export function FigureWorkspace({
             onHoverPart={setHoveredPartId}
             zoom={zoom}
           />
+          {marquee ? (
+            <span
+              className={styles.marquee}
+              style={{
+                left: `${marquee.x * 100}%`,
+                top: `${marquee.y * 100}%`,
+                width: `${marquee.w * 100}%`,
+                height: `${marquee.h * 100}%`,
+              }}
+            />
+          ) : null}
+
           {unplaced > 0 ? (
             <p className={styles.plateNotice}>
               {markers.length === 0
@@ -341,6 +440,20 @@ export function FigureWorkspace({
           )}
         </div>
       </div>
+
+      {crop && drawing ? (
+        <CroppedPart
+          src={drawing.storagePath}
+          rect={crop}
+          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          date={new Date().toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          onClose={() => setCrop(null)}
+        />
+      ) : null}
     </div>
   );
 }

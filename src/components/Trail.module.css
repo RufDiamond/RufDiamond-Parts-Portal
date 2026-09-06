@@ -1,6 +1,7 @@
 /* The breadcrumb bar at the head of every catalogue screen — slides 12–14. */
 
 .trail {
+  display: block;
   margin: 0;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--deck-panel);
@@ -18,7 +19,19 @@
   padding: 0 var(--space-2);
 }
 
+/* A step you can go back to. */
+.step {
+  color: var(--deck-on-dark);
+  border-bottom: 1px solid transparent;
+  transition: var(--transition-state);
+}
+
+.step:hover {
+  color: var(--select);
+  border-bottom-color: var(--select);
+}
+
 /* The screen you are on. */
 .here {
-  font-weight: var(--weight-regular);
+  color: var(--deck-on-dark);
 }

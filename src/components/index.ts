@@ -27,6 +27,8 @@ export type { MachineChipProps } from "./MachineChip";
 export { PageHeader } from "./PageHeader";
 export { PortalShell } from "./PortalShell";
 export { Trail } from "./Trail";
+export { CroppedPart } from "./CroppedPart";
+export type { CropRect } from "./CroppedPart";
 export type { PageHeaderProps } from "./PageHeader";
 
 export { Panel } from "./Panel";

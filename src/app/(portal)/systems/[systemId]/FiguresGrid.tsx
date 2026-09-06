@@ -55,7 +55,7 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
   if (!selectedModel || !selectedVariant) {
     return (
       <div className={styles.screen}>
-        <Trail steps={["No machine selected"]} />
+        <Trail steps={[{ label: "No machine selected" }]} />
         <p className={styles.empty}>
           Choose a machine first.{" "}
           <Link href="/parts/fat-truck">Select a machine</Link>.
@@ -72,7 +72,16 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
 
   return (
     <div className={styles.screen}>
-      <Trail steps={systemStep ? [machine, systemStep] : [machine]} />
+      <Trail
+        steps={
+          systemStep
+            ? [
+                { label: machine, href: "/systems" },
+                { label: systemStep },
+              ]
+            : [{ label: machine, href: "/systems" }]
+        }
+      />
       <div className={styles.grid}>
         {(data?.figures ?? []).map(({ figure, plate }) => (
           <Link
