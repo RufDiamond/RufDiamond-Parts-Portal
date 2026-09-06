@@ -30,7 +30,7 @@
   flex-direction: column;
   gap: var(--space-2);
   /* clears the mark, which sits over the top of this column */
-  padding: 108px var(--space-1) var(--space-4);
+  padding: 108px 16px var(--space-4) var(--space-1);
   overflow-y: auto;
 }
 
@@ -41,6 +41,8 @@
   padding: 4px;
   background: var(--deck-surface);
   border-radius: 12px;
+  /* a selected child overhangs to the right and must not be cut off */
+  overflow: visible;
 }
 
 .railItem {
@@ -69,12 +71,19 @@
 }
 
 /*
- * Selected reads exactly as hovered, on instruction. The deck's slide 3 asks
- * for a highlighted outline instead; if that is wanted back, set
- * `border-color: var(--select)` here.
+ * The selected button is a raised tab: it takes the hover fill, then breaks
+ * out past the card's right edge and casts a shadow, so it reads as pushed
+ * forward out of the stack rather than merely tinted.
  */
-.railItemActive {
+.railItemActive,
+.railItemActive:hover {
+  position: relative;
+  z-index: 2;
+  margin-right: -14px;
+  padding-right: 16px;
   background: var(--sheet);
+  border-radius: 12px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.55);
 }
 
 .railItemPending {
