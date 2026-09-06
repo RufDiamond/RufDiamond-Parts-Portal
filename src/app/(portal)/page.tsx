@@ -19,7 +19,8 @@ const SOCIAL = [
 export default function HomePage() {
   return (
     <div className={styles.stage}>
-      <section className={`${styles.card} ${styles.withIcon} ${styles.userGuide}`}>
+      <div className={styles.column}>
+      <section className={`${styles.card} ${styles.withIcon}`}>
         <div className={styles.body}>
           <h2 className={styles.title}>User guide</h2>
           <p className={styles.text}>
@@ -36,28 +37,7 @@ export default function HomePage() {
         />
       </section>
 
-      <section className={`${styles.card} ${styles.ordering}`}>
-        <div className={styles.body}>
-          <h2 className={`${styles.title} ${styles.titlePlain} ${styles.titleRight}`}>
-            Parts Ordering Information
-          </h2>
-          <div className={styles.withIcon}>
-            <p className={styles.text}>
-              Please review these important recommendations before submitting
-              your parts request.
-            </p>
-            <Image
-              src="/home/icon-warning.png"
-              alt=""
-              width={480}
-              height={480}
-              className={styles.iconSmall}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className={`${styles.card} ${styles.catalogs}`}>
+      <section className={styles.card}>
         <div className={styles.body}>
           <h2 className={`${styles.title} ${styles.titleRight}`}>Parts catalogs</h2>
           <div className={`${styles.withIcon} ${styles.iconFirst}`}>
@@ -71,24 +51,6 @@ export default function HomePage() {
             <p className={styles.text}>
               You may also access the PDF Parts Catalogues here.
             </p>
-          </div>
-        </div>
-      </section>
-
-      <section className={`${styles.card} ${styles.brochures}`}>
-        <div className={styles.body}>
-          <h2 className={styles.title}>Ruf Diamond brochures</h2>
-          <div className={styles.withIcon}>
-            <p className={styles.text}>
-              You may also access general information about our equipment.
-            </p>
-            <Image
-              src="/home/icon-brochure.png"
-              alt=""
-              width={256}
-              height={256}
-              className={styles.iconSmall}
-            />
           </div>
         </div>
       </section>
@@ -131,6 +93,47 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </div>
+
+      <div className={styles.column}>
+      <section className={styles.card}>
+        <div className={styles.body}>
+          <h2 className={`${styles.title} ${styles.titlePlain} ${styles.titleRight}`}>
+            Parts Ordering Information
+          </h2>
+          <div className={styles.withIcon}>
+            <p className={styles.text}>
+              Please review these important recommendations before submitting
+              your parts request.
+            </p>
+            <Image
+              src="/home/icon-warning.png"
+              alt=""
+              width={480}
+              height={480}
+              className={styles.iconSmall}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <div className={styles.body}>
+          <h2 className={styles.title}>Ruf Diamond brochures</h2>
+          <div className={styles.withIcon}>
+            <p className={styles.text}>
+              You may also access general information about our equipment.
+            </p>
+            <Image
+              src="/home/icon-brochure.png"
+              alt=""
+              width={256}
+              height={256}
+              className={styles.iconSmall}
+            />
+          </div>
+        </div>
+      </section>
 
       <section className={`${styles.card} ${styles.news}`}>
         <h2 className={styles.title}>Ruf Diamond news</h2>
@@ -145,10 +148,7 @@ export default function HomePage() {
             />
             <p className={styles.newsHeadline}>IronHorse Catalogue 2026</p>
           </li>
-          <li className={`${styles.newsItem} ${styles.newsItemFlip}`}>
-            <p className={`${styles.newsHeadline} ${styles.textRight}`}>
-              Sudbury college students design Arctic military toboggan
-            </p>
+          <li className={styles.newsItem}>
             <Image
               src="/home/news-2.png"
               alt=""
@@ -156,6 +156,9 @@ export default function HomePage() {
               height={267}
               className={styles.newsThumb}
             />
+            <p className={styles.newsHeadline}>
+              Sudbury college students design Arctic military toboggan
+            </p>
           </li>
           <li className={styles.newsItem}>
             <Image
@@ -172,6 +175,7 @@ export default function HomePage() {
           </li>
         </ul>
       </section>
+      </div>
     </div>
   );
 }
