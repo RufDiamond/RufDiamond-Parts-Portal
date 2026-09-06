@@ -30,7 +30,7 @@
   flex-direction: column;
   gap: var(--space-2);
   /* clears the mark, which sits over the top of this column */
-  padding: 92px var(--space-1) var(--space-4);
+  padding: 108px var(--space-1) var(--space-4);
   overflow-y: auto;
 }
 
@@ -69,12 +69,12 @@
 }
 
 /*
- * "Each time a user clicks a button, the button's outline/border must be
- * highlighted to clearly indicate that the corresponding section has been
- * selected." — slide 3. So selection is an outline, not a fill.
+ * Selected reads exactly as hovered, on instruction. The deck's slide 3 asks
+ * for a highlighted outline instead; if that is wanted back, set
+ * `border-color: var(--select)` here.
  */
 .railItemActive {
-  border-color: var(--select);
+  background: var(--sheet);
 }
 
 .railItemPending {
@@ -118,13 +118,17 @@
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--deck-ground);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--space-4);
   /* left column is clear for the mark, which overhangs from the rail */
-  padding: var(--space-3) var(--space-5);
-  min-height: 76px;
+  padding: var(--space-4) var(--space-5);
+  min-height: 108px;
 }
 
 /*
@@ -133,56 +137,19 @@
  * to clear it.
  */
 .brand {
-  position: absolute;
-  top: var(--space-2);
-  left: var(--space-2);
-  z-index: 5;
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto;
-  align-items: center;
-  column-gap: var(--space-3);
-  padding: var(--space-2);
-  color: var(--deck-on-dark);
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: 6;
+  display: block;
   text-decoration: none;
 }
 
-.brandMark {
-  grid-row: 1 / span 2;
-}
-
+/* Emblem, wordmark and flag are one image, so it is sized by height alone. */
 .brandMark {
   width: auto;
-  height: 66px;
+  height: 76px;
   object-fit: contain;
-}
-
-.wordmarkCell {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.wordmark {
-  grid-column: 2;
-  grid-row: 2;
-  display: grid;
-  gap: 1px;
-  font: var(--weight-bold) 26px / 0.98 var(--font-ui);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--deck-on-dark);
-}
-
-/* Country of the catalogue in view, alongside the mark — as on slide 5. */
-/* Country of the catalogue in view, above the wordmark — as on slide 5. */
-.flag {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: start;
-  width: 40px;
-  height: 26px;
-  object-fit: cover;
-  border: 1px solid var(--deck-panel);
 }
 
 .title {
@@ -208,8 +175,8 @@
 }
 
 .calendar {
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
 }
 

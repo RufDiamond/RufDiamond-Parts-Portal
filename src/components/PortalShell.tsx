@@ -104,31 +104,18 @@ export function PortalShell({ children, date }: PortalShellProps) {
   return (
     <div className={styles.shell}>
       {/*
-        * The mark runs across the head of the rail and on into the header, as
-        * the deck has it. The emblem is the supplied artwork inverted so it
-        * reads on the dark ground; the wordmark is set as type because the
-        * supplied file's wordmark is white on a white ground and did not
-        * survive — see clients.md.
+        * The supplied header artwork, used as given: emblem, wordmark and
+        * flag in one piece. It runs across the head of the rail and on into
+        * the header, as the deck has it.
         */}
       <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
         <Image
-          src="/brand/logo-mark-dark.png"
-          alt=""
-          width={306}
-          height={420}
+          src="/brand/header-logo.png"
+          alt="RUF Diamond"
+          width={900}
+          height={298}
           className={styles.brandMark}
           priority
-        />
-        <span className={styles.wordmark}>
-          <b>RUF</b>
-          <b>DIAMOND</b>
-        </span>
-        <Image
-          src="/brand/flag-ca.jpg"
-          alt="Canada"
-          width={60}
-          height={60}
-          className={styles.flag}
         />
       </Link>
 
@@ -206,7 +193,7 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
           <span className={styles.dateBlock}>
             <Image
-              src="/brand/calendar.png"
+              src="/brand/calendar-light.png"
               alt=""
               width={200}
               height={200}
