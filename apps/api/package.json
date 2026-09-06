@@ -1,0 +1,22 @@
+{
+  "name": "@rufdiamond/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rufdiamond/contracts": "*",
+    "fastify": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "tsx": "^4.19.2",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
+  }
+}
