@@ -98,3 +98,16 @@
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
 }
+
+/* Everything on the plate scales together, so percentage-placed markers stay
+   on their targets at any magnification. */
+.stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  transition: transform 120ms ease-out;
+}
+
+.sheetZoomed {
+  cursor: var(--cursor-pointer);
+}

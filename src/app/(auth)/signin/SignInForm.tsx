@@ -43,7 +43,7 @@ export function SignInForm({ date }: { date: string }) {
             priority
           />
           <Image
-            src="/brand/flag-ca.jpg"
+            src="/brand/flag-ca.png"
             alt="Canada"
             width={60}
             height={40}

@@ -83,6 +83,13 @@ palette — the portal's colours are being taken from the screens themselves:
 white ground, black text, grey table headers, RUF Diamond red as the single
 accent, sampled as `#D0212E` from the wordmark on the parts catalogue cover.
 
+### 1.3b Artwork still needed — DECIDE
+- **System icons 11 and 12.** The deck draws ten system tiles (slide 12);
+  FT3 Wagon carries twelve. Tire inflation system and Accessories reuse the
+  nearest mark meanwhile.
+- **A YouTube channel address.** Instagram, Facebook and LinkedIn were
+  supplied; the YouTube mark on Home is shown but not linked.
+
 ### 1.4 Model photographs — CONFIRM
 Seven Fat Truck models are shown on the deck's model grid, but the deck
 contains only **five distinct photographs**: 2.8 Wagon, 2.8C and FT3 Wagon all

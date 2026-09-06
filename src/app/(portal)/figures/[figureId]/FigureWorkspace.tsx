@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import { DrawingViewer, PartsTable } from "@/components";
+import { useEffect, useMemo, useState } from "react";
+import { DrawingViewer, PartsTable, Trail } from "@/components";
 import { buildDrawingMarkers } from "@/lib/drawing";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
@@ -12,13 +12,23 @@ import { recordRecentFigure } from "@/state/useRecentlyViewed";
 import type { FigureDetail } from "@/types/catalog";
 import styles from "./figure.module.css";
 
-/** The plate controls, then the actions — in the deck's order. */
-const PLATE_TOOLS = [
-  { id: "crop", icon: "crop", label: "Crop a region" },
-  { id: "fit", icon: "fit", label: "Fit to view" },
-  { id: "zoom-out", icon: "zoom-out", label: "Zoom out" },
-  { id: "zoom-in", icon: "zoom-in", label: "Zoom in" },
-];
+/** The deck numbers the systems in catalogue order. */
+const SYSTEM_NUMBERS: Record<string, string> = {
+  "sys-filters": "1",
+  "sys-frame-assy": "2",
+  "sys-drive-system": "3",
+  "sys-hydraulic": "4",
+  "sys-tire-wheel": "5",
+  "sys-cabin": "6",
+  "sys-cowling-fender": "7",
+  "sys-engine": "8",
+  "sys-fuel-system": "9",
+  "sys-electric": "10",
+  "sys-tire-inflation": "11",
+  "sys-accessories": "12",
+};
+
+const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
 
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
@@ -87,16 +97,45 @@ export function FigureWorkspace({
 
   const unplaced = callouts.length - markers.length;
 
+  /** Plate zoom. Markers are placed in percentages, so they scale with it. */
+  const [zoom, setZoom] = useState(1);
+  const stepZoom = (direction: 1 | -1) =>
+    setZoom((current) => {
+      const i = ZOOM_STEPS.indexOf(current);
+      const next = i === -1 ? 0 : i + direction;
+      return ZOOM_STEPS[Math.min(ZOOM_STEPS.length - 1, Math.max(0, next))];
+    });
+
+  /** Hand the figure's parts list to the reader's mail client. */
+  const emailFigure = () => {
+    const lines = rows.map(
+      (row) =>
+        `${row.calloutNumbers.join(", ") || "-"}\t${row.part.partNumber}\t` +
+        `${row.part.description}\tx${row.figurePart.qty}`,
+    );
+    const body = [
+      `${figure.name} — Fat Truck ${machineName}`,
+      "",
+      "Ref\tPart no.\tDescription\tQty",
+      ...lines,
+    ].join("\n");
+    window.location.href =
+      `mailto:?subject=${encodeURIComponent(`Parts list — ${figure.name}`)}` +
+      `&body=${encodeURIComponent(body)}`;
+  };
+
+  // The deck numbers the systems in catalogue order, e.g. "3 DRIVE SYSTEM".
+  const systemNumber = SYSTEM_NUMBERS[system.id] ?? "";
+
   return (
     <div className={styles.screen}>
-      <p className={styles.trail}>
-        <span className={styles.trailLead}>Search by Model:</span>{" "}
-        {`Fat Truck ${machineName}`}
-        <span className={styles.trailSep}>&gt;</span>
-        {system.name.toUpperCase()}
-        <span className={styles.trailSep}>&gt;</span>
-        <span className={styles.trailTail}>{figure.name.toUpperCase()}</span>
-      </p>
+      <Trail
+        steps={[
+          `Fat Truck ${machineName}`,
+          `${systemNumber} ${system.name}`.trim(),
+          figure.name,
+        ]}
+      />
 
       <div className={styles.toolbar}>
         <div className={styles.pager}>
@@ -141,24 +180,52 @@ export function FigureWorkspace({
           </button>
         </div>
 
-        {PLATE_TOOLS.map((tool) => (
-          <button
-            key={tool.id}
-            type="button"
-            className={`${styles.button} ${styles.iconButton}`}
-            title={`${tool.label} — available in a later phase`}
-            aria-label={tool.label}
-            disabled
-          >
-            <Image
-              src={`/toolbar/${tool.icon}.png`}
-              alt=""
-              width={40}
-              height={40}
-              className={styles.buttonIcon}
-            />
-          </button>
-        ))}
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          title="Crop a region — available in a later phase"
+          aria-label="Crop a region"
+          disabled
+        >
+          <Image src="/toolbar/crop.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => setZoom(1)}
+          disabled={zoom === 1}
+          title="Fit the plate to the panel"
+          aria-label="Fit to view"
+        >
+          <Image src="/toolbar/fit.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => stepZoom(-1)}
+          disabled={zoom === ZOOM_STEPS[0]}
+          title="Zoom out"
+          aria-label="Zoom out"
+        >
+          <Image src="/toolbar/zoom-out.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => stepZoom(1)}
+          disabled={zoom === ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+          title="Zoom in"
+          aria-label="Zoom in"
+        >
+          <Image src="/toolbar/zoom-in.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
 
         <span className={styles.spacer} />
 
@@ -186,8 +253,13 @@ export function FigureWorkspace({
           Add to cart
         </button>
 
-        <button type="button" className={styles.button} disabled
-          title="Available in a later phase">
+        <button
+          type="button"
+          className={styles.button}
+          onClick={emailFigure}
+          disabled={rows.length === 0}
+          title="Email this parts list"
+        >
           <Image src="/toolbar/email.png" alt="" width={40} height={28}
             className={styles.buttonIcon} />
           Email
@@ -227,6 +299,7 @@ export function FigureWorkspace({
             hoveredPartId={hoveredPartId}
             onTogglePart={toggle}
             onHoverPart={setHoveredPartId}
+            zoom={zoom}
           />
           {unplaced > 0 ? (
             <p className={styles.plateNotice}>

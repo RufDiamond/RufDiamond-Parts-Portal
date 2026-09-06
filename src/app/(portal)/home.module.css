@@ -255,3 +255,19 @@ a.card:hover {
   .newsThumb { height: 62px; }
   .pending { font: var(--type-eyebrow); letter-spacing: var(--tracking-eyebrow); }
 }
+
+/* The promo card is the LinkedIn link. */
+.promoLink {
+  display: block;
+  transition: var(--transition-state);
+}
+
+.promoLink:hover {
+  opacity: 0.85;
+}
+
+/* A channel with no address supplied yet. */
+.socialLinkPending {
+  opacity: 0.45;
+  cursor: default;
+}

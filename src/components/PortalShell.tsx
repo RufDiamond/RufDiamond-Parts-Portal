@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMachine } from "@/state/MachineContext";
 import type { ReactNode } from "react";
 import styles from "./PortalShell.module.css";
 
@@ -81,10 +82,27 @@ const NAV_GROUPS: NavItem[][] = [
   ],
 ];
 
-function isActive(pathname: string, item: NavItem): boolean {
+/** Product line id to the rail button that represents it. */
+const LINE_TO_HREF: Record<string, string> = {
+  "pl-fat-truck": "/parts/fat-truck",
+  "pl-ironhorse": "/parts/ironhorse",
+  "pl-agilis": "/parts/agilis",
+};
+
+/**
+ * A product line stays lit for everything beneath it — systems, figures and
+ * the plate — not just its own landing screen. Those routes are addressed by
+ * figure or system id and carry no brand in the path, so the selected
+ * machine's product line is what marks them.
+ */
+function isActive(pathname: string, item: NavItem, lineHref: string | null): boolean {
   if (!item.href) return false;
   if (item.href === "/") return pathname === "/";
-  return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  if (pathname === item.href || pathname.startsWith(`${item.href}/`)) return true;
+
+  const withinCatalogue =
+    pathname.startsWith("/systems") || pathname.startsWith("/figures");
+  return withinCatalogue && lineHref === item.href;
 }
 
 export interface PortalShellProps {
@@ -100,6 +118,10 @@ export interface PortalShellProps {
 
 export function PortalShell({ children, date }: PortalShellProps) {
   const pathname = usePathname() ?? "/";
+  const { selectedModel } = useMachine();
+  const lineHref = selectedModel
+    ? (LINE_TO_HREF[selectedModel.productLineId] ?? null)
+    : null;
 
   return (
     <div className={styles.shell}>
@@ -175,9 +197,9 @@ export function PortalShell({ children, date }: PortalShellProps) {
                   key={item.id}
                   href={item.href}
                   className={`${styles.railItem} ${
-                    isActive(pathname, item) ? styles.railItemActive : ""
+                    isActive(pathname, item, lineHref) ? styles.railItemActive : ""
                   }`}
-                  aria-current={isActive(pathname, item) ? "page" : undefined}
+                  aria-current={isActive(pathname, item, lineHref) ? "page" : undefined}
                 >
                   {body}
                 </Link>

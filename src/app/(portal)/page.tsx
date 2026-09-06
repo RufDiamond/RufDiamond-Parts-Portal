@@ -11,10 +11,28 @@ import styles from "./home.module.css";
  */
 
 const SOCIAL = [
-  { name: "Instagram", icon: "/home/social-instagram.png", href: "#instagram", wide: false },
-  { name: "Facebook", icon: "/home/social-facebook.png", href: "#facebook", wide: false },
-  { name: "YouTube", icon: "/home/social-youtube.png", href: "#youtube", wide: true },
+  {
+    name: "Instagram",
+    icon: "/home/social-instagram.png",
+    href: "https://www.instagram.com/rufdiamondltd",
+    wide: false,
+  },
+  {
+    name: "Facebook",
+    icon: "/home/social-facebook.png",
+    href: "https://www.facebook.com/search/top?q=rufdiamond",
+    wide: false,
+  },
+  {
+    // No YouTube channel supplied yet — see clients.md.
+    name: "YouTube",
+    icon: "/home/social-youtube.png",
+    href: null,
+    wide: true,
+  },
 ];
+
+const LINKEDIN = "https://www.linkedin.com/company/rufdiamond-ltd/";
 
 export default function HomePage() {
   return (
@@ -56,13 +74,21 @@ export default function HomePage() {
       </section>
 
       <section className={`${styles.card} ${styles.social}`}>
-        <Image
-          src="/home/social-promo.png"
-          alt=""
-          width={384}
-          height={480}
-          className={styles.promo}
-        />
+        <a
+          href={LINKEDIN}
+          className={styles.promoLink}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="RUF Diamond on LinkedIn"
+        >
+          <Image
+            src="/home/social-promo.png"
+            alt=""
+            width={384}
+            height={480}
+            className={styles.promo}
+          />
+        </a>
         <div className={styles.socialBody}>
           <h2 className={`${styles.title} ${styles.titleRight}`}>Social media</h2>
           <p className={`${styles.text} ${styles.textRight}`}>
@@ -72,13 +98,8 @@ export default function HomePage() {
             Follow us on social media
           </p>
           <div className={styles.socialRow}>
-            {SOCIAL.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className={styles.socialLink}
-                aria-label={item.name}
-              >
+            {SOCIAL.map((item) => {
+              const mark = (
                 <Image
                   src={item.icon}
                   alt=""
@@ -88,8 +109,31 @@ export default function HomePage() {
                     item.wide ? styles.socialIconWide : ""
                   }`}
                 />
-              </a>
-            ))}
+              );
+
+              // A channel with no address yet is shown, not hidden, so its
+              // absence is visible rather than mistaken for a missing icon.
+              return item.href ? (
+                <a
+                  key={item.name}
+                  href={item.href}
+                  className={styles.socialLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={item.name}
+                >
+                  {mark}
+                </a>
+              ) : (
+                <span
+                  key={item.name}
+                  className={`${styles.socialLink} ${styles.socialLinkPending}`}
+                  title={`${item.name} — no channel supplied yet`}
+                >
+                  {mark}
+                </span>
+              );
+            })}
           </div>
         </div>
       </section>

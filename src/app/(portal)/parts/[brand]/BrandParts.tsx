@@ -50,7 +50,7 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
   return (
     <div className={styles.screen}>
       <div className={styles.gridPanel}>
-        <p className={styles.label}>Search by model:</p>
+        <p className={styles.label}>Search by Model</p>
 
         {models.length === 0 ? (
         <p className={styles.empty}>
@@ -111,7 +111,7 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
           }}
         >
           <label className={styles.label} htmlFor="by-part">
-            Search by part number:
+            Search by Part Number
           </label>
           <div className={styles.field}>
             <input
@@ -140,7 +140,7 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
           }}
         >
           <label className={styles.label} htmlFor="by-description">
-            Search by description:
+            Search by Description
           </label>
           <div className={styles.field}>
             <input

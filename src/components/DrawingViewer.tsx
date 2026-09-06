@@ -44,6 +44,11 @@ export interface DrawingViewerProps {
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
+  /**
+   * Plate magnification. Markers sit in percentages of the plate, so scaling
+   * the whole sheet keeps every marker on its target.
+   */
+  zoom?: number;
 }
 
 const NO_SELECTION: ReadonlySet<string> = new Set();
@@ -61,6 +66,7 @@ export function DrawingViewer({
   hoveredPartId = null,
   onTogglePart,
   onHoverPart,
+  zoom = 1,
 }: DrawingViewerProps) {
   const highlighted = markers.filter(
     (marker) =>
@@ -91,10 +97,14 @@ export function DrawingViewer({
       </div>
 
       <div
-        className={styles.sheet}
+        className={`${styles.sheet} ${zoom > 1 ? styles.sheetZoomed : ""}`}
         style={frame}
         onMouseLeave={() => onHoverPart?.(null)}
       >
+        <div
+          className={styles.stage}
+          style={zoom === 1 ? undefined : { transform: `scale(${zoom})` }}
+        >
         {src ? (
           // Plain <img>: the drawing is an arbitrary asset served by the
           // backend, and next/image would need its dimensions up front.
@@ -142,6 +152,7 @@ export function DrawingViewer({
             }
           />
         ))}
+        </div>
       </div>
     </figure>
   );

@@ -1,0 +1,24 @@
+/* The breadcrumb bar at the head of every catalogue screen — slides 12–14. */
+
+.trail {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: #303030;
+  font: var(--weight-regular) var(--text-sm) / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
+}
+
+.lead {
+  font-weight: var(--weight-bold);
+}
+
+.sep {
+  padding: 0 var(--space-2);
+}
+
+/* The screen you are on. */
+.here {
+  font-weight: var(--weight-regular);
+}
