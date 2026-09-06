@@ -30,6 +30,7 @@ async function loadSystem(variantId: string, systemId: string) {
         figure,
         partCount: detail?.rows.length ?? 0,
         calloutCount: detail?.callouts.length ?? 0,
+        drawingSrc: detail?.drawing?.storagePath,
         sheet: `${pad(index + 1)} / ${pad(figures.length)}`,
       };
     }),
@@ -161,7 +162,8 @@ export default function SystemPage() {
         />
       ) : (
         <div className={screen.grid3}>
-          {figures.map(({ figure, partCount, calloutCount, sheet }) => (
+          {figures.map(
+            ({ figure, partCount, calloutCount, sheet, drawingSrc }) => (
             <FigureTile
               key={figure.id}
               groupNo={figure.groupNo}
@@ -170,9 +172,12 @@ export default function SystemPage() {
               partCount={partCount}
               calloutCount={calloutCount}
               sheet={sheet}
+              drawingSrc={drawingSrc}
+              drawingMissing={!drawingSrc}
               href={`/figures/${figure.id}`}
             />
-          ))}
+            ),
+          )}
         </div>
       )}
     </main>

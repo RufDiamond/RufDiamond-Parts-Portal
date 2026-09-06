@@ -146,7 +146,7 @@ export function ModelEditor({ detail }: { detail: ModelDetail }) {
             variant before they see any parts.
           </p>
 
-          <table className={catalog.table}>
+          <div className={catalog.tableScroll}><table className={catalog.table}>
             <thead>
               <tr>
                 <th scope="col">Label</th>
@@ -184,7 +184,7 @@ export function ModelEditor({ detail }: { detail: ModelDetail }) {
                 ))
               )}
             </tbody>
-          </table>
+          </table></div>
 
           <button
             type="button"

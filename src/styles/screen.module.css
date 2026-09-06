@@ -127,3 +127,51 @@
   border-bottom-style: solid;
   text-decoration: none;
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   The layout was designed at 1440. These rules collapse it rather than
+   rescale it: columns drop away in order, and nothing shrinks below a
+   legible size. */
+
+/* Laptop and tablet landscape: the four-across contents grid is too tight. */
+@media (max-width: 1200px) {
+  .grid4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Tablet portrait: every two-column split becomes one column. The reading
+   order already puts the primary panel first. */
+@media (max-width: 900px) {
+  .grid4,
+  .grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .split75,
+  .split57,
+  .split84 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .screen {
+    padding-bottom: 96px;
+  }
+}
+
+/* Phone: one column throughout, and buttons go full width so they clear the
+   44px target with room either side. */
+@media (max-width: 600px) {
+  .grid4,
+  .grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .button {
+    justify-content: center;
+  }
+
+  .stack {
+    gap: var(--space-3);
+  }
+}

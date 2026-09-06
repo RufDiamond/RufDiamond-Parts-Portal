@@ -91,7 +91,7 @@ export default async function AdminCatalogPage() {
         <div key={group.productLine.id} className={catalog.group}>
           <p className={catalog.groupLine}>{group.productLine.name}</p>
 
-          <table className={catalog.table}>
+          <div className={catalog.tableScroll}><table className={catalog.table}>
             <thead>
               <tr>
                 <th scope="col">Model</th>
@@ -188,7 +188,7 @@ export default async function AdminCatalogPage() {
                 })
               )}
             </tbody>
-          </table>
+          </table></div>
         </div>
       ))}
 

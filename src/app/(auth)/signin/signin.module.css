@@ -4,7 +4,6 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 620px;
   min-height: 100vh;
-  min-width: 1440px;
 }
 
 .pitch {
@@ -150,4 +149,71 @@
 .note {
   font: var(--type-body-sm);
   color: var(--text-secondary);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+/* The 620px form column stops being a proportion and starts being most of the
+   screen, so let it flex first. */
+@media (max-width: 1100px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  }
+
+  .pitch,
+  .form {
+    padding: var(--space-10);
+  }
+}
+
+/* Tablet portrait: stack. The pitch panel keeps its place above the form so
+   the reader still meets the catalogue before the credentials. */
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .pitch {
+    gap: var(--space-8);
+    padding: var(--space-8) var(--gutter-page);
+  }
+
+  .form {
+    padding: var(--space-8) var(--gutter-page) var(--space-10);
+    border-left: 0;
+    border-top: var(--rule-medium) solid var(--ink);
+  }
+
+  .display {
+    font: var(--weight-bold) var(--text-2xl) / var(--leading-tight)
+      var(--font-ui);
+    letter-spacing: var(--tracking-display);
+  }
+}
+
+@media (max-width: 600px) {
+  /* Three fact cells side by side leaves each about 100px. Stack them. */
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fact {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--graphite);
+  }
+
+  .fact + .fact {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .fact:last-child {
+    border-bottom: 0;
+  }
+
+  .display {
+    font: var(--weight-bold) var(--text-xl) / var(--leading-tight)
+      var(--font-ui);
+  }
 }

@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { getAllParts } from "@/data/repository";
 import { buildPartsCsv, downloadCsv } from "@/lib/adminCsv";
-import { formatAmount, formatFigureRef } from "@/lib/format";
+import { formatPrice, formatFigureRef } from "@/lib/format";
 import { useAsync } from "@/state/useAsync";
 import type { AdminPartRow } from "@/types/admin";
 import type { System } from "@/types/catalog";
@@ -158,7 +158,7 @@ export function PartsBrowser({ initialParts, systems }: PartsBrowserProps) {
         </select>
       </div>
 
-      <table className={catalog.table}>
+      <div className={catalog.tableScroll}><table className={catalog.table}>
         <thead>
           <tr>
             <th scope="col" style={{ width: 96 }}>
@@ -206,7 +206,7 @@ export function PartsBrowser({ initialParts, systems }: PartsBrowserProps) {
                 {row.totalQty > 0 ? row.totalQty : "—"}
               </td>
               <td className={catalog.num}>
-                {formatAmount(row.part.listPrice, row.part.currency)}
+                {formatPrice(row.part.listPrice, row.part.currency)}
               </td>
               <td className={catalog.small}>
                 {row.remarks.map((remark) => (
@@ -244,7 +244,7 @@ export function PartsBrowser({ initialParts, systems }: PartsBrowserProps) {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
 
       {rows.length === 0 ? (
         <div className={catalog.empty}>

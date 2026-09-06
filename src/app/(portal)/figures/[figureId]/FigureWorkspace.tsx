@@ -14,7 +14,7 @@ import {
   WarningPanel,
 } from "@/components";
 import { buildDrawingMarkers } from "@/lib/drawing";
-import { formatAmount, formatFigureRef } from "@/lib/format";
+import { formatPrice, formatFigureRef } from "@/lib/format";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
 import { useSelection } from "@/state/useSelection";
@@ -36,7 +36,7 @@ export interface FigureWorkspaceProps {
 }
 
 export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
-  const { figure, system, variant, rows, callouts } = detail;
+  const { figure, drawing, system, variant, rows, callouts } = detail;
   const { selectedModel } = useMachine();
   const { addParts, removeLine, lines } = useRequest();
 
@@ -63,6 +63,20 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
       systemName: system.name,
     });
   }, [figure.id, figure.groupNo, figure.name, system.name]);
+
+  // Placed markers vs callouts that exist. The export carries numbers but no
+  // positions, so these differ on every figure until someone maps it, and
+  // saying "0 callouts" when there are three reads as missing data.
+  const placedCount = markers.length;
+  const calloutCount = callouts.length;
+  const unplaced = calloutCount - placedCount;
+
+  const plateCount =
+    calloutCount === 0
+      ? `${rows.length} parts`
+      : unplaced === 0
+        ? `${calloutCount} callouts · ${rows.length} parts`
+        : `${placedCount} of ${calloutCount} callouts placed · ${rows.length} parts`;
 
   const figureRef = formatFigureRef(figure.groupNo);
   const machineName = selectedModel?.name ?? "FT3 Wagon";
@@ -132,20 +146,28 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
         <div className={styles.sheetColumn}>
           <DrawingViewer
             label={`Sheet ${sheet} — exploded view`}
-            // Only mapped callouts are drawable, so count those rather than
-            // every number the import left on the plate.
-            count={`${markers.length} callouts · ${rows.length} parts`}
-            note={
-              figure.drawingFileId
-                ? `Drawing ${figure.drawingFileId} not available in this build`
-                : `Assembly drawing not supplied — callouts positioned to ${figureRef}`
-            }
+            count={plateCount}
+            src={drawing?.storagePath}
+            width={drawing?.width}
+            height={drawing?.height}
+            note={`Assembly drawing not supplied — callouts positioned to ${figureRef}`}
             markers={markers}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
             onTogglePart={toggle}
             onHoverPart={setHoveredPartId}
           />
+          {unplaced > 0 ? (
+            <p className={styles.plateNotice}>
+              {placedCount === 0
+                ? `None of this figure's ${calloutCount} callout numbers have been positioned on the drawing yet`
+                : `${unplaced} of this figure's ${calloutCount} callout numbers have not been positioned yet`}
+              , so clicking a part cannot highlight it here. Match the{" "}
+              <b>Ref</b> column against the numbers printed on the plate.
+              Positions are added in the figure editor.
+            </p>
+          ) : null}
+
           <TitleBlock
             fields={[
               { label: "Section", value: system.name },
@@ -174,19 +196,31 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
             padding="none"
             frame="strong"
           >
-            <PartsTable
-              rows={rows}
-              selectedPartIds={selectedPartIds}
-              hoveredPartId={hoveredPartId}
-              onTogglePart={toggle}
-              onHoverPart={setHoveredPartId}
-              requestedPartIds={requestedPartIds}
-              onToggleRequested={toggleRequested}
-            />
+            {rows.length === 0 ? (
+              // The plate is loaded but its parts have not been imported yet.
+              // Say so plainly: a bare table header reads as a fault.
+              <p className={styles.listEmpty}>
+                The drawing for this figure is loaded, but its parts have not
+                been imported yet. The numbered callouts on the plate come from
+                the printed catalogue; they are keyed to records once the parts
+                export for {figureRef} is loaded.
+              </p>
+            ) : (
+              <PartsTable
+                rows={rows}
+                selectedPartIds={selectedPartIds}
+                hoveredPartId={hoveredPartId}
+                onTogglePart={toggle}
+                onHoverPart={setHoveredPartId}
+                requestedPartIds={requestedPartIds}
+                onToggleRequested={toggleRequested}
+              />
+            )}
             <div className={styles.listFoot}>
               <span className={styles.listFootNote}>
-                Tick a row to add it to the request list. Click a row to
-                highlight every callout for that part.
+                {rows.length === 0
+                  ? "Nothing on this sheet can be ordered until its parts are imported."
+                  : "Tick a row to add it to the request list. Click a row to highlight every callout for that part."}
               </span>
               <Link
                 href="/request"
@@ -219,7 +253,7 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
                   },
                   {
                     label: "List price",
-                    value: formatAmount(
+                    value: formatPrice(
                       activeRow.part.listPrice,
                       activeRow.part.currency,
                     ),

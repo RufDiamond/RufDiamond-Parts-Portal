@@ -36,9 +36,9 @@
 }
 
 .active {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
+  background: var(--select);
+  border-color: var(--select);
+  color: var(--select-on);
 }
 
 .muted {
@@ -49,4 +49,14 @@
 .muted:hover:not(:disabled) {
   border-color: var(--graphite);
   color: var(--graphite);
+}
+
+/* Keep the tap target usable on a touch screen without changing the drawn
+   size of the marker. */
+@media (pointer: coarse) {
+  .placed::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
 }

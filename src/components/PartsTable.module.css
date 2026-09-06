@@ -65,11 +65,12 @@
   background: var(--sheet);
 }
 
-/* Selected rows carry the heavy left rule, per the reference. Fill stays
-   light so the callout squares in the Ref cell can invert instead. */
+/* Selected rows carry the heavy left rule, per the reference — now in the
+   selection colour, so a row and its markers on the plate read as one thing.
+   Fill stays light so the callout squares in the Ref cell can invert. */
 .row[data-active] {
   background: var(--sheet);
-  box-shadow: inset var(--rule-heavy) 0 0 0 var(--ink);
+  box-shadow: inset var(--rule-heavy) 0 0 0 var(--select);
 }
 
 .checkbox {
@@ -132,4 +133,27 @@
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
   white-space: nowrap;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+.scroller {
+  overflow-x: auto;
+  /* Momentum scrolling, and a hint that there is more to the right. */
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroller .table {
+  min-width: 640px;
+}
+
+@media (max-width: 900px) {
+  .table th,
+  .table td {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .table tbody tr {
+    height: auto;
+  }
 }

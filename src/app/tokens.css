@@ -37,6 +37,16 @@
 
   --status-hatch-stroke: var(--mid);
 
+  /* ── Selection. The one deliberate departure from the five. ────────
+     The reference carries no accent hue and says state is weight, fill and
+     rule thickness. Selection is the exception: on a plate of forty numbered
+     markers, "which one did I just pick" is the question colour answers
+     fastest, and the drawing is otherwise pure greyscale so nothing competes.
+     Sampled from the Fat Truck wordmark on the catalogue cover. Used ONLY for
+     selection — never for status, never for emphasis. */
+  --select: #d0212e;
+  --select-on: var(--paper); /* 5.3:1 on --select, passes AA */
+
   /* ── Type ──────────────────────────────────────────────────────────
      Site floor is 14px; body is 16px. Gloved hands, poor light. */
   --font-ui: var(--font-plus-jakarta-sans), "Helvetica Neue", Arial, sans-serif;
@@ -116,6 +126,12 @@
   --gutter-column: var(--space-6);
   --content-max: 1440px;
 
+  /* Breakpoints, for reference — media queries cannot read custom properties,
+     so these values are repeated literally in the rules that use them:
+       1200px  laptop → tablet landscape
+        900px  tablet portrait: two-column splits stack
+        600px  phone: single column, tables scroll */
+
   /* ── Form. Zero radius. Everywhere. ───────────────────────────────── */
   --radius-none: 0;
   --radius: 0;
@@ -171,4 +187,19 @@
 
   --callout-size: 28px;
   --callout-size-lg: 36px;
+}
+
+/* Tighter gutters as the viewport narrows — 32px of padding either side is a
+   lot of a 390px screen. */
+@media (max-width: 900px) {
+  :root {
+    --gutter-page: var(--space-5);
+    --gutter-column: var(--space-4);
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --gutter-page: var(--space-4);
+  }
 }

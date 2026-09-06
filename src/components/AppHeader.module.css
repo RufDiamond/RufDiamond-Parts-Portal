@@ -148,3 +148,59 @@
   letter-spacing: var(--tracking-mono);
   color: var(--mid);
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   The bar carries four things. They drop in order of how much they help
+   someone who already knows where they are. */
+
+@media (max-width: 1100px) {
+  /* "Parts catalog" is a subtitle to a wordmark that already says it. */
+  .product {
+    display: none;
+  }
+
+  .machineLabel {
+    max-width: 30ch;
+  }
+}
+
+@media (max-width: 900px) {
+  .header {
+    height: auto;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--gutter-page);
+  }
+
+  .left,
+  .right {
+    gap: var(--space-2);
+  }
+
+  /* The machine chip takes the full second row rather than being squeezed. */
+  .machine {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .machineLabel {
+    max-width: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* The account block is the least load-bearing element here; sign-out stays
+     reachable from it, so it keeps its tap target and loses only the label. */
+  .accountName {
+    display: none;
+  }
+
+  .headerButton {
+    padding: 0 var(--space-3);
+  }
+
+  .wordmark {
+    font-size: var(--text-xs);
+  }
+}

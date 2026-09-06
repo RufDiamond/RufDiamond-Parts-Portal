@@ -15,6 +15,9 @@ html {
 
 body {
   min-height: 100%;
+  /* A wide table or drawing must scroll inside its own container, never take
+     the page with it. */
+  overflow-x: hidden;
   background: var(--surface-page);
   color: var(--text-primary);
   font: var(--type-body);

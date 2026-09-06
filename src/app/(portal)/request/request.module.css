@@ -123,3 +123,59 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+/* ── Responsive ───────────────────────────────────────────────────────
+   The line grid is five fixed tracks. It folds to two rows per line: the
+   part above, the controls below. */
+
+@media (max-width: 900px) {
+  .head {
+    display: none;
+  }
+
+  .line {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "part remove"
+      "desc desc"
+      "qty total";
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .partNo {
+    grid-area: part;
+  }
+
+  .desc {
+    grid-area: desc;
+  }
+
+  .line > :nth-child(3) {
+    grid-area: qty;
+    justify-self: start;
+  }
+
+  .lineTotal {
+    grid-area: total;
+    align-self: center;
+  }
+
+  .remove {
+    grid-area: remove;
+  }
+
+  .tableFoot {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .footer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .submit {
+    grid-column: 1;
+  }
+}
