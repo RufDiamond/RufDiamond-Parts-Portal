@@ -52,7 +52,7 @@
   --deck-table-head: #e8e8e8;
 
   /* Type, converted from the deck's points at 96dpi (1pt = 1.333px). */
-  --deck-title: 37px;   /* 28pt — PARTS & SERVICE PORTAL */
+  --deck-title: 33px;   /* 28pt at the deck's scale */
   --deck-button-text: 16px; /* 12pt */
   --deck-rail-label: 11px;  /* 8pt */
 
@@ -141,7 +141,7 @@
   --row-height: 56px;
   --row-padding-x: var(--space-4);
 
-  --rail-width: 122px;
+  --rail-width: 104px;
 
   --gutter-page: var(--space-8);
   --gutter-column: var(--space-6);
