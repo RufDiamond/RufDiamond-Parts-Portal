@@ -1,84 +1,211 @@
-/* Drawing left, parts right — 5fr / 7fr, per the reference. Designed at
-   1440; no mobile view yet. */
-.sheetColumn {
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: calc(64px + var(--space-6));
+/*
+ * Figure screen — slide 14.
+ *
+ * A single outlined panel on the dark ground holding a breadcrumb bar, a
+ * toolbar of grey buttons, and two white surfaces side by side: the plate on
+ * the left, the parts list on the right.
+ */
+
+.screen {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--space-3);
+  min-height: 0;
 }
 
-.listColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
+/* ── Breadcrumb ───────────────────────────────────────────────────── */
+
+.trail {
+  margin: 0;
+  font: var(--weight-bold) var(--text-base) / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
 }
 
-/* Footer bar under the parts list. */
-.listFoot {
+.trailLead {
+  font-weight: var(--weight-bold);
+}
+
+.trailSep {
+  padding: 0 var(--space-1);
+  color: var(--deck-on-dark);
+}
+
+.trailTail {
+  font-weight: var(--weight-regular);
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pager {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-top: var(--border-thick);
-  background: var(--paper);
+  gap: var(--space-2);
+  min-width: 150px;
+  height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 6px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-xs) / 1 var(--font-ui);
+  justify-content: center;
 }
 
-.listFootNote {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.pagerStep {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 22px;
+  border: 0;
+  background: none;
+  color: var(--deck-on-dark);
+  cursor: pointer;
 }
 
-.added {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.pagerStep:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────
-   Drawing above, parts below. Sticky is dropped: once the columns stack,
-   pinning the drawing would push the list off the screen. */
-
-@media (max-width: 900px) {
-  .sheetColumn {
-    position: static;
-  }
-
-  .listFoot {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-  }
+.pagerCount {
+  min-width: 62px;
+  text-align: center;
+  white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-2);
-  }
-
-  .toolbarActions > * {
-    flex: 1 1 auto;
-  }
+/* A button: grey plate, white artwork, white bold label. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 6px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-xs) / 1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--transition-state);
 }
 
-/* Figure loaded, parts not yet imported. */
-.listEmpty {
-  margin: 0;
-  padding: var(--space-6) var(--space-5);
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
-  border-bottom: var(--border-thin);
+.button:hover {
+  background: var(--graphite);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The four plate controls carry no label. */
+.iconButton {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+
+.buttonIcon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.spacer {
+  flex: 1 1 var(--space-4);
+  min-width: var(--space-2);
+}
+
+/* ── The two surfaces ─────────────────────────────────────────────── */
+
+.split {
+  /* the collapse control is positioned against this, not against the plate */
+  position: relative;
+  display: grid;
+  grid-template-columns: 41fr 59fr;
+  gap: var(--space-2);
+  align-items: stretch;
+  min-height: 0;
+}
+
+.plate,
+.list {
+  position: relative;
+  min-width: 0;
+  min-height: 460px;
+  background: var(--deck-surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
 }
 
 /* Callout numbers exist but have no position on the plate yet. */
 .plateNotice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.94);
+  border-top: 1px solid var(--rule);
+  font: var(--weight-regular) var(--text-2xs) / 1.4 var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* The collapse control the deck puts between the two surfaces. */
+.divider {
+  position: absolute;
+  top: 50%;
+  left: calc(41% - 7px);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 50%;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  cursor: pointer;
+}
+
+/* Nothing imported for this figure yet. */
+.empty {
+  margin: 0;
+  padding: var(--space-6) var(--space-5);
   font: var(--type-body-sm);
   color: var(--text-secondary);
-  border: var(--border-thin);
-  border-top: 0;
-  background: var(--surface-well);
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .plate,
+  .list {
+    min-height: 320px;
+  }
 }
