@@ -4,79 +4,80 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Icon, type IconName } from "./Icon";
 import styles from "./PortalShell.module.css";
 
 /**
- * The portal chrome from the V2 deck: a persistent icon rail down the left,
- * and a header carrying the dealer mark, the portal title and today's date.
+ * The portal chrome from the V2 deck: an icon rail down the left and a header
+ * carrying the RUF Diamond mark, the portal title and today's date.
  *
- * Replaces the previous top-header shell. Deck geometry (slide 14, 1280x720):
- * rail 72px wide against a 1280 stage, header 90px tall, content inset to
- * x=94. Those are transposed here as a fixed rail and a fluid content column
- * rather than copied as pixels, since the deck is a 16:9 slide and this is a
- * browser.
+ * The rail's buttons sit on three rounded white cards, grouped as the deck
+ * groups them — Home; the three product lines with quote and order status;
+ * then the utilities. Icons are the deck's own artwork, which is photographic
+ * for the product lines rather than line art.
  */
 
 interface NavItem {
   id: string;
-  icon: IconName;
-  /** Two lines in the deck, e.g. "FAT TRUCK" / "PARTS". */
+  icon: string;
+  /** Wraps to two lines in the deck, e.g. "FAT TRUCK" / "PARTS". */
   label: string;
-  sub?: string;
   href?: string;
   /** Opens the visitor's mail client or an external site rather than routing. */
   external?: string;
+  /** Drawn wide rather than square. */
+  wide?: boolean;
 }
 
 const NAV_GROUPS: NavItem[][] = [
+  [{ id: "home", icon: "home", label: "Home", href: "/" }],
   [
-  { id: "home", icon: "home", label: "Home", href: "/" },
+    {
+      id: "fat-truck",
+      icon: "fat-truck",
+      label: "Fat Truck Parts",
+      href: "/parts/fat-truck",
+      wide: true,
+    },
+    {
+      id: "ironhorse",
+      icon: "ironhorse",
+      label: "IronHorse Parts",
+      href: "/parts/ironhorse",
+    },
+    {
+      id: "agilis",
+      icon: "agilis",
+      label: "Agilis Parts",
+      href: "/parts/agilis",
+      wide: true,
+    },
+    {
+      id: "quote",
+      icon: "quote-status",
+      label: "Quote Status",
+      href: "/quotes",
+    },
+    {
+      id: "order",
+      icon: "order-status",
+      label: "Order Status",
+      href: "/orders",
+    },
   ],
   [
-  {
-    id: "fat-truck",
-    icon: "truck",
-    label: "Fat Truck",
-    sub: "Parts",
-    href: "/parts/fat-truck",
-  },
-  {
-    id: "ironhorse",
-    icon: "truck-delivery",
-    label: "IronHorse",
-    sub: "Parts",
-    href: "/parts/ironhorse",
-  },
-  {
-    id: "agilis",
-    icon: "package",
-    label: "Agilis",
-    sub: "Parts",
-    href: "/parts/agilis",
-  },
-  { id: "quote", icon: "receipt", label: "Quote status", href: "/quotes" },
-  {
-    id: "order",
-    icon: "clipboard-list",
-    label: "Order status",
-    href: "/orders",
-  },
-  ],
-  [
-  { id: "technical", icon: "cog", label: "Technical", sub: "info" },
-  {
-    id: "support",
-    icon: "mail",
-    label: "Support",
-    external: "mailto:parts@rufdiamond.com",
-  },
-  {
-    id: "website",
-    icon: "globe",
-    label: "Website",
-    external: "https://www.rufdiamond.com",
-  },
+    { id: "technical", icon: "technical", label: "Technical Info" },
+    {
+      id: "support",
+      icon: "support",
+      label: "Support",
+      external: "mailto:parts@rufdiamond.com",
+    },
+    {
+      id: "website",
+      icon: "website",
+      label: "Website",
+      external: "https://www.rufdiamond.com",
+    },
   ],
 ];
 
@@ -89,7 +90,7 @@ function isActive(pathname: string, item: NavItem): boolean {
 export interface PortalShellProps {
   children: ReactNode;
   /**
-   * Today, formatted, as the deck prints it top-right. Passed in from the
+   * Today, formatted, as the deck prints it top right. Passed in from the
    * server layout rather than computed here: the server and the reader can sit
    * in different time zones, and formatting a date on both sides of hydration
    * is a mismatch waiting to happen.
@@ -103,88 +104,106 @@ export function PortalShell({ children, date }: PortalShellProps) {
   return (
     <div className={styles.shell}>
       <nav className={styles.rail} aria-label="Portal sections">
-        {NAV_GROUPS.map((group, groupIndex) => (
-          <div key={groupIndex} className={styles.railGroup}>
-        {group.map((item) => {
-          const body = (
-            <>
-              <Icon name={item.icon} size="lg" className={styles.railIcon} />
-              <span className={styles.railLabel}>
-                {item.label}
-                {item.sub ? (
-                  <>
-                    <br />
-                    {item.sub}
-                  </>
-                ) : null}
-              </span>
-            </>
-          );
+        {NAV_GROUPS.map((group, index) => (
+          <div key={index} className={styles.railGroup}>
+            {group.map((item) => {
+              const body = (
+                <>
+                  <span className={styles.railIconBox}>
+                    <Image
+                      src={`/nav/${item.icon}.png`}
+                      alt=""
+                      width={120}
+                      height={120}
+                      className={`${styles.railIcon} ${
+                        item.wide ? styles.railIconWide : ""
+                      }`}
+                    />
+                  </span>
+                  <span className={styles.railLabel}>{item.label}</span>
+                </>
+              );
 
-          if (item.external) {
-            return (
-              <a
-                key={item.id}
-                href={item.external}
-                className={styles.railItem}
-                target={item.external.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-              >
-                {body}
-              </a>
-            );
-          }
+              if (item.external) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.external}
+                    className={styles.railItem}
+                    target={
+                      item.external.startsWith("http") ? "_blank" : undefined
+                    }
+                    rel="noreferrer"
+                  >
+                    {body}
+                  </a>
+                );
+              }
 
-          if (!item.href) {
-            // Technical info is phase two in the deck; the button is shown so
-            // its absence is not mistaken for a missing feature.
-            return (
-              <span
-                key={item.id}
-                className={`${styles.railItem} ${styles.railItemPending}`}
-                title="Available in a later phase"
-              >
-                {body}
-              </span>
-            );
-          }
+              if (!item.href) {
+                // Technical info is phase two in the deck. The button is shown
+                // so its absence is not mistaken for a missing feature.
+                return (
+                  <span
+                    key={item.id}
+                    className={`${styles.railItem} ${styles.railItemPending}`}
+                    title="Available in a later phase"
+                  >
+                    {body}
+                  </span>
+                );
+              }
 
-          return (
-            <Link
-              key={item.id}
-              href={item.href}
-              className={`${styles.railItem} ${
-                isActive(pathname, item) ? styles.railItemActive : ""
-              }`}
-              aria-current={isActive(pathname, item) ? "page" : undefined}
-            >
-              {body}
-            </Link>
-          );
-        })}
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  className={`${styles.railItem} ${
+                    isActive(pathname, item) ? styles.railItemActive : ""
+                  }`}
+                  aria-current={isActive(pathname, item) ? "page" : undefined}
+                >
+                  {body}
+                </Link>
+              );
+            })}
           </div>
         ))}
       </nav>
 
       <div className={styles.main}>
         <header className={styles.header}>
-          <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
-            {/*
-              * The emblem only. The supplied logo's wordmark is drawn white on
-              * a white ground, so it cannot be shown on this light plate — the
-              * wordmark is set as type until a usable version arrives. See
-              * clients.md.
-              */}
+          <div className={styles.brandBlock}>
+            <Link
+              href="/"
+              className={styles.brand}
+              aria-label="RUF Diamond home"
+            >
+              {/*
+                * The emblem only. The supplied logo's wordmark is drawn white
+                * on a white ground, so it cannot be shown on this light plate
+                * — the wordmark is set as type until a usable version arrives.
+                * See clients.md.
+                */}
+              <Image
+                src="/brand/logo-mark.png"
+                alt=""
+                width={233}
+                height={320}
+                className={styles.brandMark}
+                priority
+              />
+              <b className={styles.wordmark}>RUF DIAMOND</b>
+            </Link>
             <Image
-              src="/brand/logo-mark.png"
-              alt=""
-              width={233}
-              height={320}
-              className={styles.brandMark}
-              priority
+              src="/brand/flag-ca.jpg"
+              alt="Canada"
+              width={60}
+              height={60}
+              className={styles.flag}
             />
-            <b className={styles.wordmark}>RUF DIAMOND</b>
-          </Link>
+          </div>
+
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>
           <span className={styles.date}>{date}</span>
         </header>
