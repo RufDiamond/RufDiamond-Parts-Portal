@@ -34,8 +34,8 @@
 .tile {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-2) var(--space-2);
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4) var(--space-3);
   border: 2px solid transparent;
   border-radius: 8px;
   background: var(--deck-surface);
@@ -52,14 +52,14 @@
 .art {
   display: grid;
   place-items: center;
-  min-height: 110px;
+  min-height: 92px;
 }
 
 .icon {
   width: auto;
   height: auto;
-  max-width: 80%;
-  max-height: 108px;
+  max-width: 68%;
+  max-height: 84px;
   object-fit: contain;
 }
 

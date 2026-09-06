@@ -21,38 +21,37 @@ const ICONS: Record<string, string> = {
   "sys-engine": "engine",
   "sys-fuel-system": "fuel-system",
   "sys-electric": "electric",
-  // The deck draws ten systems; these two reuse the nearest mark until
+  // The deck draws ten system tiles; FT3 Wagon carries twelve. Tire inflation
+  // (section 10) and Accessories (section 12) reuse the nearest mark until
   // artwork is supplied — see clients.md.
   "sys-tire-inflation": "tire-wheel",
   "sys-accessories": "frame-assy",
 };
 
-/** The deck numbers the systems in catalogue order. */
-const NUMBERS: Record<string, number> = {
-  "sys-filters": 1,
-  "sys-frame-assy": 2,
-  "sys-drive-system": 3,
-  "sys-hydraulic": 4,
-  "sys-tire-wheel": 5,
-  "sys-cabin": 6,
-  "sys-cowling-fender": 7,
-  "sys-engine": 8,
-  "sys-fuel-system": 9,
-  "sys-electric": 10,
-  "sys-tire-inflation": 11,
-  "sys-accessories": 12,
-};
+/**
+ * A system's section number is not ours to choose: it is the leading part of
+ * its figures' GROUPNO in the export, e.g. FIG- 11.3 puts Electric at 11.
+ * Deriving it keeps the screen honest if the catalogue is renumbered.
+ */
+function sectionNumber(groupNos: string[]): number | null {
+  const numbers = groupNos
+    .map((g) => Number.parseInt(g.split(".")[0] ?? "", 10))
+    .filter((n) => Number.isFinite(n));
+  return numbers.length ? Math.min(...numbers) : null;
+}
 
 async function load(variantId: string) {
   const systems = await getSystems(variantId);
-  const counts = await Promise.all(
-    systems.map((system) =>
-      getFigures(variantId, system.id).then((figures) => figures.length),
-    ),
+  const perSystem = await Promise.all(
+    systems.map((system) => getFigures(variantId, system.id)),
   );
   return systems
-    .map((system, i) => ({ system, figureCount: counts[i] }))
-    .sort((a, b) => (NUMBERS[a.system.id] ?? 99) - (NUMBERS[b.system.id] ?? 99));
+    .map((system, i) => ({
+      system,
+      figureCount: perSystem[i].length,
+      number: sectionNumber(perSystem[i].map((figure) => figure.groupNo)),
+    }))
+    .sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
 }
 
 /** Systems for the selected machine — slide 12. */
@@ -86,8 +85,8 @@ export function SystemsGrid() {
     <div className={styles.screen}>
       <Trail steps={[{ label: machine }]} />
       <div className={styles.grid}>
-        {(data ?? []).map(({ system, figureCount }) => {
-          const label = `${NUMBERS[system.id] ?? ""} ${system.name}`.trim();
+        {(data ?? []).map(({ system, figureCount, number }) => {
+          const label = `${number ?? ""} ${system.name}`.trim();
           const icon = ICONS[system.id];
           const ready = figureCount > 0;
 

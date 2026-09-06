@@ -9,34 +9,25 @@ import { useAsync } from "@/state/useAsync";
 import { useMachine } from "@/state/MachineContext";
 import styles from "../tiles.module.css";
 
-const NUMBERS: Record<string, number> = {
-  "sys-filters": 1,
-  "sys-frame-assy": 2,
-  "sys-drive-system": 3,
-  "sys-hydraulic": 4,
-  "sys-tire-wheel": 5,
-  "sys-cabin": 6,
-  "sys-cowling-fender": 7,
-  "sys-engine": 8,
-  "sys-fuel-system": 9,
-  "sys-electric": 10,
-  "sys-tire-inflation": 11,
-  "sys-accessories": 12,
-};
-
 async function load(variantId: string, systemId: string) {
   const systems = await getSystems(variantId);
   const system = systems.find((s) => s.id === systemId) ?? null;
   if (!system) return { system: null, figures: [] };
 
   const figures = await getFigures(variantId, systemId);
+  // The section number is the leading part of the figures' GROUPNO.
+  const number = Number.parseInt(figures[0]?.groupNo.split(".")[0] ?? "", 10);
   const withPlates = await Promise.all(
     figures.map(async (figure) => {
       const detail = await getFigureDetail(figure.id);
       return { figure, plate: detail?.drawing?.storagePath ?? null };
     }),
   );
-  return { system, figures: withPlates };
+  return {
+    system,
+    number: Number.isFinite(number) ? number : null,
+    figures: withPlates,
+  };
 }
 
 /** Figures within a system — slide 13. */
@@ -67,7 +58,7 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
   const system = data?.system ?? null;
   const machine = `Fat Truck ${selectedModel.name}`;
   const systemStep = system
-    ? `${NUMBERS[system.id] ?? ""} ${system.name}`.trim()
+    ? `${data?.number ?? ""} ${system.name}`.trim()
     : "";
 
   return (

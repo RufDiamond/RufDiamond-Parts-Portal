@@ -18,22 +18,6 @@ import { recordRecentFigure } from "@/state/useRecentlyViewed";
 import type { FigureDetail } from "@/types/catalog";
 import styles from "./figure.module.css";
 
-/** The deck numbers the systems in catalogue order. */
-const SYSTEM_NUMBERS: Record<string, string> = {
-  "sys-filters": "1",
-  "sys-frame-assy": "2",
-  "sys-drive-system": "3",
-  "sys-hydraulic": "4",
-  "sys-tire-wheel": "5",
-  "sys-cabin": "6",
-  "sys-cowling-fender": "7",
-  "sys-engine": "8",
-  "sys-fuel-system": "9",
-  "sys-electric": "10",
-  "sys-tire-inflation": "11",
-  "sys-accessories": "12",
-};
-
 const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
 
 export interface FigureWorkspaceProps {
@@ -160,8 +144,9 @@ export function FigureWorkspace({
       `&body=${encodeURIComponent(body)}`;
   };
 
-  // The deck numbers the systems in catalogue order, e.g. "3 DRIVE SYSTEM".
-  const systemNumber = SYSTEM_NUMBERS[system.id] ?? "";
+  // The section number is the leading part of this figure's GROUPNO, e.g.
+  // "6.1" puts it in section 6 — taken from the export, never assigned here.
+  const systemNumber = figure.groupNo.split(".")[0] ?? "";
 
   return (
     <div className={styles.screen}>

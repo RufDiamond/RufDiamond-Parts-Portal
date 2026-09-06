@@ -195,8 +195,9 @@
   white-space: nowrap;
 }
 
-/* Content sits inside a single hairline panel. Home is the exception: its
-   cards float on the perspective plate with no frame around them. */
+/* Content sits inside a single hairline panel. Home and the product-line
+   screens are the exceptions: their sections carry their own borders, so a
+   frame around all of them would double up. */
 .content {
   flex: 1;
   min-width: 0;

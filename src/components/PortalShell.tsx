@@ -227,7 +227,9 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
         <div
           className={`${styles.content} ${
-            pathname === "/" ? styles.contentBare : ""
+            pathname === "/" || pathname.startsWith("/parts/")
+              ? styles.contentBare
+              : ""
           }`}
         >
           {children}
