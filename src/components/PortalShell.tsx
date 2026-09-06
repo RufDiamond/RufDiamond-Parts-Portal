@@ -104,6 +104,23 @@ export function PortalShell({ children, date }: PortalShellProps) {
   return (
     <div className={styles.shell}>
       <nav className={styles.rail} aria-label="Portal sections">
+        <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
+          {/*
+            * The emblem only. The supplied logo's wordmark is drawn white on a
+            * white ground, so it cannot be shown on this light plate — see
+            * clients.md.
+            */}
+          <Image
+            src="/brand/logo-mark.png"
+            alt=""
+            width={233}
+            height={320}
+            className={styles.brandMark}
+            priority
+          />
+          <b className={styles.wordmark}>RUF DIAMOND</b>
+        </Link>
+
         {NAV_GROUPS.map((group, index) => (
           <div key={index} className={styles.railGroup}>
             {group.map((item) => {
@@ -173,36 +190,13 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
       <div className={styles.main}>
         <header className={styles.header}>
-          <div className={styles.brandBlock}>
-            <Link
-              href="/"
-              className={styles.brand}
-              aria-label="RUF Diamond home"
-            >
-              {/*
-                * The emblem only. The supplied logo's wordmark is drawn white
-                * on a white ground, so it cannot be shown on this light plate
-                * — the wordmark is set as type until a usable version arrives.
-                * See clients.md.
-                */}
-              <Image
-                src="/brand/logo-mark.png"
-                alt=""
-                width={233}
-                height={320}
-                className={styles.brandMark}
-                priority
-              />
-              <b className={styles.wordmark}>RUF DIAMOND</b>
-            </Link>
-            <Image
-              src="/brand/flag-ca.jpg"
-              alt="Canada"
-              width={60}
-              height={60}
-              className={styles.flag}
-            />
-          </div>
+          <Image
+            src="/brand/flag-ca.jpg"
+            alt="Canada"
+            width={60}
+            height={60}
+            className={styles.flag}
+          />
 
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>
           <span className={styles.date}>{date}</span>

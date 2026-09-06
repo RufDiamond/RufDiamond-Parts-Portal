@@ -123,42 +123,39 @@
   padding: var(--space-3) var(--space-5);
 }
 
-.brandBlock {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  justify-self: start;
-}
-
+/* The mark sits at the head of the rail, above Home, on its own white card. */
 .brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-4);
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-2);
   background: var(--deck-surface);
   color: var(--ink);
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
-/* Country of the catalogue in view, beside the mark — as on slide 5. */
-.flag {
-  width: 40px;
-  height: 26px;
-  object-fit: cover;
-  border: 1px solid var(--deck-panel);
-}
-
-/* The emblem reads only on a light ground, so the brand sits on a white plate. */
 .brandMark {
   width: auto;
-  height: 40px;
+  height: auto;
+  max-width: 100%;
+  max-height: 48px;
   object-fit: contain;
 }
 
 .wordmark {
-  font: var(--weight-bold) var(--text-md) / 1 var(--font-ui);
-  letter-spacing: 0.1em;
+  font: var(--weight-bold) var(--deck-rail-label) / 1.2 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+/* Country of the catalogue in view, top left of the header — as on slide 5. */
+.flag {
+  justify-self: start;
+  width: 46px;
+  height: 30px;
+  object-fit: cover;
+  border: 1px solid var(--deck-panel);
 }
 
 .title {
