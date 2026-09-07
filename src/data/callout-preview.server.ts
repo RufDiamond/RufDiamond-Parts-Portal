@@ -3,7 +3,6 @@ import "server-only";
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import {
   applyCalloutPreview,
   type CalloutPreview,
@@ -12,7 +11,10 @@ import {
 } from "@/lib/callout-preview";
 import type { FigureDetail } from "@/types/catalog";
 
-const REPOSITORY_ROOT = fileURLToPath(new URL("../..", import.meta.url));
+// Root package scripts launch Next.js and the focused tests from the project
+// root. Avoid import.meta URL arithmetic here: Turbopack treats literal
+// `new URL()` paths as bundled asset dependencies.
+const REPOSITORY_ROOT = process.cwd();
 const REVIEW_PATH = path.join(
   REPOSITORY_ROOT,
   "tools/callouts/review/proposals.json",
