@@ -16,6 +16,7 @@ export default defineConfig({
   test: {
     include: [
       "tests/callout-preview.test.ts",
+      "tests/drawing-viewer-pan.test.tsx",
       "tests/full-illustration-preview.test.tsx",
     ],
   },
