@@ -179,4 +179,12 @@ Final-review correction:
 - [x] **Step 2: Exercise new figures.** Navigate Cabin 6.2, Hydraulic 4.4, Engine 8.2, and a larger Cowling drawing. On each click a visible numbered marker and confirm corresponding row selected; click its row/ref again to clear and select, confirm marker follows. Exercise zoom and full illustration. Verify Frame 2.1 and Cabin 6.13 show withheld warnings, not guessed markers. Recheck Windows/Filters regression. Use fresh browser accessibility evidence before actions.
 - [x] **Step 3: Capture actual interactions.** Prefer continuous recording if the browser surface supports it; otherwise capture genuine before/after UI states and label the video “Step-by-step UI captures”. Include multiple newly mapped sections, marker-to-row, row-to-marker, zoom/full illustration and remaining withheld examples. Do not submit an order or imply this is production-ready.
 - [x] **Step 4: Encode and inspect.** Preserve original UI screenshots; compose captions outside them. Use local ffmpeg to encode H.264/yuv420p MP4. Check duration/codec with ffprobe, decode the whole file with ffmpeg, and visually inspect beginning/middle/end. Keep video untracked and link it in the user-facing result.
-- [ ] **Step 5: Review and handoff.** Record actual results in the review document, independently review the complete scoped change, commit documentation, and provide the video plus exact remaining limitations. Keep the local preview running. Do not merge, push or deploy.
+- [x] **Step 5: Review and handoff.** Record actual results in the review document, independently review the complete scoped change, commit documentation, and provide the video plus exact remaining limitations. Keep the local preview running. Do not merge, push or deploy.
+
+Final broad review and corrective rereview completed on 7 September 2026 through
+`332a94b`: approved for local-preview handoff, with dense fit-view marker overlap
+retained as an important UI/UX follow-up. Fullscreen preview context and explicit
+enlargement guidance were corrected; the original collection-only RED remains
+an honestly recorded process limitation. The corrective component test achieved
+behavioral RED/GREEN, and the final focused suite passed 26/26. No customer
+publication, merge, push or deployment was performed.
