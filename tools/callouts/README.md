@@ -5,6 +5,25 @@ The customer viewer already supports part/marker selection. The catalogue has
 are deliberately outside `src/` and are **not imported by the application**.
 Do not write them into the seed or publish them without RUF Diamond sign-off.
 
+## Optional local viewer preview
+
+To inspect unambiguous proposals in the existing customer-style viewer during
+development, start the local app with the server-only opt-in:
+
+```sh
+RUF_CALLOUT_PREVIEW=1 npm run dev -- --port 3100 --hostname 127.0.0.1
+```
+
+The preview is disabled unless both development mode and the exact flag value
+`1` are present, and it is always disabled in production. Enabled loads check
+the proposal schema and review status, null reviewer, catalogue hash, drawing
+path, dimensions and artwork hash before copying eligible x/y values into the
+detached response. The seed and review files are not modified. The viewer shows
+an unapproved/not-for-ordering notice, preserves existing coordinates and
+masks, excludes ambiguous or unassociated occurrences, and withholds Frame 2.1
+and Cabin 6.13 until their source conflicts are resolved. RUF Diamond approval
+and the existing catalogue publication gate remain required.
+
 ## Run the checks
 
 These analysis tools require Python, numpy, scipy and Pillow. The renderer also

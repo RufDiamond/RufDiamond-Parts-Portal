@@ -108,3 +108,21 @@ subsequent to this frontend placement gate; Xero remains deferred.
 
 This is a **review milestone**, not a completed exploded-view fix, backend
 integration, deployment or production publishing event.
+
+## Development-only viewer preview
+
+The reviewed proposal file can be overlaid in the existing figure viewer on a
+local development server without changing `src/data/ft3-wagon.ts`:
+
+```sh
+RUF_CALLOUT_PREVIEW=1 npm run dev -- --port 3100 --hostname 127.0.0.1
+```
+
+The server reads and validates the proposal, catalogue and exact drawing bytes
+on every enabled figure load. Production ignores the flag, and an unset flag
+does not read or send review data. A visible notice identifies every enabled
+overlay as unapproved and not for ordering. Frame 2.1 and Cabin 6.13 remain
+withheld because of their source conflicts; ambiguous, missing, duplicate,
+unassociated and out-of-bounds occurrences remain unplaced. This preview does
+not approve positions, change the seed, relax publication blockers or replace
+the required attributable RUF Diamond sign-off.
