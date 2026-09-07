@@ -12,6 +12,9 @@ export type { CalloutMarkerProps, CalloutMarkerState } from "./CalloutMarker";
 export { DrawingViewer } from "./DrawingViewer";
 export type { DrawingMarker, DrawingViewerProps } from "./DrawingViewer";
 
+export { ComingSoon } from "./ComingSoon";
+export type { ComingSoonProps } from "./ComingSoon";
+
 export { EmptyState } from "./EmptyState";
 export type { EmptyStateProps } from "./EmptyState";
 

@@ -11,6 +11,7 @@ import {
   type CSSProperties,
 } from "react";
 import {
+  ComingSoon,
   CroppedPart,
   DrawingViewer,
   FullIllustration,
@@ -23,7 +24,8 @@ import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
 import { useSelection } from "@/state/useSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
-import type { FigureDetail } from "@/types/catalog";
+import type { FigureDetail, PartUsageSummary } from "@/types/catalog";
+import { QuoteRequest } from "../../request/QuoteRequest";
 import styles from "./figure.module.css";
 
 const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
@@ -45,6 +47,8 @@ function clampSplit(value: number): number {
 
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
+  /** Where each part is used — the quote view opens inside this screen. */
+  usage: Record<string, PartUsageSummary>;
   /** Sheet number as printed, e.g. "01 / 04". */
   sheet: string;
   /** Position within the system's figures, for the pager. */
@@ -58,6 +62,7 @@ export interface FigureWorkspaceProps {
 
 export function FigureWorkspace({
   detail,
+  usage,
   sheet,
   index,
   total,
@@ -69,7 +74,7 @@ export function FigureWorkspace({
   const router = useRouter();
   const { figure, drawing, system, variant, rows, callouts } = detail;
   const { selectedModel } = useMachine();
-  const { addParts, removeLine, lines } = useRequest();
+  const { addParts, lines } = useRequest();
 
   const { selectedPartIds, toggle, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
@@ -94,38 +99,40 @@ export function FigureWorkspace({
     [lines],
   );
 
-  /**
-   * The tick and the lit marker are one state.
+  /*
+   * The tick and the lit marker are one state — but that state is SELECTION,
+   * not the cart.
    *
-   * Selecting a part — from a callout on the plate, a Ref number in the list,
-   * or the row itself — puts it on the cart and ticks its box; clearing the
-   * selection takes it off again. The two used to be separate, a click only
-   * highlighting, but a reader who lights a part on the drawing means to order
-   * it, and being made to tick it a second time reads as the click not having
-   * worked.
+   * Clicking a callout, a Ref number or a row lights the part on the plate and
+   * ticks its box. Getting it onto the cart is a second, deliberate act: the
+   * Add to cart button. Wiring the tick straight to the cart made every click
+   * an order and left Add to cart with nothing to do.
    */
-  const setRequested = (partId: string, wanted: boolean) => {
-    if (wanted === requestedPartIds.has(partId)) return;
-    if (!wanted) {
-      removeLine(partId);
-      return;
-    }
-    const row = rows.find((candidate) => candidate.part.id === partId);
-    if (row) addParts([{ part: row.part, qty: row.figurePart.qty }]);
-  };
 
-  /** A callout, a Ref number or a row: select the part and tick it. */
-  const toggleSelected = (partId: string) => {
-    const selected = !selectedPartIds.has(partId);
-    toggle(partId);
-    setRequested(partId, selected);
-  };
+  /*
+   * What Add to cart will actually do. It used to sweep in EVERY part on the
+   * figure, which — now that the tick and the selection are one state — lit
+   * every row and ticked every box, reading as though the click had selected
+   * the whole sheet. It adds what is ticked, and nothing else.
+   */
+  /** A callout, a Ref number, a row or its tick: all select the part. */
+  const toggleSelected = (partId: string) => toggle(partId);
 
-  /** The box itself, driving the same pair from the other end. */
-  const toggleRequested = (partId: string) => {
-    const wanted = !requestedPartIds.has(partId);
-    setRequested(partId, wanted);
-    if (wanted !== selectedPartIds.has(partId)) toggle(partId);
+  /** Ticked parts not already on the cart. */
+  const pending = useMemo(
+    () =>
+      rows
+        .filter(
+          (row) =>
+            selectedPartIds.has(row.part.id) &&
+            !requestedPartIds.has(row.part.id),
+        )
+        .map((row) => ({ part: row.part, qty: row.figurePart.qty })),
+    [rows, selectedPartIds, requestedPartIds],
+  );
+
+  const addSelectedToCart = () => {
+    if (pending.length > 0) addParts(pending);
   };
 
   const go = (id: string | null) => {
@@ -140,6 +147,15 @@ export function FigureWorkspace({
    * what the zoom control already does.
    */
   const [fullScreen, setFullScreen] = useState(false);
+  /* Check cart has no screen behind it yet — see clients.md. */
+  const [cartComingSoon, setCartComingSoon] = useState(false);
+
+  /*
+   * The quote view opens IN PLACE of the plate and the parts list — slides 48
+   * to 49 keep the same breadcrumb and the same toolbar, with Request a quote
+   * lit, and change only what is underneath. Navigating away lost that.
+   */
+  const [quoting, setQuoting] = useState(false);
 
   /** Plate zoom. Markers are placed in percentages, so they scale with it. */
   const [zoom, setZoom] = useState(1);
@@ -339,8 +355,18 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() => router.push("/request")}
-          title="Review the cart and request a quote"
+          /*
+           * Takes the ticked parts with it. Selecting a part no longer puts it
+           * on the cart, so jumping straight to the request list would have
+           * arrived empty — which is exactly what it did.
+           */
+          onClick={() => {
+            addSelectedToCart();
+            setQuoting(true);
+          }}
+          title="Add anything ticked, then draw up the request"
+          aria-pressed={quoting}
+          data-armed={quoting || undefined}
         >
           <Image src="/toolbar/quote.png" alt="" width={40} height={52}
             className={styles.buttonIcon} />
@@ -350,18 +376,19 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() =>
-            rows.forEach((row) => {
-              if (!requestedPartIds.has(row.part.id)) {
-                addParts([{ part: row.part, qty: row.figurePart.qty }]);
-              }
-            })
+          onClick={addSelectedToCart}
+          disabled={pending.length === 0}
+          title={
+            selectedPartIds.size === 0
+              ? "Tick a part first"
+              : pending.length === 0
+                ? "Everything ticked is already on the cart"
+                : `Add ${pending.length} part${pending.length === 1 ? "" : "s"} to the cart`
           }
-          disabled={rows.length === 0}
         >
           <Image src="/toolbar/cart-add.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
-          Add to cart
+          Add to cart{pending.length > 0 ? ` · ${pending.length}` : ""}
         </button>
 
         <button
@@ -389,7 +416,8 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() => router.push("/request")}
+          onClick={() => setCartComingSoon(true)}
+          title="The cart screen has not been built yet"
         >
           <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
@@ -397,177 +425,196 @@ export function FigureWorkspace({
         </button>
       </div>
 
-      <div
-        ref={splitRef}
-        className={`${styles.split} ${resizing ? styles.splitResizing : ""}`}
-        onClickCapture={(event) => {
-          if (!swallowClickRef.current) return;
-          swallowClickRef.current = false;
-          event.stopPropagation();
-          event.preventDefault();
-        }}
-        style={
-          {
-            "--split-left": `${split}fr`,
-            "--split-right": `${100 - split}fr`,
-            "--split-at": `${split}%`,
-          } as CSSProperties
-        }
-      >
+      {quoting ? (
+        <QuoteRequest
+          usage={usage}
+          embedded
+          onAddMoreParts={() => setQuoting(false)}
+        />
+      ) : (
         <div
-          ref={plateRef}
-          className={`${styles.plate} ${cropping ? styles.plateArmed : ""}`}
-          onMouseDown={(event) => {
-            if (!cropping) return;
-            const p = pointFromEvent(event);
-            if (!p) return;
+          ref={splitRef}
+          className={`${styles.split} ${resizing ? styles.splitResizing : ""}`}
+          onClickCapture={(event) => {
+            if (!swallowClickRef.current) return;
+            swallowClickRef.current = false;
+            event.stopPropagation();
             event.preventDefault();
-            dragRef.current = p;
-            setMarquee({ x: p.x, y: p.y, w: 0, h: 0 });
           }}
-          onMouseMove={(event) => {
-            const origin = dragRef.current;
-            if (!cropping || !origin) return;
-            const p = pointFromEvent(event);
-            if (p) setMarquee(rectBetween(origin, p));
-          }}
-          onMouseUp={(event) => {
-            const origin = dragRef.current;
-            if (!cropping || !origin) return;
-            // Derive the rectangle from where the button was released rather
-            // than from the last move: a drag can finish without any
-            // intermediate mousemove ever firing.
-            const end = pointFromEvent(event);
-            const rect = end ? rectBetween(origin, end) : marquee;
-            dragRef.current = null;
-            setMarquee(null);
-            // Ignore a stray click; a crop needs a real area.
-            if (rect && rect.w > 0.02 && rect.h > 0.02) {
-              setCrop(rect);
-              setCropping(false);
-            }
-          }}
-          onMouseLeave={() => {
-            if (dragRef.current) {
+          style={
+            {
+              "--split-left": `${split}fr`,
+              "--split-right": `${100 - split}fr`,
+              "--split-at": `${split}%`,
+            } as CSSProperties
+          }
+        >
+          <div
+            ref={plateRef}
+            className={`${styles.plate} ${cropping ? styles.plateArmed : ""}`}
+            onMouseDown={(event) => {
+              if (!cropping) return;
+              const p = pointFromEvent(event);
+              if (!p) return;
+              event.preventDefault();
+              dragRef.current = p;
+              setMarquee({ x: p.x, y: p.y, w: 0, h: 0 });
+            }}
+            onMouseMove={(event) => {
+              const origin = dragRef.current;
+              if (!cropping || !origin) return;
+              const p = pointFromEvent(event);
+              if (p) setMarquee(rectBetween(origin, p));
+            }}
+            onMouseUp={(event) => {
+              const origin = dragRef.current;
+              if (!cropping || !origin) return;
+              // Derive the rectangle from where the button was released rather
+              // than from the last move: a drag can finish without any
+              // intermediate mousemove ever firing.
+              const end = pointFromEvent(event);
+              const rect = end ? rectBetween(origin, end) : marquee;
               dragRef.current = null;
               setMarquee(null);
-            }
-          }}
-        >
-          <DrawingViewer
-            label={`Sheet ${sheet}`}
-            src={drawing?.storagePath}
-            width={drawing?.width}
-            height={drawing?.height}
-            note={`Assembly drawing not supplied — ${figure.name}`}
-            markers={markers}
-            selectedPartIds={selectedPartIds}
-            hoveredPartId={hoveredPartId}
-            onTogglePart={toggleSelected}
-            onHoverPart={setHoveredPartId}
-            zoom={zoom}
-            onZoomChange={setZoom}
-          />
-          {marquee ? (
-            <span
-              className={styles.marquee}
-              style={{
-                left: `${marquee.x * 100}%`,
-                top: `${marquee.y * 100}%`,
-                width: `${marquee.w * 100}%`,
-                height: `${marquee.h * 100}%`,
-              }}
-            />
-          ) : null}
-
-          {unplaced > 0 ? (
-            <p className={styles.plateNotice}>
-              {markers.length === 0
-                ? `None of this figure's ${callouts.length} callout numbers have been positioned yet`
-                : `${unplaced} of ${callouts.length} callout numbers are not positioned yet`}
-              , so clicking a part cannot highlight it here. Match the Ref. no.
-              column against the numbers printed on the plate.
-            </p>
-          ) : null}
-        </div>
-
-        {/*
-          The handle the deck draws between the two surfaces. Dragging it moves
-          the split; the arrow keys move it a step at a time and a double-click
-          puts it back where the deck has it.
-        */}
-        <div
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Width of the drawing"
-          aria-valuenow={Math.round(split)}
-          aria-valuemin={SPLIT_MIN}
-          aria-valuemax={SPLIT_MAX}
-          tabIndex={0}
-          className={styles.divider}
-          title="Drag to set the width of the drawing"
-          onPointerDown={(event) => {
-            event.preventDefault();
-            event.currentTarget.setPointerCapture(event.pointerId);
-            resizingRef.current = true;
-            setResizing(true);
-          }}
-          onPointerMove={(event) => {
-            if (!resizingRef.current) return;
-            swallowClickRef.current = true;
-            splitFromPointer(event.clientX);
-          }}
-          onPointerUp={(event) => {
-            event.currentTarget.releasePointerCapture(event.pointerId);
-            resizingRef.current = false;
-            setResizing(false);
-          }}
-          onPointerCancel={() => {
-            resizingRef.current = false;
-            setResizing(false);
-          }}
-          onDoubleClick={() => setSplit(SPLIT_DEFAULT)}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowLeft") {
-              event.preventDefault();
-              setSplit((v) => clampSplit(v - SPLIT_STEP));
-            } else if (event.key === "ArrowRight") {
-              event.preventDefault();
-              setSplit((v) => clampSplit(v + SPLIT_STEP));
-            } else if (event.key === "Home") {
-              event.preventDefault();
-              setSplit(SPLIT_MIN);
-            } else if (event.key === "End") {
-              event.preventDefault();
-              setSplit(SPLIT_MAX);
-            } else if (event.key === "Enter") {
-              event.preventDefault();
-              setSplit(SPLIT_DEFAULT);
-            }
-          }}
-        >
-          <span aria-hidden="true">&#10096;&#10097;</span>
-        </div>
-
-        <div className={styles.list}>
-          {rows.length === 0 ? (
-            <p className={styles.empty}>
-              The drawing for this figure is loaded, but its parts have not been
-              imported yet.
-            </p>
-          ) : (
-            <PartsTable
-              rows={rows}
+              // Ignore a stray click; a crop needs a real area.
+              if (rect && rect.w > 0.02 && rect.h > 0.02) {
+                setCrop(rect);
+                setCropping(false);
+              }
+            }}
+            onMouseLeave={() => {
+              if (dragRef.current) {
+                dragRef.current = null;
+                setMarquee(null);
+              }
+            }}
+          >
+            <DrawingViewer
+              label={`Sheet ${sheet}`}
+              src={drawing?.storagePath}
+              width={drawing?.width}
+              height={drawing?.height}
+              note={`Assembly drawing not supplied — ${figure.name}`}
+              markers={markers}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
               onTogglePart={toggleSelected}
               onHoverPart={setHoveredPartId}
-              requestedPartIds={requestedPartIds}
-              onToggleRequested={toggleRequested}
+              zoom={zoom}
+              onZoomChange={setZoom}
             />
-          )}
+            {marquee ? (
+              <span
+                className={styles.marquee}
+                style={{
+                  left: `${marquee.x * 100}%`,
+                  top: `${marquee.y * 100}%`,
+                  width: `${marquee.w * 100}%`,
+                  height: `${marquee.h * 100}%`,
+                }}
+              />
+            ) : null}
+
+            {unplaced > 0 ? (
+              <p className={styles.plateNotice}>
+                {markers.length === 0
+                  ? `None of this figure's ${callouts.length} callout numbers have been positioned yet`
+                  : `${unplaced} of ${callouts.length} callout numbers are not positioned yet`}
+                , so clicking a part cannot highlight it here. Match the Ref. no.
+                column against the numbers printed on the plate.
+              </p>
+            ) : null}
+          </div>
+
+          {/*
+            The handle the deck draws between the two surfaces. Dragging it moves
+            the split; the arrow keys move it a step at a time and a double-click
+            puts it back where the deck has it.
+          */}
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Width of the drawing"
+            aria-valuenow={Math.round(split)}
+            aria-valuemin={SPLIT_MIN}
+            aria-valuemax={SPLIT_MAX}
+            tabIndex={0}
+            className={styles.divider}
+            title="Drag to set the width of the drawing"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              resizingRef.current = true;
+              setResizing(true);
+            }}
+            onPointerMove={(event) => {
+              if (!resizingRef.current) return;
+              swallowClickRef.current = true;
+              splitFromPointer(event.clientX);
+            }}
+            onPointerUp={(event) => {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+              resizingRef.current = false;
+              setResizing(false);
+            }}
+            onPointerCancel={() => {
+              resizingRef.current = false;
+              setResizing(false);
+            }}
+            onDoubleClick={() => setSplit(SPLIT_DEFAULT)}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                setSplit((v) => clampSplit(v - SPLIT_STEP));
+              } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                setSplit((v) => clampSplit(v + SPLIT_STEP));
+              } else if (event.key === "Home") {
+                event.preventDefault();
+                setSplit(SPLIT_MIN);
+              } else if (event.key === "End") {
+                event.preventDefault();
+                setSplit(SPLIT_MAX);
+              } else if (event.key === "Enter") {
+                event.preventDefault();
+                setSplit(SPLIT_DEFAULT);
+              }
+            }}
+          >
+            <span aria-hidden="true">&#10096;&#10097;</span>
+          </div>
+
+          <div className={styles.list}>
+            {rows.length === 0 ? (
+              <p className={styles.empty}>
+                The drawing for this figure is loaded, but its parts have not been
+                imported yet.
+              </p>
+            ) : (
+              <PartsTable
+                rows={rows}
+                selectedPartIds={selectedPartIds}
+                hoveredPartId={hoveredPartId}
+                onTogglePart={toggleSelected}
+                onHoverPart={setHoveredPartId}
+                requestedPartIds={selectedPartIds}
+                onToggleRequested={toggleSelected}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {cartComingSoon ? (
+        <ComingSoon
+          title="Check cart — coming soon"
+          onClose={() => setCartComingSoon(false)}
+        >
+          The cart screen has not been designed yet. Use{" "}
+          <strong>Request a quote</strong> to review what you have gathered and
+          send it to RUF Diamond.
+        </ComingSoon>
+      ) : null}
 
       {fullScreen ? (
         <FullIllustration

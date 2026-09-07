@@ -98,12 +98,12 @@ export function DrawingViewer({
     return selectedPartIds.size > 0 ? ("muted" as const) : ("default" as const);
   };
 
-  // Only constrain the frame when a plate is actually attached; the empty
-  // state keeps the stylesheet's fixed height.
-  const frame =
-    src && width && height
-      ? { aspectRatio: `${width} / ${height}`, height: "auto" }
-      : undefined;
+  /*
+   * The frame no longer carries the drawing's aspect ratio. It used to, which
+   * pinned the sheet's height to the plate's shape and left the rest of the
+   * panel empty; the stage now fits the drawing inside whatever frame it is
+   * given, so the frame is free to fill.
+   */
 
   /*
    * Magnification is REAL SIZE, not a transform.
@@ -187,7 +187,6 @@ export function DrawingViewer({
         className={`${styles.sheet} ${zoom > 1 ? styles.sheetZoomed : ""} ${
           dragging ? styles.sheetDragging : ""
         }`}
-        style={frame}
         onMouseLeave={() => onHoverPart?.(null)}
         onPointerDown={startDrag}
         onPointerMove={onDrag}

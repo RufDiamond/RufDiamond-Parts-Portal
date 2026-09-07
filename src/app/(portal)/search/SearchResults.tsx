@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { EmptyState } from "@/components";
+import { ComingSoon, EmptyState } from "@/components";
 import { formatFigureRef, formatPrice } from "@/lib/format";
 import { useRequest } from "@/state/RequestContext";
 import type { PartUsageRow } from "@/types/catalog";
@@ -129,6 +129,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
     else router.back();
   };
 
+  const [cartComingSoon, setCartComingSoon] = useState(false);
   const [term, setTerm] = useState(query);
   const research = () => {
     const next = term.trim();
@@ -222,8 +223,8 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
         <button
           type="button"
           className={styles.button}
-          onClick={() => router.push("/request")}
-          title="Review the cart"
+          onClick={() => setCartComingSoon(true)}
+          title="The cart screen has not been built yet"
         >
           <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
@@ -358,6 +359,17 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
           </div>
         )}
       </div>
+
+      {cartComingSoon ? (
+        <ComingSoon
+          title="Check cart — coming soon"
+          onClose={() => setCartComingSoon(false)}
+        >
+          The cart screen has not been designed yet. Use{" "}
+          <strong>Request a quote</strong> to review what you have gathered and
+          send it to RUF Diamond.
+        </ComingSoon>
+      ) : null}
 
       {rows.length > 0 ? (
         <p className={styles.count}>

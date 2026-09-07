@@ -1,0 +1,52 @@
+/* A dialog for a screen that does not exist yet — the shape slide 42 draws. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(38, 38, 38, 0.6);
+}
+
+.panel {
+  width: min(420px, 100%);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border: 2px solid var(--select);
+  border-radius: 8px;
+  background: var(--paper);
+  /* White panel on a dark shell: state the ink. */
+  color: var(--ink);
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+}
+
+.body {
+  margin: 0 0 var(--space-4);
+  font: var(--weight-regular) var(--text-sm) / 1.5 var(--font-ui);
+  color: var(--text-secondary);
+}
+
+.ok {
+  min-width: 120px;
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--select);
+  border-radius: 4px;
+  background: var(--select);
+  color: var(--select-on);
+  font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  cursor: var(--cursor-pointer);
+}
+
+.ok:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
