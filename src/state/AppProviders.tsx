@@ -18,6 +18,9 @@ const PLACEHOLDER_COMPANY: Company = {
   type: "dealer",
   // 10% is the dealer rate the client uses, and the reference's default.
   discountRate: 0.1,
+  // The address the deck itself types on slide 52, so the default-address
+  // button has something real to fill until accounts exist.
+  defaultShippingAddress: "62 Smelter Road, Coniston, Ontario, Canada P0M 1M0",
 };
 
 /**

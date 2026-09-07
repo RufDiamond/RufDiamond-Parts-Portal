@@ -13,6 +13,7 @@ import {
 import {
   CroppedPart,
   DrawingViewer,
+  FullIllustration,
   PartsTable,
   Trail,
   type CropRect,
@@ -66,7 +67,7 @@ export function FigureWorkspace({
   lastId,
 }: FigureWorkspaceProps) {
   const router = useRouter();
-  const { figure, drawing, system, rows, callouts } = detail;
+  const { figure, drawing, system, variant, rows, callouts } = detail;
   const { selectedModel } = useMachine();
   const { addParts, removeLine, lines } = useRequest();
 
@@ -93,9 +94,19 @@ export function FigureWorkspace({
     [lines],
   );
 
-  /** Ticking a row puts the part on the cart; clicking it only highlights. */
-  const toggleRequested = (partId: string) => {
-    if (requestedPartIds.has(partId)) {
+  /**
+   * The tick and the lit marker are one state.
+   *
+   * Selecting a part — from a callout on the plate, a Ref number in the list,
+   * or the row itself — puts it on the cart and ticks its box; clearing the
+   * selection takes it off again. The two used to be separate, a click only
+   * highlighting, but a reader who lights a part on the drawing means to order
+   * it, and being made to tick it a second time reads as the click not having
+   * worked.
+   */
+  const setRequested = (partId: string, wanted: boolean) => {
+    if (wanted === requestedPartIds.has(partId)) return;
+    if (!wanted) {
       removeLine(partId);
       return;
     }
@@ -103,11 +114,32 @@ export function FigureWorkspace({
     if (row) addParts([{ part: row.part, qty: row.figurePart.qty }]);
   };
 
+  /** A callout, a Ref number or a row: select the part and tick it. */
+  const toggleSelected = (partId: string) => {
+    const selected = !selectedPartIds.has(partId);
+    toggle(partId);
+    setRequested(partId, selected);
+  };
+
+  /** The box itself, driving the same pair from the other end. */
+  const toggleRequested = (partId: string) => {
+    const wanted = !requestedPartIds.has(partId);
+    setRequested(partId, wanted);
+    if (wanted !== selectedPartIds.has(partId)) toggle(partId);
+  };
+
   const go = (id: string | null) => {
     if (id) router.push(`/figures/${id}`);
   };
 
   const unplaced = callouts.length - markers.length;
+
+  /*
+   * The whole plate, opened over the workspace — slide 37. The deck puts this
+   * on the second toolbar icon, where a "fit to view" used to sit; fitting is
+   * what the zoom control already does.
+   */
+  const [fullScreen, setFullScreen] = useState(false);
 
   /** Plate zoom. Markers are placed in percentages, so they scale with it. */
   const [zoom, setZoom] = useState(1);
@@ -268,10 +300,11 @@ export function FigureWorkspace({
         <button
           type="button"
           className={`${styles.button} ${styles.iconButton}`}
-          onClick={() => setZoom(1)}
-          disabled={zoom === 1}
-          title="Fit the plate to the panel"
-          aria-label="Fit to view"
+          onClick={() => setFullScreen((on) => !on)}
+          title="Open the illustration full screen"
+          aria-label="Illustration full screen"
+          aria-pressed={fullScreen}
+          data-armed={fullScreen || undefined}
         >
           <Image src="/toolbar/fit.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
@@ -430,9 +463,10 @@ export function FigureWorkspace({
             markers={markers}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
-            onTogglePart={toggle}
+            onTogglePart={toggleSelected}
             onHoverPart={setHoveredPartId}
             zoom={zoom}
+            onZoomChange={setZoom}
           />
           {marquee ? (
             <span
@@ -526,7 +560,7 @@ export function FigureWorkspace({
               rows={rows}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
-              onTogglePart={toggle}
+              onTogglePart={toggleSelected}
               onHoverPart={setHoveredPartId}
               requestedPartIds={requestedPartIds}
               onToggleRequested={toggleRequested}
@@ -535,11 +569,48 @@ export function FigureWorkspace({
         </div>
       </div>
 
+      {fullScreen ? (
+        <FullIllustration
+          label={`Sheet ${sheet}`}
+          src={drawing?.storagePath}
+          width={drawing?.width}
+          height={drawing?.height}
+          note={`Assembly drawing not supplied — ${figure.name}`}
+          markers={markers}
+          selectedPartIds={selectedPartIds}
+          hoveredPartId={hoveredPartId}
+          onTogglePart={toggleSelected}
+          onHoverPart={setHoveredPartId}
+          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          date={new Date().toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          onClose={() => setFullScreen(false)}
+        />
+      ) : null}
+
       {crop && drawing ? (
         <CroppedPart
           src={drawing.storagePath}
           rect={crop}
           trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          /*
+           * The foot of the PDF retraces the whole route to the part, serial
+           * range included — slide 36. It is the line that makes a printed
+           * crop identifiable months later, off the screen it came from.
+           */
+          footerTrail={[
+            "FIGURE SEARCH",
+            "FAT TRUCK",
+            `FAT TRUCK ${machineName}`,
+            variant.serialFrom ?? variant.label,
+            system.name,
+            `${figure.name} (FIG ${figure.groupNo})`,
+          ]
+            .join(" >> ")
+            .toUpperCase()}
           date={new Date().toLocaleDateString("en-CA", {
             year: "numeric",
             month: "long",

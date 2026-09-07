@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
 import styles from "./PartsTable.module.css";
@@ -55,6 +56,17 @@ export function PartsTable({
   const unit = currency ?? rows[0]?.part.currency ?? "CAD";
   const selectable = Boolean(onTogglePart);
   const tickable = Boolean(onToggleRequested);
+
+  /*
+   * Ref numbers carry the same three states as the squares on the plate, by
+   * the same rule: the selected or hovered part is lit, and once anything is
+   * selected everything else steps back. A number in the list and its marker
+   * on the drawing must never disagree.
+   */
+  const markerState = (partId: string): CalloutMarkerState => {
+    if (selectedPartIds.has(partId) || partId === hoveredPartId) return "active";
+    return selectedPartIds.size > 0 ? "muted" : "default";
+  };
 
   const visible = useMemo(() => {
     const active = Object.entries(filters).filter(([, v]) => v.trim());
@@ -184,7 +196,38 @@ export function PartsTable({
                     {calloutNumbers.length === 0 ? (
                       <span className={styles.noRef}>&mdash;</span>
                     ) : (
-                      calloutNumbers.join(", ")
+                      /*
+                       * The row is clickable too, so a click that a marker has
+                       * already handled is stopped here — letting it reach the
+                       * row would toggle the same part straight back off.
+                       */
+                      <span
+                        className={styles.refMarks}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {calloutNumbers.map((number) => (
+                          <CalloutMarker
+                            key={number}
+                            number={number}
+                            size="sm"
+                            state={markerState(part.id)}
+                            title={`${part.partNumber} \u2014 ${part.description}`}
+                            onActivate={
+                              selectable
+                                ? () => onTogglePart?.(part.id)
+                                : undefined
+                            }
+                            /*
+                             * Assert the hover, never clear it: the pointer
+                             * leaving a marker is usually still inside the row,
+                             * and the row's own mouseleave is what ends it.
+                             */
+                            onHoverChange={(hovering) => {
+                              if (hovering) onHoverPart?.(part.id);
+                            }}
+                          />
+                        ))}
+                      </span>
                     )}
                   </td>
 

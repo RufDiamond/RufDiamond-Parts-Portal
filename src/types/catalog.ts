@@ -184,6 +184,12 @@ export interface Company {
   type: CompanyType;
   /** Fraction, e.g. 0.15 for 15% off list. */
   discountRate: number;
+  /**
+   * Where this account's parts normally ship. Offered on the quote request as
+   * "Use my default shipping address" (slide 51); null when none is saved, and
+   * the button then has nothing to fill.
+   */
+  defaultShippingAddress: string | null;
 }
 
 /**
@@ -223,4 +229,46 @@ export interface FigureDetail {
   variant: Variant;
   rows: FigurePartRow[];
   callouts: Callout[];
+}
+
+/**
+ * One row of a part search: a part, and one place it is used.
+ *
+ * A part fitted on several figures returns one row per figure, because the
+ * columns the results screen shows — model, serial, system, page, assembly —
+ * describe the USAGE, not the part. Slide 19 lists them that way.
+ *
+ * Every usage field is nullable: a part can exist in the catalogue without
+ * appearing on any figure, and dropping it from the results would report a
+ * real match as no match.
+ */
+export interface PartUsageRow {
+  part: Part;
+  figureId: string | null;
+  /** Group number as printed, e.g. "6.1". Rendered as "FIG 6.1". */
+  groupNo: string | null;
+  /** The figure's name — the deck's ASSEMBLY NAME column. */
+  assemblyName: string | null;
+  systemName: string | null;
+  modelName: string | null;
+  /** Serial range the variant covers, as printed on the catalogue cover. */
+  serial: string | null;
+}
+
+/**
+ * Where one part is used, flattened to a single place.
+ *
+ * The quote request screen prints these columns beside a part that arrived
+ * there with no figure attached to it — see `getPartUsageIndex`.
+ */
+export interface PartUsageSummary {
+  /** Product line — "Fat Truck", "IronHorse", "Agilis". The documents' Brand. */
+  productLineName: string | null;
+  modelName: string | null;
+  serial: string | null;
+  systemName: string | null;
+  /** Group number as printed, e.g. "6.1". Rendered as "FIG 6.1". */
+  groupNo: string | null;
+  assemblyName: string | null;
+  figureId: string | null;
 }

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BRANDS } from "@/lib/brands";
 import {
   getFiguresForModel,
   getModels,
@@ -6,13 +7,6 @@ import {
   getVariants,
 } from "@/data/repository";
 import { BrandParts, type BrandModel } from "./BrandParts";
-
-/** URL slug per product line, e.g. /parts/fat-truck. */
-const BRANDS: Record<string, string> = {
-  "fat-truck": "Fat Truck",
-  ironhorse: "IronHorse",
-  agilis: "Agilis",
-};
 
 /**
  * Model photos supplied with the design deck. Keyed by model id; a model with
@@ -53,5 +47,7 @@ export default async function BrandPage({
     })),
   );
 
-  return <BrandParts productLine={productLine} models={entries} />;
+  return (
+    <BrandParts productLine={productLine} models={entries} slug={brand} />
+  );
 }

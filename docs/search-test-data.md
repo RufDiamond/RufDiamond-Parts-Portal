@@ -63,36 +63,46 @@ the same import that feeds the portal. 536 parts, 273 of them priced.
 
 ## Search by Description
 
-| Term | Matches | A part it finds |
-|---|---|---|
-| `filter` | 7 | Hatz oil filter |
-| `hose` | 31 | Hose/tube seal clamp 1-5/8" to 1-7/8" |
-| `seat` | 13 | Rh seat & safety belt |
-| `radiator` | 11 | Radiator bushing support |
-| `bolt` | 17 | M6 bolt |
-| `windshield` | 10 | Gas spring (lexan windshield) |
-| `latch` | 14 | Rotary push-to-close latch, striker bolt , steel, zi |
-| `bearing` | 1 | OIL-EMBEDDED FLANGED SLEEVE BEARING FOR 12 MM SHAFT  |
-| `pump` | 5 | Charge pump |
-| `valve` | 10 | Air release valve clamp |
-| `cable` | 18 | Tailgate cable |
-| `fuse` | 3 | Mega®/ amg safety fuse block with cover, 300a, 32vdc |
-| `light` | 14 | Rear light |
-| `tire` | 5 | Tire 63 x 24-24. |
+**Parts** is how many part records match. **Rows** is how many lines the
+results screen prints, which is larger: the screen lists one row per PLACE a
+part is used, so a part fitted on three figures is three rows. Check against
+Rows when reading the screen, against Parts when testing the query itself.
+
+| Term | Parts | Rows | A part it finds |
+|---|---|---|---|
+| `air filter` | 2 | 3 | Air filter donaldson |
+| `filter` | 7 | 8 | Hatz oil filter |
+| `hose` | 31 | 35 | Hose/tube seal clamp 1-5/8" to 1-7/8" |
+| `seat` | 13 | 14 | Rh seat & safety belt |
+| `radiator` | 11 | 14 | Radiator bushing support |
+| `bolt` | 17 | 20 | M6 bolt |
+| `windshield` | 10 | 14 | Gas spring (lexan windshield) |
+| `latch` | 14 | 17 | Rotary push-to-close latch, striker bolt , steel, zi |
+| `bearing` | 1 | 4 | OIL-EMBEDDED FLANGED SLEEVE BEARING FOR 12 MM SHAFT  |
+| `pump` | 5 | 5 | Charge pump |
+| `valve` | 10 | 10 | Air release valve clamp |
+| `cable` | 18 | 20 | Tailgate cable |
+| `fuse` | 3 | 3 | Mega®/ amg safety fuse block with cover, 300a, 32vdc |
+| `light` | 14 | 17 | Rear light |
+| `tire` | 5 | 5 | Tire 63 x 24-24. |
+| `window` | 9 | 10 | Front car operator left window |
+| `clamp` | 18 | 23 | Vibration damping clamp |
 
 ### Cases worth trying
 
-- `zinc plated` — 33 matches, a two-word term; the search has to handle a phrase, not just one word.
-- `air filter` — the deck's own placeholder; 2 matches.
-- `screw` — 32 matches, all fasteners; a good test of a long result list.
-- `grommet` — 2 matches, a short result list.
+- `zinc plated` — 26 parts / 47 rows, a two-word term; the search has to handle a phrase, not just one word.
+- `air filter` — the deck's own placeholder, and the field's placeholder text; 2 parts / 3 rows.
+- `screw` — 33 parts / 52 rows, all fasteners; the longest list, and the one that scrolls.
+- `bearing` — 1 part but 4 rows, the clearest case of one part on several figures.
+- `grommet` — 2 parts / 2 rows, a short result list.
 - `xyzzy` — no matches, for the empty state.
 
 
-## What is not built yet
+## State of the screen
 
-The two search boxes on the brand screen already route to
-`/search?mode=part|description&q=…`, but that route is still a placeholder —
-the results screens are slides 17–27 and have not been built. So these values
-will not return anything on screen yet; they are here so the results screens
-can be built and checked against real data the moment the design is settled.
+The results screen is built, to slides 19 and 20: ten columns, tick-to-select,
+the page reference linking through to its figure, and an empty state for a term
+that matches nothing. Both modes work from the brand screen's two boxes.
+
+Still open: slides 21–27 of the deck, which cover the rest of the search
+journey and have not been read against this screen.

@@ -129,6 +129,16 @@
   white-space: nowrap;
 }
 
+/* The Ref cell holds the callout squares themselves, so a number in the list
+   and its marker on the plate are visibly the same object. A part fitted in
+   two places carries two squares and wraps rather than widening the column. */
+.refMarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
 .partNo {
   font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
   white-space: nowrap;

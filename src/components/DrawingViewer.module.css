@@ -25,12 +25,25 @@
 /* The plate: drawing grid ground, dashed trim line, callouts on top. */
 .sheet {
   position: relative;
+  /*
+   * Room around the drawing. The callout squares sit at the plate's own
+   * extremes — a marker at 0% or 100% is centred on the edge — so without this
+   * they were half-cut by the frame. `.stage` is inset:0 against the PADDING
+   * box, so the plate and its markers inset together and stay aligned.
+   */
+  padding: var(--space-4);
   height: 520px;
   background-image: var(--grid-10);
   background-color: var(--surface-drawing);
   background-size: var(--grid-size) var(--grid-size);
   border: var(--border-thin);
-  overflow: hidden;
+  /* Zoomed past 1x the canvas is genuinely larger than this frame, so the
+     sheet scrolls to it rather than clipping it. */
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* Sized independently of its contents, so the canvas can be measured
+     against it — this is what makes a true fit at 1x possible. */
+  container-type: size;
 }
 
 .trim {
@@ -99,15 +112,36 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* Everything on the plate scales together, so percentage-placed markers stay
-   on their targets at any magnification. */
+/*
+ * The canvas the plate and its callouts share.
+ *
+ * At 1x it is CONTAINED — the smaller of the frame's width and the width its
+ * own proportions allow in the frame's height — so the whole drawing is in
+ * view with no scrollbar. Each step multiplies that, and because the box
+ * really grows, the frame scrolls instead of cropping. Markers are placed in
+ * percentages of this box, so they stay on their targets throughout.
+ */
 .stage {
-  position: absolute;
-  inset: 0;
-  transform-origin: center center;
-  transition: transform 120ms ease-out;
+  position: relative;
+  width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
+  aspect-ratio: var(--ratio, 3 / 2);
+  margin: 0 auto;
+  transition: width 120ms ease-out;
+}
+
+/* No plate attached: the empty state keeps the frame's own box. */
+.stage:has(> .trim) {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 .sheetZoomed {
-  cursor: var(--cursor-pointer);
+  cursor: grab;
+}
+
+.sheetDragging {
+  cursor: grabbing;
+  /* Selection during a drag makes the plate flicker blue. */
+  user-select: none;
 }

@@ -19,13 +19,16 @@ export interface BrandModel {
 export interface BrandPartsProps {
   productLine: ProductLine;
   models: BrandModel[];
+  /** This screen's own URL slug, e.g. "fat-truck". Carried into the search so
+   *  the results screen has a working way back. */
+  slug: string;
 }
 
 /**
  * A product line's landing screen, per slide 10: pick a model from the photo
  * grid, or go straight in by part number or description.
  */
-export function BrandParts({ productLine, models }: BrandPartsProps) {
+export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
   const router = useRouter();
   const { setMachine } = useMachine();
   const [partNo, setPartNo] = useState("");
@@ -43,7 +46,7 @@ export function BrandParts({ productLine, models }: BrandPartsProps) {
     const q = value.trim();
     if (!q) return;
     router.push(
-      `/search?mode=${mode}&q=${encodeURIComponent(q)}&brand=${productLine.id}`,
+      `/search?mode=${mode}&q=${encodeURIComponent(q)}&brand=${slug}`,
     );
   };
 

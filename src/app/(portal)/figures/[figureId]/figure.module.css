@@ -147,7 +147,15 @@
     minmax(0, var(--split-right, 59fr));
   gap: 6px;
   align-items: stretch;
-  min-height: 0;
+  /*
+   * Capped to the window, so a long parts list scrolls inside its own panel
+   * instead of growing the page and pushing the plate off the top. The
+   * subtraction is the chrome around it — sticky header, breadcrumb bar,
+   * toolbar, and the shell's margin below — measured at 191px above and 54px
+   * under. The floor keeps both panels usable on a short laptop.
+   */
+  height: calc(100dvh - 245px);
+  min-height: 320px;
 }
 
 /* While the handle is being dragged, nothing else should select or hover. */
@@ -165,16 +173,28 @@
 .list {
   position: relative;
   min-width: 0;
-  min-height: 460px;
+  /* The split sets the height now; a floor here would defeat it. */
+  min-height: 0;
   background: var(--deck-surface);
   border: 1px solid var(--rule);
   border-radius: 3px;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .list {
   display: flex;
   flex-direction: column;
+}
+
+/*
+ * The drawing stops shrinking at a readable size and the panel scrolls
+ * instead. Pulling the handle left used to crush the plate towards nothing,
+ * since the image is object-fit: contain and simply got smaller; past this
+ * floor the panel offers scrollbars and the drawing stays legible.
+ */
+.plate > * {
+  min-width: 360px;
+  min-height: 300px;
 }
 
 /* Callout numbers exist but have no position on the plate yet. */
