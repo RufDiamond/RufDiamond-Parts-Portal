@@ -13,6 +13,14 @@ import styles from "./quote.module.css";
 export interface QuoteRequestProps {
   /** Where each part is used, keyed by part id. */
   usage: Record<string, PartUsageSummary>;
+  /**
+   * Set when the view is opened inside another screen — the figure workspace
+   * shows it in place of the plate (slides 48-49) rather than navigating. The
+   * screen's own toolbar already says REQUEST A QUOTE, so the header bar comes
+   * off, and "Add more parts" goes back to the plate instead of the catalogue.
+   */
+  embedded?: boolean;
+  onAddMoreParts?: () => void;
 }
 
 type ShippingMethod = "standard" | "expedited";
@@ -28,7 +36,11 @@ const NONE = "—";
  * estimated shipping block. Prices are deliberately absent: the deck drops the
  * unit price column here because the quote is what establishes the price.
  */
-export function QuoteRequest({ usage }: QuoteRequestProps) {
+export function QuoteRequest({
+  usage,
+  embedded = false,
+  onAddMoreParts,
+}: QuoteRequestProps) {
   const router = useRouter();
   const { selectedModel, selectedVariant } = useMachine();
   const {
@@ -125,6 +137,7 @@ export function QuoteRequest({ usage }: QuoteRequestProps) {
 
   return (
     <div className={styles.screen}>
+      {embedded ? null : (
       <div className={styles.bar}>
         <span className={styles.title}>Request a quote</span>
         <span className={styles.count}>
@@ -133,6 +146,7 @@ export function QuoteRequest({ usage }: QuoteRequestProps) {
           {itemCount === 1 ? "piece" : "pieces"} · Fat Truck {machineName}
         </span>
       </div>
+      )}
 
       <div className={styles.surface}>
         <div className={styles.scroller}>
@@ -376,7 +390,9 @@ export function QuoteRequest({ usage }: QuoteRequestProps) {
         <button
           type="button"
           className={styles.primary}
-          onClick={() => router.push("/systems")}
+          onClick={() =>
+            onAddMoreParts ? onAddMoreParts() : router.push("/systems")
+          }
         >
           Add more parts
         </button>

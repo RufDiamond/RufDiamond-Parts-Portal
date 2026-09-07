@@ -1,5 +1,9 @@
 import { notFound } from "next/navigation";
-import { getFigureDetail, getFigures } from "@/data/repository";
+import {
+  getFigureDetail,
+  getFigures,
+  getPartUsageIndex,
+} from "@/data/repository";
 import { FigureWorkspace } from "./FigureWorkspace";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -19,12 +23,15 @@ export default async function FigurePage({
 
   // The sheet pager walks the figures of this system, in catalogue order.
   const siblings = await getFigures(detail.figure.variantId, detail.system.id);
+  // The quote view opens inside this screen, and its columns come from here.
+  const usage = await getPartUsageIndex();
   const index = siblings.findIndex((figure) => figure.id === figureId);
   const total = siblings.length;
 
   return (
     <FigureWorkspace
       detail={detail}
+      usage={usage}
       sheet={index === -1 ? "—" : `${pad(index + 1)} / ${pad(total)}`}
       index={index === -1 ? 0 : index}
       total={total || 1}

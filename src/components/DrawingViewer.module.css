@@ -1,6 +1,8 @@
 .viewer {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 /* Sheet strip above the plate: what this sheet is, and how many callouts. */
@@ -32,7 +34,14 @@
    * box, so the plate and its markers inset together and stay aligned.
    */
   padding: var(--space-4);
-  height: 520px;
+  /*
+   * The sheet takes whatever the panel leaves it rather than a fixed height or
+   * the drawing's own aspect ratio — that left a wide plate floating in the
+   * top third of a tall panel with dead white beneath. The stage inside fits
+   * the drawing to this frame, so filling it simply makes the drawing bigger.
+   */
+  flex: 1 1 auto;
+  min-height: 220px;
   background-image: var(--grid-10);
   background-color: var(--surface-drawing);
   background-size: var(--grid-size) var(--grid-size);
@@ -71,7 +80,6 @@
 
 @media (max-width: 1100px) {
   .sheet {
-    height: auto;
     aspect-ratio: 16 / 11;
   }
 }
