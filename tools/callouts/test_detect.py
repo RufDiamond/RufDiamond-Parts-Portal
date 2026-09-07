@@ -37,3 +37,19 @@ def test_finds_no_callout_the_figure_does_not_have():
     expected = set(gt.expected_numbers("fig-cabin-6-1"))
     found = {n for n, _, _ in detect_callouts(gt.drawing_for("fig-cabin-6-1"))}
     assert not (found - expected), f"invented callouts {sorted(found - expected)}"
+
+
+def test_recovers_all_six_filters_without_false_positives():
+    known = gt.placed("fig-filters-1-1")
+    found = detect_callouts(gt.drawing_for("fig-filters-1-1"))
+    assert len(found) == len(known) == 6
+    for number, x, y in known:
+        matches = [(fx, fy) for n, fx, fy in found if n == number]
+        assert len(matches) == 1, (number, found)
+        assert abs(matches[0][0] - x) <= TOLERANCE
+        assert abs(matches[0][1] - y) <= TOLERANCE
+
+
+def test_windows_does_not_hide_duplicate_or_false_detections_in_a_dictionary():
+    found = detect_callouts(gt.drawing_for("fig-cabin-6-1"))
+    assert len(found) == 9
