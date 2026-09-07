@@ -2,8 +2,10 @@
 
 The customer viewer already supports part/marker selection. The catalogue has
 572 imported callouts but only 15 positioned markers. New proposals in `review/`
-are deliberately outside `src/` and are **not imported by the application**.
-Do not write them into the seed or publish them without RUF Diamond sign-off.
+are deliberately outside `src/`; they are **not statically bundled or used in
+customer or ordinary-development responses**. The opt-in local preview reads
+them at runtime only after its server-side gates pass. Do not write them into
+the seed or publish them without RUF Diamond sign-off.
 
 ## Optional local viewer preview
 
@@ -22,7 +24,10 @@ detached response. The seed and review files are not modified. The viewer shows
 an unapproved/not-for-ordering notice, preserves existing coordinates and
 masks, excludes ambiguous or unassociated occurrences, and withholds Frame 2.1
 and Cabin 6.13 until their source conflicts are resolved. RUF Diamond approval
-and the existing catalogue publication gate remain required.
+and the existing catalogue publication gate remain required. On crowded plates,
+use the existing **Zoom in** control or open the full illustration; the preview
+notice remains visible in that full view. Fit view can still contain overlapping
+marker targets, so this guidance is not a claim that dense-layout UX is finished.
 
 ## Run the checks
 

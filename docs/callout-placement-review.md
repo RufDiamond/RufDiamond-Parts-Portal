@@ -125,7 +125,9 @@ overlay as unapproved and not for ordering. Frame 2.1 and Cabin 6.13 remain
 withheld because of their source conflicts; ambiguous, missing, duplicate,
 unassociated and out-of-bounds occurrences remain unplaced. This preview does
 not approve positions, change the seed, relax publication blockers or replace
-the required attributable RUF Diamond sign-off.
+the required attributable RUF Diamond sign-off. The notice points readers of
+crowded plates to the existing Zoom in and full-illustration controls, and the
+full-illustration header keeps the preview status visible outside the artwork.
 
 ## Browser verification and local demo evidence
 
@@ -160,8 +162,19 @@ This evidence establishes interaction behavior, not finished UI polish. At a
 marker-bounding-box pairs at fit view and none at 4x zoom. The page itself had
 no horizontal overflow (`documentWidth` equalled the 1,251-pixel viewport), but
 the dense existing 28-pixel marker squares can obscure nearby drawing detail.
-Zoom and the full-illustration view improve separation, with the recorded
-full-screen 1.5x state clearly readable. Most new plates have no silhouette
-masks, so the Windows fill treatment is not implied elsewhere. The unresolved
-source-conflict cases and RUF Diamond approval gate above remain unchanged, and
-customer publication is still blocked.
+The interface now explicitly recommends Zoom in or full illustration for
+crowded labels and retains the unapproved/not-for-ordering status in the full
+view's header. Those existing enlargement paths improve separation, with the
+recorded full-screen 1.5x state clearly readable, but fit-view density remains
+an unresolved UX limitation: marker targets were not shrunk, source positions
+were not moved, and no collision-avoidance behavior was invented. Most new
+plates have no silhouette masks, so the Windows fill treatment is not implied
+elsewhere. The unresolved source-conflict cases and RUF Diamond approval gate
+above remain unchanged, and customer publication is still blocked.
+
+After this guidance/status correction, controller browser verification on
+Engine 8.2 confirmed the workspace guidance, a readable fullscreen status with
+unapproved/not-for-ordering language and counts, persistent warning after Zoom
+in, and working close behavior at a 1,251-pixel viewport. The inspected local
+capture is `tmp/remaining-callouts-video/final-fullscreen-preview-warning.png`;
+it remains untracked review evidence, not a release artifact.

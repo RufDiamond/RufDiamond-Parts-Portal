@@ -17,6 +17,7 @@ export interface FullIllustrationProps {
   height?: number;
   note?: string;
   markers: DrawingMarker[];
+  previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
@@ -42,6 +43,7 @@ export function FullIllustration({
   height,
   note,
   markers,
+  previewNotice = null,
   selectedPartIds,
   hoveredPartId,
   onTogglePart,
@@ -147,6 +149,12 @@ export function FullIllustration({
           </div>
 
           <p className={styles.date}>Date: {date}</p>
+
+          {previewNotice ? (
+            <p role="status" className={styles.previewNotice}>
+              {previewNotice} Use <strong>Zoom in</strong> for crowded labels.
+            </p>
+          ) : null}
         </header>
 
         <div className={styles.stage}>

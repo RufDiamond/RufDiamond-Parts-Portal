@@ -13,5 +13,10 @@ export default defineConfig({
       ),
     },
   },
-  test: { include: ["tests/callout-preview.test.ts"] },
+  test: {
+    include: [
+      "tests/callout-preview.test.ts",
+      "tests/full-illustration-preview.test.tsx",
+    ],
+  },
 });

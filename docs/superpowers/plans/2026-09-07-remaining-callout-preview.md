@@ -63,7 +63,7 @@ export function loadCalloutPreview(detail: FigureDetail): Promise<CalloutPreview
 - `applyCalloutPreview` never mutates arguments. It receives only a source-validated proposal from the loader; it independently checks figure identity, existing placement, count uniqueness, row association and coordinate bounds.
 - `loadCalloutPreview` reads the real server environment; no UI-exposed argument can enable it. Return `{detail, notice: null}` before accessing review files if disabled. Handle absent proposal/drawing or source mismatch by preserving original detail and explaining why preview is unavailable. Handle unexpected file errors with a generic visible failure notice and a server diagnostic, without leaking filesystem details to the browser.
 
-- [ ] **Step 1: Establish clean baseline.** Run existing test runners (not pytest):
+- [x] **Step 1: Establish clean baseline.** Run existing test runners (not pytest):
 
 ```sh
 /Users/athifshaffy/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 tools/callouts/run_tests.py test_review
@@ -106,7 +106,13 @@ Also exercise the actual `buildDrawingMarkers` with two legitimate callouts shar
 
 Run `node_modules/.bin/vitest run --config vitest.callouts.config.mts`. First establish the RED failure, then implement; record exact evidence in the task report.
 
-- [ ] **Step 3: Implement filtering and integrity checks.** Pure adapter algorithm:
+Evidence caveat: the initial run failed during module collection with zero tests
+collected, so it did not establish the planned failing behavioral assertion and
+this checkbox remains open. The later Turbopack root-resolution regression and
+the final-review fullscreen-notice correction each have genuine collected
+RED/GREEN evidence; neither retroactively changes the initial result.
+
+- [x] **Step 3: Implement filtering and integrity checks.** Pure adapter algorithm:
 
 ```ts
 const blocked = new Set(['fig-frame-assy-2-1', 'fig-cabin-6-13']);
@@ -122,7 +128,7 @@ const blocked = new Set(['fig-frame-assy-2-1', 'fig-cabin-6-13']);
 
 Server loader reads `tools/callouts/review/proposals.json` as server-only evidence. Check schemaVersion 1, global NOT_FOR_CUSTOMER_USE status, null reviewer, matching catalogue SHA-256, exact `public${detail.drawing.storagePath}` path, drawing dimensions and SHA-256. Resolve only the matched repository drawing path, never a browser-supplied arbitrary path. Read catalogue and artwork on each enabled load so replacing either cannot reuse stale validation. Parse and validate the selected proposal shape before use. The disabled path must not read or transmit proposals.
 
-- [ ] **Step 4: Connect server result to existing viewer.**
+- [x] **Step 4: Connect server result to existing viewer.**
 
 ```tsx
 // page.tsx after detail is fetched and checked
@@ -140,7 +146,7 @@ previewNotice={preview.notice}
 
 Banner must say “Local preview — unapproved marker positions; not for ordering.” Show source conflict/unresolved explanations without covering the drawing. Reuse existing marker/table selection, hover, zoom, full illustration and cart semantics without changing handlers. No red silhouette promise: most plates have no masks.
 
-- [ ] **Step 5: Verify all plates and document counts.** Test all 44 proposals against the real repository through the enabled loader. Assert excluded figures have no new markers, oracles unchanged, every accepted occurrence resolves to a part and is in bounds, original callouts unchanged, and there are new positions in every other figure with usable proposals. Report exact eligible/partial/withheld counts, not “all fixed”. Run focused tests, TypeScript, lint and existing review tests. Document local enable command and production-off behavior.
+- [x] **Step 5: Verify all plates and document counts.** Test all 44 proposals against the real repository through the enabled loader. Assert excluded figures have no new markers, oracles unchanged, every accepted occurrence resolves to a part and is in bounds, original callouts unchanged, and there are new positions in every other figure with usable proposals. Report exact eligible/partial/withheld counts, not “all fixed”. Run focused tests, TypeScript, lint and existing review tests. Document local enable command and production-off behavior.
 
 ```sh
 RUF_CALLOUT_PREVIEW=1 npm run dev -- --port 3100 --hostname 127.0.0.1
@@ -149,7 +155,16 @@ npx tsc --noEmit
 npm run lint
 ```
 
-- [ ] **Step 6: Commit only scoped source/tests/docs after self-review.** Stage the exact file list above; preserve existing untracked dependencies, media and temporary artifacts. Report commit, RED/GREEN evidence, counts and limitations for independent review. No push.
+- [x] **Step 6: Commit only scoped source/tests/docs after self-review.** Stage the exact file list above; preserve existing untracked dependencies, media and temporary artifacts. Report commit, RED/GREEN evidence, counts and limitations for independent review. No push.
+
+Final-review correction:
+
+- [x] Preserve the optional preview status in the full-illustration header and
+  omit it when preview is off, with a collected render-test RED/GREEN cycle.
+- [x] Make the existing Zoom in/full-illustration enlargement path explicit
+  without moving coordinates, shrinking targets, or inventing viewer behavior.
+- [x] Clarify that proposals are runtime-read only by the gated local preview,
+  while dense fit-view marker overlap remains an honest limitation.
 
 ### Task 2: Browser verification and updated video
 

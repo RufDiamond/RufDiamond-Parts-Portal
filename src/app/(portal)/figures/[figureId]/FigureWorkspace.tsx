@@ -259,7 +259,8 @@ export function FigureWorkspace({
       <div className={styles.controls}>
         {previewNotice ? (
           <p role="status" className={styles.previewNotice}>
-            {previewNotice}
+            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
+            open the full illustration.
           </p>
         ) : null}
 
@@ -634,6 +635,7 @@ export function FigureWorkspace({
           height={drawing?.height}
           note={`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
+          previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
           onTogglePart={toggleSelected}
