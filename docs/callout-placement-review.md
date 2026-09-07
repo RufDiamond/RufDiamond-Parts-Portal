@@ -126,3 +126,42 @@ withheld because of their source conflicts; ambiguous, missing, duplicate,
 unassociated and out-of-bounds occurrences remain unplaced. This preview does
 not approve positions, change the seed, relax publication blockers or replace
 the required attributable RUF Diamond sign-off.
+
+## Browser verification and local demo evidence
+
+The enabled loopback development preview was exercised in the actual portal on
+7 September 2026. Bidirectional selection worked on Cabin 6.2 (26 proposed
+markers), Hydraulic 4.4 (3), Engine 8.2 (7), and Cowling 7.2 (5 placed, with
+reference 6 still unresolved): selecting a marker selected its table row, and
+selecting the row/reference highlighted the corresponding marker. Cabin 6.2
+also preserved a legitimate repeated-part relationship, with references 2 and
+18 highlighting together. Zoom was checked from 1x to 1.5x and back to 1x, and
+the full-illustration view retained the selected marker at 1.5x.
+
+The safety boundaries remained visible. Frame 2.1 and Cabin 6.13 showed their
+withheld warnings instead of guessed markers. Existing Windows roof-hatch mask
+behavior and Filters reference 3 selection still worked. A production server
+started with `RUF_CALLOUT_PREVIEW=1` still returned the original unplaced view
+with no local-preview notice, confirming that the flag alone cannot enable the
+overlay outside development.
+
+The local demo video is
+`output/video/rufdiamond-remaining-callouts-demo-2026-09-07.mp4`. It is a
+67.958-second H.264/yuv420p sequence of 17 genuine UI captures with caption
+footers, explicitly labelled **Step-by-step UI captures**; it is not a
+continuous screen recording or a release artifact. Full-file decoding
+completed without error, and beginning, middle, and ending frames were visually
+inspected. The source-frame manifest is
+`tmp/remaining-callouts-video/frames.json`. Both paths remain local and
+untracked.
+
+This evidence establishes interaction behavior, not finished UI polish. At a
+1,251-pixel viewport, Cabin 6.2's 26 markers produced 21 overlapping
+marker-bounding-box pairs at fit view and none at 4x zoom. The page itself had
+no horizontal overflow (`documentWidth` equalled the 1,251-pixel viewport), but
+the dense existing 28-pixel marker squares can obscure nearby drawing detail.
+Zoom and the full-illustration view improve separation, with the recorded
+full-screen 1.5x state clearly readable. Most new plates have no silhouette
+masks, so the Windows fill treatment is not implied elsewhere. The unresolved
+source-conflict cases and RUF Diamond approval gate above remain unchanged, and
+customer publication is still blocked.
