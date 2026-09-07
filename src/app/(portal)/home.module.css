@@ -1,206 +1,273 @@
-.copy {
-  font: var(--type-body);
-  color: var(--text-secondary);
-}
+/*
+ * Home — slide 5.
+ *
+ * The deck places these six cards at six different sizes with no shared edges.
+ * That reads as scattered in a browser, so on instruction they are aligned
+ * here: two columns, shared gutters, cards flush to their column, headings all
+ * to the left. The plate, the rounded corners, the italic copy and the icon
+ * sizes are the deck's.
+ *
+ * To return to the deck's literal arrangement, restore `position: absolute`
+ * on .card and the percentage rules that were here — see git history.
+ */
 
-.modeBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.searchRow {
-  display: flex;
-  gap: 0;
-}
-
-.searchInput {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: var(--control-height-lg);
-  padding: 0 var(--control-padding-x);
-  border: var(--border-thin);
-  border-right: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-}
-
-.searchInput:focus {
-  outline: none;
-  border-color: var(--ink);
-  background: var(--sheet);
-}
-
-/* Chrome paints the native clear control blue — the one colour this system
-   does not have. */
-.searchInput::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.tryRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.tryValues {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  color: var(--text-secondary);
-}
-
-/* Mode 2: the three steps, numbered with callout squares. */
-.steps {
-  display: flex;
-  flex-direction: column;
-  border-top: var(--border-thin);
-}
-
-.step {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) 0;
-  border-bottom: var(--border-thin);
-  font: var(--type-body-sm);
-}
-
-/* Results and recently-viewed share the row grid. */
-.rowList {
-  list-style: none;
-}
-
-.row {
+.stage {
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) 240px 24px;
-  align-items: center;
-  gap: var(--space-6);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 2cqw;
+  padding: 2.4cqw;
   width: 100%;
-  min-height: var(--row-height);
-  padding: 0 var(--space-4);
-  background: var(--paper);
-  border: 0;
-  border-bottom: var(--border-thin);
-  text-align: left;
-  font-family: inherit;
-  cursor: pointer;
+  min-height: 100%;
+  background-image: url("/home/grid.jpg");
+  background-size: cover;
+  background-position: center;
+  background-color: #0d0d0d;
+}
+
+/* Two columns of cards, each column flush top to bottom. */
+.column {
+  display: grid;
+  align-content: start;
+  gap: 2cqw;
+}
+
+.card {
+  display: grid;
+  align-content: center;
+  gap: 1cqw;
+  padding: 2cqw;
+  min-height: 11cqw;
+  border: 1px solid var(--deck-panel);
+  border-radius: 1cqw;
+  color: var(--deck-on-dark);
+}
+
+a.card {
+  text-decoration: none;
   transition: var(--transition-state);
 }
 
-.row:hover {
-  background: var(--sheet);
-  border-bottom: var(--border-thin);
+a.card:hover {
+  border-color: var(--select);
 }
 
-.rowRef {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-}
-
-.rowLabel {
-  font: var(--type-body);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.rowWhere {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.rowChevron {
-  color: var(--graphite);
-}
-
-/* Search result rows carry a price and an add control instead. */
-.resultRow {
+/* Text beside its icon. Needs to be a grid in its own right — this class is
+   used both on a card and on an inner row. */
+.withIcon {
   display: grid;
-  grid-template-columns: 130px minmax(0, 1fr) 140px 120px auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-4);
-  min-height: var(--row-height);
-  padding: var(--space-2) var(--space-4);
-  background: var(--paper);
-  border-bottom: var(--border-thin);
+  column-gap: 2cqw;
 }
 
-.resultNum {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  text-align: right;
+/* Cards whose icon leads. */
+.iconFirst {
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
-.resultMaker {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.body {
+  display: grid;
+  gap: 0.8cqw;
+  min-width: 0;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────
-   The row grids carry a fixed reference column, a flexible label and a
-   trailing detail. On a narrow screen the detail moves under the label
-   rather than being crushed. */
+.title {
+  margin: 0;
+  font: var(--weight-bold) 2.05cqw / 1.15 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
 
-@media (max-width: 900px) {
-  .modes {
+/* Kept so a card can still be set right if the client wants the deck's
+   original alignment back. */
+.titleRight {
+  text-align: left;
+}
+
+/* "Parts Ordering Information" is the one heading set in sentence case. */
+.titlePlain {
+  text-transform: none;
+}
+
+.text {
+  margin: 0;
+  font: italic var(--weight-regular) 1.32cqw / 1.35 var(--font-ui);
+  color: var(--deck-on-dark);
+}
+
+.textRight {
+  text-align: left;
+}
+
+.icon {
+  width: 9cqw;
+  height: auto;
+  max-height: 11cqw;
+  object-fit: contain;
+}
+
+.iconSmall {
+  width: 6.5cqw;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Still to be supplied by RUFDiamond — see clients.md. */
+.pending {
+  font: var(--weight-semibold) 1.05cqw / 1.2 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+/* ── Social ───────────────────────────────────────────────────────── */
+
+.social {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 2cqw;
+}
+
+.promo {
+  width: 13cqw;
+  height: auto;
+  object-fit: contain;
+}
+
+.socialBody {
+  display: grid;
+  justify-items: start;
+  gap: 1cqw;
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqw;
+}
+
+.socialLink {
+  display: inline-grid;
+  place-items: center;
+  transition: var(--transition-state);
+}
+
+.socialLink:hover {
+  opacity: 0.75;
+}
+
+.socialIcon {
+  width: 4.4cqw;
+  height: 4.4cqw;
+  object-fit: contain;
+}
+
+/* The YouTube mark is a wide rounded rectangle, not a circle. */
+.socialIconWide {
+  width: 5.4cqw;
+}
+
+/* ── News ─────────────────────────────────────────────────────────── */
+
+.news {
+  align-content: start;
+  gap: 1.4cqw;
+}
+
+.newsList {
+  display: grid;
+  gap: 1.4cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.newsItem {
+  display: grid;
+  grid-template-columns: 9cqw minmax(0, 1fr);
+  align-items: center;
+  gap: 1.6cqw;
+}
+
+/* The deck flips the middle story's picture to the right; with the screen
+   aligned, all three lead with the picture instead. */
+
+.newsThumb {
+  width: 100%;
+  height: 5.6cqw;
+  object-fit: cover;
+}
+
+.newsThumbTall {
+  height: 7.4cqw;
+  object-fit: contain;
+}
+
+.newsHeadline {
+  margin: 0;
+  font: italic var(--weight-regular) 1.32cqw / 1.3 var(--font-ui);
+}
+
+/* ── Narrow screens ───────────────────────────────────────────────────
+   A staged layout cannot survive a phone, so below tablet the cards leave
+   their positions and stack in reading order. */
+
+@media (max-width: 820px) {
+  .stage {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    padding: var(--space-4);
   }
 
-  .row {
-    grid-template-columns: 120px minmax(0, 1fr) 24px;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+  .column {
+    gap: var(--space-4);
   }
 
-  /* Where the figure sits is useful but not worth a column here. */
-  .rowWhere {
-    display: none;
+  .card {
+    gap: var(--space-2);
+    padding: var(--space-4);
+    min-height: 0;
+    border-radius: 6px;
   }
 
-  .resultRow {
-    grid-template-columns: 120px minmax(0, 1fr) auto;
-    gap: var(--space-2) var(--space-3);
+  .title {
+    font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+    text-align: left;
   }
 
-  .resultMaker {
-    display: none;
+  .text,
+  .newsHeadline {
+    font: italic var(--weight-regular) var(--text-sm) / 1.4 var(--font-ui);
+    text-align: left;
   }
+
+  .socialBody {
+    justify-items: start;
+  }
+
+  .icon { width: 64px; max-height: 64px; }
+  .iconSmall { width: 52px; }
+  .promo { width: 130px; }
+  .socialIcon { width: 34px; height: 34px; }
+  .newsItem { grid-template-columns: 96px minmax(0, 1fr); }
+  .newsThumb { height: 62px; }
+  .pending { font: var(--type-eyebrow); letter-spacing: var(--tracking-eyebrow); }
 }
 
-@media (max-width: 600px) {
-  .searchRow {
-    flex-direction: column;
-    gap: var(--space-2);
-  }
+/* The promo card is the LinkedIn link. */
+.promoLink {
+  display: block;
+  transition: var(--transition-state);
+}
 
-  .searchInput {
-    border-right: var(--border-thin);
-  }
+.promoLink:hover {
+  opacity: 0.85;
+}
 
-  /* Part number over description, price and action on their own line. */
-  .resultRow {
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-  }
-
-  .rowLabel {
-    white-space: normal;
-  }
-
-  .row {
-    grid-template-columns: minmax(0, 1fr) 24px;
-    align-items: start;
-  }
-
-  .rowRef {
-    grid-column: 1 / -1;
-  }
+/* A channel with no address supplied yet. */
+.socialLinkPending {
+  opacity: 0.45;
+  cursor: default;
 }

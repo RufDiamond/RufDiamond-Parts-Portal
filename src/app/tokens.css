@@ -37,6 +37,34 @@
 
   --status-hatch-stroke: var(--mid);
 
+  /* ── V2 deck palette. Measured from the slides, not chosen. ────────
+     The portal is dark: every slide's background is theme tx1 at lumMod 85% /
+     lumOff 15%, which resolves to #262626. White is used only where content
+     demands a light surface — the drawing plate and the parts table. */
+  --deck-ground: #262626;      /* slide background */
+  --deck-panel: #7f7f7f;       /* 1px outline round content panels */
+  --deck-surface: #ffffff;     /* drawing plate, parts table, rail cards */
+  --deck-button: #747474;      /* toolbar and action buttons */
+  --deck-button-edge: #e6e9ec; /* 0.8px button outline */
+  --deck-pill: #d0d0d0;        /* the date chip in the header */
+  --deck-pill-text: #747474;
+  --deck-on-dark: #ffffff;
+  --deck-table-head: #e8e8e8;
+  /* Slides 19-20, the search results table: a dark header row, a ticked row
+     filled pale blue, and the lit Back button that is the way out. Selection
+     here is blue, not --select red: these rows are a shortlist being gathered,
+     not a part lit on a drawing, and the deck keeps the two apart. */
+  --deck-results-head: #1c1c1c;
+  --deck-select-row: #bfe3f5;
+  --deck-accent: #2f6f8f;
+  --deck-accent-edge: #6fb5d8;
+  --deck-accent-hover: #3b87ac;
+
+  /* Type, converted from the deck's points at 96dpi (1pt = 1.333px). */
+  --deck-title: 33px;   /* 28pt at the deck's scale */
+  --deck-button-text: 16px; /* 12pt */
+  --deck-rail-label: 11px;  /* 8pt */
+
   /* ── Selection. The one deliberate departure from the five. ────────
      The reference carries no accent hue and says state is weight, fill and
      rule thickness. Selection is the exception: on a plate of forty numbered
@@ -121,6 +149,16 @@
 
   --row-height: 56px;
   --row-padding-x: var(--space-4);
+
+  --rail-width: 104px;
+
+  /* The RUF Diamond mark with its neon halo, as the deck draws the pointer —
+     tilted -145 degrees to match. 32px is the practical ceiling; larger
+     cursors are ignored outright. The same mark is used over clickable things,
+     so the pointer never changes. Hotspot sits top-left, like an arrow. */
+  --cursor-mark: url("/brand/cursor.png") 6 4, auto;
+  --cursor-pointer: url("/brand/cursor.png") 6 4, pointer;
+  --cursor-text: url("/brand/cursor.png") 6 4, text;
 
   --gutter-page: var(--space-8);
   --gutter-column: var(--space-6);

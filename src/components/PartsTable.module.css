@@ -1,159 +1,175 @@
+/*
+ * Parts list — slide 14. A white table on the figure screen's white panel:
+ * grey header, a filter row beneath it, hairline rules, no zebra.
+ */
+
+.scroller {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: var(--deck-surface);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
-  font: var(--type-body-sm);
+  font: var(--weight-regular) var(--text-xs) / 1.35 var(--font-ui);
+  color: var(--ink);
 }
 
-.table th,
-.table td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: var(--border-thin);
-  vertical-align: middle;
+/* ── Header ───────────────────────────────────────────────────────── */
+
+.head th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--space-2);
+  background: var(--deck-table-head);
+  border: 1px solid var(--rule);
+  font: var(--weight-semibold) var(--text-2xs) / 1.2 var(--font-ui);
   text-align: left;
-}
-
-.table tbody tr {
-  height: var(--row-height);
-}
-
-.table thead th {
-  padding-top: var(--space-3);
-  padding-bottom: var(--space-3);
-  border-bottom: var(--border-thick);
-  font: var(--type-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  color: var(--text-secondary);
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
-.tickHead,
-.tick {
-  width: 44px;
-  padding-right: 0;
+.tickHead {
+  width: 30px;
+  text-align: center;
 }
 
-/* Wide enough for two callout squares side by side — a part fitted twice
-   shows both its numbers inline, not stacked. */
-.refHead,
-.ref {
-  width: 96px;
+.refHead {
+  width: 72px;
 }
 
-.partNoHead,
-.partNo {
-  width: 130px;
+.partNoHead {
+  width: 116px;
 }
 
-.numHead,
+.qtyHead {
+  width: 46px;
+}
+
 .priceHead {
+  width: 96px;
   text-align: right;
 }
 
-.priceHead {
-  width: 130px;
+.remarksHead {
+  width: 170px;
 }
+
+/* ── Filter row ───────────────────────────────────────────────────── */
+
+.filterCell {
+  padding: 2px 3px;
+  background: var(--deck-table-head);
+  border: 1px solid var(--rule);
+}
+
+.filterInput {
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  font: var(--weight-regular) var(--text-2xs) / 1 var(--font-ui);
+  color: var(--ink);
+}
+
+.filterInput:focus-visible {
+  outline: 1px solid var(--ink);
+  outline-offset: -1px;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────── */
 
 .row {
   background: var(--paper);
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
-/* Hovering a marker on the drawing lights the matching row, and vice versa. */
+.row td,
+.row th {
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  vertical-align: middle;
+  font-weight: var(--weight-regular);
+  text-align: left;
+}
+
 .row:hover,
 .row[data-hovered] {
   background: var(--sheet);
 }
 
-/* Selected rows carry the heavy left rule, per the reference — now in the
-   selection colour, so a row and its markers on the plate read as one thing.
-   Fill stays light so the callout squares in the Ref cell can invert. */
+/* A selected row carries the selection colour, so the row and its markers on
+   the plate read as one thing. */
 .row[data-active] {
   background: var(--sheet);
   box-shadow: inset var(--rule-heavy) 0 0 0 var(--select);
 }
 
-.checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--ink);
-  cursor: pointer;
+.tickCell {
+  width: 30px;
+  text-align: center;
 }
 
-.refList {
-  display: inline-flex;
+.checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--select);
+  cursor: var(--cursor-pointer);
+}
+
+.ref {
+  font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
+  white-space: nowrap;
+}
+
+/* The Ref cell holds the callout squares themselves, so a number in the list
+   and its marker on the plate are visibly the same object. A part fitted in
+   two places carries two squares and wraps rather than widening the column. */
+.refMarks {
+  display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
-}
-
-.noRef {
-  font: var(--type-identifier);
-  color: var(--text-muted);
+  align-items: center;
 }
 
 .partNo {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
   white-space: nowrap;
-}
-
-.partButton {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  cursor: pointer;
-}
-
-.partButton:hover {
-  box-shadow: inset 0 -1px 0 currentColor;
 }
 
 .description {
-  font: var(--type-body-sm);
+  min-width: 160px;
 }
 
-/* Block, not flex: the cell has to stay a table-cell for the columns to line
-   up, so the sub-lines stack on their own. */
-.note {
-  display: block;
-  margin-top: 2px;
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.qty {
+  text-align: center;
 }
 
-.num {
+.price {
   text-align: right;
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
+  font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-mono);
   white-space: nowrap;
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────── */
-
-.scroller {
-  overflow-x: auto;
-  /* Momentum scrolling, and a hint that there is more to the right. */
-  -webkit-overflow-scrolling: touch;
+.remarks {
+  font-size: var(--text-2xs);
+  color: var(--text-secondary);
 }
 
-.scroller .table {
-  min-width: 640px;
+.noRef {
+  color: var(--text-muted);
 }
 
-@media (max-width: 900px) {
-  .table th,
-  .table td {
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .table tbody tr {
-    height: auto;
-  }
+.empty {
+  padding: var(--space-6);
+  border: 1px solid var(--rule);
+  text-align: center;
+  color: var(--text-secondary);
 }

@@ -15,6 +15,9 @@ export type { DrawingMarker, DrawingViewerProps } from "./DrawingViewer";
 export { EmptyState } from "./EmptyState";
 export type { EmptyStateProps } from "./EmptyState";
 
+export { FullIllustration } from "./FullIllustration";
+export type { FullIllustrationProps } from "./FullIllustration";
+
 export { FigureTile } from "./FigureTile";
 export type { FigureTileProps } from "./FigureTile";
 
@@ -25,6 +28,10 @@ export { MachineChip } from "./MachineChip";
 export type { MachineChipProps } from "./MachineChip";
 
 export { PageHeader } from "./PageHeader";
+export { PortalShell } from "./PortalShell";
+export { Trail } from "./Trail";
+export { CroppedPart } from "./CroppedPart";
+export type { CropRect } from "./CroppedPart";
 export type { PageHeaderProps } from "./PageHeader";
 
 export { Panel } from "./Panel";

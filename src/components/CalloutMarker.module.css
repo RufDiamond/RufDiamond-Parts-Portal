@@ -11,7 +11,7 @@
   font: var(--weight-semibold) var(--text-sm) / 1 var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 

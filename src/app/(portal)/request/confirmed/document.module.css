@@ -1,0 +1,132 @@
+/*
+ * A Quote Request document — slide 53.
+ *
+ * A plain white sheet meant to be read as paper, not as a screen: black on
+ * white, one column, a ruled parts table, and the notes beneath it. Two of
+ * these are produced per submission and differ only in the head.
+ */
+
+.sheet {
+  padding: var(--space-6);
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  /* White ground on a dark shell — the sheet states its own ink. */
+  color: #000;
+  font: var(--weight-regular) var(--text-2xs) / 1.45 var(--font-ui);
+}
+
+.head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  margin-bottom: var(--space-5);
+}
+
+.logo {
+  width: auto;
+  height: 34px;
+  object-fit: contain;
+}
+
+/* The dealer supplies their own mark; the deck leaves a box for it. */
+.dealerLogo {
+  display: grid;
+  place-items: center;
+  min-width: 140px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid #000;
+  font: var(--weight-semibold) var(--text-sm) / 1 var(--font-ui);
+}
+
+.addressed {
+  text-align: right;
+}
+
+.docTitle {
+  margin: 0 0 var(--space-2);
+  font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.line {
+  margin: 0;
+}
+
+.label {
+  font-weight: var(--weight-bold);
+}
+
+.reference {
+  font-family: var(--font-mono);
+}
+
+.intro {
+  margin: 0 0 var(--space-4);
+}
+
+.sectionTitle {
+  margin: 0 0 var(--space-2);
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: var(--space-5);
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2);
+  border: 1px solid #000;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-align: center;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.centre {
+  text-align: center;
+}
+
+.noteTitle {
+  margin: 0 0 var(--space-1);
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.note {
+  margin: 0 0 var(--space-4);
+}
+
+/* The deck sets the shipping section apart in red; on paper it is the one
+   part of the document that is conditional, so it carries its own weight. */
+.shippingTitle {
+  color: var(--select);
+}
+
+.shippingLead {
+  font-weight: var(--weight-bold);
+}
+
+.close {
+  margin: var(--space-5) 0 var(--space-4);
+}
+
+.signoff {
+  margin: 0;
+  font-style: italic;
+}

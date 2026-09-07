@@ -1,0 +1,179 @@
+/* Product-line landing screen — slide 10. */
+
+/*
+ * All three ways in — by model, by part number, by description — on one
+ * desktop screen, without scrolling. The model row is the only part that can
+ * grow, so it takes what is left after the two search panels.
+ */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.label {
+  margin: 0 0 var(--space-4);
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+  color: var(--deck-on-dark);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--deck-panel);
+  font: var(--type-body-sm);
+  color: var(--deck-on-dark);
+}
+
+/* ── Model grid ───────────────────────────────────────────────────── */
+
+/*
+ * Four across on a desktop, as the deck draws them. Fixed counts rather than
+ * an auto-fit track, because seven models only tile evenly at four or seven
+ * and an auto-fit floor lands on five at some widths, leaving a ragged
+ * second row.
+ */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 1180px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.tile {
+  display: grid;
+  align-content: space-between;
+  gap: 4px;
+  padding: var(--space-2);
+  border: 1px solid var(--deck-panel);
+  background: none;
+  color: var(--deck-on-dark);
+  font: inherit;
+  text-align: center;
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.tile:hover:not(:disabled) {
+  border-color: var(--select);
+}
+
+.tilePending {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.photo {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  /*
+   * The photographs are the only thing on this screen big enough to decide
+   * whether it fits, so they are capped against the viewport rather than at a
+   * fixed height: on a short laptop they give way, on a tall monitor they take
+   * the room.
+   */
+  max-height: clamp(86px, 14vh, 140px);
+  overflow: hidden;
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.photoNone {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+.tileName {
+  font: var(--weight-bold) var(--text-xs) / 1.25 var(--font-ui);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--deck-on-dark);
+}
+
+.tileNote {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--mid);
+}
+
+/* ── The two search entries ───────────────────────────────────────── */
+
+.searches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 820px) {
+  .searches { grid-template-columns: minmax(0, 1fr); }
+}
+
+.search {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--deck-panel);
+}
+
+/* The field fills its panel — the two of them share the width evenly. */
+.field {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: var(--control-height-md);
+  padding: 0 var(--space-3);
+  border: var(--border-thin);
+  background: var(--paper);
+  font: var(--type-identifier);
+  color: var(--text-primary);
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.go {
+  display: grid;
+  place-items: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  border: var(--border-thin);
+  background: var(--paper);
+  color: var(--text-primary);
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.go:hover {
+  background: var(--select);
+  color: var(--paper);
+  border-color: var(--select);
+}
+
+/* The model grid sits in its own panel above the two searches. */
+.gridPanel {
+  padding: var(--space-4);
+  border: 1px solid var(--deck-panel);
+}

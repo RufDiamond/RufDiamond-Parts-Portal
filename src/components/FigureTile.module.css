@@ -8,7 +8,7 @@
   font-family: inherit;
   text-align: left;
   color: var(--ink);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 

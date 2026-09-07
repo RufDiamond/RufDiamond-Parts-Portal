@@ -30,9 +30,31 @@ export interface RequestTotals {
   netTotal: number;
 }
 
+/** What the reader typed alongside the parts, carried into the documents. */
+export interface RequestDetails {
+  /** Per-part notes, keyed by part id. */
+  comments: Record<string, string>;
+  generalComment: string;
+  /**
+   * Null when the reader never asked for an estimate. Slide 53 is explicit:
+   * the shipping section is omitted from the documents entirely in that case,
+   * rather than printed empty.
+   */
+  shipping: {
+    address: string;
+    method: "standard" | "expedited" | null;
+  } | null;
+  /** Product line the parts belong to — "Fat Truck", "IronHorse", "Agilis". */
+  brand: string | null;
+  /** Serial range the machine falls in, printed against every part. */
+  serial: string | null;
+}
+
 /** The record of a submitted request, kept so the confirmation can be re-read. */
 export interface RequestConfirmation {
   reference: string;
+  /** What the reader typed, so the documents can be rebuilt after a refresh. */
+  details: RequestDetails;
   /** ISO timestamp. */
   submittedAt: string;
   lines: OrderLine[];
@@ -45,6 +67,12 @@ export interface RequestConfirmation {
 
 export interface RequestState {
   lines: OrderLine[];
+  /**
+   * Parts on the list but left OUT of the request — the unticked rows on the
+   * quote screen. Held as exclusions rather than inclusions so a newly added
+   * part is in by default, which is what adding one means.
+   */
+  excluded: string[];
   /** Taken from the first part added; reset when the list empties. */
   currency: Currency;
   /** False until the stored request list has been read. */
@@ -58,12 +86,16 @@ export interface RequestState {
 export interface StoredRequest {
   lines: OrderLine[];
   currency: Currency;
+  /** Optional: lists written before exclusions existed simply have none. */
+  excluded?: string[];
 }
 
 export type RequestAction =
   | { type: "add"; parts: RequestPartInput[] }
   | { type: "updateQty"; partId: string; qty: number }
   | { type: "remove"; partId: string }
+  | { type: "toggleIncluded"; partId: string }
+  | { type: "setAllIncluded"; included: boolean }
   | { type: "clear" }
   | { type: "submit"; confirmation: RequestConfirmation }
   | { type: "hydrateLines"; stored: StoredRequest | null }
@@ -71,6 +103,7 @@ export type RequestAction =
 
 export const initialRequestState: RequestState = {
   lines: [],
+  excluded: [],
   currency: "CAD",
   linesHydrated: false,
   lastConfirmation: null,
@@ -158,22 +191,51 @@ export function requestReducer(
       return {
         ...state,
         lines,
+        // A part that is gone cannot be excluded from anything.
+        excluded: state.excluded.filter((id) => id !== action.partId),
         currency: lines.length === 0 ? "CAD" : state.currency,
       };
     }
 
-    case "clear":
-      if (state.lines.length === 0) return state;
-      return { ...state, lines: [], currency: "CAD" };
+    case "toggleIncluded": {
+      if (!state.lines.some((line) => line.partId === action.partId)) {
+        return state;
+      }
+      const excluded = state.excluded.includes(action.partId)
+        ? state.excluded.filter((id) => id !== action.partId)
+        : [...state.excluded, action.partId];
+      return { ...state, excluded };
+    }
 
-    case "submit":
-      // The list empties into the confirmation.
+    case "setAllIncluded":
       return {
         ...state,
-        lines: [],
-        currency: "CAD",
+        excluded: action.included
+          ? []
+          : state.lines.map((line) => line.partId),
+      };
+
+    case "clear":
+      if (state.lines.length === 0) return state;
+      return { ...state, lines: [], excluded: [], currency: "CAD" };
+
+    case "submit": {
+      /*
+       * Only the ticked parts go. Anything left unticked was deliberately held
+       * back, so it stays on the list as a fresh working set rather than being
+       * silently submitted or silently dropped.
+       */
+      const kept = state.lines.filter((line) =>
+        state.excluded.includes(line.partId),
+      );
+      return {
+        ...state,
+        lines: kept,
+        excluded: [],
+        currency: kept.length === 0 ? "CAD" : state.currency,
         lastConfirmation: action.confirmation,
       };
+    }
 
     case "hydrateLines":
       // Anything added before the read landed wins over the stored list.
@@ -182,6 +244,7 @@ export function requestReducer(
         ...state,
         linesHydrated: true,
         lines: action.stored?.lines ?? [],
+        excluded: action.stored?.excluded ?? [],
         currency: action.stored?.currency ?? "CAD",
       };
 
@@ -257,8 +320,15 @@ export function readStoredRequest(): StoredRequest | null {
     // list beats an empty one when someone is twenty lines in.
     const lines = candidate.lines.filter(isOrderLine);
     const currency = candidate.currency === "USD" ? "USD" : "CAD";
+    const excluded = Array.isArray(candidate.excluded)
+      ? candidate.excluded.filter(
+          (id): id is string =>
+            typeof id === "string" &&
+            lines.some((line) => line.partId === id),
+        )
+      : [];
 
-    return { lines, currency };
+    return { lines, currency, excluded };
   } catch {
     return null;
   }
@@ -312,8 +382,17 @@ function writeStoredConfirmation(value: RequestConfirmation | null): void {
 
 export interface RequestContextValue extends RequestTotals {
   lines: OrderLine[];
+  /**
+   * The lines actually going on the request. Totals, the piece count and the
+   * submission are all built from THESE, so unticking a part takes it out of
+   * the cost and out of what ships.
+   */
+  includedLines: OrderLine[];
+  isIncluded: (partId: string) => boolean;
+  toggleIncluded: (partId: string) => void;
+  setAllIncluded: (included: boolean) => void;
   currency: Currency;
-  /** Total pieces across all lines. */
+  /** Total pieces across the INCLUDED lines. */
   itemCount: number;
   /** The account the discount comes from. Null until accounts exist. */
   company: Company | null;
@@ -327,7 +406,7 @@ export interface RequestContextValue extends RequestTotals {
   removeLine: (partId: string) => void;
   clear: () => void;
   /** Empties the list into a confirmation. Null when there is nothing to send. */
-  submit: () => RequestConfirmation | null;
+  submit: (details: RequestDetails) => RequestConfirmation | null;
 }
 
 const RequestContext = createContext<RequestContextValue | null>(null);
@@ -359,8 +438,12 @@ export function RequestProvider({
     // Don't write before the read has happened, or the empty initial state
     // would wipe what is already stored.
     if (!state.linesHydrated) return;
-    writeStoredRequest({ lines: state.lines, currency: state.currency });
-  }, [state.linesHydrated, state.lines, state.currency]);
+    writeStoredRequest({
+      lines: state.lines,
+      currency: state.currency,
+      excluded: state.excluded,
+    });
+  }, [state.linesHydrated, state.lines, state.currency, state.excluded]);
 
   // The confirmation outlives the request list so /request/confirmed survives
   // a refresh too.
@@ -390,29 +473,56 @@ export function RequestProvider({
     [],
   );
   const clear = useCallback(() => dispatch({ type: "clear" }), []);
+  const toggleIncluded = useCallback(
+    (partId: string) => dispatch({ type: "toggleIncluded", partId }),
+    [],
+  );
+  const setAllIncluded = useCallback(
+    (included: boolean) => dispatch({ type: "setAllIncluded", included }),
+    [],
+  );
 
   const discountRate = company?.discountRate ?? 0;
 
+  const excludedSet = useMemo(
+    () => new Set(state.excluded),
+    [state.excluded],
+  );
+
+  const includedLines = useMemo(
+    () => state.lines.filter((line) => !excludedSet.has(line.partId)),
+    [state.lines, excludedSet],
+  );
+
+  const isIncluded = useCallback(
+    (partId: string) => !excludedSet.has(partId),
+    [excludedSet],
+  );
+
+  // Cost follows the ticks, not the list.
   const totals = useMemo(
-    () => computeTotals(state.lines, discountRate),
-    [state.lines, discountRate],
+    () => computeTotals(includedLines, discountRate),
+    [includedLines, discountRate],
   );
 
   const itemCount = useMemo(
-    () => state.lines.reduce((sum, line) => sum + line.qty, 0),
-    [state.lines],
+    () => includedLines.reduce((sum, line) => sum + line.qty, 0),
+    [includedLines],
   );
 
-  const submit = useCallback((): RequestConfirmation | null => {
-    if (state.lines.length === 0) return null;
+  const submit = useCallback(
+    (details: RequestDetails): RequestConfirmation | null => {
+    // Nothing ticked is nothing to send, even with parts on the list.
+    if (includedLines.length === 0) return null;
 
     const confirmation: RequestConfirmation = {
       // Generated in the handler, never during render, so the server and the
       // client never disagree on it.
       reference: buildReference(new Date(), Math.random()),
+      details,
       submittedAt: new Date().toISOString(),
-      lines: state.lines,
-      totals: computeTotals(state.lines, discountRate),
+      lines: includedLines,
+      totals: computeTotals(includedLines, discountRate),
       discountRate,
       companyName: company?.name ?? null,
       currency: state.currency,
@@ -420,11 +530,17 @@ export function RequestProvider({
 
     dispatch({ type: "submit", confirmation });
     return confirmation;
-  }, [state.lines, state.currency, discountRate, company]);
+    },
+    [includedLines, state.currency, discountRate, company],
+  );
 
   const value = useMemo<RequestContextValue>(
     () => ({
       lines: state.lines,
+      includedLines,
+      isIncluded,
+      toggleIncluded,
+      setAllIncluded,
       currency: state.currency,
       itemCount,
       company,
@@ -441,6 +557,10 @@ export function RequestProvider({
     }),
     [
       state.lines,
+      includedLines,
+      isIncluded,
+      toggleIncluded,
+      setAllIncluded,
       state.currency,
       state.linesHydrated,
       state.lastConfirmation,
