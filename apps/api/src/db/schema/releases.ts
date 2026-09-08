@@ -14,8 +14,15 @@ const snapshot = () => ({ releaseId: uuid("release_id").notNull().references(() 
 
 export const releaseDrawing = pgTable("release_drawing", {
   ...snapshot(), objectKey: text("object_key").notNull(), filename: text("filename").notNull(), mediaType: text("media_type").notNull(), bytes: bigint("bytes", { mode: "bigint" }).notNull(),
-  sha256: text("sha256").notNull(), width: integer("width"), height: integer("height"), pages: integer("pages"), fileVersion: integer("file_version").notNull().default(1), previewObjectKey: text("preview_object_key"),
-}, t => [primaryKey({ columns: [t.releaseId, t.id] }), unique("release_drawing_source").on(t.releaseId, t.workingId), checksumCheck(t.sha256), check("release_drawing_dimensions", sql`${t.bytes} > 0 AND ${t.fileVersion} > 0 AND (${t.width} IS NULL OR ${t.width} > 0) AND (${t.height} IS NULL OR ${t.height} > 0) AND (${t.pages} IS NULL OR ${t.pages} > 0)`)]);
+  sha256: text("sha256").notNull(), width: integer("width"), height: integer("height"), pages: integer("pages"), fileVersion: integer("file_version").notNull().default(1), objectVersionId: text("object_version_id"),
+  previewObjectKey: text("preview_object_key"), previewObjectVersionId: text("preview_object_version_id"), previewSha256: text("preview_sha256"),
+  previewBytes: bigint("preview_bytes", { mode: "bigint" }), previewWidth: integer("preview_width"), previewHeight: integer("preview_height"),
+}, t => [
+  primaryKey({ columns: [t.releaseId, t.id] }), unique("release_drawing_source").on(t.releaseId, t.workingId), checksumCheck(t.sha256),
+  check("release_drawing_dimensions", sql`${t.bytes} > 0 AND ${t.fileVersion} > 0 AND (${t.width} IS NULL OR ${t.width} > 0) AND (${t.height} IS NULL OR ${t.height} > 0) AND (${t.pages} IS NULL OR ${t.pages} > 0)`),
+  check("release_drawing_object_versions", sql`(${t.objectVersionId} IS NULL OR length(btrim(${t.objectVersionId})) > 0) AND (${t.previewObjectVersionId} IS NULL OR length(btrim(${t.previewObjectVersionId})) > 0)`),
+  check("release_drawing_preview_metadata", sql`(${t.previewSha256} IS NULL OR ${t.previewSha256} ~ '^[a-f0-9]{64}$') AND (${t.previewBytes} IS NULL OR ${t.previewBytes} > 0) AND (${t.previewWidth} IS NULL OR ${t.previewWidth} > 0) AND (${t.previewHeight} IS NULL OR ${t.previewHeight} > 0)`),
+]);
 
 export const releaseModel = pgTable("release_model", {
   ...snapshot(), productLineId: uuid("product_line_id").notNull(), productLineName: text("product_line_name").notNull(), manufacturer: text("manufacturer"), country: text("country"), isDistributed: boolean("is_distributed").notNull().default(false),
@@ -47,5 +54,5 @@ export const releaseFigurePart = pgTable("release_figure_part", {
 }, t => [primaryKey({ columns: [t.releaseId, t.id] }), unique("release_figure_part_source").on(t.releaseId, t.workingId), unique("release_figure_part_figure").on(t.releaseId, t.id, t.figureId), unique("release_figure_part_row").on(t.releaseId, t.figureId, t.sourceRowKey), foreignKey({ columns: [t.releaseId, t.figureId], foreignColumns: [releaseFigure.releaseId, releaseFigure.id] }), foreignKey({ columns: [t.releaseId, t.partId], foreignColumns: [releasePart.releaseId, releasePart.id] }), check("release_figure_part_qty", sql`${t.qty} > 0`), check("release_figure_part_dates", sql`${t.effectiveTo} >= ${t.effectiveFrom}`)]);
 
 export const releaseCallout = pgTable("release_callout", {
-  ...snapshot(), figureId: uuid("figure_id").notNull(), figurePartId: uuid("figure_part_id").notNull(), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }).notNull(), y: numeric("y", { precision: 7, scale: 4 }).notNull(),
+  ...snapshot(), figureId: uuid("figure_id").notNull(), figurePartId: uuid("figure_part_id").notNull(), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }).notNull(), y: numeric("y", { precision: 7, scale: 4 }).notNull(), maskPath: text("mask_path"),
 }, t => [primaryKey({ columns: [t.releaseId, t.id] }), unique("release_callout_source").on(t.releaseId, t.workingId), unique("release_callout_row").on(t.releaseId, t.figureId, t.sourceKey), foreignKey({ columns: [t.releaseId, t.figureId], foreignColumns: [releaseFigure.releaseId, releaseFigure.id] }), foreignKey({ name: "release_callout_same_figure", columns: [t.releaseId, t.figurePartId, t.figureId], foreignColumns: [releaseFigurePart.releaseId, releaseFigurePart.id, releaseFigurePart.figureId] }), check("release_callout_coordinates", sql`${t.x} BETWEEN 0 AND 100 AND ${t.y} BETWEEN 0 AND 100`)]);

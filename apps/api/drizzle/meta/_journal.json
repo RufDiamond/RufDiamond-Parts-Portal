@@ -36,6 +36,13 @@
       "when": 1788695462371,
       "tag": "0005_contract_status_and_staging",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1788829860655,
+      "tag": "0006_integration_fields",
+      "breakpoints": true
     }
   ]
 }

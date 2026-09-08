@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startPostgres } from "../helpers/postgres.js";
-import { sql } from "drizzle-orm";
-import { getTableConfig } from "drizzle-orm/pg-core";
+import { is, sql } from "drizzle-orm";
+import { getTableConfig, PgTable } from "drizzle-orm/pg-core";
 import * as schema from "../../src/db/schema/index.js";
 import { closeDatabase, createDatabase, withTransaction } from "../../src/db/client.js";
 
@@ -15,7 +15,7 @@ describe("PostgreSQL domain constraints", () => {
     await expect(postgres.migrate()).resolves.toBeUndefined();
     await expect(postgres.migrate()).resolves.toBeUndefined();
     const result = await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations");
-    expect(result.rows[0].count).toBe(5);
+    expect(result.rows[0].count).toBe(6);
     expect((await postgres.pool.query("select count(*)::int as count from capability")).rows[0].count).toBe(45);
   });
 
@@ -88,7 +88,7 @@ describe("PostgreSQL domain constraints", () => {
     const company = randomUUID();
     const user = randomUUID();
     await postgres.pool.query("insert into company(id,name) values($1,'Mine')", [company]);
-    await postgres.pool.query("insert into app_user(id,company_id,name,email,password_hash,role_id) select $1,$2,'Buyer',$3,'argon2-placeholder',id from role where key='purchaser'", [user, company, `${user}@example.test`]);
+    await postgres.pool.query("insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,$2,'Buyer',$3,$3,'argon2-placeholder',id from role where key='purchaser'", [user, company, `${user}@example.test`]);
     return { company, user };
   }
 
@@ -215,6 +215,7 @@ describe("PostgreSQL domain constraints", () => {
     const deployed = new Map(actual.rows.map(row => [`${row.table_name}.${row.column_name}`, row]));
     let count = 0;
     for (const table of Object.values(schema)) {
+      if (!is(table, PgTable)) continue;
       const config = getTableConfig(table);
       for (const column of config.columns) {
         const key = `${config.name}.${column.name}`;
