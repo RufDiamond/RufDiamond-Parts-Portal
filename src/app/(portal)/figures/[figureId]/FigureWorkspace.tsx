@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -48,6 +49,8 @@ function clampSplit(value: number): number {
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
   previewNotice?: string | null;
+  /** Isolated hosted review: selection is allowed, commerce/export is not. */
+  reviewOnly?: boolean;
   /** Where each part is used — the quote view opens inside this screen. */
   usage: Record<string, PartUsageSummary>;
   /** Sheet number as printed, e.g. "01 / 04". */
@@ -64,6 +67,7 @@ export interface FigureWorkspaceProps {
 export function FigureWorkspace({
   detail,
   previewNotice = null,
+  reviewOnly = false,
   usage,
   sheet,
   index,
@@ -87,13 +91,14 @@ export function FigureWorkspace({
   );
 
   useEffect(() => {
+    if (reviewOnly) return;
     recordRecentFigure({
       figureId: figure.id,
       groupNo: figure.groupNo,
       figureName: figure.name,
       systemName: system.name,
     });
-  }, [figure.id, figure.groupNo, figure.name, system.name]);
+  }, [figure.id, figure.groupNo, figure.name, system.name, reviewOnly]);
 
   const machineName = selectedModel?.name ?? "FT3 Wagon";
   const requestedPartIds = useMemo(
@@ -134,11 +139,12 @@ export function FigureWorkspace({
   );
 
   const addSelectedToCart = () => {
+    if (reviewOnly) return;
     if (pending.length > 0) addParts(pending);
   };
 
   const go = (id: string | null) => {
-    if (id) router.push(`/figures/${id}`);
+    if (id) router.push(`${reviewOnly ? "/review" : ""}/figures/${id}`);
   };
 
   const unplaced = callouts.length - markers.length;
@@ -223,6 +229,7 @@ export function FigureWorkspace({
 
   /** Hand the figure's parts list to the reader's mail client. */
   const emailFigure = () => {
+    if (reviewOnly) return;
     const lines = rows.map(
       (row) =>
         `${row.calloutNumbers.join(", ") || "-"}\t${row.part.partNumber}\t` +
@@ -257,6 +264,13 @@ export function FigureWorkspace({
       />
 
       <div className={styles.controls}>
+        <p className={styles.previewNotice}>
+          {reviewOnly ? (
+            <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
+          ) : (
+            <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
+          )}
+        </p>
         {previewNotice ? (
           <p role="status" className={styles.previewNotice}>
             {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
@@ -316,6 +330,7 @@ export function FigureWorkspace({
           }}
           title={cropping ? "Cancel the crop" : "Crop a region of the plate"}
           aria-label="Crop a region"
+          disabled={reviewOnly}
           aria-pressed={cropping}
           data-armed={cropping || undefined}
         >
@@ -371,10 +386,12 @@ export function FigureWorkspace({
            * arrived empty — which is exactly what it did.
            */
           onClick={() => {
+            if (reviewOnly) return;
             addSelectedToCart();
             setQuoting(true);
           }}
           title="Add anything ticked, then draw up the request"
+          disabled={reviewOnly}
           aria-pressed={quoting}
           data-armed={quoting || undefined}
         >
@@ -387,7 +404,7 @@ export function FigureWorkspace({
           type="button"
           className={styles.button}
           onClick={addSelectedToCart}
-          disabled={pending.length === 0}
+          disabled={reviewOnly || pending.length === 0}
           title={
             selectedPartIds.size === 0
               ? "Tick a part first"
@@ -405,7 +422,7 @@ export function FigureWorkspace({
           type="button"
           className={styles.button}
           onClick={emailFigure}
-          disabled={rows.length === 0}
+          disabled={reviewOnly || rows.length === 0}
           title="Email this parts list"
         >
           <Image src="/toolbar/email.png" alt="" width={40} height={28}
@@ -416,7 +433,8 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() => window.print()}
+          onClick={() => { if (!reviewOnly) window.print(); }}
+          disabled={reviewOnly}
         >
           <Image src="/toolbar/print.png" alt="" width={40} height={40}
             className={styles.buttonIcon} />
@@ -426,7 +444,8 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() => setCartComingSoon(true)}
+          onClick={() => { if (!reviewOnly) setCartComingSoon(true); }}
+          disabled={reviewOnly}
           title="The cart screen has not been built yet"
         >
           <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
@@ -436,7 +455,7 @@ export function FigureWorkspace({
         </div>
       </div>
 
-      {quoting ? (
+      {quoting && !reviewOnly ? (
         <QuoteRequest
           usage={usage}
           embedded
@@ -609,7 +628,7 @@ export function FigureWorkspace({
                 onTogglePart={toggleSelected}
                 onHoverPart={setHoveredPartId}
                 requestedPartIds={selectedPartIds}
-                onToggleRequested={toggleSelected}
+                onToggleRequested={reviewOnly ? undefined : toggleSelected}
               />
             )}
           </div>

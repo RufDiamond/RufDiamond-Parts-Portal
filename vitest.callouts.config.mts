@@ -20,6 +20,7 @@ export default defineConfig({
       "tests/drawing-viewer-pan.test.tsx",
       "tests/drawing-viewer-wheel.test.ts",
       "tests/full-illustration-preview.test.tsx",
+      "tests/hosted-marker-review.test.tsx",
     ],
   },
 });

@@ -97,19 +97,29 @@ function unavailable(reason: string): string {
 }
 
 /**
- * Opt into review-only callout coordinates on a local development server.
+ * Local preview remains development-only. The hosted-review surface is an
+ * explicit read-only demo route, never an option on the customer catalogue API.
  * Every enabled request revalidates both the catalogue and exact drawing bytes.
  */
 export async function loadCalloutPreview(
   detail: FigureDetail,
+  surface: "local" | "hosted-review" = "local",
 ): Promise<CalloutPreview> {
   if (
-    process.env.NODE_ENV !== "development" ||
-    process.env.RUF_CALLOUT_PREVIEW !== "1"
+    surface !== "hosted-review" &&
+    (process.env.NODE_ENV !== "development" ||
+      process.env.RUF_CALLOUT_PREVIEW !== "1")
   ) {
     return { detail, notice: null };
   }
 
+  const result = await loadValidatedPreview(detail);
+  return surface === "hosted-review"
+    ? { ...result, notice: result.notice?.replace("Local preview", "Marker review") ?? null }
+    : result;
+}
+
+async function loadValidatedPreview(detail: FigureDetail): Promise<CalloutPreview> {
   try {
     const [reviewBytes, catalogueBytes] = await Promise.all([
       fs.readFile(REVIEW_PATH),
@@ -145,7 +155,7 @@ export async function loadCalloutPreview(
       return { detail, notice: unavailable("drawing dimensions mismatch") };
     }
 
-    const drawingPath = path.resolve(REPOSITORY_ROOT, proposal.drawingPath);
+    const drawingPath = path.resolve(PUBLIC_ROOT, proposal.drawingPath.slice("public/".length));
     if (!drawingPath.startsWith(`${PUBLIC_ROOT}${path.sep}`)) {
       return { detail, notice: unavailable("drawing path mismatch") };
     }
