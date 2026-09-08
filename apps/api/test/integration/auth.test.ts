@@ -5,6 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { buildApp } from "../../src/app.js";
 import { createDatabase } from "../../src/db/client.js";
 import { createPasswordService, PRODUCTION_PASSWORD_OPTIONS } from "../../src/modules/identity/passwords.js";
+import { createIdentityService, sha256 } from "../../src/modules/identity/service.js";
 import {
   createPasswordResetDelivery,
   decryptProtectedDelivery,
@@ -366,5 +367,81 @@ describe("first-party authentication", () => {
     expect(row.after_patch).toMatchObject({ outcome: "denied", targetUserId: identity.userId, loginFingerprint: expect.stringMatching(/^[a-f0-9]{64}$/) });
     expect(JSON.stringify(row)).not.toContain(identity.loginId);
     expect(JSON.stringify(row)).not.toContain(identity.password);
+  });
+
+  it("does not issue a stale session when a reset changes the verified password before insertion", async () => {
+    const identity = await account();
+    const resetToken = randomBytes(32).toString("base64url");
+    const issuedAt = new Date();
+    await postgres.pool.query(
+      "insert into password_reset_token(token_hash,user_id,expires_at,created_at,updated_at) values($1,$2,$3,$4,$4)",
+      [sha256(resetToken), identity.userId, new Date(issuedAt.getTime() + 30 * 60_000), issuedAt],
+    );
+    const realPasswords = createPasswordService(passwordOptions);
+    let releaseVerification!: () => void;
+    let observedVerification!: () => void;
+    const verificationObserved = new Promise<void>(resolve => { observedVerification = resolve; });
+    const verificationRelease = new Promise<void>(resolve => { releaseVerification = resolve; });
+    let pauseFirstVerification = true;
+    const signInService = await createIdentityService({
+      database: connection,
+      sessionSecret: config.sessionSecret,
+      deliveryEncryption: config.deliveryEncryption,
+      passwords: {
+        hash: password => realPasswords.hash(password),
+        async verify(encodedHash, password) {
+          const result = await realPasswords.verify(encodedHash, password);
+          if (pauseFirstVerification) {
+            pauseFirstVerification = false;
+            observedVerification();
+            await verificationRelease;
+          }
+          return result;
+        },
+      },
+    });
+    const resetService = await createIdentityService({
+      database: connection,
+      sessionSecret: config.sessionSecret,
+      deliveryEncryption: config.deliveryEncryption,
+      passwordOptions,
+    });
+
+    const staleSignIn = signInService.authenticate(identity.loginId, identity.password);
+    await verificationObserved;
+    await resetService.completePasswordReset(resetToken, "replacement password value", "reset-request");
+    releaseVerification();
+
+    await expect(staleSignIn).rejects.toMatchObject({ code: "INVALID_CREDENTIALS", status: 401 });
+    expect((await postgres.pool.query("select count(*)::int as count from session where revoked_at is null")).rows[0].count).toBe(0);
+  });
+
+  it("audits direct privilege-change revocation with the supplied actor context", async () => {
+    const identity = await account();
+    const service = await createIdentityService({
+      database: connection,
+      sessionSecret: config.sessionSecret,
+      deliveryEncryption: config.deliveryEncryption,
+      passwordOptions,
+    });
+    const session = await service.authenticate(identity.loginId, identity.password);
+    await service.revokeForPrivilegeChange(identity.userId, {
+      actorUserId: identity.userId,
+      companyId: identity.companyId,
+      capability: "accounts.manage",
+      requestId: "privilege-change-request",
+    });
+
+    await expect(service.readSession(session.sessionToken)).resolves.toBeNull();
+    const audit = (await postgres.pool.query("select actor_id,effective_company_id,capability,object_type,object_id,after_patch,request_id from audit_log where request_id='privilege-change-request'")).rows[0];
+    expect(audit).toEqual({
+      actor_id: identity.userId,
+      effective_company_id: identity.companyId,
+      capability: "accounts.manage",
+      object_type: "app_user",
+      object_id: identity.userId,
+      after_patch: { action: "privilege_change", revokedCount: 1 },
+      request_id: "privilege-change-request",
+    });
   });
 });

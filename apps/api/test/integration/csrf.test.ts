@@ -117,6 +117,9 @@ describe("origin and CSRF protection", () => {
     });
     expect(current.statusCode).toBe(200);
     expect(String(current.headers["set-cookie"])).toContain("Expires=Thu, 01 Jan 1970 00:00:00 GMT");
+    expect((await postgres.pool.query("select capability,object_type,after_patch from audit_log where request_id=$1", [current.headers["x-request-id"]])).rows[0]).toEqual({
+      capability: "identity.sign-out", object_type: "session", after_patch: { action: "sign_out", scope: "current", revokedCount: 1 },
+    });
     expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: first.cookie } })).statusCode).toBe(401);
     expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: second.cookie } })).statusCode).toBe(200);
 
@@ -126,8 +129,28 @@ describe("origin and CSRF protection", () => {
       payload: { allSessions: true },
     });
     expect(all.statusCode).toBe(200);
+    expect((await postgres.pool.query("select capability,object_type,object_id,after_patch from audit_log where request_id=$1", [all.headers["x-request-id"]])).rows[0]).toMatchObject({
+      capability: "identity.sign-out", object_type: "app_user", after_patch: { action: "sign_out", scope: "all", revokedCount: 1 },
+    });
     expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: second.cookie } })).statusCode).toBe(401);
     expect((await postgres.pool.query("select count(*)::int as count from session where revoked_at is null")).rows[0].count).toBe(0);
+  });
+
+  it("rotates only the presented browser session during a successful sign-in", async () => {
+    const { app, loginId, password } = await fixture();
+    const presented = await login(app, loginId, password);
+    const independent = await login(app, loginId, password);
+
+    const replacementResponse = await app.inject({
+      method: "POST", url: "/api/v1/auth/sign-in",
+      headers: { origin: webOrigin, cookie: presented.cookie }, payload: { loginId, password },
+    });
+    const replacementCookie = String(replacementResponse.headers["set-cookie"]).split(";")[0];
+
+    expect(replacementResponse.statusCode).toBe(200);
+    expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: presented.cookie } })).statusCode).toBe(401);
+    expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: replacementCookie } })).statusCode).toBe(200);
+    expect((await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie: independent.cookie } })).statusCode).toBe(200);
   });
 
   it("accepts only an exact web origin and a canonical 32-byte delivery keyring", () => {

@@ -142,3 +142,64 @@ The complete dependency audit still reports the pre-existing four moderate devel
 - The rate limiter is deliberately process-local and resets on restart; it is appropriate only for the documented single-API pilot and is not cross-instance durable protection.
 - A configured worker must retain previous delivery decryption keys until every pending envelope using them has expired. The API intentionally does not start that worker, and this task provides no real notification adapter.
 - Task 5 must replace the typed deny-all authorization resolver with the real database-backed policy before protected customer catalogue routes are enabled.
+
+## Review fix round 1
+
+Base reviewed: `f6849fa67238a6c946d4f8353a824d915ad70892`.
+
+### Fixes
+
+- Session issuance and password reset now serialize on the same `app_user` row lock. Argon2 verification remains outside the transaction, then the locked account's active state and exact verified password hash are rechecked before insertion. Whichever operation acquires the lock first wins safely: a subsequent reset revokes the new session, while a preceding reset causes the stale sign-in to fail generically without inserting a session.
+- Successful sign-in now passes the already authenticated cookie token into the identity service and revokes only that presented session in the same transaction that inserts and audits its replacement. Other device sessions remain valid.
+- Current-session logout, logout-all, and direct privilege-change revocation now write safe audit records in the same transaction as revocation. Route logout carries its request ID; the direct security helper requires an explicit mutation/security audit context. Audit metadata contains only action, scope, and a safe `revokedCount`.
+
+### RED
+
+Exact command:
+
+```text
+npm test -w @rufdiamond/api -- auth.test.ts csrf.test.ts
+```
+
+Observed against the reviewed implementation after adding the four behavioral regressions:
+
+```text
+Test Files  2 failed (2)
+Tests       4 failed | 22 passed (26)
+```
+
+The deterministic interleaving test showed stale sign-in resolved after reset instead of rejecting; the cookie-rotation test showed the presented old token still returned 200 instead of 401; current/all logout and direct privilege revocation had no matching audit rows.
+
+An intermediate run after the behavioral fix was `2 failed | 24 passed`: both remaining assertions showed `revokedSessions` was replaced with `[REDACTED]` by the established sensitive-key audit filter. Renaming the non-sensitive numeric metadata field to `revokedCount` preserved the sanitizer and made the safe audit shape explicit.
+
+### GREEN and scoped final verification
+
+```text
+npm test -w @rufdiamond/api -- auth.test.ts csrf.test.ts
+Test Files  2 passed (2)
+Tests       26 passed (26)
+
+npm run typecheck -w @rufdiamond/api
+exit 0
+
+npm run lint -- apps/api/src/modules/identity/service.ts apps/api/src/modules/identity/repository.ts apps/api/src/modules/identity/routes.ts apps/api/test/integration/auth.test.ts apps/api/test/integration/csrf.test.ts
+exit 0, no output
+
+git diff --check
+exit 0
+```
+
+No contract schema changed in this fix. Per the scoped re-review request, the already recorded whole-suite verification above was not unnecessarily repeated.
+
+### Review-fix files changed
+
+- `apps/api/src/modules/identity/repository.ts`
+- `apps/api/src/modules/identity/routes.ts`
+- `apps/api/src/modules/identity/service.ts`
+- `apps/api/test/integration/auth.test.ts`
+- `apps/api/test/integration/csrf.test.ts`
+- `.superpowers/sdd/2026-09-07-backend-frontend-integration/task-4-report.md`
+
+### Review-fix concerns
+
+None within this fix scope. Future account/MFA mutation callers must supply their authenticated mutation/security audit context to `revokeForPrivilegeChange`; no future routes were added here.

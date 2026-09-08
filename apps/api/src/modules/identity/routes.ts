@@ -59,7 +59,12 @@ export function registerIdentityRoutes(app: FastifyInstance, config: AppConfig, 
       if (!signInLimiter.consume(key)) throw new AppError("RATE_LIMITED", 429, "Too many requests. Try again later.");
     },
   }, async (request, reply) => {
-    const result = await identity.authenticateForRequest(request.body.loginId, request.body.password, request.requestId);
+    const result = await identity.authenticateForRequest(
+      request.body.loginId,
+      request.body.password,
+      request.requestId,
+      request.identitySession?.rawToken,
+    );
     reply.setCookie(sessionCookieName(config), result.sessionToken, cookieOptions(config));
     return { csrfToken: result.csrfToken };
   });
@@ -74,7 +79,7 @@ export function registerIdentityRoutes(app: FastifyInstance, config: AppConfig, 
     preHandler: async request => requireCsrf(request, config),
   }, async (request, reply) => {
     if (!request.identitySession) throw new AppError("AUTHENTICATION_REQUIRED", 401, "Authentication is required.");
-    await identity.signOut(request.identitySession.rawToken, request.body.allSessions ?? false);
+    await identity.signOut(request.identitySession.rawToken, request.body.allSessions ?? false, request.requestId);
     reply.clearCookie(sessionCookieName(config), cookieOptions(config));
     return { signedOut: true as const };
   });

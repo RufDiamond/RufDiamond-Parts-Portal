@@ -4,12 +4,13 @@ import type { HashOptions } from "argon2";
 
 import type { Database, Transaction } from "../../db/client.js";
 import { AppError } from "../../plugins/error-handler.js";
-import { writeAuditLog } from "../audit/repository.js";
+import { writeAuditLog, type MutationContext, type SecurityAuditContext } from "../audit/repository.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
 import { createPasswordService, type PasswordService } from "./passwords.js";
 import { encryptProtectedDelivery, type DeliveryKeyring } from "./protected-delivery.js";
 import {
   findAccountByLoginId,
+  findAccountByLoginIdForUpdate,
   findSessionAccount,
   consumePasswordReset,
   insertPasswordReset,
@@ -52,6 +53,7 @@ export interface IdentityServiceOptions {
 }
 
 export interface AuthenticatedSession {
+  sessionId: string;
   user: SessionUser;
   profile: MeResponse;
   rawToken: string;
@@ -60,11 +62,11 @@ export interface AuthenticatedSession {
 
 export interface IdentityService {
   authenticate(loginId: string, password: string): Promise<{ sessionToken: string; csrfToken: string }>;
-  authenticateForRequest(loginId: string, password: string, requestId: string): Promise<{ sessionToken: string; csrfToken: string }>;
+  authenticateForRequest(loginId: string, password: string, requestId: string, presentedSessionToken?: string): Promise<{ sessionToken: string; csrfToken: string }>;
   readSession(token: string): Promise<SessionUser | null>;
   readSessionDetails(token: string): Promise<AuthenticatedSession | null>;
-  signOut(token: string, allSessions?: boolean): Promise<void>;
-  revokeForPrivilegeChange(userId: string): Promise<void>;
+  signOut(token: string, allSessions?: boolean, requestId?: string): Promise<void>;
+  revokeForPrivilegeChange(userId: string, context: MutationContext | SecurityAuditContext): Promise<void>;
   requestPasswordReset(loginId: string, requestId: string): Promise<void>;
   completePasswordReset(resetToken: string, newPassword: string, requestId: string): Promise<void>;
 }
@@ -89,7 +91,7 @@ export async function createIdentityService(options: IdentityServiceOptions): Pr
   const now = options.now ?? (() => new Date());
   const dummyHash = await passwords.hash(`dummy-${randomBytes(32).toString("base64url")}`);
 
-  async function authenticateForRequest(loginId: string, password: string, requestId: string) {
+  async function authenticateForRequest(loginId: string, password: string, requestId: string, presentedSessionToken?: string) {
     const canonicalLoginId = loginId.trim().toLowerCase();
     const account = await findAccountByLoginId(options.database.db, canonicalLoginId);
     const matches = await passwords.verify(account?.passwordHash ?? dummyHash, password);
@@ -110,22 +112,41 @@ export async function createIdentityService(options: IdentityServiceOptions): Pr
     const sessionToken = randomBytes(32).toString("base64url");
     const csrfToken = stableCsrf(options.sessionSecret, sessionToken);
     const issuedAt = now();
-    await options.database.withTransaction(async tx => {
+    const created = await options.database.withTransaction(async tx => {
+      const lockedAccount = await findAccountByLoginIdForUpdate(tx, canonicalLoginId);
+      if (!isActive(lockedAccount) || lockedAccount.passwordHash !== account.passwordHash) {
+        await writeAuditLog(tx, {
+          actorUserId: null,
+          companyId: null,
+          capability: "identity.sign-in",
+          requestId,
+        }, {
+          objectType: "app_user",
+          objectId: lockedAccount?.userId ?? account.userId,
+          after: { outcome: "denied", targetUserId: lockedAccount?.userId ?? account.userId, reason: "credential_changed" },
+        });
+        return false;
+      }
+      const replacedPresentedSession = presentedSessionToken
+        ? await revokeSession(tx, sha256(presentedSessionToken), issuedAt)
+        : 0;
       const sessionId = await insertSession(tx, {
         tokenHash: sha256(sessionToken),
         csrfTokenHash: sha256(csrfToken),
-        userId: account.userId,
+        userId: lockedAccount.userId,
         expiresAt: new Date(issuedAt.getTime() + ABSOLUTE_SESSION_MS),
         idleExpiresAt: new Date(issuedAt.getTime() + IDLE_SESSION_MS),
         now: issuedAt,
       });
       await writeAuditLog(tx, {
-        actorUserId: account.userId,
-        companyId: account.companyId,
+        actorUserId: lockedAccount.userId,
+        companyId: lockedAccount.companyId,
         capability: "identity.sign-in",
         requestId,
-      }, { objectType: "session", objectId: sessionId, after: { outcome: "created" } });
+      }, { objectType: "session", objectId: sessionId, after: { outcome: "created", replacedPresentedSession: replacedPresentedSession === 1 } });
+      return true;
     });
+    if (!created) throw new AppError("INVALID_CREDENTIALS", 401, "The supplied credentials are invalid.");
     return { sessionToken, csrfToken };
   }
 
@@ -161,7 +182,7 @@ export async function createIdentityService(options: IdentityServiceOptions): Pr
     const profile = authorization.scopes.canViewPrices
       ? { ...common, scopes: { ...authorization.scopes, canViewPrices: true as const }, company: { ...company, discountRate: account.discountRate } }
       : { ...common, scopes: { ...authorization.scopes, canViewPrices: false as const }, company };
-    return { user, profile, rawToken: token, csrfToken };
+    return { sessionId: account.sessionId, user, profile, rawToken: token, csrfToken };
   }
 
   return {
@@ -169,16 +190,35 @@ export async function createIdentityService(options: IdentityServiceOptions): Pr
     authenticateForRequest,
     readSession: async token => (await readSessionDetails(token))?.user ?? null,
     readSessionDetails,
-    async signOut(token, allSessions = false) {
+    async signOut(token, allSessions = false, requestId = "authentication") {
       const details = await readSessionDetails(token);
       if (!details) return;
       const current = now();
-      await options.database.withTransaction(tx => allSessions
-        ? revokeAllSessions(tx, details.user.id, current).then(() => undefined)
-        : revokeSession(tx, sha256(token), current).then(() => undefined));
+      await options.database.withTransaction(async tx => {
+        const revokedSessions = allSessions
+          ? await revokeAllSessions(tx, details.user.id, current)
+          : await revokeSession(tx, sha256(token), current);
+        await writeAuditLog(tx, {
+          actorUserId: details.user.id,
+          companyId: details.user.companyId,
+          capability: "identity.sign-out",
+          requestId,
+        }, {
+          objectType: allSessions ? "app_user" : "session",
+          objectId: allSessions ? details.user.id : details.sessionId,
+          after: { action: "sign_out", scope: allSessions ? "all" : "current", revokedCount: revokedSessions },
+        });
+      });
     },
-    async revokeForPrivilegeChange(userId) {
-      await options.database.withTransaction(tx => revokeAllSessions(tx, userId, now()).then(() => undefined));
+    async revokeForPrivilegeChange(userId, context) {
+      await options.database.withTransaction(async tx => {
+        const revokedSessions = await revokeAllSessions(tx, userId, now());
+        await writeAuditLog(tx, context, {
+          objectType: "app_user",
+          objectId: userId,
+          after: { action: "privilege_change", revokedCount: revokedSessions },
+        });
+      });
     },
     async requestPasswordReset(loginId, requestId) {
       const canonicalLoginId = loginId.trim().toLowerCase();

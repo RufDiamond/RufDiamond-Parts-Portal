@@ -40,6 +40,14 @@ export async function findAccountByLoginId(db: Database, loginId: string): Promi
   return row ?? null;
 }
 
+export async function findAccountByLoginIdForUpdate(tx: Transaction, loginId: string): Promise<IdentityAccount | null> {
+  const [row] = await tx.select(accountSelection).from(appUser)
+    .innerJoin(company, eq(company.id, appUser.companyId))
+    .where(eq(appUser.loginId, loginId)).limit(1)
+    .for("update", { of: appUser });
+  return row ?? null;
+}
+
 export async function findSessionAccount(db: Database, tokenHash: string) {
   const [row] = await db.select({
     sessionId: session.id,
@@ -123,7 +131,7 @@ export async function consumePasswordReset(tx: Transaction, tokenHash: string, n
       AND pr.expires_at > ${now}
       AND u.status = 'active'
       AND c.status = 'active'
-    FOR UPDATE OF pr
+    FOR UPDATE OF pr, u
   `);
   const row = rows.rows[0] as { id: string; user_id: string; expires_at: Date } | undefined;
   if (!row) return null;
