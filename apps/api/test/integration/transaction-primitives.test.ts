@@ -15,7 +15,7 @@ import {
   IdempotencyConflictError,
   withIdempotency,
 } from "../../src/modules/outbox/idempotency.js";
-import { processOutboxBatch } from "../../src/modules/outbox/worker.js";
+import { processOutboxBatch, runOutboxWorker, type OutboxDelivery } from "../../src/modules/outbox/worker.js";
 import { startPostgres } from "../helpers/postgres.js";
 
 describe("transactional mutation primitives", () => {
@@ -227,6 +227,50 @@ describe("transactional mutation primitives", () => {
     expect(delivered).toHaveLength(1);
     expect(delivered[0].providerIdempotencyKey).toBe("rfq:7");
     expect((await postgres.pool.query("select completed_at is not null as completed, attempts from outbox_event")).rows[0]).toEqual({ completed: true, attempts: 0 });
+  });
+
+  it("does not treat an inherited deliveries property as a registered handler", async () => {
+    const id = await connection.withTransaction(tx => enqueueOutboxEvent(tx, {
+      eventType: "toString", aggregateType: "order", aggregateId: randomUUID(), payload: { safe: true },
+    }));
+
+    const result = await processOutboxBatch({ transactionRunner: connection, deliveries: {} });
+
+    expect(result).toEqual({ claimed: 1, completed: 0, failed: 1, terminal: 0 });
+    expect((await postgres.pool.query("select completed_at,attempts,last_error from outbox_event where id=$1", [id])).rows[0])
+      .toEqual({ completed_at: null, attempts: 1, last_error: "OutboxDeliveryError:MISSING_HANDLER" });
+  });
+
+  it("does not invoke a registered delivery value unless it is callable", async () => {
+    const id = await connection.withTransaction(tx => enqueueOutboxEvent(tx, {
+      eventType: "invalid.delivery", aggregateType: "order", aggregateId: randomUUID(), payload: { safe: true },
+    }));
+    const deliveries = { "invalid.delivery": { configured: true } } as unknown as Record<string, OutboxDelivery>;
+
+    const result = await processOutboxBatch({ transactionRunner: connection, deliveries });
+
+    expect(result).toEqual({ claimed: 1, completed: 0, failed: 1, terminal: 0 });
+    expect((await postgres.pool.query("select completed_at,attempts,last_error from outbox_event where id=$1", [id])).rows[0])
+      .toEqual({ completed_at: null, attempts: 1, last_error: "OutboxDeliveryError:MISSING_HANDLER" });
+  });
+
+  it("reports a trusted worker error category instead of forwarding hostile error names", async () => {
+    const controller = new AbortController();
+    const observed: unknown[] = [];
+    const hostile = new Error("transaction unavailable");
+    hostile.name = "sessionToken=fixture-secret";
+
+    await runOutboxWorker({
+      transactionRunner: { withTransaction: async () => { throw hostile; } },
+      deliveries: {},
+      signal: controller.signal,
+      onWorkerError: error => {
+        observed.push(error);
+        controller.abort();
+      },
+    });
+
+    expect(observed).toEqual([{ code: "OUTBOX_WORKER_ERROR", category: "WORKER_CYCLE_FAILED" }]);
   });
 
   it("backs failures off, stops after twelve failures, and emits a structured terminal alert", async () => {

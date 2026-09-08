@@ -67,8 +67,10 @@ export async function processOutboxBatch(dependencies: ProcessOutboxDependencies
   const result: ProcessOutboxResult = { claimed: claimed.length, completed: 0, failed: 0, terminal: 0 };
   for (const event of claimed) {
     try {
-      const delivery = dependencies.deliveries[event.eventType];
-      if (!delivery) throw new MissingDeliveryHandlerError(event.eventType);
+      const delivery = Object.prototype.hasOwnProperty.call(dependencies.deliveries, event.eventType)
+        ? dependencies.deliveries[event.eventType]
+        : undefined;
+      if (typeof delivery !== "function") throw new MissingDeliveryHandlerError(event.eventType);
       await delivery(deliveryMessage(event));
       if (await dependencies.transactionRunner.withTransaction(tx => completeOutboxEvent(tx, event.id, event.leaseToken))) {
         result.completed += 1;
@@ -94,7 +96,7 @@ export async function processOutboxBatch(dependencies: ProcessOutboxDependencies
 export interface RunOutboxWorkerDependencies extends ProcessOutboxDependencies {
   signal: AbortSignal;
   pollIntervalMs?: number;
-  onWorkerError?: (error: { code: "OUTBOX_WORKER_ERROR"; name: string }) => void | Promise<void>;
+  onWorkerError?: (error: { code: "OUTBOX_WORKER_ERROR"; category: "WORKER_CYCLE_FAILED" }) => void | Promise<void>;
 }
 
 function waitForPoll(milliseconds: number, signal: AbortSignal): Promise<void> {
@@ -117,9 +119,8 @@ export async function runOutboxWorker(dependencies: RunOutboxWorkerDependencies)
     let claimed = 0;
     try {
       claimed = (await processOutboxBatch(dependencies)).claimed;
-    } catch (error) {
-      const name = error instanceof Error ? error.name : "UnknownError";
-      await dependencies.onWorkerError?.({ code: "OUTBOX_WORKER_ERROR", name });
+    } catch {
+      await dependencies.onWorkerError?.({ code: "OUTBOX_WORKER_ERROR", category: "WORKER_CYCLE_FAILED" });
     }
     if (claimed === 0 && !dependencies.signal.aborted) await waitForPoll(pollIntervalMs, dependencies.signal);
   }
