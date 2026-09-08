@@ -38,6 +38,12 @@ function titleForStatus(status: number): string {
   switch (status) {
     case 400:
       return "Invalid request";
+    case 401:
+      return "Unauthorized";
+    case 403:
+      return "Forbidden";
+    case 404:
+      return "Not Found";
     case 409:
       return "Conflict";
     case 422:

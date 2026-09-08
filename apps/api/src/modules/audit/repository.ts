@@ -8,6 +8,13 @@ export interface MutationContext {
   requestId: string;
 }
 
+export interface SecurityAuditContext {
+  actorUserId: string | null;
+  companyId: string | null;
+  capability: string;
+  requestId: string;
+}
+
 export interface AuditEntry {
   objectType: string;
   objectId: string;
@@ -44,7 +51,7 @@ export function redactAuditValue(value: unknown): unknown {
   ]));
 }
 
-export async function writeAuditLog(tx: Transaction, ctx: MutationContext, entry: AuditEntry): Promise<string> {
+export async function writeAuditLog(tx: Transaction, ctx: MutationContext | SecurityAuditContext, entry: AuditEntry): Promise<string> {
   const [stored] = await tx.insert(auditLog).values({
     actorId: ctx.actorUserId,
     effectiveCompanyId: ctx.companyId,

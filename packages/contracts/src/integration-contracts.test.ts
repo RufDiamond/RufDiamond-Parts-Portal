@@ -9,6 +9,7 @@ import {
   DraftPartSchema,
   FigureDetailSchema,
   MoneySchema,
+  PricedMeResponseSchema,
   PartUsageRowSchema,
   PartUsageSummarySchema,
   PricedFigureDetailSchema,
@@ -26,6 +27,7 @@ import {
   UnpricedFigureDetailSchema,
   UnpricedOrderDetailSchema,
   UnpricedPartSchema,
+  UnpricedMeResponseSchema,
   UnpricedPartUsageRowSchema,
   VariantSchema,
 } from "./index.js";
@@ -129,6 +131,55 @@ describe("decimal transport values", () => {
     expect(Value.Check(RateSchema, "1.000000")).toBe(true);
     expect(Value.Check(RateSchema, "1.000001")).toBe(false);
     expect(Value.Check(RateSchema, "0.15")).toBe(false);
+  });
+});
+
+describe("identity transport contracts", () => {
+  const session = {
+    id: "user-1",
+    companyId: "company-1",
+    displayName: "Pat Parts",
+    capabilities: ["catalog.figure.view"],
+    scopes: {
+      brandIds: ["fat-truck"],
+      accountIds: ["company-1"],
+      fleet: [],
+      environment: "published",
+      priceTier: "standard",
+      canViewPrices: false,
+    },
+    company: {
+      id: "company-1",
+      name: "Diamond Customer",
+      type: "customer",
+      defaultShippingAddress: null,
+    },
+    csrfToken: "csrf-value",
+  } as const;
+
+  it("rejects prices from the strict unpriced session envelope", () => {
+    expect(Value.Check(UnpricedMeResponseSchema, session)).toBe(true);
+    expect(Value.Check(UnpricedMeResponseSchema, {
+      ...session,
+      company: { ...session.company, discountRate: "0.100000" },
+    })).toBe(false);
+  });
+
+  it("requires prices in the strict priced session envelope", () => {
+    expect(Value.Check(PricedMeResponseSchema, {
+      ...session,
+      scopes: { ...session.scopes, canViewPrices: true },
+      company: { ...session.company, discountRate: "0.100000" },
+    })).toBe(true);
+    expect(Value.Check(PricedMeResponseSchema, session)).toBe(false);
+  });
+
+  it("rejects secret and undeclared fields from session transport", () => {
+    expect(Value.Check(UnpricedMeResponseSchema, { ...session, sessionToken: "secret" })).toBe(false);
+    expect(Value.Check(UnpricedMeResponseSchema, {
+      ...session,
+      scopes: { ...session.scopes, discountRate: "0.100000" },
+    })).toBe(false);
   });
 });
 
