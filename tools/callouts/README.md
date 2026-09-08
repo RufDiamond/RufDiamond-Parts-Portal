@@ -2,10 +2,21 @@
 
 The customer viewer already supports part/marker selection. The catalogue has
 572 imported callouts but only 15 positioned markers. New proposals in `review/`
-are deliberately outside `src/`; they are **not statically bundled or used in
-customer or ordinary-development responses**. The opt-in local preview reads
-them at runtime only after its server-side gates pass. Do not write them into
+are deliberately outside `src/`; they are **not used in ordinary catalogue
+responses**. The opt-in local preview and explicit hosted read-only review
+read them at runtime after source validation. Do not write them into
 the seed or publish them without RUF Diamond sign-off.
+
+## Hosted read-only review
+
+Each figure links to `/review/figures/<figureId>`. This owner-requested demo
+route works in a production Next build without environment configuration and
+is explicitly separate from customer publication. Review source and drawing
+files are included in that route's server bundle for runtime hash validation.
+Cart, quote, email, print and crop exports are disabled; zoom, fullscreen,
+filtering and selection remain interactive. The public demo route is not an
+authenticated backend draft preview and must not be connected to private
+working data. See `docs/callout-placement-review.md` for rollout acceptance.
 
 ## Optional local viewer preview
 
@@ -16,7 +27,7 @@ development, start the local app with the server-only opt-in:
 RUF_CALLOUT_PREVIEW=1 npm run dev -- --port 3100 --hostname 127.0.0.1
 ```
 
-The preview is disabled unless both development mode and the exact flag value
+The local overlay is disabled unless both development mode and the exact flag value
 `1` are present, and it is always disabled in production. Enabled loads check
 the proposal schema and review status, null reviewer, catalogue hash, drawing
 path, dimensions and artwork hash before copying eligible x/y values into the

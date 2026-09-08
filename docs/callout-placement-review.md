@@ -1,6 +1,57 @@
 # Exploded drawing placement review
 
-Date: 7 September 2026. Status: **review prepared; no new live mappings applied**.
+Date: 7 September 2026. Status: **hosted read-only review prepared; no new customer mappings approved**.
+
+## Hosted marker review rollout
+
+The owner has requested a merge-deployed review, replacing the local-only
+visibility limitation. After this change is merged into the Vercel deployment
+branch, each ordinary figure offers **Open marker review**, linking to
+`/review/figures/<figureId>`. For example:
+`/review/figures/fig-cabin-6-2`. No new environment variable is required.
+
+This is a public, read-only review of the existing demo catalogue assets, not
+the authenticated backend's draft-preview API and not customer publication.
+The ordinary `/figures/<figureId>` response retains its original positions;
+the local opt-in described below retains its development-only gate. The new
+route explicitly requests the review overlay and disables cart additions,
+quotes, parts-list email, print and crop exports. Selection, filtering, zoom,
+pan and fullscreen remain available. The sheet pager stays in review mode.
+Warnings remain visible in fullscreen; returning to the ordinary catalogue
+discards review selection. Search engines are instructed not to index review
+pages; this is not an authentication control.
+
+The server still validates catalogue/artwork hashes, dimensions and mapping
+identity on every load. Required source files are explicitly traced into the
+Next deployment bundle. Missing or stale files show an unavailable notice,
+never invented positions. Frame 2.1 and Cabin 6.13 stay withheld. No seed,
+approval record, backend entitlement or release is changed. Before connecting
+this prototype to private working data, replace or remove this public review
+route; backend draft preview still requires `publish.draft.view` and scope.
+
+Merge acceptance: open Cabin 6.2 in marker review (26 applied), Hydraulic 4.4
+(3 applied), Cowling 7.2 (5 applied, 1 unresolved), and Frame 2.1 (withheld).
+Check wheel zoom, button zoom, fullscreen notice, marker/table selection and
+disabled ordering; ordinary pages must still use the original positions.
+A pushed commit is not proof of a successful Vercel deployment: verify the
+deployment SHA and these URLs after the merge.
+
+Local production-build verification for this rollout: 55 focused tests passed,
+lint and `next build` passed, and all 44 review URLs returned 200 with validated
+review notices. The emitted server trace contains proposal JSON, catalogue
+source and artwork and no `.env` files. Cabin 6.2 was exercised in Chrome:
+native wheel over the artwork enlarged 1x to 1.5x, wheel over a marker returned
+to 1x, reference 2 selected both references 2 and 18 and their rows, fullscreen
+wheel enlarged to 1.5x with its warning visible, and Next sheet retained the
+review route while clearing selection. Add-to-cart remained disabled after
+selection. Ordinary Cabin 6.2 and Hydraulic 4.4 still returned zero new markers.
+This is local production-mode evidence, not a claim of Vercel deployment or
+interactive testing of all 44 drawings.
+
+The broader API suite also passed (104 tests) and contracts passed (41 tests).
+The pre-existing `test:web` script points to an absent `@rufdiamond/web`
+workspace, so it cannot run yet; this rollout tests the current Next frontend
+with `test:callout-preview` and does not scaffold the deferred Vite migration.
 
 ## Root cause and current customer behavior
 

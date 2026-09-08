@@ -251,6 +251,31 @@ describe("applyCalloutPreview", () => {
 });
 
 describe("loadCalloutPreview", () => {
+  test("serves source-validated hosted review markers in a production build without changing the ordinary catalogue", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RUF_CALLOUT_PREVIEW", "");
+    const detail = (await getFigureDetail("fig-cabin-6-2"))!;
+    const before = structuredClone(detail);
+    const result = await loadCalloutPreview(detail, "hosted-review");
+
+    expect(result.detail.callouts.find(({ number }) => number === 1)).toEqual(
+      expect.objectContaining({ x: 34.8047, y: 42.1528 }),
+    );
+    expect(result.notice).toContain("Marker review");
+    expect(result.notice).toContain("unapproved");
+    expect(result.notice).toContain("not for ordering");
+    expect(detail).toEqual(before);
+    await expect(loadCalloutPreview(detail)).resolves.toEqual({ detail: before, notice: null });
+  });
+
+  test("hosted review still withholds source conflicts", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    const detail = (await getFigureDetail("fig-frame-assy-2-1"))!;
+    const result = await loadCalloutPreview(detail, "hosted-review");
+    expect(result.detail).toEqual(detail);
+    expect(result.notice).toContain("source conflict");
+  });
+
   test.each([
     ["production", "1"],
     ["development", undefined],
