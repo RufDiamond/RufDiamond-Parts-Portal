@@ -19,6 +19,8 @@ import type {
   FigurePartRow,
   Model,
   Part,
+  PartUsageRow,
+  PartUsageSummary,
   ProductLine,
   System,
   Variant,
@@ -174,6 +176,103 @@ export async function searchParts(query: string): Promise<Part[]> {
 
 function stripSeparators(value: string): string {
   return value.replace(/[^a-z0-9]/g, "");
+}
+
+/** Which box the reader typed into. The deck gives each its own field. */
+export type PartSearchMode = "part" | "description" | "any";
+
+/** "99FT3WXXXXXX and up", as the catalogue cover prints it. */
+function formatSerial(variant: Variant): string {
+  if (variant.serialFrom && variant.serialTo) {
+    return `${variant.serialFrom} \u2013 ${variant.serialTo}`;
+  }
+  if (variant.serialFrom) return `${variant.serialFrom} and up`;
+  return variant.label;
+}
+
+/**
+ * Part search, expanded to one row per place the part is used — slides 18-20.
+ *
+ * Searching by number ignores separators, so "12116000122" finds
+ * "12-116000-122"; searching by description is a plain contains match, so a
+ * phrase like "zinc plated" works. `any` searches both, which is what a bare
+ * /search?q= falls back to.
+ */
+export async function searchPartUsages(
+  query: string,
+  mode: PartSearchMode = "any",
+): Promise<PartUsageRow[]> {
+  const trimmed = query.trim().toLowerCase();
+  if (!trimmed) return [];
+
+  const loose = stripSeparators(trimmed);
+
+  const matched = seed.parts.filter((part) => {
+    const byNumber = stripSeparators(part.partNumber.toLowerCase()).includes(
+      loose,
+    );
+    const byDescription = part.description.toLowerCase().includes(trimmed);
+    if (mode === "part") return byNumber;
+    if (mode === "description") return byDescription;
+    return byNumber || byDescription;
+  });
+
+  const rows: PartUsageRow[] = [];
+  for (const part of matched) {
+    const uses = seed.figureParts.filter(
+      (figurePart) => figurePart.partId === part.id,
+    );
+
+    // A part with no figure behind it is still a match; it just has nothing
+    // to say in the usage columns.
+    if (uses.length === 0) {
+      rows.push({
+        part,
+        figureId: null,
+        groupNo: null,
+        assemblyName: null,
+        systemName: null,
+        modelName: null,
+        serial: null,
+      });
+      continue;
+    }
+
+    for (const use of uses) {
+      const figure = seed.figures.find(
+        (candidate) => candidate.id === use.figureId,
+      );
+      if (!figure) continue;
+
+      const system = seed.systems.find(
+        (candidate) => candidate.id === figure.systemId,
+      );
+      const variant = seed.variants.find(
+        (candidate) => candidate.id === figure.variantId,
+      );
+      const model = variant
+        ? seed.models.find((candidate) => candidate.id === variant.modelId)
+        : undefined;
+
+      rows.push({
+        part,
+        figureId: figure.id,
+        groupNo: figure.groupNo,
+        assemblyName: figure.name,
+        systemName: system?.name ?? null,
+        modelName: model?.name ?? null,
+        serial: variant ? formatSerial(variant) : null,
+      });
+    }
+  }
+
+  rows.sort((a, b) => {
+    const byPart = a.part.partNumber.localeCompare(b.part.partNumber);
+    if (byPart !== 0) return byPart;
+    return compareGroupNo(a.groupNo ?? "", b.groupNo ?? "");
+  });
+
+  return detach(rows);
 }
 
 /** "1.10" sorts after "1.2", which a plain string compare gets wrong. */
@@ -516,6 +615,56 @@ export async function getAllParts(
       }),
     ),
   );
+}
+
+/**
+ * Where each part is used, keyed by part id.
+ *
+ * The request list stores only a part and a quantity, but the quote screen
+ * prints the model, serial range, system, page and assembly it came from
+ * (slide 44). A part fitted on several figures reports the first in catalogue
+ * order — the screen shows one row per part, not one per usage.
+ */
+export async function getPartUsageIndex(): Promise<
+  Record<string, PartUsageSummary>
+> {
+  const figures = [...seed.figures].sort((a, b) =>
+    compareGroupNo(a.groupNo, b.groupNo),
+  );
+
+  const index: Record<string, PartUsageSummary> = {};
+  for (const figure of figures) {
+    const system = seed.systems.find(
+      (candidate) => candidate.id === figure.systemId,
+    );
+    const variant = seed.variants.find(
+      (candidate) => candidate.id === figure.variantId,
+    );
+    const model = variant
+      ? seed.models.find((candidate) => candidate.id === variant.modelId)
+      : undefined;
+    const productLine = model
+      ? seed.productLines.find(
+          (candidate) => candidate.id === model.productLineId,
+        )
+      : undefined;
+
+    for (const figurePart of seed.figureParts) {
+      if (figurePart.figureId !== figure.id) continue;
+      if (index[figurePart.partId]) continue;
+
+      index[figurePart.partId] = {
+        productLineName: productLine?.name ?? null,
+        modelName: model?.name ?? null,
+        serial: variant ? formatSerial(variant) : null,
+        systemName: system?.name ?? null,
+        groupNo: figure.groupNo,
+        assemblyName: figure.name,
+        figureId: figure.id,
+      };
+    }
+  }
+  return detach(index);
 }
 
 export async function getOrders(): Promise<AdminOrder[]> {

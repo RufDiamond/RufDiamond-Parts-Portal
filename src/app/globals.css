@@ -14,6 +14,8 @@ html {
 }
 
 body {
+  cursor: var(--cursor-mark);
+
   min-height: 100%;
   /* A wide table or drawing must scroll inside its own container, never take
      the page with it. */
@@ -44,15 +46,15 @@ h3 {
   font: var(--type-h3);
 }
 
+/*
+ * Links carry no underline of their own: on the V2 design each one sits in a
+ * card, a rail button or a toolbar and styles itself. The old rule drew a
+ * hairline under every anchor, which showed as a stray line beneath the logo.
+ */
 a {
-  color: var(--text-link);
+  color: inherit;
   text-decoration: none;
-  border-bottom: var(--hairline) solid var(--rule);
   transition: var(--transition-state);
-}
-
-a:hover {
-  border-bottom: var(--rule-medium) solid var(--ink);
 }
 
 code,
@@ -103,4 +105,207 @@ img {
   letter-spacing: var(--tracking-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+/*
+ * The mark is the pointer everywhere, including over anything clickable — the
+ * deck shows one cursor, not two.
+ */
+a,
+button,
+select,
+summary,
+label,
+[role="button"],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: var(--cursor-pointer);
+}
+
+input[type="text"],
+input[type="search"],
+input[type="password"],
+input:not([type]),
+textarea {
+  cursor: var(--cursor-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Print
+   --------------------------------------------------------------------------- */
+
+/*
+ * The cropped-part panel prints on its own. Without this the browser lays out
+ * the whole portal — rail, header, parts list — and leaves the crop itself
+ * blank, because the region is painted as a CSS background and backgrounds are
+ * dropped from print by default.
+ *
+ * Everything is hidden by visibility rather than display so the sheet keeps its
+ * place in the flow; the sheet is then pinned to the page and the rest of the
+ * document is clipped away.
+ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  /*
+   * Printing the cropped part.
+   *
+   * Two earlier approaches failed and are worth naming. `visibility: hidden`
+   * on the rest of the portal only stopped it PAINTING — its layout survived,
+   * ran past one page, and printed a blank second sheet. Lifting the sheet out
+   * with `position: fixed` then made Chrome repeat it on every page, so the
+   * second sheet came back carrying a duplicate of the same crop.
+   *
+   * What works is removing the other boxes outright. CroppedPart tags its own
+   * ancestor chain with `data-crop-path` on mount, so each level can hide its
+   * other children by `display: none` — no layout left to paginate — and the
+   * sheet prints in normal flow as a single page.
+   */
+  body.printing-crop {
+    height: auto;
+    background: #fff;
+  }
+
+  body.printing-crop > *:not([data-crop-path]),
+  body.printing-crop [data-crop-path] > *:not([data-crop-path]):not([data-crop-sheet]) {
+    display: none !important;
+  }
+
+  /* The path itself is scaffolding: strip everything it contributes. */
+  body.printing-crop [data-crop-path] {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  body.printing-crop [data-crop-sheet],
+  body.printing-crop [data-crop-sheet] * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /*
+   * The sheet IS the page: exactly one A4 portrait less its 12mm margins, laid
+   * out as header / cropped content / footer. Giving it the page's real height
+   * is what pins the foot to the bottom of the sheet rather than letting it
+   * ride up under the image.
+   */
+  body.printing-crop [data-crop-sheet] {
+    position: static !important;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    width: 100%;
+    max-width: none;
+    height: calc(297mm - 24mm);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Buttons, the panel title and its icon are no use on paper. */
+  body.printing-crop [data-crop-hide] {
+    display: none !important;
+  }
+
+  /*
+   * The printed head, per slide 34: the mark and the date share the first
+   * line, and the trail sits under them.
+   */
+  body.printing-crop [data-crop-head] {
+    padding-bottom: 2mm;
+  }
+
+  body.printing-crop [data-crop-date] {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: center;
+    text-align: right;
+    white-space: nowrap;
+    color: #000;
+  }
+
+  /* Paper has no grey to spare — the trail is the caption for the artefact. */
+  body.printing-crop [data-crop-trail] {
+    color: #000;
+  }
+
+  /*
+   * The plate is capped so it cannot push the sheet onto a second page, and
+   * sized from its WIDTH: on screen the panel is wide and short, but a
+   * portrait page is the other way round, and height-first sizing made the
+   * plate far wider than the paper and cut the crop off at the right.
+   */
+  /* The middle band: the crop, centred in whatever the head and foot leave. */
+  body.printing-crop [data-crop-stage] {
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    overflow: hidden;
+    padding: 4mm 0;
+  }
+
+  body.printing-crop [data-crop-stage] > * {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* The foot sits on the page, not only on the PDF. */
+  body.printing-crop [data-crop-foot] {
+    display: flex;
+    align-self: end;
+  }
+
+  /* ── Export to PDF ─────────────────────────────────────────────────
+     Slide 36 is a different sheet from slide 34's print: the mark, the
+     trail and the date share ONE line over a rule, the mark is laid faintly
+     across the plate, and the route to the part is printed along the foot
+     with a page count. Only the export sets this class. */
+
+  body.printing-crop.printing-pdf [data-crop-pdf] {
+    display: block;
+  }
+
+  body.printing-crop.printing-pdf [data-crop-head] {
+    grid-template-columns: auto 1fr auto;
+    column-gap: 6mm;
+    align-items: center;
+    padding-bottom: 3mm;
+    border-bottom: 1px solid #000;
+  }
+
+  body.printing-crop.printing-pdf [data-crop-title-block] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  body.printing-crop.printing-pdf [data-crop-date] {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
 }

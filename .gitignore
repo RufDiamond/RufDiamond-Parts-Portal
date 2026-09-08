@@ -42,3 +42,9 @@ next-env.d.ts
 
 # client drawing source files — large, and not ours to publish
 /drawings/
+
+# client design deck — large binary, source material not ours to publish
+/design-reference/source/
+
+# Generated customer-artwork review packs and reviewer corrections stay local.
+/output/pdf/

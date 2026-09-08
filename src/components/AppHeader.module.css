@@ -79,7 +79,7 @@
   font: var(--weight-semibold) var(--text-xs) / 1 var(--font-mono);
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -97,7 +97,7 @@
   border: 1px solid var(--graphite);
   color: var(--paper);
   font: var(--weight-semibold) var(--text-sm) / 1 var(--font-ui);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -133,7 +133,7 @@
   padding: 0;
   background: transparent;
   border: 0;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .accountName {

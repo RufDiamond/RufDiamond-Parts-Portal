@@ -1,60 +1,91 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
-  Breadcrumbs,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import {
+  ComingSoon,
+  CroppedPart,
   DrawingViewer,
-  Icon,
-  PageHeader,
-  Panel,
+  FullIllustration,
   PartsTable,
-  SpecList,
-  TitleBlock,
-  WarningPanel,
+  Trail,
+  type CropRect,
 } from "@/components";
 import { buildDrawingMarkers } from "@/lib/drawing";
-import { formatPrice, formatFigureRef } from "@/lib/format";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
 import { useSelection } from "@/state/useSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
-import type { FigureDetail } from "@/types/catalog";
-import screen from "@/styles/screen.module.css";
+import type { FigureDetail, PartUsageSummary } from "@/types/catalog";
+import { QuoteRequest } from "../../request/QuoteRequest";
 import styles from "./figure.module.css";
 
-/** "3 and 4", or "3, 4 and 5". */
-function formatList(numbers: number[]): string {
-  if (numbers.length <= 1) return String(numbers[0] ?? "—");
-  return `${numbers.slice(0, -1).join(", ")} and ${numbers[numbers.length - 1]}`;
+const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
+
+/*
+ * The split between the drawing and the parts list, as a percentage of the
+ * width. The deck draws it at 41/59; the handle moves it, stopping before
+ * either side is too narrow to read.
+ */
+const SPLIT_DEFAULT = 41;
+const SPLIT_MIN = 24;
+const SPLIT_MAX = 76;
+/** One press of an arrow key. */
+const SPLIT_STEP = 2;
+
+function clampSplit(value: number): number {
+  return Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, value));
 }
 
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
-  /** Sheet number as printed, e.g. "01 / 01". */
+  previewNotice?: string | null;
+  /** Where each part is used — the quote view opens inside this screen. */
+  usage: Record<string, PartUsageSummary>;
+  /** Sheet number as printed, e.g. "01 / 04". */
   sheet: string;
+  /** Position within the system's figures, for the pager. */
+  index: number;
+  total: number;
+  previousId: string | null;
+  nextId: string | null;
+  firstId: string | null;
+  lastId: string | null;
 }
 
-export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
+export function FigureWorkspace({
+  detail,
+  previewNotice = null,
+  usage,
+  sheet,
+  index,
+  total,
+  previousId,
+  nextId,
+  firstId,
+  lastId,
+}: FigureWorkspaceProps) {
+  const router = useRouter();
   const { figure, drawing, system, variant, rows, callouts } = detail;
   const { selectedModel } = useMachine();
-  const { addParts, removeLine, lines } = useRequest();
+  const { addParts, lines } = useRequest();
 
-  const {
-    selectedPartIds,
-    toggle,
-    hoveredPartId,
-    setHoveredPartId,
-    calloutsForPart,
-  } = useSelection({ rows, callouts });
+  const { selectedPartIds, toggle, hoveredPartId, setHoveredPartId } =
+    useSelection({ rows, callouts });
 
   const markers = useMemo(
     () => buildDrawingMarkers(rows, callouts),
     [rows, callouts],
   );
 
-  // Writes straight to sessionStorage and holds no React state, so this
-  // cannot loop.
   useEffect(() => {
     recordRecentFigure({
       figureId: figure.id,
@@ -64,210 +95,589 @@ export function FigureWorkspace({ detail, sheet }: FigureWorkspaceProps) {
     });
   }, [figure.id, figure.groupNo, figure.name, system.name]);
 
-  // Placed markers vs callouts that exist. The export carries numbers but no
-  // positions, so these differ on every figure until someone maps it, and
-  // saying "0 callouts" when there are three reads as missing data.
-  const placedCount = markers.length;
-  const calloutCount = callouts.length;
-  const unplaced = calloutCount - placedCount;
-
-  const plateCount =
-    calloutCount === 0
-      ? `${rows.length} parts`
-      : unplaced === 0
-        ? `${calloutCount} callouts · ${rows.length} parts`
-        : `${placedCount} of ${calloutCount} callouts placed · ${rows.length} parts`;
-
-  const figureRef = formatFigureRef(figure.groupNo);
   const machineName = selectedModel?.name ?? "FT3 Wagon";
   const requestedPartIds = useMemo(
     () => new Set(lines.map((line) => line.partId)),
     [lines],
   );
 
-  /** Ticking puts the part on the request list; clicking only highlights. */
-  const toggleRequested = (partId: string) => {
-    if (requestedPartIds.has(partId)) {
-      removeLine(partId);
-      return;
-    }
-    const row = rows.find((candidate) => candidate.part.id === partId);
-    if (row) addParts([{ part: row.part, qty: row.figurePart.qty }]);
-  };
+  /*
+   * The tick and the lit marker are one state — but that state is SELECTION,
+   * not the cart.
+   *
+   * Clicking a callout, a Ref number or a row lights the part on the plate and
+   * ticks its box. Getting it onto the cart is a second, deliberate act: the
+   * Add to cart button. Wiring the tick straight to the cart made every click
+   * an order and left Add to cart with nothing to do.
+   */
 
-  // Any part fitted in more than one place gets flagged: the reference calls
-  // this out so nobody replaces one of a pair.
-  const multiPosition = rows.filter(
-    (row) => calloutsForPart(row.part.id).length > 1,
+  /*
+   * What Add to cart will actually do. It used to sweep in EVERY part on the
+   * figure, which — now that the tick and the selection are one state — lit
+   * every row and ticked every box, reading as though the click had selected
+   * the whole sheet. It adds what is ticked, and nothing else.
+   */
+  /** A callout, a Ref number, a row or its tick: all select the part. */
+  const toggleSelected = (partId: string) => toggle(partId);
+
+  /** Ticked parts not already on the cart. */
+  const pending = useMemo(
+    () =>
+      rows
+        .filter(
+          (row) =>
+            selectedPartIds.has(row.part.id) &&
+            !requestedPartIds.has(row.part.id),
+        )
+        .map((row) => ({ part: row.part, qty: row.figurePart.qty })),
+    [rows, selectedPartIds, requestedPartIds],
   );
 
-  const activeRow =
-    rows.find((row) => selectedPartIds.has(row.part.id)) ?? rows[0];
+  const addSelectedToCart = () => {
+    if (pending.length > 0) addParts(pending);
+  };
+
+  const go = (id: string | null) => {
+    if (id) router.push(`/figures/${id}`);
+  };
+
+  const unplaced = callouts.length - markers.length;
+
+  /*
+   * The whole plate, opened over the workspace — slide 37. The deck puts this
+   * on the second toolbar icon, where a "fit to view" used to sit; fitting is
+   * what the zoom control already does.
+   */
+  const [fullScreen, setFullScreen] = useState(false);
+  /* Check cart has no screen behind it yet — see clients.md. */
+  const [cartComingSoon, setCartComingSoon] = useState(false);
+
+  /*
+   * The quote view opens IN PLACE of the plate and the parts list — slides 48
+   * to 49 keep the same breadcrumb and the same toolbar, with Request a quote
+   * lit, and change only what is underneath. Navigating away lost that.
+   */
+  const [quoting, setQuoting] = useState(false);
+
+  /** Plate zoom. Markers are placed in percentages, so they scale with it. */
+  const [zoom, setZoom] = useState(1);
+  const stepZoom = (direction: 1 | -1) =>
+    setZoom((current) => {
+      const i = ZOOM_STEPS.indexOf(current);
+      const next = i === -1 ? 0 : i + direction;
+      return ZOOM_STEPS[Math.min(ZOOM_STEPS.length - 1, Math.max(0, next))];
+    });
+
+  /*
+   * Crop. Arming the tool lets the reader drag a marquee over the plate; on
+   * release the region opens enlarged in its own panel — slides 31 to 33. The
+   * rectangle is kept in fractions of the plate so it survives any zoom.
+   */
+  const plateRef = useRef<HTMLDivElement>(null);
+  const [cropping, setCropping] = useState(false);
+  // The drag origin lives in a ref, not in state: mousedown and mouseup can
+  // both land before React re-renders, and a state value would still read as
+  // null by the time the release is handled.
+  const splitRef = useRef<HTMLDivElement>(null);
+  const [split, setSplit] = useState(SPLIT_DEFAULT);
+  /*
+   * Whether the handle is being dragged. Held in a ref as well as in state:
+   * the first pointermove can arrive before React has re-rendered, so a state
+   * flag alone would read false and the opening moves would be dropped.
+   */
+  const resizingRef = useRef(false);
+  /*
+   * A drag ends in a click on whatever is under the pointer — a parts row, if
+   * the handle was pulled that far — so the click that closes a drag is
+   * swallowed before it can select anything.
+   */
+  const swallowClickRef = useRef(false);
+  const [resizing, setResizing] = useState(false);
+
+  /** Where the pointer is, as a share of the split's width. */
+  const splitFromPointer = useCallback((clientX: number) => {
+    const box = splitRef.current?.getBoundingClientRect();
+    if (!box || box.width === 0) return;
+    setSplit(clampSplit(((clientX - box.left) / box.width) * 100));
+  }, []);
+
+  const dragRef = useRef<{ x: number; y: number } | null>(null);
+  const [marquee, setMarquee] = useState<CropRect | null>(null);
+  const [crop, setCrop] = useState<CropRect | null>(null);
+
+  const pointFromEvent = (event: React.MouseEvent) => {
+    const box = plateRef.current?.getBoundingClientRect();
+    if (!box) return null;
+    return {
+      x: Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)),
+      y: Math.min(1, Math.max(0, (event.clientY - box.top) / box.height)),
+    };
+  };
+
+  const rectBetween = (a: { x: number; y: number }, b: { x: number; y: number }) => ({
+    x: Math.min(a.x, b.x),
+    y: Math.min(a.y, b.y),
+    w: Math.abs(a.x - b.x),
+    h: Math.abs(a.y - b.y),
+  });
+
+  /** Hand the figure's parts list to the reader's mail client. */
+  const emailFigure = () => {
+    const lines = rows.map(
+      (row) =>
+        `${row.calloutNumbers.join(", ") || "-"}\t${row.part.partNumber}\t` +
+        `${row.part.description}\tx${row.figurePart.qty}`,
+    );
+    const body = [
+      `${figure.name} — Fat Truck ${machineName}`,
+      "",
+      "Ref\tPart no.\tDescription\tQty",
+      ...lines,
+    ].join("\n");
+    window.location.href =
+      `mailto:?subject=${encodeURIComponent(`Parts list — ${figure.name}`)}` +
+      `&body=${encodeURIComponent(body)}`;
+  };
+
+  // The section number is the leading part of this figure's GROUPNO, e.g.
+  // "6.1" puts it in section 6 — taken from the export, never assigned here.
+  const systemNumber = figure.groupNo.split(".")[0] ?? "";
 
   return (
-    <main className={screen.screen}>
-      <div className={screen.trail}>
-        <Breadcrumbs
-          items={[
-            { label: machineName, href: "/" },
-            { label: "Systems", href: "/systems" },
-            { label: system.name, href: `/systems/${system.id}` },
-            { label: figureRef },
-          ]}
-        />
-      </div>
-
-      <PageHeader
-        hasTrail
-        eyebrow="Figure drawing"
-        title={`${figureRef} — ${figure.name}`}
-        meta={[`Fat Truck ${machineName}`, `Sheet ${sheet}`]}
-        actions={
-          <>
-            <Link
-              href={`/systems/${system.id}`}
-              className={`${screen.button} ${screen.buttonGhost}`}
-            >
-              <Icon name="arrow-left" size="md" />
-              Back to figures
-            </Link>
-            <Link
-              href="/request"
-              className={`${screen.button} ${screen.buttonPrimary}`}
-            >
-              <Icon name="clipboard-list" size="md" />
-              Request list · {lines.length}
-            </Link>
-          </>
-        }
+    <div className={styles.screen}>
+      <Trail
+        steps={[
+          { label: `Fat Truck ${machineName}`, href: "/systems" },
+          {
+            label: `${systemNumber} ${system.name}`.trim(),
+            href: `/systems/${system.id}`,
+          },
+          { label: figure.name },
+        ]}
       />
 
-      <div className={screen.split57}>
-        <div className={styles.sheetColumn}>
-          <DrawingViewer
-            label={`Sheet ${sheet} — exploded view`}
-            count={plateCount}
-            src={drawing?.storagePath}
-            width={drawing?.width}
-            height={drawing?.height}
-            note={`Assembly drawing not supplied — callouts positioned to ${figureRef}`}
-            markers={markers}
-            selectedPartIds={selectedPartIds}
-            hoveredPartId={hoveredPartId}
-            onTogglePart={toggle}
-            onHoverPart={setHoveredPartId}
-          />
-          {unplaced > 0 ? (
-            <p className={styles.plateNotice}>
-              {placedCount === 0
-                ? `None of this figure's ${calloutCount} callout numbers have been positioned on the drawing yet`
-                : `${unplaced} of this figure's ${calloutCount} callout numbers have not been positioned yet`}
-              , so clicking a part cannot highlight it here. Match the{" "}
-              <b>Ref</b> column against the numbers printed on the plate.
-              Positions are added in the figure editor.
-            </p>
-          ) : null}
+      <div className={styles.controls}>
+        {previewNotice ? (
+          <p role="status" className={styles.previewNotice}>
+            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
+            open the full illustration.
+          </p>
+        ) : null}
 
-          <TitleBlock
-            fields={[
-              { label: "Section", value: system.name },
-              { label: "Figure", value: figureRef },
-              { label: "Sheet", value: sheet },
-            ]}
-          />
+        <div className={styles.toolbar}>
+        <div className={styles.pager}>
+          <button
+            type="button"
+            className={styles.pagerStep}
+            onClick={() => go(firstId)}
+            disabled={!firstId || index === 0}
+            aria-label="First sheet"
+          >
+            &laquo;
+          </button>
+          <button
+            type="button"
+            className={styles.pagerStep}
+            onClick={() => go(previousId)}
+            disabled={!previousId}
+            aria-label="Previous sheet"
+          >
+            &lsaquo;
+          </button>
+          <span className={styles.pagerCount}>
+            {index + 1} of {total}
+          </span>
+          <button
+            type="button"
+            className={styles.pagerStep}
+            onClick={() => go(nextId)}
+            disabled={!nextId}
+            aria-label="Next sheet"
+          >
+            &rsaquo;
+          </button>
+          <button
+            type="button"
+            className={styles.pagerStep}
+            onClick={() => go(lastId)}
+            disabled={!lastId || index === total - 1}
+            aria-label="Last sheet"
+          >
+            &raquo;
+          </button>
         </div>
 
-        <div className={styles.listColumn}>
-          {multiPosition.map((row) => (
-            <WarningPanel
-              key={row.part.id}
-              severity="critical"
-              title="Two positions"
-            >
-              {row.part.description} {row.part.partNumber} is fitted at
-              callouts {formatList(row.calloutNumbers)}. Replace all of them at
-              the same service interval.
-            </WarningPanel>
-          ))}
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => {
+            setCropping((on) => !on);
+            setMarquee(null);
+          }}
+          title={cropping ? "Cancel the crop" : "Crop a region of the plate"}
+          aria-label="Crop a region"
+          aria-pressed={cropping}
+          data-armed={cropping || undefined}
+        >
+          <Image src="/toolbar/crop.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
 
-          <Panel
-            eyebrow="Keyed to drawing"
-            title="Parts list"
-            padding="none"
-            frame="strong"
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => setFullScreen((on) => !on)}
+          title="Open the illustration full screen"
+          aria-label="Illustration full screen"
+          aria-pressed={fullScreen}
+          data-armed={fullScreen || undefined}
+        >
+          <Image src="/toolbar/fit.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => stepZoom(-1)}
+          disabled={zoom === ZOOM_STEPS[0]}
+          title="Zoom out"
+          aria-label="Zoom out"
+        >
+          <Image src="/toolbar/zoom-out.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.button} ${styles.iconButton}`}
+          onClick={() => stepZoom(1)}
+          disabled={zoom === ZOOM_STEPS[ZOOM_STEPS.length - 1]}
+          title="Zoom in"
+          aria-label="Zoom in"
+        >
+          <Image src="/toolbar/zoom-in.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+        </button>
+
+        <span className={styles.spacer} />
+
+        <button
+          type="button"
+          className={styles.button}
+          /*
+           * Takes the ticked parts with it. Selecting a part no longer puts it
+           * on the cart, so jumping straight to the request list would have
+           * arrived empty — which is exactly what it did.
+           */
+          onClick={() => {
+            addSelectedToCart();
+            setQuoting(true);
+          }}
+          title="Add anything ticked, then draw up the request"
+          aria-pressed={quoting}
+          data-armed={quoting || undefined}
+        >
+          <Image src="/toolbar/quote.png" alt="" width={40} height={52}
+            className={styles.buttonIcon} />
+          Request a quote
+        </button>
+
+        <button
+          type="button"
+          className={styles.button}
+          onClick={addSelectedToCart}
+          disabled={pending.length === 0}
+          title={
+            selectedPartIds.size === 0
+              ? "Tick a part first"
+              : pending.length === 0
+                ? "Everything ticked is already on the cart"
+                : `Add ${pending.length} part${pending.length === 1 ? "" : "s"} to the cart`
+          }
+        >
+          <Image src="/toolbar/cart-add.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+          Add to cart{pending.length > 0 ? ` · ${pending.length}` : ""}
+        </button>
+
+        <button
+          type="button"
+          className={styles.button}
+          onClick={emailFigure}
+          disabled={rows.length === 0}
+          title="Email this parts list"
+        >
+          <Image src="/toolbar/email.png" alt="" width={40} height={28}
+            className={styles.buttonIcon} />
+          Email
+        </button>
+
+        <button
+          type="button"
+          className={styles.button}
+          onClick={() => window.print()}
+        >
+          <Image src="/toolbar/print.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+          Print
+        </button>
+
+        <button
+          type="button"
+          className={styles.button}
+          onClick={() => setCartComingSoon(true)}
+          title="The cart screen has not been built yet"
+        >
+          <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
+            className={styles.buttonIcon} />
+          Check cart · {lines.length}
+        </button>
+        </div>
+      </div>
+
+      {quoting ? (
+        <QuoteRequest
+          usage={usage}
+          embedded
+          onAddMoreParts={() => setQuoting(false)}
+        />
+      ) : (
+        <div
+          ref={splitRef}
+          className={`${styles.split} ${resizing ? styles.splitResizing : ""}`}
+          onClickCapture={(event) => {
+            if (!swallowClickRef.current) return;
+            swallowClickRef.current = false;
+            event.stopPropagation();
+            event.preventDefault();
+          }}
+          style={
+            {
+              "--split-left": `${split}fr`,
+              "--split-right": `${100 - split}fr`,
+              "--split-at": `${split}%`,
+            } as CSSProperties
+          }
+        >
+          <div
+            ref={plateRef}
+            className={`${styles.plate} ${cropping ? styles.plateArmed : ""}`}
+            onMouseDown={(event) => {
+              if (!cropping) return;
+              const p = pointFromEvent(event);
+              if (!p) return;
+              event.preventDefault();
+              dragRef.current = p;
+              setMarquee({ x: p.x, y: p.y, w: 0, h: 0 });
+            }}
+            onMouseMove={(event) => {
+              const origin = dragRef.current;
+              if (!cropping || !origin) return;
+              const p = pointFromEvent(event);
+              if (p) setMarquee(rectBetween(origin, p));
+            }}
+            onMouseUp={(event) => {
+              const origin = dragRef.current;
+              if (!cropping || !origin) return;
+              // Derive the rectangle from where the button was released rather
+              // than from the last move: a drag can finish without any
+              // intermediate mousemove ever firing.
+              const end = pointFromEvent(event);
+              const rect = end ? rectBetween(origin, end) : marquee;
+              dragRef.current = null;
+              setMarquee(null);
+              // Ignore a stray click; a crop needs a real area.
+              if (rect && rect.w > 0.02 && rect.h > 0.02) {
+                setCrop(rect);
+                setCropping(false);
+              }
+            }}
+            onMouseLeave={() => {
+              if (dragRef.current) {
+                dragRef.current = null;
+                setMarquee(null);
+              }
+            }}
           >
+            <DrawingViewer
+              label={`Sheet ${sheet}`}
+              src={drawing?.storagePath}
+              width={drawing?.width}
+              height={drawing?.height}
+              note={`Assembly drawing not supplied — ${figure.name}`}
+              markers={markers}
+              selectedPartIds={selectedPartIds}
+              hoveredPartId={hoveredPartId}
+              onTogglePart={toggleSelected}
+              onHoverPart={setHoveredPartId}
+              zoom={zoom}
+              onZoomChange={setZoom}
+            />
+            {marquee ? (
+              <span
+                className={styles.marquee}
+                style={{
+                  left: `${marquee.x * 100}%`,
+                  top: `${marquee.y * 100}%`,
+                  width: `${marquee.w * 100}%`,
+                  height: `${marquee.h * 100}%`,
+                }}
+              />
+            ) : null}
+
+            {unplaced > 0 ? (
+              <p className={styles.plateNotice}>
+                {markers.length === 0
+                  ? `None of this figure's ${callouts.length} callout numbers have been positioned yet`
+                  : `${unplaced} of ${callouts.length} callout numbers are not positioned yet`}
+                , so clicking a part cannot highlight it here. Match the Ref. no.
+                column against the numbers printed on the plate.
+              </p>
+            ) : null}
+          </div>
+
+          {/*
+            The handle the deck draws between the two surfaces. Dragging it moves
+            the split; the arrow keys move it a step at a time and a double-click
+            puts it back where the deck has it.
+          */}
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Width of the drawing"
+            aria-valuenow={Math.round(split)}
+            aria-valuemin={SPLIT_MIN}
+            aria-valuemax={SPLIT_MAX}
+            tabIndex={0}
+            className={styles.divider}
+            title="Drag to set the width of the drawing"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              resizingRef.current = true;
+              setResizing(true);
+            }}
+            onPointerMove={(event) => {
+              if (!resizingRef.current) return;
+              swallowClickRef.current = true;
+              splitFromPointer(event.clientX);
+            }}
+            onPointerUp={(event) => {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+              resizingRef.current = false;
+              setResizing(false);
+            }}
+            onPointerCancel={() => {
+              resizingRef.current = false;
+              setResizing(false);
+            }}
+            onDoubleClick={() => setSplit(SPLIT_DEFAULT)}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                setSplit((v) => clampSplit(v - SPLIT_STEP));
+              } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                setSplit((v) => clampSplit(v + SPLIT_STEP));
+              } else if (event.key === "Home") {
+                event.preventDefault();
+                setSplit(SPLIT_MIN);
+              } else if (event.key === "End") {
+                event.preventDefault();
+                setSplit(SPLIT_MAX);
+              } else if (event.key === "Enter") {
+                event.preventDefault();
+                setSplit(SPLIT_DEFAULT);
+              }
+            }}
+          >
+            <span aria-hidden="true">&#10096;&#10097;</span>
+          </div>
+
+          <div className={styles.list}>
             {rows.length === 0 ? (
-              // The plate is loaded but its parts have not been imported yet.
-              // Say so plainly: a bare table header reads as a fault.
-              <p className={styles.listEmpty}>
-                The drawing for this figure is loaded, but its parts have not
-                been imported yet. The numbered callouts on the plate come from
-                the printed catalogue; they are keyed to records once the parts
-                export for {figureRef} is loaded.
+              <p className={styles.empty}>
+                The drawing for this figure is loaded, but its parts have not been
+                imported yet.
               </p>
             ) : (
               <PartsTable
                 rows={rows}
                 selectedPartIds={selectedPartIds}
                 hoveredPartId={hoveredPartId}
-                onTogglePart={toggle}
+                onTogglePart={toggleSelected}
                 onHoverPart={setHoveredPartId}
-                requestedPartIds={requestedPartIds}
-                onToggleRequested={toggleRequested}
+                requestedPartIds={selectedPartIds}
+                onToggleRequested={toggleSelected}
               />
             )}
-            <div className={styles.listFoot}>
-              <span className={styles.listFootNote}>
-                {rows.length === 0
-                  ? "Nothing on this sheet can be ordered until its parts are imported."
-                  : "Tick a row to add it to the request list. Click a row to highlight every callout for that part."}
-              </span>
-              <Link
-                href="/request"
-                className={`${screen.button} ${screen.buttonPrimary}`}
-              >
-                <Icon name="clipboard-list" size="md" />
-                Review request
-              </Link>
-            </div>
-          </Panel>
-
-          {activeRow ? (
-            <Panel eyebrow="Selected part" title={activeRow.part.description}>
-              <SpecList
-                columns={2}
-                items={[
-                  { label: "Part number", value: activeRow.part.partNumber },
-                  {
-                    label: "Callouts",
-                    value:
-                      activeRow.calloutNumbers.join(", ") || "—",
-                  },
-                  {
-                    label: "Quantity per figure",
-                    value: String(activeRow.figurePart.qty),
-                  },
-                  {
-                    label: "Manufacturer",
-                    value: activeRow.part.manufacturer ?? "—",
-                  },
-                  {
-                    label: "List price",
-                    value: formatPrice(
-                      activeRow.part.listPrice,
-                      activeRow.part.currency,
-                    ),
-                  },
-                  {
-                    label: "Catalog",
-                    value: `REV ${variant.catalogRevision}`,
-                  },
-                ]}
-              />
-            </Panel>
-          ) : null}
+          </div>
         </div>
-      </div>
-    </main>
+      )}
+
+      {cartComingSoon ? (
+        <ComingSoon
+          title="Check cart — coming soon"
+          onClose={() => setCartComingSoon(false)}
+        >
+          The cart screen has not been designed yet. Use{" "}
+          <strong>Request a quote</strong> to review what you have gathered and
+          send it to RUF Diamond.
+        </ComingSoon>
+      ) : null}
+
+      {fullScreen ? (
+        <FullIllustration
+          label={`Sheet ${sheet}`}
+          src={drawing?.storagePath}
+          width={drawing?.width}
+          height={drawing?.height}
+          note={`Assembly drawing not supplied — ${figure.name}`}
+          markers={markers}
+          previewNotice={previewNotice}
+          selectedPartIds={selectedPartIds}
+          hoveredPartId={hoveredPartId}
+          onTogglePart={toggleSelected}
+          onHoverPart={setHoveredPartId}
+          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          date={new Date().toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          onClose={() => setFullScreen(false)}
+        />
+      ) : null}
+
+      {crop && drawing ? (
+        <CroppedPart
+          src={drawing.storagePath}
+          rect={crop}
+          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          /*
+           * The foot of the PDF retraces the whole route to the part, serial
+           * range included — slide 36. It is the line that makes a printed
+           * crop identifiable months later, off the screen it came from.
+           */
+          footerTrail={[
+            "FIGURE SEARCH",
+            "FAT TRUCK",
+            `FAT TRUCK ${machineName}`,
+            variant.serialFrom ?? variant.label,
+            system.name,
+            `${figure.name} (FIG ${figure.groupNo})`,
+          ]
+            .join(" >> ")
+            .toUpperCase()}
+          date={new Date().toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+          onClose={() => setCrop(null)}
+        />
+      ) : null}
+    </div>
   );
 }

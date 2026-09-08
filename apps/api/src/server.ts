@@ -22,11 +22,18 @@ export async function startServer(options: StartServerOptions = {}) {
     );
   };
 
+  const removeSignalHooks = () => {
+    process.removeListener("SIGTERM", shutdown);
+    process.removeListener("SIGINT", shutdown);
+  };
+
   process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
+  app.addHook("onClose", async () => removeSignalHooks());
   try {
     await app.listen({ port: config.port, host: "0.0.0.0" });
   } catch (error) {
-    process.removeListener("SIGTERM", shutdown);
+    removeSignalHooks();
     await app.close();
     throw error;
   }

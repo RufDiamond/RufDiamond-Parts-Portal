@@ -1,3 +1,8 @@
+/*
+ * Both screens that use this — the request list and its confirmation — sit
+ * directly on the dark portal ground, so the trail is coloured for dark. It
+ * was written light, which left the current crumb near-black on #262626.
+ */
 .nav {
   font: var(--type-identifier);
   letter-spacing: var(--tracking-mono);
@@ -16,20 +21,20 @@
 }
 
 .link {
-  color: var(--text-secondary);
+  color: var(--deck-pill);
   border-bottom: 0;
 }
 
 .link:hover {
-  color: var(--ink);
-  border-bottom: var(--rule-medium) solid var(--ink);
+  color: var(--deck-on-dark);
+  border-bottom: var(--rule-medium) solid var(--deck-on-dark);
 }
 
 .current {
-  color: var(--ink);
+  color: var(--deck-on-dark);
 }
 
 .separator {
   padding: 0 var(--space-2);
-  color: var(--rule);
+  color: var(--deck-panel);
 }

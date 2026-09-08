@@ -1,6 +1,8 @@
 .viewer {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 
 /* Sheet strip above the plate: what this sheet is, and how many callouts. */
@@ -25,12 +27,32 @@
 /* The plate: drawing grid ground, dashed trim line, callouts on top. */
 .sheet {
   position: relative;
-  height: 520px;
+  /*
+   * Room around the drawing. The callout squares sit at the plate's own
+   * extremes — a marker at 0% or 100% is centred on the edge — so without this
+   * they were half-cut by the frame. `.stage` is inset:0 against the PADDING
+   * box, so the plate and its markers inset together and stay aligned.
+   */
+  padding: var(--space-4);
+  /*
+   * The sheet takes whatever the panel leaves it rather than a fixed height or
+   * the drawing's own aspect ratio — that left a wide plate floating in the
+   * top third of a tall panel with dead white beneath. The stage inside fits
+   * the drawing to this frame, so filling it simply makes the drawing bigger.
+   */
+  flex: 1 1 auto;
+  min-height: 220px;
   background-image: var(--grid-10);
   background-color: var(--surface-drawing);
   background-size: var(--grid-size) var(--grid-size);
   border: var(--border-thin);
-  overflow: hidden;
+  /* Zoomed past 1x the canvas is genuinely larger than this frame, so the
+     sheet scrolls to it rather than clipping it. */
+  overflow: auto;
+  overscroll-behavior: contain;
+  /* Sized independently of its contents, so the canvas can be measured
+     against it — this is what makes a true fit at 1x possible. */
+  container-type: size;
 }
 
 .trim {
@@ -58,7 +80,6 @@
 
 @media (max-width: 1100px) {
   .sheet {
-    height: auto;
     aspect-ratio: 16 / 11;
   }
 }
@@ -97,4 +118,38 @@
   stroke-width: 0.25;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+}
+
+/*
+ * The canvas the plate and its callouts share.
+ *
+ * At 1x it is CONTAINED — the smaller of the frame's width and the width its
+ * own proportions allow in the frame's height — so the whole drawing is in
+ * view with no scrollbar. Each step multiplies that, and because the box
+ * really grows, the frame scrolls instead of cropping. Markers are placed in
+ * percentages of this box, so they stay on their targets throughout.
+ */
+.stage {
+  position: relative;
+  width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
+  aspect-ratio: var(--ratio, 3 / 2);
+  margin: 0 auto;
+  transition: width 120ms ease-out;
+}
+
+/* No plate attached: the empty state keeps the frame's own box. */
+.stage:has(> .trim) {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+
+.sheetZoomed {
+  cursor: grab;
+}
+
+.sheetDragging {
+  cursor: grabbing;
+  /* Selection during a drag makes the plate flicker blue. */
+  user-select: none;
 }

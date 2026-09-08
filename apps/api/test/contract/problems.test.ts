@@ -8,6 +8,8 @@ const config = {
   databaseUrl: "postgres://rufdiamond:rufdiamond@localhost:5432/rufdiamond",
   sessionSecret: "a-test-session-secret-that-is-long-enough",
   webOrigin: "http://localhost:3000",
+  allowInsecureLoopbackCookie: false,
+  deliveryEncryption: { activeKeyId: "test", keys: { test: Buffer.alloc(32, 1).toString("base64") } },
   s3: {
     endpoint: "http://localhost:9000",
     region: "us-east-1",

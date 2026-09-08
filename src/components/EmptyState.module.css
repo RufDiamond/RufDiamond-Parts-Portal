@@ -6,6 +6,10 @@
   padding: var(--space-12) var(--space-6);
   border: var(--border-thin);
   background: var(--paper);
+  /* The panel paints its own white ground, so it has to state its own ink:
+     every screen that uses it sits on the dark portal shell, and inheriting
+     leaves the title white on white. */
+  color: var(--ink);
   text-align: center;
 }
 

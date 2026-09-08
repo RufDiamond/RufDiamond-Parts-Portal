@@ -10,7 +10,7 @@ export const priceTier = pgTable("price_tier", {
 export const company = pgTable("company", {
   id: id(), name: text("name").notNull(), type: text("type", { enum: ["customer", "dealer", "internal"] }).notNull().default("customer"),
   status: text("status", { enum: ["active", "suspended", "inactive"] }).notNull().default("active"), discountRate: rate("discount_rate").notNull().default("0"),
-  priceTierId: uuid("price_tier_id").references(() => priceTier.id), technicianPricingVisible: boolean("technician_pricing_visible").notNull().default(true), ...mutable(),
+  priceTierId: uuid("price_tier_id").references(() => priceTier.id), technicianPricingVisible: boolean("technician_pricing_visible").notNull().default(true), defaultShippingAddress: text("default_shipping_address"), ...mutable(),
 }, t => [versionCheck(t), check("company_type", sql`${t.type} IN ('customer','dealer','internal')`), check("company_status", sql`${t.status} IN ('active','suspended','inactive')`), check("company_discount_range", sql`${t.discountRate} BETWEEN 0 AND 1`)]);
 
 export const companyProductLine = pgTable("company_product_line", {
@@ -32,9 +32,9 @@ export const roleCapability = pgTable("role_capability", {
 }, t => [primaryKey({ columns: [t.roleId, t.capabilityKey] }), versionCheck(t)]);
 
 export const appUser = pgTable("app_user", {
-  id: id(), companyId: uuid("company_id").notNull().references(() => company.id), name: text("name").notNull(), email: text("email").notNull().unique(), passwordHash: text("password_hash").notNull(),
+  id: id(), companyId: uuid("company_id").notNull().references(() => company.id), name: text("name").notNull(), loginId: text("login_id").notNull().unique(), email: text("email").notNull().unique(), passwordHash: text("password_hash").notNull(),
   roleId: uuid("role_id").notNull().references(() => role.id), status: text("status", { enum: ["active", "suspended", "invited", "disabled"] }).notNull().default("active"), ...mutable(),
-}, t => [index("app_user_company").on(t.companyId), versionCheck(t), check("user_email_canonical", sql`${t.email} = lower(btrim(${t.email})) AND position('@' IN ${t.email}) > 1`), check("user_status", sql`${t.status} IN ('active','suspended','invited','disabled')`)]);
+}, t => [index("app_user_company").on(t.companyId), versionCheck(t), check("user_login_id_canonical", sql`${t.loginId} = lower(btrim(${t.loginId})) AND ${t.loginId} <> ''`), check("user_email_canonical", sql`${t.email} = lower(btrim(${t.email})) AND position('@' IN ${t.email}) > 1`), check("user_status", sql`${t.status} IN ('active','suspended','invited','disabled')`)]);
 
 // Named staff receive a capability grant, never an identity check in application code.
 export const userCapability = pgTable("user_capability", {

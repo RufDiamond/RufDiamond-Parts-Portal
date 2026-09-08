@@ -12,7 +12,9 @@
     "db:migrate": "tsx src/db/migrate.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "^10.0.1",
     "@rufdiamond/contracts": "*",
+    "argon2": "^0.45.1",
     "drizzle-orm": "^0.45.2",
     "fastify": "^5.0.0",
     "pg": "^8.23.0"

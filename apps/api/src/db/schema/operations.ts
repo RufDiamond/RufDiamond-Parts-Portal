@@ -1,30 +1,53 @@
 import { sql } from "drizzle-orm";
-import { check, foreignKey, index, integer, jsonb, pgTable, primaryKey, text, unique, uuid } from "drizzle-orm/pg-core";
+import type { RfqDetails } from "@rufdiamond/contracts";
+import { check, foreignKey, index, integer, jsonb, pgSequence, pgTable, primaryKey, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { model, part, variant } from "./catalog.js";
 import { appUser, company } from "./identity.js";
 import { publicationRelease, releasePart, releaseVariant } from "./releases.js";
 import { checksumCheck, currencyCheck, id, money, mutable, rate, time, versionCheck } from "./common.js";
 
+export type OrderContextSnapshot = {
+  companyName: string;
+  companyAddress: string | null;
+  productLineName: string;
+  modelName: string;
+  serialLabel: string;
+};
+
+export const rfqReferenceSeq = pgSequence("rfq_reference_seq");
+
 export const order = pgTable("order", {
   id: id(), companyId: uuid("company_id").notNull().references(() => company.id), submittedByUserId: uuid("submitted_by_user_id").notNull().references(() => appUser.id),
   dealerCompanyId: uuid("dealer_company_id").references(() => company.id), variantId: uuid("variant_id").notNull().references(() => variant.id), releaseId: uuid("release_id").notNull().references(() => publicationRelease.id),
-  reference: text("reference"), kind: text("kind", { enum: ["request_for_quote"] }).notNull().default("request_for_quote"),
+  reference: text("reference"), customerReference: text("customer_reference"), detailsSnapshot: jsonb("details_snapshot").$type<RfqDetails>(), contextSnapshot: jsonb("context_snapshot").$type<OrderContextSnapshot>(),
+  kind: text("kind", { enum: ["request_for_quote"] }).notNull().default("request_for_quote"),
   status: text("status", { enum: ["submitted", "quoted", "confirmed", "fulfilled", "cancelled"] }).notNull().default("submitted"),
   currency: text("currency").notNull(), listTotal: money("list_total").notNull(), discountRate: rate("discount_rate").notNull().default("0"), discountApplied: money("discount_applied").notNull(), netTotal: money("net_total").notNull(), submittedAt: time("submitted_at"), ...mutable(),
 }, t => [
   index("order_company_submitted").on(t.companyId, t.submittedAt, t.id),
+  uniqueIndex("order_reference_unique").on(t.reference).where(sql`${t.reference} IS NOT NULL`),
   unique("order_id_release").on(t.id, t.releaseId),
   foreignKey({ name: "order_variant_in_release", columns: [t.releaseId, t.variantId], foreignColumns: [releaseVariant.releaseId, releaseVariant.workingId] }),
   versionCheck(t), currencyCheck(t.currency),
   check("order_kind", sql`${t.kind} = 'request_for_quote'`),
   check("order_status", sql`${t.status} IN ('submitted','quoted','confirmed','fulfilled','cancelled')`),
   check("order_amounts", sql`${t.listTotal} >= 0 AND ${t.listTotal} < 'Infinity'::numeric AND ${t.discountApplied} BETWEEN 0 AND ${t.listTotal} AND ${t.discountRate} BETWEEN 0 AND 1 AND ${t.netTotal} = ${t.listTotal} - ${t.discountApplied}`),
+  check("order_context_snapshot", sql`${t.contextSnapshot} IS NULL OR (
+    jsonb_typeof(${t.contextSnapshot}) = 'object'
+    AND ${t.contextSnapshot} ?& ARRAY['companyName','companyAddress','productLineName','modelName','serialLabel']
+    AND (${t.contextSnapshot} - ARRAY['companyName','companyAddress','productLineName','modelName','serialLabel']) = '{}'::jsonb
+    AND jsonb_typeof(${t.contextSnapshot}->'companyName') = 'string'
+    AND jsonb_typeof(${t.contextSnapshot}->'companyAddress') IN ('string','null')
+    AND jsonb_typeof(${t.contextSnapshot}->'productLineName') = 'string'
+    AND jsonb_typeof(${t.contextSnapshot}->'modelName') = 'string'
+    AND jsonb_typeof(${t.contextSnapshot}->'serialLabel') = 'string'
+  )`),
 ]);
 
 export const orderLine = pgTable("order_line", {
   id: id(), orderId: uuid("order_id").notNull().references(() => order.id), partId: uuid("part_id").notNull().references(() => part.id),
   releaseId: uuid("release_id").notNull(), releasePartId: uuid("release_part_id").notNull(), partNumberSnapshot: text("part_number_snapshot").notNull(), descriptionSnapshot: text("description_snapshot").notNull(),
-  qty: integer("qty").notNull(), unitPriceSnapshot: money("unit_price_snapshot").notNull(), lineTotal: money("line_total").notNull(), ...mutable(),
+  qty: integer("qty").notNull(), commentSnapshot: text("comment_snapshot"), unitPriceSnapshot: money("unit_price_snapshot").notNull(), lineTotal: money("line_total").notNull(), ...mutable(),
 }, t => [
   index("order_line_order").on(t.orderId), versionCheck(t),
   foreignKey({ name: "order_line_parent_release", columns: [t.orderId, t.releaseId], foreignColumns: [order.id, order.releaseId] }),
@@ -33,9 +56,9 @@ export const orderLine = pgTable("order_line", {
 ]);
 
 export const importJob = pgTable("import_job", {
-  id: id(), modelId: uuid("model_id").notNull().references(() => model.id), variantId: uuid("variant_id").notNull(), sourceChecksum: text("source_checksum").notNull(), objectKey: text("object_key").notNull().unique(), filename: text("filename"),
+  id: id(), modelId: uuid("model_id").notNull().references(() => model.id), variantId: uuid("variant_id").notNull(), sourceChecksum: text("source_checksum").notNull(), objectKey: text("object_key").notNull().unique(), objectVersionId: text("object_version_id"), filename: text("filename"),
   state: text("state", { enum: ["uploaded", "staged", "validated", "applying", "applied", "failed"] }).notNull().default("uploaded"), summary: jsonb("summary"), actorId: uuid("actor_id").notNull().references(() => appUser.id), appliedAt: time("applied_at"), ...mutable(),
-}, t => [unique("import_source_target").on(t.variantId, t.sourceChecksum), foreignKey({ columns: [t.variantId, t.modelId], foreignColumns: [variant.id, variant.modelId] }), versionCheck(t), checksumCheck(t.sourceChecksum), check("import_state", sql`${t.state} IN ('uploaded','staged','validated','applying','applied','failed')`)]);
+}, t => [unique("import_source_target").on(t.variantId, t.sourceChecksum), foreignKey({ columns: [t.variantId, t.modelId], foreignColumns: [variant.id, variant.modelId] }), versionCheck(t), checksumCheck(t.sourceChecksum), check("import_object_version", sql`${t.objectVersionId} IS NULL OR length(btrim(${t.objectVersionId})) > 0`), check("import_state", sql`${t.state} IN ('uploaded','staged','validated','applying','applied','failed')`)]);
 
 export const importStagingRow = pgTable("import_staging_row", {
   id: id(), jobId: uuid("job_id").notNull().references(() => importJob.id), sourceRowKey: text("source_row_key").notNull(), rowNumber: integer("row_number"), sourcePayload: jsonb("source_payload").notNull(), normalizedFields: jsonb("normalized_fields").notNull(), ...mutable(),

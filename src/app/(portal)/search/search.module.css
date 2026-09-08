@@ -1,0 +1,296 @@
+/*
+ * Part search results — slides 19 and 20.
+ *
+ * The deck draws one dark bar holding the search field and the four actions,
+ * then a single white surface filling the rest of the screen with the results
+ * table. The table is wide — ten columns — so it scrolls inside its own
+ * surface rather than pushing the page sideways.
+ */
+
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* ── The bar ──────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.label {
+  font: var(--weight-bold) var(--text-sm) / 1 var(--font-ui);
+  color: var(--deck-on-dark);
+  white-space: nowrap;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.input {
+  width: 200px;
+  height: 100%;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: none;
+  font: var(--weight-bold) var(--text-xs) / 1 var(--font-mono);
+  color: var(--ink);
+}
+
+.input:focus {
+  outline: none;
+}
+
+.go {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 100%;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  background: var(--sheet);
+  color: var(--ink);
+  font: var(--weight-bold) var(--text-md) / 1 var(--font-ui);
+  cursor: var(--cursor-pointer);
+}
+
+.go:hover {
+  background: var(--rule);
+}
+
+/* Pushes the four actions to the right, as the deck sets them. */
+.spacer {
+  flex: 1;
+}
+
+/* Same grey plate as the figure toolbar — one button vocabulary. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 4px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--graphite);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.buttonIcon {
+  width: auto;
+  height: 18px;
+  object-fit: contain;
+}
+
+/*
+ * The deck draws Back lit AND larger than the three actions beside it — it is
+ * the way out of a dead end, and on the no-match screen it is the only control
+ * that does anything. Sized up rather than restyled, so it still reads as one
+ * of the row.
+ */
+.back {
+  height: 34px;
+  padding: 0 var(--space-4);
+  border-color: var(--deck-accent-edge);
+  background: var(--deck-accent);
+  font-size: var(--text-xs);
+}
+
+.back:hover:not(:disabled) {
+  background: var(--deck-accent-hover);
+}
+
+/* ── The surface ──────────────────────────────────────────────────── */
+
+.surface {
+  min-height: 0;
+  color: var(--ink);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.scroller {
+  height: 100%;
+  overflow: auto;
+}
+
+/* The surface is white but the shell around it is dark, so the table has to
+   state its own ink — inheriting leaves every cell white on white. */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-ui);
+  color: var(--ink);
+}
+
+.head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2) var(--space-2);
+  border: 1px solid var(--rule);
+  background: var(--deck-results-head);
+  color: var(--paper);
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.row {
+  background: var(--paper);
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.row td,
+.row th {
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  vertical-align: middle;
+  font-weight: var(--weight-regular);
+  text-align: left;
+}
+
+.row:hover {
+  background: var(--sheet);
+}
+
+/* A ticked row, filled as slide 20 draws it. */
+.row[data-active] {
+  background: var(--deck-select-row);
+}
+
+.tickHead,
+.tickCell {
+  width: 28px;
+  text-align: center;
+}
+
+.checkbox {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--select);
+  cursor: var(--cursor-pointer);
+}
+
+.noHead,
+.no {
+  width: 32px;
+  text-align: center;
+}
+
+.partNoHead,
+.partNo,
+.price,
+.serial,
+.page {
+  font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
+  white-space: nowrap;
+}
+
+.description,
+.assembly {
+  min-width: 180px;
+}
+
+.priceHead {
+  width: 80px;
+}
+
+/*
+ * "$" left, the figure right, as the deck prints it.
+ *
+ * The flex box goes on a span INSIDE the cell, never on the <td> itself:
+ * display:flex takes the cell out of table layout, so it stops matching the
+ * row's height and breaks out of the grid the moment a description wraps.
+ */
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.currency {
+  color: var(--text-secondary);
+}
+
+.modelHead,
+.model,
+.systemHead,
+.system {
+  white-space: nowrap;
+}
+
+.serialHead,
+.serial {
+  white-space: nowrap;
+}
+
+.pageHead {
+  width: 86px;
+}
+
+/* The page reference is the way into the figure it names. */
+.pageLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--select);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: var(--cursor-pointer);
+}
+
+.pageLink:hover {
+  text-decoration-thickness: 2px;
+}
+
+.count {
+  margin: 0;
+  font: var(--weight-medium) var(--text-2xs) / 1 var(--font-ui);
+  color: var(--deck-on-dark);
+  text-align: right;
+}
+
+/* Confirmation of the last add, alongside the result count. Held until the
+   selection changes, so the click leaves a trace rather than nothing. */
+.added {
+  color: var(--deck-accent-edge);
+  font-weight: var(--weight-bold);
+}

@@ -42,6 +42,7 @@ export function CalloutMarker({
       aria-label={title ? `Callout ${number}: ${title}` : `Callout ${number}`}
       aria-pressed={interactive ? state === "active" : undefined}
       disabled={!interactive}
+      onPointerDown={(event) => event.stopPropagation()}
       onClick={onActivate}
       onMouseEnter={() => onHoverChange?.(true)}
       onMouseLeave={() => onHoverChange?.(false)}

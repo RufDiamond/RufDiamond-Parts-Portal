@@ -1,219 +1,221 @@
-/* Split screen: the ink panel states what the catalogue is, the paper panel
-   takes the credentials. Fixed 620px form column, per the reference. */
-.page {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 620px;
+/*
+ * Portal login — slide 1.
+ *
+ * One dark screen. The RUF Diamond emblem is oversized and bleeds off the left
+ * edge; the wordmark and title sit across the top; account access is a column
+ * on the right.
+ */
+
+.screen {
+  container-type: inline-size;
+  position: relative;
   min-height: 100vh;
+  overflow: hidden;
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
 }
 
-.pitch {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-12);
-  padding: var(--space-16);
-  background: var(--surface-inverse);
+/* The mark, cropped by the screen edge as the deck has it. */
+.emblem {
+  position: absolute;
+  top: 50%;
+  left: -3cqw;
+  width: 29cqw;
+  height: auto;
+  transform: translateY(-50%);
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
 }
 
-.brand {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
+.inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 30cqw);
+  align-content: start;
+  gap: 3cqw;
+  min-height: 100vh;
+  padding: 3cqw 4cqw 3cqw 31cqw;
+}
+
+/* ── Masthead ─────────────────────────────────────────────────────── */
+
+.masthead {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: start;
+  column-gap: 2cqw;
 }
 
 .wordmark {
-  font: var(--weight-semibold) var(--text-lg) / 1 var(--font-mono);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--paper);
+  grid-column: 1;
+  width: 30cqw;
+  height: auto;
+  object-fit: contain;
 }
 
-.wordmarkSub {
-  padding-left: var(--space-3);
-  border-left: 1px solid var(--graphite);
-  font: var(--type-body-sm);
-  color: var(--mid);
+.flag {
+  grid-column: 2;
+  align-self: end;
+  width: 5cqw;
+  height: auto;
+  margin-bottom: 0.6cqw;
+  object-fit: contain;
 }
 
-.pitchBody {
+.dateBlock {
+  grid-column: 4;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  max-width: 46ch;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.eyebrowInverse {
-  font: var(--type-eyebrow);
-  letter-spacing: var(--tracking-eyebrow);
+.calendar {
+  width: 3.4cqw;
+  height: 3.4cqw;
+  object-fit: contain;
+}
+
+.date {
+  padding: var(--space-1) var(--space-4);
+  background: var(--deck-pill);
+  color: var(--deck-pill-text);
+  font: var(--weight-regular) 1.15cqw / 1.4 var(--font-ui);
+  white-space: nowrap;
+}
+
+.title {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  margin: 0.4cqw 0 0;
+  font: var(--weight-bold) 3.4cqw / 1 var(--font-ui);
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: var(--paper);
+  white-space: nowrap;
 }
 
-.display {
-  font: var(--type-display);
-  letter-spacing: var(--tracking-display);
-  color: var(--paper);
-}
-
-.pitchCopy {
-  font: var(--type-body);
-  color: var(--mid);
-}
-
-/* Three-field strip along the foot of the ink panel. */
-.facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: var(--rule-medium) solid var(--graphite);
-}
-
-.fact {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--space-4);
-}
-
-.fact:first-child {
-  padding-left: 0;
-}
-
-.fact + .fact {
-  border-left: 1px solid var(--graphite);
-}
-
-.factValue {
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
-  color: var(--paper);
-}
+/* ── Account access ───────────────────────────────────────────────── */
 
 .form {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-8);
-  padding: var(--space-16) var(--space-16) var(--space-12);
-  background: var(--paper);
-  border-left: var(--rule-medium) solid var(--ink);
-}
-
-.formHead {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding-bottom: var(--space-5);
-  border-bottom: var(--border-thick);
+  grid-column: 2;
+  display: grid;
+  align-content: start;
+  gap: 1.4cqw;
 }
 
 .formTitle {
-  font: var(--type-h1);
-  letter-spacing: var(--tracking-display);
-}
-
-.fields {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
+  margin: 0;
+  font: var(--weight-regular) 1.3cqw / 1.3 var(--font-ui);
+  text-align: right;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  gap: 0.5cqw;
 }
 
-.input {
+.label {
+  font: var(--weight-bold) 1.3cqw / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.input,
+.select {
   width: 100%;
-  height: var(--control-height-lg);
-  padding: 0 var(--control-padding-x);
-  border: var(--border-thin);
+  height: 2.6cqw;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--deck-panel);
+  border-radius: 3px;
   background: var(--paper);
+  font: var(--weight-regular) 1.1cqw / 1 var(--font-ui);
   color: var(--ink);
-  font: var(--type-identifier);
-  letter-spacing: var(--tracking-mono);
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--ink);
-  background: var(--sheet);
+.input::placeholder {
+  font-style: italic;
+  color: var(--text-muted);
 }
 
-.submitArea {
+.input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: -2px;
+}
+
+.linkRow {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin: 0;
 }
 
-.note {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.link {
+  font: var(--weight-regular) 1.2cqw / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
 }
 
-/* ── Responsive ─────────────────────────────────────────────────────── */
+.link:hover {
+  color: var(--select);
+}
 
-/* The 620px form column stops being a proportion and starts being most of the
-   screen, so let it flex first. */
-@media (max-width: 1100px) {
-  .page {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+.linkIcon {
+  width: 2cqw;
+  height: 2cqw;
+  object-fit: contain;
+}
+
+.submit {
+  width: 100%;
+  height: 2.8cqw;
+  min-height: 36px;
+  border: 1px solid var(--deck-panel);
+  border-radius: 3px;
+  background: var(--deck-pill);
+  color: var(--ink);
+  font: var(--weight-bold) 1.4cqw / 1 var(--font-ui);
+  transition: var(--transition-state);
+}
+
+.submit:hover {
+  background: var(--paper);
+}
+
+/* ── Narrow screens ───────────────────────────────────────────────── */
+
+@media (max-width: 820px) {
+  .emblem {
+    display: none;
   }
 
-  .pitch,
-  .form {
-    padding: var(--space-10);
-  }
-}
-
-/* Tablet portrait: stack. The pitch panel keeps its place above the form so
-   the reader still meets the catalogue before the credentials. */
-@media (max-width: 860px) {
-  .page {
+  .inner {
     grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--gutter-page);
   }
 
-  .pitch {
-    gap: var(--space-8);
-    padding: var(--space-8) var(--gutter-page);
+  .masthead {
+    grid-template-columns: auto 1fr;
+    row-gap: var(--space-2);
   }
 
-  .form {
-    padding: var(--space-8) var(--gutter-page) var(--space-10);
-    border-left: 0;
-    border-top: var(--rule-medium) solid var(--ink);
-  }
+  .wordmark { width: 200px; }
+  .flag { width: 40px; margin-top: 0; }
+  .dateBlock { grid-column: 2; justify-self: end; }
+  .calendar { width: 28px; height: 28px; }
+  .date { font: var(--type-body-sm); }
+  .title { grid-column: 1 / -1; font: var(--weight-bold) var(--text-xl) / 1.1 var(--font-ui); }
 
-  .display {
-    font: var(--weight-bold) var(--text-2xl) / var(--leading-tight)
-      var(--font-ui);
-    letter-spacing: var(--tracking-display);
-  }
-}
-
-@media (max-width: 600px) {
-  /* Three fact cells side by side leaves each about 100px. Stack them. */
-  .facts {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .fact {
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--graphite);
-  }
-
-  .fact + .fact {
-    border-left: 0;
-    padding-left: 0;
-  }
-
-  .fact:last-child {
-    border-bottom: 0;
-  }
-
-  .display {
-    font: var(--weight-bold) var(--text-xl) / var(--leading-tight)
-      var(--font-ui);
-  }
+  .form { grid-column: 1; }
+  .formTitle,
+  .linkRow { text-align: left; justify-content: flex-start; }
+  .label { font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui); }
+  .input, .select { font: var(--type-body-sm); }
+  .link { font: var(--type-body-sm); }
+  .linkIcon { width: 22px; height: 22px; }
+  .submit { font: var(--weight-bold) var(--text-base) / 1 var(--font-ui); }
 }

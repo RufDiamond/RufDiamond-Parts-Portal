@@ -11,10 +11,17 @@ export const productLine = pgTable("product_line", {
 export const drawingFile = pgTable("drawing_file", {
   id: id(), objectKey: text("object_key").notNull().unique(), filename: text("filename").notNull(), mediaType: text("media_type").notNull(),
   bytes: bigint("bytes", { mode: "bigint" }).notNull(), sha256: text("sha256").notNull(), width: integer("width"), height: integer("height"), pages: integer("pages"),
-  fileVersion: integer("file_version").notNull().default(1), validationStatus: text("validation_status", { enum: ["pending", "valid", "rejected"] }).notNull().default("pending"),
-  validationReport: jsonb("validation_report"), previewObjectKey: text("preview_object_key").unique(),
+  fileVersion: integer("file_version").notNull().default(1), objectVersionId: text("object_version_id"), validationStatus: text("validation_status", { enum: ["pending", "valid", "rejected"] }).notNull().default("pending"),
+  validationReport: jsonb("validation_report"), previewObjectKey: text("preview_object_key").unique(), previewObjectVersionId: text("preview_object_version_id"),
+  previewSha256: text("preview_sha256"), previewBytes: bigint("preview_bytes", { mode: "bigint" }), previewWidth: integer("preview_width"), previewHeight: integer("preview_height"),
   uploadedByUserId: uuid("uploaded_by_user_id").references((): AnyPgColumn => appUser.id), createdAt: time("created_at").notNull().defaultNow(),
-}, t => [checksumCheck(t.sha256), check("drawing_dimensions", sql`${t.bytes} > 0 AND ${t.fileVersion} > 0 AND (${t.width} IS NULL OR ${t.width} > 0) AND (${t.height} IS NULL OR ${t.height} > 0) AND (${t.pages} IS NULL OR ${t.pages} > 0)`), check("drawing_validation", sql`${t.validationStatus} IN ('pending','valid','rejected')`)]);
+}, t => [
+  checksumCheck(t.sha256),
+  check("drawing_dimensions", sql`${t.bytes} > 0 AND ${t.fileVersion} > 0 AND (${t.width} IS NULL OR ${t.width} > 0) AND (${t.height} IS NULL OR ${t.height} > 0) AND (${t.pages} IS NULL OR ${t.pages} > 0)`),
+  check("drawing_object_versions", sql`(${t.objectVersionId} IS NULL OR length(btrim(${t.objectVersionId})) > 0) AND (${t.previewObjectVersionId} IS NULL OR length(btrim(${t.previewObjectVersionId})) > 0)`),
+  check("drawing_preview_metadata", sql`(${t.previewSha256} IS NULL OR ${t.previewSha256} ~ '^[a-f0-9]{64}$') AND (${t.previewBytes} IS NULL OR ${t.previewBytes} > 0) AND (${t.previewWidth} IS NULL OR ${t.previewWidth} > 0) AND (${t.previewHeight} IS NULL OR ${t.previewHeight} > 0)`),
+  check("drawing_validation", sql`${t.validationStatus} IN ('pending','valid','rejected')`),
+]);
 
 export const model = pgTable("model", {
   id: id(), productLineId: uuid("product_line_id").notNull().references(() => productLine.id), name: text("name").notNull(),
@@ -56,5 +63,5 @@ export const figurePart = pgTable("figure_part", {
 }, t => [unique("figure_part_id_figure").on(t.id, t.figureId), unique("figure_part_source_identity").on(t.figureId, t.sourceRowKey), index("figure_part_part").on(t.partId), versionCheck(t), check("figure_part_qty_positive", sql`${t.qty} > 0`), check("figure_part_dates", sql`${t.effectiveTo} >= ${t.effectiveFrom}`)]);
 
 export const callout = pgTable("callout", {
-  id: id(), figureId: uuid("figure_id").notNull().references(() => figure.id), figurePartId: uuid("figure_part_id"), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }), y: numeric("y", { precision: 7, scale: 4 }), ...mutable(),
+  id: id(), figureId: uuid("figure_id").notNull().references(() => figure.id), figurePartId: uuid("figure_part_id"), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }), y: numeric("y", { precision: 7, scale: 4 }), maskPath: text("mask_path"), ...mutable(),
 }, t => [unique("callout_source_identity").on(t.figureId, t.sourceKey), foreignKey({ name: "callout_same_figure", columns: [t.figurePartId, t.figureId], foreignColumns: [figurePart.id, figurePart.figureId] }), index("callout_figure_part").on(t.figurePartId), versionCheck(t), check("callout_coordinates", sql`(${t.x} IS NULL AND ${t.y} IS NULL) OR (${t.x} IS NOT NULL AND ${t.y} IS NOT NULL AND ${t.x} BETWEEN 0 AND 100 AND ${t.y} BETWEEN 0 AND 100)`)]);

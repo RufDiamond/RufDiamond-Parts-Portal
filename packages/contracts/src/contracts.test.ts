@@ -7,9 +7,10 @@ it("accepts duplicate-number callouts and rejects a half coordinate", () => {
     id: crypto.randomUUID(),
     figureId: "f",
     figurePartId: "fp",
-    number: 7,
+    number: "7",
     x: 10,
     y: 20,
+    maskPath: null,
   };
   const b = { ...a, id: crypto.randomUUID(), x: 40 };
 

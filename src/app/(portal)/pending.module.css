@@ -1,0 +1,27 @@
+/* Shared placeholder for sections the deck has not yet designed. */
+.pending {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 640px;
+  padding: var(--space-10) var(--space-8);
+  border: var(--border-thin);
+  background: var(--surface-well);
+}
+
+.eyebrow {
+  font: var(--type-eyebrow);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.title {
+  margin: 0;
+  font: var(--type-h2);
+}
+
+.body {
+  margin: 0;
+  font: var(--type-body-sm);
+  color: var(--text-secondary);
+}

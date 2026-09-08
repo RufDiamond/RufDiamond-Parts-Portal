@@ -11,7 +11,7 @@
   font-family: inherit;
   text-align: left;
   color: var(--ink);
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
   transition: var(--transition-state);
 }
 
@@ -99,7 +99,7 @@
   background: transparent;
   font-family: inherit;
   text-align: left;
-  cursor: pointer;
+  cursor: var(--cursor-pointer);
 }
 
 .radio {

@@ -6,6 +6,11 @@ export interface AppConfig {
   databaseUrl: string;
   sessionSecret: string;
   webOrigin: string;
+  allowInsecureLoopbackCookie: boolean;
+  deliveryEncryption: {
+    activeKeyId: string;
+    keys: Readonly<Record<string, string>>;
+  };
   s3: {
     endpoint: string;
     region: string;
@@ -43,6 +48,34 @@ function validHttpUrl(value: string, name: string): string {
   return url;
 }
 
+function validOrigin(value: string): string {
+  const parsed = new URL(validHttpUrl(value, "WEB_ORIGIN"));
+  if (value !== parsed.origin || parsed.username || parsed.password || parsed.hostname.includes("*")) {
+    throw new Error("WEB_ORIGIN must be an exact origin without path, query, credentials, or wildcard host");
+  }
+  return value;
+}
+
+function deliveryEncryption(environment: Environment) {
+  const activeKeyId = required(environment, "DELIVERY_ENCRYPTION_KEY_ID");
+  let candidate: unknown;
+  try { candidate = JSON.parse(required(environment, "DELIVERY_ENCRYPTION_KEYS_JSON")); }
+  catch { throw new Error("DELIVERY_ENCRYPTION_KEYS_JSON must be a JSON object of canonical base64 keys"); }
+  if (!candidate || Array.isArray(candidate) || typeof candidate !== "object") {
+    throw new Error("DELIVERY_ENCRYPTION_KEYS_JSON must be a JSON object of canonical base64 keys");
+  }
+  const keys = candidate as Record<string, unknown>;
+  for (const [keyId, encoded] of Object.entries(keys)) {
+    if (!keyId || typeof encoded !== "string") throw new Error("Delivery encryption keys must have non-empty IDs and canonical base64 values");
+    const decoded = Buffer.from(encoded, "base64");
+    if (decoded.length !== 32 || decoded.toString("base64") !== encoded) {
+      throw new Error("Each delivery encryption key must be a canonical base64-encoded 32-byte value");
+    }
+  }
+  if (typeof keys[activeKeyId] !== "string") throw new Error("DELIVERY_ENCRYPTION_KEY_ID must identify a configured key");
+  return { activeKeyId, keys: keys as Readonly<Record<string, string>> };
+}
+
 export function loadConfig(environment: Environment): AppConfig {
   const nodeEnv = required(environment, "NODE_ENV");
   if (nodeEnv !== "development" && nodeEnv !== "test" && nodeEnv !== "production") {
@@ -65,12 +98,26 @@ export function loadConfig(environment: Environment): AppConfig {
     throw new Error("SESSION_SECRET must be at least 32 characters");
   }
 
+  const webOrigin = validOrigin(required(environment, "WEB_ORIGIN"));
+  const allowInsecureLoopbackCookie = environment.ALLOW_INSECURE_LOOPBACK_COOKIE === "true";
+  if (environment.ALLOW_INSECURE_LOOPBACK_COOKIE !== undefined && environment.ALLOW_INSECURE_LOOPBACK_COOKIE !== "true" && environment.ALLOW_INSECURE_LOOPBACK_COOKIE !== "false") {
+    throw new Error("ALLOW_INSECURE_LOOPBACK_COOKIE must be true or false");
+  }
+  if (allowInsecureLoopbackCookie) {
+    const origin = new URL(webOrigin);
+    if (nodeEnv !== "development" || origin.protocol !== "http:" || !["localhost", "127.0.0.1", "::1"].includes(origin.hostname)) {
+      throw new Error("Insecure cookies require explicit development mode with an HTTP loopback WEB_ORIGIN");
+    }
+  }
+
   return {
     nodeEnv,
     port,
     databaseUrl,
     sessionSecret,
-    webOrigin: validHttpUrl(required(environment, "WEB_ORIGIN"), "WEB_ORIGIN"),
+    webOrigin,
+    allowInsecureLoopbackCookie,
+    deliveryEncryption: deliveryEncryption(environment),
     s3: {
       endpoint: validHttpUrl(required(environment, "S3_ENDPOINT"), "S3_ENDPOINT"),
       region: required(environment, "S3_REGION"),

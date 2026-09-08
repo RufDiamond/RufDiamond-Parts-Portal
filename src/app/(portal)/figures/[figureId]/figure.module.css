@@ -1,84 +1,323 @@
-/* Drawing left, parts right — 5fr / 7fr, per the reference. Designed at
-   1440; no mobile view yet. */
-.sheetColumn {
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: calc(64px + var(--space-6));
+/*
+ * Figure screen — slide 14.
+ *
+ * A single outlined panel on the dark ground holding a breadcrumb bar, a
+ * toolbar of grey buttons, and two white surfaces side by side: the plate on
+ * the left, the parts list on the right.
+ */
+
+.screen {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 6px;
+  min-height: 0;
 }
 
-.listColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
+/* ── Breadcrumb ───────────────────────────────────────────────────── */
+
+.trail {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: #303030;
+  font: var(--weight-bold) var(--text-sm) / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
 }
 
-/* Footer bar under the parts list. */
-.listFoot {
+.trailLead {
+  font-weight: var(--weight-bold);
+}
+
+.trailSep {
+  padding: 0 var(--space-1);
+  color: var(--deck-on-dark);
+}
+
+.trailTail {
+  font-weight: var(--weight-regular);
+}
+
+.controls {
+  display: grid;
+  gap: 6px;
+}
+
+.previewNotice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid #c48a00;
+  border-radius: 4px;
+  background: #fff4cc;
+  color: #4a3600;
+  font: var(--weight-bold) var(--text-xs) / 1.35 var(--font-ui);
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.pager {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-top: var(--border-thick);
-  background: var(--paper);
+  gap: var(--space-2);
+  min-width: 132px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 4px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-xs) / 1 var(--font-ui);
+  justify-content: center;
 }
 
-.listFootNote {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.pagerStep {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 22px;
+  border: 0;
+  background: none;
+  color: var(--deck-on-dark);
+  cursor: var(--cursor-pointer);
 }
 
-.added {
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
+.pagerStep:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────
-   Drawing above, parts below. Sticky is dropped: once the columns stack,
-   pinning the drawing would push the list off the screen. */
-
-@media (max-width: 900px) {
-  .sheetColumn {
-    position: static;
-  }
-
-  .listFoot {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-  }
+.pagerCount {
+  min-width: 62px;
+  text-align: center;
+  white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-2);
-  }
-
-  .toolbarActions > * {
-    flex: 1 1 auto;
-  }
+/* A button: grey plate, white artwork, white bold label. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 4px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
 }
 
-/* Figure loaded, parts not yet imported. */
-.listEmpty {
-  margin: 0;
-  padding: var(--space-6) var(--space-5);
-  font: var(--type-body-sm);
-  color: var(--text-secondary);
-  border-bottom: var(--border-thin);
+.button:hover {
+  background: var(--graphite);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The four plate controls carry no label. */
+.iconButton {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+.buttonIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* A little air between the plate controls and the actions, no more. */
+.spacer {
+  width: var(--space-3);
+}
+
+/* ── The two surfaces ─────────────────────────────────────────────── */
+
+.split {
+  /* the handle is positioned against this, not against the plate */
+  position: relative;
+  display: grid;
+  /*
+   * Set from the handle. Custom properties rather than the shorthand, so the
+   * stacked layout below can still override the columns outright.
+   */
+  grid-template-columns:
+    minmax(0, var(--split-left, 41fr))
+    minmax(0, var(--split-right, 59fr));
+  gap: 6px;
+  align-items: stretch;
+  /*
+   * Capped to the window, so a long parts list scrolls inside its own panel
+   * instead of growing the page and pushing the plate off the top. The
+   * subtraction is the chrome around it — sticky header, breadcrumb bar,
+   * toolbar, and the shell's margin below — measured at 191px above and 54px
+   * under. The floor keeps both panels usable on a short laptop.
+   */
+  height: calc(100dvh - 245px);
+  min-height: 320px;
+}
+
+/* While the handle is being dragged, nothing else should select or hover. */
+.splitResizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* The handle keeps the pointer — it has captured it. */
+.splitResizing *:not(.divider) {
+  pointer-events: none;
+}
+
+.plate,
+.list {
+  position: relative;
+  min-width: 0;
+  /* The split sets the height now; a floor here would defeat it. */
+  min-height: 0;
+  background: var(--deck-surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: auto;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+/*
+ * The drawing stops shrinking at a readable size and the panel scrolls
+ * instead. Pulling the handle left used to crush the plate towards nothing,
+ * since the image is object-fit: contain and simply got smaller; past this
+ * floor the panel offers scrollbars and the drawing stays legible.
+ */
+/* The VIEWER, not every child: this also caught the absolutely positioned
+   callout notice and inflated it to 300px, painting a translucent white block
+   across the lower half of the panel. */
+.plate > figure {
+  min-width: 360px;
+  min-height: 260px;
 }
 
 /* Callout numbers exist but have no position on the plate yet. */
 .plateNotice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   margin: 0;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(255, 255, 255, 0.94);
+  border-top: 1px solid var(--rule);
+  font: var(--weight-regular) var(--text-2xs) / 1.4 var(--font-ui);
+  color: var(--text-secondary);
+}
+
+/* The handle the deck puts between the two surfaces. */
+.divider {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--split-at, 41%) - 11px);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 50%;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+/*
+ * A knob 22px across is a small target for a drag, so the grab area is a full
+ * height strip behind it. It carries no paint — only the knob is seen.
+ */
+.divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 100vh;
+  max-height: 640px;
+  transform: translate(-50%, -50%);
+}
+
+.divider:hover,
+.divider:focus-visible {
+  background: var(--graphite);
+  outline: none;
+}
+
+.divider:focus-visible {
+  box-shadow: 0 0 0 2px var(--select);
+}
+
+/* The knob must stay above its own grab strip. */
+.divider > span {
+  position: relative;
+}
+
+/* Nothing imported for this figure yet. */
+.empty {
+  margin: 0;
+  padding: var(--space-6) var(--space-5);
   font: var(--type-body-sm);
   color: var(--text-secondary);
-  border: var(--border-thin);
-  border-top: 0;
-  background: var(--surface-well);
+}
+
+@media (max-width: 900px) {
+  /* Stacked: one column, and nothing to drag. */
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .plate,
+  .list {
+    min-height: 320px;
+  }
+}
+
+/* Crop mode: the plate takes a crosshair and the marquee follows the drag. */
+.plateArmed {
+  cursor: crosshair;
+}
+
+.marquee {
+  position: absolute;
+  z-index: 4;
+  border: 1.5px solid var(--ink);
+  background: rgba(240, 164, 0, 0.14);
+  pointer-events: none;
+}
+
+/* The crop tool while it is armed. */
+.button[data-armed] {
+  border-color: #f0a400;
+  box-shadow: inset 0 0 0 1px #f0a400;
 }

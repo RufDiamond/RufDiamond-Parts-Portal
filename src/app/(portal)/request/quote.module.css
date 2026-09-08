@@ -1,0 +1,462 @@
+/*
+ * Request a quote — slide 44.
+ *
+ * A dark bar, one white table of the parts gathered so far, then the comment
+ * and shipping blocks, and two large actions across the foot. No unit price:
+ * the deck drops that column here, because the quote is what settles it.
+ */
+
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.loading {
+  padding: var(--space-12) 0;
+  text-align: center;
+  color: var(--deck-on-dark);
+}
+
+/* ── Bar ──────────────────────────────────────────────────────────── */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: #303030;
+}
+
+.title {
+  font: var(--weight-bold) var(--text-sm) / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.count {
+  font: var(--weight-medium) var(--text-2xs) / 1 var(--font-ui);
+  color: var(--deck-pill);
+}
+
+/* ── The table ────────────────────────────────────────────────────── */
+
+.surface {
+  min-height: 0;
+  /* The surface is white but the shell is dark: state the ink. */
+  color: var(--ink);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.scroller {
+  height: 100%;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--ink);
+  font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-ui);
+}
+
+.head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  background: var(--deck-results-head);
+  color: var(--paper);
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.row {
+  background: var(--paper);
+  transition: var(--transition-state);
+}
+
+.row td,
+.row th {
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  vertical-align: middle;
+  font-weight: var(--weight-regular);
+  text-align: left;
+}
+
+/* A part that is going on the request, filled as slide 44 draws it. */
+.row[data-active] {
+  background: var(--deck-select-row);
+}
+
+.tickHead,
+.tickCell {
+  width: 28px;
+  text-align: center;
+}
+
+.checkbox {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--select);
+  cursor: var(--cursor-pointer);
+}
+
+.noHead,
+.no {
+  width: 32px;
+  text-align: center;
+}
+
+.partNoHead,
+.partNo,
+.serial,
+.page {
+  font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
+  white-space: nowrap;
+}
+
+.description,
+.assembly {
+  min-width: 160px;
+}
+
+.qtyHead {
+  width: 56px;
+}
+
+.qtyInput {
+  width: 46px;
+  padding: 2px var(--space-1);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--weight-medium) var(--text-2xs) / 1.3 var(--font-mono);
+  text-align: right;
+}
+
+.modelHead,
+.model,
+.systemHead,
+.system,
+.serialHead {
+  white-space: nowrap;
+}
+
+.pageHead {
+  width: 84px;
+}
+
+.pageLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--select);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: var(--cursor-pointer);
+}
+
+/* A note opens under the description it belongs to. */
+.note {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--weight-regular) var(--text-2xs) / 1.4 var(--font-ui);
+  resize: vertical;
+}
+
+.commentHead,
+.commentCell {
+  width: 116px;
+  white-space: nowrap;
+}
+
+.commentCell {
+  text-align: center;
+}
+
+.rowButton {
+  padding: 4px var(--space-2);
+  border: 1px solid var(--deck-accent-edge);
+  border-radius: 3px;
+  background: var(--deck-accent);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1.1 var(--font-ui);
+  text-transform: uppercase;
+  cursor: var(--cursor-pointer);
+}
+
+.rowButton:hover {
+  background: var(--deck-accent-hover);
+}
+
+/* A line that already carries a note reads differently from one that does not. */
+.rowButtonSet {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+/* ── Comments and shipping ────────────────────────────────────────── */
+
+.field {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.blockButton {
+  height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--deck-accent-edge);
+  border-radius: 4px;
+  background: var(--deck-accent);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: var(--cursor-pointer);
+}
+
+.blockButton:hover:not(:disabled) {
+  background: var(--deck-accent-hover);
+}
+
+.blockButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The address and the saved-address shortcut share one field, as slide 51
+   draws it: the button sits inside the field's right-hand end. */
+.addressField {
+  position: relative;
+  display: grid;
+}
+
+.addressField .input {
+  padding-right: 172px;
+}
+
+.defaultAddress {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--deck-accent-edge);
+  border-radius: 4px;
+  background: var(--deck-accent);
+  color: var(--deck-on-dark);
+  font: var(--weight-semibold) var(--text-2xs) / 1.2 var(--font-ui);
+  text-align: center;
+  cursor: var(--cursor-pointer);
+}
+
+.defaultAddress:hover:not(:disabled) {
+  background: var(--deck-accent-hover);
+}
+
+.defaultAddress:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.input {
+  height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--weight-regular) var(--text-xs) / 1.3 var(--font-ui);
+}
+
+/* The address reads as handwriting on a form, filled or not — slide 44 sets
+   the placeholder in italic and slide 52 keeps the typed address that way. */
+.input::placeholder {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Dormant until the estimate is asked for. */
+.input:disabled {
+  background: var(--sheet);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Same column rhythm as a field row, with the button column left empty. */
+.underField {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.shipping {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.methods {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/*
+ * Dormant, not merely faded. The deck greys the whole block and leaves the
+ * circles EMPTY — a browser's disabled radio paints a filled grey disc, which
+ * reads as "already chosen and locked" rather than "not yet available".
+ */
+.methods:disabled {
+  color: var(--text-muted);
+}
+
+.methodsTitle {
+  padding: 0;
+  font: var(--weight-bold) var(--text-sm) / 1.3 var(--font-ui);
+  color: var(--deck-on-dark);
+}
+
+.methodsHint {
+  margin: 0 0 var(--space-2);
+  font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-ui);
+  font-style: italic;
+  color: var(--deck-pill);
+}
+
+.methods:disabled .methodsTitle,
+.methods:disabled .methodsHint,
+.methods:disabled .radio {
+  color: var(--graphite);
+}
+
+.radio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 0;
+  font: var(--weight-medium) var(--text-xs) / 1.4 var(--font-ui);
+  color: var(--deck-on-dark);
+  cursor: var(--cursor-pointer);
+}
+
+/*
+ * Drawn rather than native, so the dormant state is an empty ring in both
+ * browsers and states instead of the platform's grey disc.
+ */
+.radio input[type="radio"] {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  cursor: inherit;
+}
+
+.radio input[type="radio"]::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--deck-accent-edge);
+  transform: scale(0);
+  transition: transform 120ms ease-out;
+}
+
+.radio input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
+.methods:disabled .radio {
+  cursor: default;
+}
+
+.notice {
+  margin: 0;
+  font: var(--weight-regular) var(--text-2xs) / 1.5 var(--font-ui);
+  color: var(--deck-pill);
+  text-align: justify;
+}
+
+.notice strong {
+  color: var(--deck-on-dark);
+}
+
+.estimate {
+  color: var(--deck-accent-edge);
+}
+
+/* ── Foot ─────────────────────────────────────────────────────────── */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.primary {
+  min-width: 240px;
+  padding: var(--space-4) var(--space-6);
+  border: 1px solid var(--deck-accent-edge);
+  border-radius: 6px;
+  background: var(--deck-accent);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--deck-accent-hover);
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--deck-accent-edge);
+  border-radius: 4px;
+  background: var(--deck-accent);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  text-transform: uppercase;
+  cursor: var(--cursor-pointer);
+}
