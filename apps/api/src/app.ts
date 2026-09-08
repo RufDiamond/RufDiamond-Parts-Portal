@@ -3,6 +3,7 @@ import type { HashOptions } from "argon2";
 
 import type { AppConfig } from "./config.js";
 import { createDatabase } from "./db/client.js";
+import { createDatabaseAuthorizationResolver } from "./modules/authorization/policy.js";
 import { registerIdentityRoutes } from "./modules/identity/routes.js";
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
 import { registerAuth } from "./plugins/auth.js";
@@ -31,7 +32,7 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   const identity = await createIdentityService({
     database,
     sessionSecret: config.sessionSecret,
-    authorizationResolver: dependencies.authorizationResolver,
+    authorizationResolver: dependencies.authorizationResolver ?? createDatabaseAuthorizationResolver(database.db),
     passwordOptions: dependencies.passwordOptions,
     now,
     deliveryEncryption: config.deliveryEncryption,

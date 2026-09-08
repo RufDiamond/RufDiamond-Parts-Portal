@@ -29,6 +29,7 @@ const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 export interface AuthorizationResolution {
   capabilities: string[];
   scopes: SessionScopeSummary;
+  effectiveDiscountRate?: string;
 }
 
 export interface AuthorizationResolverInput { userId: string; companyId: string }
@@ -38,7 +39,7 @@ export const denyAllAuthorization: AuthorizationResolver = async () => ({
   capabilities: [],
   scopes: {
     brandIds: [], accountIds: [], fleet: [], environment: "published",
-    priceTier: "", canViewPrices: false,
+    priceTier: "", scopeVersion: "denied", canViewPrices: false,
   },
 });
 
@@ -180,7 +181,7 @@ export async function createIdentityService(options: IdentityServiceOptions): Pr
       defaultShippingAddress: account.defaultShippingAddress,
     };
     const profile = authorization.scopes.canViewPrices
-      ? { ...common, scopes: { ...authorization.scopes, canViewPrices: true as const }, company: { ...company, discountRate: account.discountRate } }
+      ? { ...common, scopes: { ...authorization.scopes, canViewPrices: true as const }, company: { ...company, discountRate: authorization.effectiveDiscountRate ?? account.discountRate } }
       : { ...common, scopes: { ...authorization.scopes, canViewPrices: false as const }, company };
     return { sessionId: account.sessionId, user, profile, rawToken: token, csrfToken };
   }

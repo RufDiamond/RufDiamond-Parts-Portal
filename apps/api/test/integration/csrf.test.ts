@@ -46,6 +46,7 @@ describe("origin and CSRF protection", () => {
       "insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,$2,'Buyer',$3,$3,$4,id from role where key='purchaser'",
       [userId, companyId, loginId, passwordHash],
     );
+    await postgres.pool.query("insert into user_scope(user_id) values($1)", [userId]);
     const app = await buildApp({ config, dependencies: { database: connection, passwordOptions } as never });
     apps.push(app);
     return { app, loginId, password };

@@ -146,6 +146,7 @@ describe("identity transport contracts", () => {
       fleet: [],
       environment: "published",
       priceTier: "standard",
+      scopeVersion: "scope-test-version",
       canViewPrices: false,
     },
     company: {
@@ -180,6 +181,12 @@ describe("identity transport contracts", () => {
       ...session,
       scopes: { ...session.scopes, discountRate: "0.100000" },
     })).toBe(false);
+  });
+
+  it("requires the opaque authorization version in session summaries", () => {
+    const withoutVersion: Record<string, unknown> = { ...session.scopes };
+    delete withoutVersion.scopeVersion;
+    expect(Value.Check(UnpricedMeResponseSchema, { ...session, scopes: withoutVersion })).toBe(false);
   });
 });
 

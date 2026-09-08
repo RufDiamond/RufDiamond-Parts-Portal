@@ -12,6 +12,7 @@ const sessionScopeFields = {
   fleet: ScopedIdsSchema,
   environment: Type.Union([Type.Literal("published"), Type.Literal("draft")]),
   priceTier: Type.String(),
+  scopeVersion: Type.String(),
 };
 
 /** Safe summaries only; never include password, token, or signed-URL data. */

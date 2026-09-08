@@ -90,6 +90,7 @@ describe("first-party authentication", () => {
             fleet: [],
             environment: "published" as const,
             priceTier: "standard",
+            scopeVersion: "scope-test-version",
             canViewPrices,
           },
         }),
@@ -151,7 +152,7 @@ describe("first-party authentication", () => {
       capabilities: ["catalog.figure.view"],
       scopes: {
         brandIds: ["fat-truck"], accountIds: [identity.companyId], fleet: [],
-        environment: "published", priceTier: "standard", canViewPrices: true,
+        environment: "published", priceTier: "standard", scopeVersion: "scope-test-version", canViewPrices: true,
       },
       company: {
         id: identity.companyId, name: "Diamond Customer", type: "customer",
@@ -164,18 +165,18 @@ describe("first-party authentication", () => {
 
   it("defaults authorization to deny-all and omits company pricing", async () => {
     const identity = await account();
-    const app = await buildApp({ config, dependencies: { database: connection, passwordOptions } as never });
-    apps.push(app);
-    const login = await signIn(app, identity.loginId, identity.password);
-    const response = await app.inject({
-      method: "GET", url: "/api/v1/me",
-      headers: { cookie: String(login.headers["set-cookie"]).split(";")[0] },
+    const service = await createIdentityService({
+      database: connection,
+      sessionSecret: config.sessionSecret,
+      passwordOptions,
+      deliveryEncryption: config.deliveryEncryption,
     });
+    const login = await service.authenticate(identity.loginId, identity.password);
+    const details = await service.readSessionDetails(login.sessionToken);
 
-    expect(response.statusCode).toBe(200);
-    expect(response.json().capabilities).toEqual([]);
-    expect(response.json().scopes).toMatchObject({ brandIds: [], accountIds: [], fleet: [], canViewPrices: false });
-    expect(response.json().company).not.toHaveProperty("discountRate");
+    expect(details?.profile.capabilities).toEqual([]);
+    expect(details?.profile.scopes).toMatchObject({ brandIds: [], accountIds: [], fleet: [], scopeVersion: "denied", canViewPrices: false });
+    expect(details?.profile.company).not.toHaveProperty("discountRate");
   });
 
   it("denies suspended accounts and returns the same safe response for wrong or missing accounts", async () => {
