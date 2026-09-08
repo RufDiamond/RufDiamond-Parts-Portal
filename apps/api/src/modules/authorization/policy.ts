@@ -44,6 +44,11 @@ interface DealerAccountRow extends VersionedIdRow {
   price_tier_id: string | null;
   discount_rate: string;
   technician_pricing_visible: boolean;
+  tier_key: string | null;
+  tier_discount_rate: string | null;
+  tier_version: number | null;
+  product_lines: Array<{ id: string; version: number }>;
+  fleet: Array<{ id: string; version: number }>;
 }
 
 function forbidden(): never {
@@ -95,6 +100,12 @@ function resourceScope(
 
 function hashVersion(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function priceVisibility(capabilities: ReadonlySet<string>, technicianPricingVisible: boolean): boolean {
+  const technicianSemantics = capabilities.has("orders.list.build") && !capabilities.has("orders.submit");
+  return capabilities.has("pricing.cost.view")
+    && (!technicianSemantics || technicianPricingVisible);
 }
 
 export function requireCapability(ctx: AuthorizationContext, key: string): void {
@@ -177,9 +188,21 @@ async function authorizationRows(tx: Transaction, userId: string) {
   const dealerAccounts = (await tx.execute(sql`
     SELECT dcs.customer_company_id AS id, dcs.version, c.status,
       c.version AS company_version, c.price_tier_id, c.discount_rate,
-      c.technician_pricing_visible
+      c.technician_pricing_visible, pt.key AS tier_key,
+      pt.discount_rate AS tier_discount_rate, pt.version AS tier_version,
+      COALESCE((
+        SELECT jsonb_agg(jsonb_build_object('id', cpl.product_line_id, 'version', cpl.version)
+          ORDER BY cpl.product_line_id)
+        FROM company_product_line cpl WHERE cpl.company_id = c.id
+      ), '[]'::jsonb) AS product_lines,
+      COALESCE((
+        SELECT jsonb_agg(jsonb_build_object('id', cm.variant_id, 'version', cm.version)
+          ORDER BY cm.variant_id, cm.id)
+        FROM company_machine cm WHERE cm.company_id = c.id
+      ), '[]'::jsonb) AS fleet
     FROM dealer_customer_scope dcs
     JOIN company c ON c.id = dcs.customer_company_id
+    LEFT JOIN price_tier pt ON pt.id = c.price_tier_id
     WHERE dcs.dealer_company_id = ${base?.company_id ?? "00000000-0000-0000-0000-000000000000"}
     ORDER BY dcs.customer_company_id
   `)).rows as unknown as DealerAccountRow[];
@@ -200,9 +223,7 @@ export async function loadAuthorization(tx: Transaction, userId: string): Promis
   const brandIds = resourceScope(base.company_type, base.brand_mode, rows.companyBrands.map(row => row.id), rows.userBrands.map(row => row.id));
   const variantIds = resourceScope(base.company_type, base.fleet_mode, rows.companyVariants.map(row => row.id), rows.userVariants.map(row => row.id));
   const accountIds = accountScope(base.company_type, base.account_mode, base.company_id, activeDealerAccounts, rows.userAccounts.map(row => row.id));
-  const technicianSemantics = capabilities.has("orders.list.build") && !capabilities.has("orders.submit");
-  const canViewPrices = capabilities.has("pricing.cost.view")
-    && (!technicianSemantics || base.technician_pricing_visible);
+  const canViewPrices = priceVisibility(capabilities, base.technician_pricing_visible);
   const priceTierId = base.user_price_tier_id ?? base.company_price_tier_id;
   const discountRate = base.user_price_tier_id
     ? base.user_tier_discount
@@ -234,10 +255,14 @@ export async function loadBehalfOfAuthorization(
   requireBehalfOf(actor, target);
   const result = await tx.execute(sql`
     SELECT c.id, c.price_tier_id, c.discount_rate AS company_discount,
-      c.version AS company_version, pt.discount_rate AS tier_discount,
+      c.version AS company_version, c.technician_pricing_visible,
+      pt.discount_rate AS tier_discount,
       pt.version AS tier_version, cpl.version AS brand_version,
-      cm.version AS fleet_version
+      cm.version AS fleet_version, dcs.version AS dealer_scope_version
     FROM company c
+    JOIN dealer_customer_scope dcs
+      ON dcs.dealer_company_id = ${actor.companyId}
+      AND dcs.customer_company_id = c.id
     JOIN company_product_line cpl
       ON cpl.company_id = c.id AND cpl.product_line_id = ${target.brandId}
     JOIN company_machine cm
@@ -254,6 +279,8 @@ export async function loadBehalfOfAuthorization(
     tier_version: number | null;
     brand_version: number;
     fleet_version: number;
+    technician_pricing_visible: boolean;
+    dealer_scope_version: number;
   } | undefined;
   if (!row) forbidden();
   const discountRate = row.price_tier_id ? row.tier_discount : row.company_discount;
@@ -264,6 +291,7 @@ export async function loadBehalfOfAuthorization(
     brandIds: [target.brandId],
     accountIds: [target.companyId],
     variantIds: [target.variantId],
+    canViewPrices: priceVisibility(actor.capabilities, row.technician_pricing_visible),
     scopeVersion: hashVersion({ actor: actor.scopeVersion, target, policy: row }),
     priceTierId: row.price_tier_id,
     discountRate,

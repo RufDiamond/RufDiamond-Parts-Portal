@@ -20,6 +20,24 @@ BEGIN
 END;
 $$;
 --> statement-breakpoint
+ALTER FUNCTION public.reject_immutable_change()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
+ALTER FUNCTION public.protect_publication_release()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
+ALTER FUNCTION public.protect_order_snapshot()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
+ALTER FUNCTION public.protect_import_source()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
+ALTER FUNCTION public.protect_idempotency_record()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
+ALTER FUNCTION public.protect_import_staging_source()
+SET search_path = pg_catalog, public, pg_temp;
+--> statement-breakpoint
 CREATE OR REPLACE FUNCTION public.protect_order_line() RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = pg_catalog, public, pg_temp

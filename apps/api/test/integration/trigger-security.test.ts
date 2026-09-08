@@ -10,6 +10,17 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { migrationsFolder, startPostgres } from "../helpers/postgres.js";
 
+const securityTriggerFunctions = [
+  "protect_idempotency_record",
+  "protect_import_source",
+  "protect_import_staging_source",
+  "protect_order_line",
+  "protect_order_snapshot",
+  "protect_publication_release",
+  "protect_release_snapshot",
+  "reject_immutable_change",
+] as const;
+
 describe("snapshot trigger security", () => {
   let postgres: Awaited<ReturnType<typeof startPostgres>>;
   let runtime: PoolClient;
@@ -73,9 +84,9 @@ describe("snapshot trigger security", () => {
       .resolves.toMatchObject({ rowCount: 1 });
   });
 
-  it("keeps both trigger functions invoker-secure with pinned lookup paths", async () => {
-    const rows = (await postgres.pool.query("select p.proname,p.prosecdef,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname in ('protect_release_snapshot','protect_order_line') order by p.proname")).rows;
-    expect(rows).toHaveLength(2);
+  it("keeps every security-trigger function invoker-secure with a pinned lookup path", async () => {
+    const rows = (await postgres.pool.query("select p.proname,p.prosecdef,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname = any($1::text[]) order by p.proname", [securityTriggerFunctions])).rows;
+    expect(rows.map(row => row.proname)).toEqual(securityTriggerFunctions);
     for (const row of rows) {
       expect(row.prosecdef).toBe(false);
       expect(row.definition).toContain("SET search_path TO 'pg_catalog', 'public', 'pg_temp'");

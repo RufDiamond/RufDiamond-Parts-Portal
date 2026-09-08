@@ -154,3 +154,81 @@ The final full output was clean. Earlier full-run attempts established that para
 ## Concerns
 
 None within Task 5 scope. Future Task 8 bootstrap must invoke the controlled pilot-role seed during an approved operator/bootstrap action; it is intentionally not automatic at API startup.
+
+## Review fix round 1
+
+Fix base: `b33a116bec735ebfb60e52081db74c9f8adc4e53`
+
+### Changes
+
+- Required an explicit transactional `dealer_customer_scope` actor/target pair in `loadBehalfOfAuthorization`, independently of the actor's general account scope. Existing actor and target brand/fleet intersections remain enforced.
+- Recomputed behalf-of price visibility from the actor's capabilities and the target company's `technician_pricing_visible` switch. Tests cover both actor-visible/target-hidden and actor-hidden/target-visible directions.
+- Included paired-company price-tier rate/version and product-line/fleet entitlement identifiers and versions in dealer session scope-version inputs. Mutation tests cover each dependency.
+- Extended additive migration 0007 search-path hardening to all eight security-trigger functions while preserving migrations 0001-0006 and the existing invoker/locking behavior.
+- Added real-database `/me` resolver coverage for a priced user-tier override (`user-contract`, effective discount `0.400000`).
+
+### RED
+
+Command:
+
+```text
+npm test -w @rufdiamond/api -- authorization.test.ts trigger-security.test.ts
+```
+
+Observed before the fix:
+
+```text
+Test Files  2 failed (2)
+Tests       4 failed | 16 passed (20)
+internal all-scope actor resolved a behalf-of target without a named pair
+target technician pricing expected false, received true
+paired target tier/entitlement mutations left scopeVersion unchanged
+security-trigger metadata found unpinned functions
+```
+
+### GREEN: focused regression suites
+
+```text
+npm test -w @rufdiamond/api -- authorization.test.ts trigger-security.test.ts
+Test Files  2 passed (2)
+Tests       20 passed (20)
+```
+
+### Final verification
+
+Command:
+
+```text
+npm test -w @rufdiamond/api && npm test -w @rufdiamond/contracts && npm run typecheck -w @rufdiamond/api && npm run typecheck -w @rufdiamond/contracts && npm run lint -- apps/api/src apps/api/test packages/contracts/src && git diff --check
+```
+
+Output:
+
+```text
+@rufdiamond/api:       11 files passed, 104 tests passed
+@rufdiamond/contracts: 2 files passed, 41 tests passed
+API typecheck:          exit 0
+contracts typecheck:    exit 0
+lint:                   exit 0, no warnings
+git diff --check:       exit 0
+```
+
+### Files changed in this fix
+
+- `apps/api/src/modules/authorization/policy.ts`
+- `apps/api/drizzle/0007_snapshot_trigger_hardening.sql`
+- `apps/api/test/integration/authorization.test.ts`
+- `apps/api/test/integration/trigger-security.test.ts`
+- `.superpowers/sdd/2026-09-07-backend-frontend-integration/task-5-report.md`
+
+### Self-review
+
+- Verified named-pair authorization is resolved in the same transaction and cannot be substituted by internal `all` or explicit account scope.
+- Verified behalf-of pricing retains the actor capability rule while using the target company's technician-pricing policy and never inherits the actor's user-tier override.
+- Verified paired tier and entitlement aggregates are deterministic scope-version inputs.
+- Verified metadata assertions enumerate all eight security-trigger functions and require invoker mode plus the pinned `pg_catalog, public, pg_temp` search path.
+- Verified no contracts, frontend code, startup seeding, later routes, or migrations 0008/0009 were added.
+
+### Concerns
+
+None within this review-fix scope.

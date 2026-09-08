@@ -40,7 +40,8 @@ describe("database authorization policy", () => {
     fatModel: randomUUID(), ironModel: randomUUID(),
     fatVariant: randomUUID(), ironVariant: randomUUID(),
     customer: randomUUID(), target: randomUUID(), dealer: randomUUID(), internal: randomUUID(),
-    customerUser: randomUUID(), technicianUser: randomUUID(), dealerUser: randomUUID(), internalUser: randomUUID(),
+    customerUser: randomUUID(), technicianUser: randomUUID(), dealerUser: randomUUID(),
+    dealerTechnicianUser: randomUUID(), internalUser: randomUUID(),
   };
 
   beforeAll(async () => {
@@ -66,6 +67,7 @@ describe("database authorization policy", () => {
       [ids.customerUser, ids.customer, "purchaser", userTier],
       [ids.technicianUser, ids.customer, "technician", null],
       [ids.dealerUser, ids.dealer, "purchaser", null],
+      [ids.dealerTechnicianUser, ids.dealer, "technician", null],
       [ids.internalUser, ids.internal, "internal_viewer", null],
     ]) {
       await q("insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,$2,$3,$4,$4,'hash',id from role where key=$5", [userId, companyId, userId, `${userId}@example.test`, roleKey]);
@@ -81,7 +83,7 @@ describe("database authorization policy", () => {
     await q("insert into user_product_line_scope(user_id,product_line_id) values($1,$2),($1,$3)", [ids.customerUser, ids.fatTruck, ids.ironHorse]);
     await q("insert into user_fleet_scope(user_id,variant_id) values($1,$2),($1,$3)", [ids.customerUser, ids.fatVariant, ids.ironVariant]);
     await q("insert into dealer_customer_scope(dealer_company_id,customer_company_id) values($1,$2)", [ids.dealer, ids.target]);
-    await q("insert into user_capability(user_id,capability_key) values($1,'orders.behalf'),($2,'pricing.cost.view'),($3,'audit.log.view')", [ids.dealerUser, ids.internalUser, ids.customerUser]);
+    await q("insert into user_capability(user_id,capability_key) values($1,'orders.behalf'),($2,'orders.behalf'),($3,'pricing.cost.view'),($3,'orders.behalf'),($4,'audit.log.view')", [ids.dealerUser, ids.dealerTechnicianUser, ids.internalUser, ids.customerUser]);
   }, 120_000);
 
   afterAll(async () => {
@@ -178,6 +180,42 @@ describe("database authorization policy", () => {
     }))).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 
+  it("requires a named actor-target pair inside the behalf-of transaction even for internal all scope", async () => {
+    const internal = await load(ids.internalUser);
+    const target = { companyId: ids.target, brandId: ids.ironHorse, variantId: ids.ironVariant };
+    expect(() => requireBehalfOf(internal, target)).not.toThrow();
+    await expect(database.db.transaction(tx => loadBehalfOfAuthorization(tx, internal, target)))
+      .rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    await postgres.pool.query("insert into dealer_customer_scope(dealer_company_id,customer_company_id) values($1,$2)", [ids.internal, ids.target]);
+    try {
+      await expect(database.db.transaction(tx => loadBehalfOfAuthorization(tx, internal, target)))
+        .resolves.toMatchObject({ companyId: ids.target });
+    } finally {
+      await postgres.pool.query("delete from dealer_customer_scope where dealer_company_id=$1 and customer_company_id=$2", [ids.internal, ids.target]);
+    }
+  });
+
+  it("recomputes technician price visibility from the target company policy in both directions", async () => {
+    const target = { companyId: ids.target, brandId: ids.ironHorse, variantId: ids.ironVariant };
+    await postgres.pool.query("insert into company_product_line(company_id,product_line_id) values($1,$2) on conflict do nothing", [ids.dealer, ids.ironHorse]);
+    await postgres.pool.query("insert into company_machine(company_id,variant_id,unit_reference) values($1,$2,'IH-DEALER-TECH') on conflict do nothing", [ids.dealer, ids.ironVariant]);
+
+    const initiallyVisible = await load(ids.dealerTechnicianUser);
+    expect(initiallyVisible.canViewPrices).toBe(true);
+    await postgres.pool.query("update company set technician_pricing_visible=false where id=$1", [ids.target]);
+    await expect(database.db.transaction(tx => loadBehalfOfAuthorization(tx, initiallyVisible, target)))
+      .resolves.toMatchObject({ canViewPrices: false });
+
+    await postgres.pool.query("update company set technician_pricing_visible=false where id=$1", [ids.dealer]);
+    await postgres.pool.query("update company set technician_pricing_visible=true where id=$1", [ids.target]);
+    const hiddenAtDealer = await load(ids.dealerTechnicianUser);
+    expect(hiddenAtDealer.canViewPrices).toBe(false);
+    await expect(database.db.transaction(tx => loadBehalfOfAuthorization(tx, hiddenAtDealer, target)))
+      .resolves.toMatchObject({ canViewPrices: true });
+    await postgres.pool.query("update company set technician_pricing_visible=true where id=$1", [ids.dealer]);
+  });
+
   it("denies own-user role escalation under own-company management", async () => {
     const ctx = { ...(await load(ids.customerUser)), capabilities: new Set(["users.own.manage"]) };
     expect(() => requireUserManagement(ctx, { userId: ids.customerUser, companyId: ids.customer, changesRole: true }))
@@ -209,6 +247,11 @@ describe("database authorization policy", () => {
     for (const [text, ...values] of [
       ["update dealer_customer_scope set version=version+1 where dealer_company_id=$1 and customer_company_id=$2", ids.dealer, ids.target],
       ["update company set discount_rate=0.21 where id=$1", ids.target],
+      ["update price_tier set discount_rate=0.31,version=version+1 where id=(select price_tier_id from company where id=$1)", ids.target],
+      ["delete from company_product_line where company_id=$1 and product_line_id=$2", ids.target, ids.ironHorse],
+      ["insert into company_product_line(company_id,product_line_id) values($1,$2)", ids.target, ids.ironHorse],
+      ["delete from company_machine where company_id=$1 and variant_id=$2", ids.target, ids.ironVariant],
+      ["insert into company_machine(company_id,variant_id,unit_reference) values($1,$2,'IH-TARGET-RESTORED')", ids.target, ids.ironVariant],
     ] as Array<[string, ...unknown[]]>) {
       await postgres.pool.query(text, values);
       const current = (await load(ids.dealerUser)).scopeVersion;
@@ -236,6 +279,23 @@ describe("database authorization policy", () => {
     await postgres.pool.query("update user_scope set brand_mode='company' where user_id=$1", [ids.technicianUser]);
     const second = await app.inject({ method: "GET", url: "/api/v1/me", headers: { cookie } });
     expect(second.json().scopes.scopeVersion).not.toBe(first.json().scopes.scopeVersion);
+  });
+
+  it("uses a user-tier override in a real database-resolved priced session", async () => {
+    const password = "user tier password value";
+    const passwordHash = await argon2.hash(password, passwordOptions);
+    await postgres.pool.query("update app_user set password_hash=$2,login_id='tiered@example.test',email='tiered@example.test' where id=$1", [ids.customerUser, passwordHash]);
+    const app = await buildApp({ config, dependencies: { database, passwordOptions } });
+    apps.push(app);
+    const login = await app.inject({ method: "POST", url: "/api/v1/auth/sign-in", headers: { origin: config.webOrigin }, payload: { loginId: "tiered@example.test", password } });
+    const response = await app.inject({
+      method: "GET", url: "/api/v1/me",
+      headers: { cookie: String(login.headers["set-cookie"]).split(";")[0] },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().scopes).toMatchObject({ priceTier: "user-contract", canViewPrices: true });
+    expect(response.json().company.discountRate).toBe("0.400000");
   });
 
   it("adds only controlled customer read grants and is idempotent", async () => {
