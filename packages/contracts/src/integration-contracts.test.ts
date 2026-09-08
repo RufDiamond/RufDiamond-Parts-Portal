@@ -11,8 +11,10 @@ import {
   MoneySchema,
   PartUsageRowSchema,
   PartUsageSummarySchema,
+  PricedFigureDetailSchema,
   PricedOrderDetailSchema,
   PricedPartSchema,
+  PricedPartUsageRowSchema,
   ProductLineSchema,
   PublishInputSchema,
   PublishQueueSchema,
@@ -21,8 +23,10 @@ import {
   RateSchema,
   ReleasedCalloutSchema,
   SubmitOrderInputSchema,
+  UnpricedFigureDetailSchema,
   UnpricedOrderDetailSchema,
   UnpricedPartSchema,
+  UnpricedPartUsageRowSchema,
   VariantSchema,
 } from "./index.js";
 
@@ -37,6 +41,18 @@ const releasedPart = {
   supersededByPartId: null,
   requires: [{ partId: "working-seal", qty: 2 }],
   status: "active",
+} as const;
+
+const unpricedReleasedPart = {
+  id: releasedPart.id,
+  releasePartId: releasedPart.releasePartId,
+  partNumber: releasedPart.partNumber,
+  description: releasedPart.description,
+  manufacturer: releasedPart.manufacturer,
+  currency: releasedPart.currency,
+  supersededByPartId: releasedPart.supersededByPartId,
+  requires: releasedPart.requires,
+  status: releasedPart.status,
 } as const;
 
 const figurePart = {
@@ -124,21 +140,9 @@ describe("released and draft catalog contracts", () => {
   });
 
   it("omits hidden prices instead of encoding them as zero or null", () => {
-    const unpricedPart = {
-      id: releasedPart.id,
-      releasePartId: releasedPart.releasePartId,
-      partNumber: releasedPart.partNumber,
-      description: releasedPart.description,
-      manufacturer: releasedPart.manufacturer,
-      currency: releasedPart.currency,
-      supersededByPartId: releasedPart.supersededByPartId,
-      requires: releasedPart.requires,
-      status: releasedPart.status,
-    };
-
-    expect(Value.Check(UnpricedPartSchema, unpricedPart)).toBe(true);
-    expect(Value.Check(UnpricedPartSchema, { ...unpricedPart, listPrice: "0.00" })).toBe(false);
-    expect(Value.Check(UnpricedPartSchema, { ...unpricedPart, listPrice: null })).toBe(false);
+    expect(Value.Check(UnpricedPartSchema, unpricedReleasedPart)).toBe(true);
+    expect(Value.Check(UnpricedPartSchema, { ...unpricedReleasedPart, listPrice: "0.00" })).toBe(false);
+    expect(Value.Check(UnpricedPartSchema, { ...unpricedReleasedPart, listPrice: null })).toBe(false);
   });
 
   it("allows nullable staff prices without inventing release-local IDs", () => {
@@ -168,6 +172,10 @@ describe("released and draft catalog contracts", () => {
       isDistributed: true,
     })).toBe(true);
     expect(Value.Check(VariantSchema, releasedFigureDetail.variant)).toBe(true);
+    expect(Value.Check(FigureDetailSchema, {
+      ...releasedFigureDetail,
+      figure: { ...releasedFigureDetail.figure, groupNo: null },
+    })).toBe(true);
     expect(Value.Check(DraftFigureDetailSchema, {
       figure: {
         ...releasedFigureDetail.figure,
@@ -205,6 +213,20 @@ describe("released and draft catalog contracts", () => {
     expect(Value.Check(CalloutSchema, { ...releasedCallout, x: null, y: null })).toBe(true);
   });
 
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    "rejects the non-finite callout coordinate %s at the contract boundary",
+    (coordinate) => {
+      expect(Value.Check(CalloutSchema, {
+        ...releasedCallout,
+        x: coordinate,
+      })).toBe(false);
+      expect(Value.Check(CalloutSchema, {
+        ...releasedCallout,
+        y: coordinate,
+      })).toBe(false);
+    },
+  );
+
   it("requires a released drawing and placed mapped callouts for customer detail", () => {
     expect(Value.Check(FigureDetailSchema, releasedFigureDetail)).toBe(true);
     expect(Value.Check(FigureDetailSchema, { ...releasedFigureDetail, drawing: null })).toBe(false);
@@ -233,6 +255,48 @@ describe("released and draft catalog contracts", () => {
       assemblyName: null,
       figureId: null,
     })).toBe(true);
+  });
+
+  it("provides scope-specific figure detail schemas that reject cross-scope prices", () => {
+    const unpricedDetail = {
+      ...releasedFigureDetail,
+      rows: [{
+        ...releasedFigureDetail.rows[0],
+        part: unpricedReleasedPart,
+      }],
+    };
+    const mixedDetail = {
+      ...releasedFigureDetail,
+      rows: [releasedFigureDetail.rows[0], unpricedDetail.rows[0]],
+    };
+
+    expect(Value.Check(PricedFigureDetailSchema, releasedFigureDetail)).toBe(true);
+    expect(Value.Check(PricedFigureDetailSchema, {
+      ...releasedFigureDetail,
+      figure: { ...releasedFigureDetail.figure, groupNo: null },
+    })).toBe(true);
+    expect(Value.Check(PricedFigureDetailSchema, unpricedDetail)).toBe(false);
+    expect(Value.Check(UnpricedFigureDetailSchema, unpricedDetail)).toBe(true);
+    expect(Value.Check(UnpricedFigureDetailSchema, releasedFigureDetail)).toBe(false);
+    expect(Value.Check(FigureDetailSchema, mixedDetail)).toBe(false);
+  });
+
+  it("provides scope-specific part-usage row schemas that reject cross-scope prices", () => {
+    const usage = {
+      part: releasedPart,
+      figureId: "figure",
+      groupNo: null,
+      assemblyName: "Filters",
+      systemName: "Engine",
+      modelName: "FT3 Wagon",
+      serial: "99FT3WXXXXXX and up",
+    } as const;
+    const unpricedUsage = { ...usage, part: unpricedReleasedPart };
+
+    expect(Value.Check(PricedPartUsageRowSchema, usage)).toBe(true);
+    expect(Value.Check(PricedPartUsageRowSchema, unpricedUsage)).toBe(false);
+    expect(Value.Check(UnpricedPartUsageRowSchema, unpricedUsage)).toBe(true);
+    expect(Value.Check(UnpricedPartUsageRowSchema, usage)).toBe(false);
   });
 });
 

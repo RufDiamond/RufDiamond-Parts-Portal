@@ -120,7 +120,7 @@ export const ReleasedFigureSchema = Type.Object(
     variantId: Type.String(),
     systemId: Type.String(),
     name: Type.String(),
-    groupNo: Type.String(),
+    groupNo: nullableString(),
     drawingFileId: Type.String(),
     status: Type.Literal("published"),
   },
@@ -271,13 +271,32 @@ export const CompanySchema = Type.Object(
 );
 export type Company = Static<typeof CompanySchema>;
 
-export const FigurePartRowSchema = Type.Object(
+const figurePartRowFields = {
+  figurePart: FigurePartSchema,
+  calloutNumbers: Type.Array(CalloutNumberSchema),
+};
+
+export const PricedFigurePartRowSchema = Type.Object(
   {
-    figurePart: FigurePartSchema,
-    part: PartSchema,
-    calloutNumbers: Type.Array(CalloutNumberSchema),
+    ...figurePartRowFields,
+    part: PricedPartSchema,
   },
-  { $id: "FigurePartRow", additionalProperties: false },
+  { $id: "PricedFigurePartRow", additionalProperties: false },
+);
+export type PricedFigurePartRow = Static<typeof PricedFigurePartRowSchema>;
+
+export const UnpricedFigurePartRowSchema = Type.Object(
+  {
+    ...figurePartRowFields,
+    part: UnpricedPartSchema,
+  },
+  { $id: "UnpricedFigurePartRow", additionalProperties: false },
+);
+export type UnpricedFigurePartRow = Static<typeof UnpricedFigurePartRowSchema>;
+
+export const FigurePartRowSchema = Type.Union(
+  [PricedFigurePartRowSchema, UnpricedFigurePartRowSchema],
+  { $id: "FigurePartRow" },
 );
 export type FigurePartRow = Static<typeof FigurePartRowSchema>;
 
@@ -305,17 +324,36 @@ export const DrawingAssetSchema = Type.Object(
 );
 export type DrawingAsset = Static<typeof DrawingAssetSchema>;
 
-export const FigureDetailSchema = Type.Object(
+const figureDetailFields = {
+  release: ReleaseRefSchema,
+  figure: ReleasedFigureSchema,
+  drawing: DrawingAssetSchema,
+  system: SystemSchema,
+  variant: VariantSchema,
+  callouts: Type.Array(ReleasedCalloutSchema),
+};
+
+export const PricedFigureDetailSchema = Type.Object(
   {
-    release: ReleaseRefSchema,
-    figure: ReleasedFigureSchema,
-    drawing: DrawingAssetSchema,
-    system: SystemSchema,
-    variant: VariantSchema,
-    rows: Type.Array(FigurePartRowSchema),
-    callouts: Type.Array(ReleasedCalloutSchema),
+    ...figureDetailFields,
+    rows: Type.Array(PricedFigurePartRowSchema),
   },
-  { $id: "FigureDetail", additionalProperties: false },
+  { $id: "PricedFigureDetail", additionalProperties: false },
+);
+export type PricedFigureDetail = Static<typeof PricedFigureDetailSchema>;
+
+export const UnpricedFigureDetailSchema = Type.Object(
+  {
+    ...figureDetailFields,
+    rows: Type.Array(UnpricedFigurePartRowSchema),
+  },
+  { $id: "UnpricedFigureDetail", additionalProperties: false },
+);
+export type UnpricedFigureDetail = Static<typeof UnpricedFigureDetailSchema>;
+
+export const FigureDetailSchema = Type.Union(
+  [PricedFigureDetailSchema, UnpricedFigureDetailSchema],
+  { $id: "FigureDetail" },
 );
 export type FigureDetail = Static<typeof FigureDetailSchema>;
 
@@ -332,17 +370,36 @@ export const DraftFigureDetailSchema = Type.Object(
 );
 export type DraftFigureDetail = Static<typeof DraftFigureDetailSchema>;
 
-export const PartUsageRowSchema = Type.Object(
+const partUsageFields = {
+  figureId: nullableString(),
+  groupNo: nullableString(),
+  assemblyName: nullableString(),
+  systemName: nullableString(),
+  modelName: nullableString(),
+  serial: nullableString(),
+};
+
+export const PricedPartUsageRowSchema = Type.Object(
   {
-    part: PartSchema,
-    figureId: nullableString(),
-    groupNo: nullableString(),
-    assemblyName: nullableString(),
-    systemName: nullableString(),
-    modelName: nullableString(),
-    serial: nullableString(),
+    ...partUsageFields,
+    part: PricedPartSchema,
   },
-  { $id: "PartUsageRow", additionalProperties: false },
+  { $id: "PricedPartUsageRow", additionalProperties: false },
+);
+export type PricedPartUsageRow = Static<typeof PricedPartUsageRowSchema>;
+
+export const UnpricedPartUsageRowSchema = Type.Object(
+  {
+    ...partUsageFields,
+    part: UnpricedPartSchema,
+  },
+  { $id: "UnpricedPartUsageRow", additionalProperties: false },
+);
+export type UnpricedPartUsageRow = Static<typeof UnpricedPartUsageRowSchema>;
+
+export const PartUsageRowSchema = Type.Union(
+  [PricedPartUsageRowSchema, UnpricedPartUsageRowSchema],
+  { $id: "PartUsageRow" },
 );
 export type PartUsageRow = Static<typeof PartUsageRowSchema>;
 
