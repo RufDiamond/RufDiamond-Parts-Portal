@@ -270,7 +270,7 @@ describe("loadCalloutPreview", () => {
 
   test("hosted review still withholds source conflicts", async () => {
     vi.stubEnv("NODE_ENV", "production");
-    const detail = (await getFigureDetail("fig-frame-assy-2-1"))!;
+    const detail = (await getFigureDetail("fig-cabin-6-13"))!;
     const result = await loadCalloutPreview(detail, "hosted-review");
     expect(result.detail).toEqual(detail);
     expect(result.notice).toContain("source conflict");
@@ -422,7 +422,7 @@ describe("loadCalloutPreview", () => {
         ).toBe(true);
       }
 
-      if (["fig-frame-assy-2-1", "fig-cabin-6-13"].includes(proposal.figureId)) {
+      if (proposal.figureId === "fig-cabin-6-13") {
         withheld += 1;
         expect(result.detail).toEqual(before);
         continue;
@@ -437,10 +437,10 @@ describe("loadCalloutPreview", () => {
     }
 
     expect({ newPositions, fullyPositioned, partial, withheld, noUsableProposal }).toEqual({
-      newPositions: 529,
-      fullyPositioned: 35,
-      partial: 6,
-      withheld: 2,
+      newPositions: 538,
+      fullyPositioned: 37,
+      partial: 5,
+      withheld: 1,
       noUsableProposal: 1,
     });
   });

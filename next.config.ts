@@ -6,8 +6,11 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/review/figures/*": [
       "./tools/callouts/review/proposals.json",
+      "./tools/callouts/review/part-highlights*.json",
+      "./tools/callouts/review/source-corrections.json",
       "./src/data/ft3-wagon.ts",
       "./public/drawings/ft3w/*.png",
+      "./public/drawings/ft3w/review-source-20260908/*.png",
     ],
   },
 };

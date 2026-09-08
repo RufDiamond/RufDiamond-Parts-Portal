@@ -21,6 +21,7 @@ export default defineConfig({
       "tests/drawing-viewer-wheel.test.ts",
       "tests/full-illustration-preview.test.tsx",
       "tests/hosted-marker-review.test.tsx",
+      "tests/part-highlight-review.test.ts",
     ],
   },
 });

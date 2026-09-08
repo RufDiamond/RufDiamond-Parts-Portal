@@ -10,6 +10,7 @@ import {
   type PreviewMarker,
 } from "@/lib/callout-preview";
 import type { FigureDetail } from "@/types/catalog";
+import { addPartHighlightReview } from "@/data/part-highlight-review.server";
 
 // Root package scripts launch Next.js and the focused tests from the project
 // root. Avoid import.meta URL arithmetic here: Turbopack treats literal
@@ -113,7 +114,10 @@ export async function loadCalloutPreview(
     return { detail, notice: null };
   }
 
-  const result = await loadValidatedPreview(detail);
+  const base = await loadValidatedPreview(detail);
+  const result = base.notice?.includes("Preview unavailable")
+    ? base
+    : await addPartHighlightReview(detail, base);
   return surface === "hosted-review"
     ? { ...result, notice: result.notice?.replace("Local preview", "Marker review") ?? null }
     : result;

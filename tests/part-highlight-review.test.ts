@@ -1,0 +1,190 @@
+import fs from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { afterEach, expect, test, vi } from "vitest";
+import { getFigureDetail } from "@/data/repository";
+import { loadCalloutPreview } from "@/data/callout-preview.server";
+import { buildDrawingMarkers } from "@/lib/drawing";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { DrawingViewer } from "@/components/DrawingViewer";
+
+const hash = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
+
+async function fixture() {
+  const detail = (await getFigureDetail("fig-hydraulic-4-4"))!;
+  const callout = detail.callouts.find((item) => item.number === 1)!;
+  const row = detail.rows.find((item) => item.figurePart.id === callout.figurePartId)!;
+  const drawingPath = `public${detail.drawing!.storagePath}`;
+  const manifest = {
+    schemaVersion: 1,
+    status: "NOT_FOR_CUSTOMER_USE",
+    reviewer: null,
+    catalogueSha256: hash(await fs.readFile("src/data/ft3-wagon.ts")),
+    figures: [{
+      figureId: detail.figure.id,
+      original: { path: drawingPath, sha256: hash(await fs.readFile(drawingPath)), width: detail.drawing!.width, height: detail.drawing!.height },
+      annotations: [{
+        calloutId: callout.id, figurePartId: callout.figurePartId!, partNumber: row.part.partNumber,
+        number: 1, x: 10, y: 20,
+        polygons: [[[30, 40], [35, 40], [35, 45], [30, 45]]],
+        evidence: "Test-only hand-checked polygon; not catalogue evidence",
+      }],
+      notes: "Test fixture",
+    }],
+  };
+  return { detail, manifest };
+}
+
+function serveManifest(manifest: unknown) {
+  const read = fs.readFile.bind(fs);
+  vi.spyOn(fs, "readFile").mockImplementation(async (file, options) => {
+    if (String(file).endsWith("/part-highlights.json")) return Buffer.from(JSON.stringify(manifest)) as never;
+    if (String(file).endsWith("/source-corrections.json")) return Buffer.from(JSON.stringify({ ...manifest as object, figures: [] })) as never;
+    return read(file, options as never) as never;
+  });
+}
+
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+
+test("source-bound outlines reach drawing markers only on review, without changing original data", async () => {
+  const { detail, manifest } = await fixture();
+  const before = structuredClone(detail);
+  serveManifest(manifest);
+  vi.stubEnv("NODE_ENV", "production");
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(buildDrawingMarkers(result.detail.rows, result.detail.callouts).find((marker) => marker.number === 1)?.maskPath)
+    .toBe("M 30 40 L 35 40 L 35 45 L 30 45 Z");
+  expect(result.notice).toContain("unapproved");
+  expect(detail).toEqual(before);
+  expect(await loadCalloutPreview(detail)).toEqual({ detail: before, notice: null });
+});
+
+test.each(["part", "occurrence", "figure-part", "catalogue", "artwork", "bounds", "degenerate", "duplicate", "status"])(
+  "does not shade a component with invalid %s evidence", async (fault) => {
+    const { detail, manifest } = await fixture();
+    const figure = manifest.figures[0];
+    const annotation = figure.annotations[0];
+    if (fault === "part") annotation.partNumber = "WRONG-PART";
+    if (fault === "occurrence") annotation.calloutId = "wrong-occurrence";
+    if (fault === "figure-part") annotation.figurePartId = "wrong-row";
+    if (fault === "catalogue") manifest.catalogueSha256 = "a".repeat(64);
+    if (fault === "artwork") figure.original.sha256 = "a".repeat(64);
+    if (fault === "bounds") annotation.polygons[0][0][0] = 101;
+    if (fault === "degenerate") annotation.polygons = [[[30, 40], [35, 40], [40, 40]]];
+    if (fault === "duplicate") figure.annotations.push(structuredClone(annotation));
+    if (fault === "status") manifest.status = "APPROVED";
+    serveManifest(manifest);
+    const result = await loadCalloutPreview(detail, "hosted-review");
+    expect(result.detail.callouts.find((item) => item.number === 1)?.maskPath).toBeNull();
+    expect(result.notice).toMatch(/highlight.*unavailable/i);
+  },
+);
+
+test("preserves supplied positions and an existing component mask", async () => {
+  const { detail, manifest } = await fixture();
+  detail.callouts[0] = { ...detail.callouts[0], x: 50, y: 60, maskPath: "M 1 1 L 2 1 L 2 2 Z" };
+  serveManifest(manifest);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail.callouts[0]).toEqual(detail.callouts[0]);
+});
+
+test("uses the corrected bumper artwork and its own coordinates only in review", async () => {
+  const detail = (await getFigureDetail("fig-frame-assy-2-1"))!;
+  const before = structuredClone(detail);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail.drawing?.storagePath).toBe("/drawings/ft3w/review-source-20260908/ft3w-frame-assy-2-1.png");
+  expect(result.detail.drawing?.width).toBe(1010);
+  expect(result.detail.callouts).toHaveLength(7);
+  expect(result.detail.callouts.find((item) => item.number === 1)).toMatchObject({ x: 53.2673, y: 90.339, maskPath: expect.stringContaining("M ") });
+  expect(result.detail.rows).toEqual(before.rows);
+  expect(result.notice).toContain("M10");
+  expect(result.notice).toContain("M4");
+  expect(result.notice).toContain("unapproved");
+  expect(detail).toEqual(before);
+  vi.stubEnv("NODE_ENV", "production");
+  expect(await loadCalloutPreview(detail)).toEqual({ detail: before, notice: null });
+});
+
+test("replacement artwork invalidates coordinates from the old motor plate", async () => {
+  const detail = (await getFigureDetail("fig-drive-system-3-1"))!;
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail.drawing?.width).toBe(1070);
+  expect(result.detail.callouts.find((item) => item.number === 2)).toMatchObject({ x: 7.1028, y: 14.3075 });
+  expect(result.detail.callouts.filter((item) => item.maskPath)).toHaveLength(4);
+});
+
+test.each(["path", "hash", "dimensions", "provenance", "original"])("rejects invalid replacement %s without exposing its coordinates", async (fault) => {
+  const source = JSON.parse(await fs.readFile("tools/callouts/review/source-corrections.json", "utf8"));
+  const item = source.figures.find((entry: { figureId: string }) => entry.figureId === "fig-frame-assy-2-1");
+  if (fault === "path") item.replacement.path = "public/../private.png";
+  if (fault === "hash") item.replacement.sha256 = "a".repeat(64);
+  if (fault === "dimensions") item.replacement.width = 999;
+  if (fault === "provenance") item.replacement.source.crop.x = -1;
+  if (fault === "original") item.original.sha256 = "a".repeat(64);
+  const read = fs.readFile.bind(fs);
+  vi.spyOn(fs, "readFile").mockImplementation(async (file, options) =>
+    String(file).endsWith("/source-corrections.json") ? Buffer.from(JSON.stringify(source)) as never : read(file, options as never) as never,
+  );
+  const detail = (await getFigureDetail("fig-frame-assy-2-1"))!;
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail).toEqual(detail);
+  expect(result.notice).toMatch(/highlight.*unavailable/i);
+});
+
+test("missing replacement artwork is reported, not silently treated as an absent manifest", async () => {
+  const read = fs.readFile.bind(fs);
+  vi.spyOn(fs, "readFile").mockImplementation(async (file, options) => {
+    if (String(file).includes("review-source-20260908/ft3w-frame-assy-2-1.png")) {
+      throw Object.assign(new Error("private artwork path"), { code: "ENOENT" });
+    }
+    return read(file, options as never) as never;
+  });
+  const detail = (await getFigureDetail("fig-frame-assy-2-1"))!;
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail).toEqual(detail);
+  expect(result.notice).toMatch(/highlight.*unavailable/i);
+  expect(result.notice).not.toContain("private artwork path");
+});
+
+test("selecting one part paints both legitimate occurrence outlines, and clearing it removes both", async () => {
+  const { detail, manifest } = await fixture();
+  const first = detail.callouts[0];
+  detail.callouts.push({ ...first, id: "second-occurrence" });
+  manifest.figures[0].annotations.push({
+    ...manifest.figures[0].annotations[0], calloutId: "second-occurrence", x: 70, y: 80,
+    polygons: [[[60, 70], [65, 70], [65, 75]]],
+  });
+  serveManifest(manifest);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  const markers = buildDrawingMarkers(result.detail.rows, result.detail.callouts);
+  const partId = markers.find((marker) => marker.id === first.id)!.partId;
+  const render = (selectedPartIds: Set<string>) => renderToStaticMarkup(createElement(DrawingViewer, {
+    label: "Occurrence test", src: detail.drawing!.storagePath, width: 1280, height: 720,
+    markers, selectedPartIds, zoom: 2,
+  }));
+  const selected = render(new Set([partId]));
+  expect(selected).toContain('d="M 30 40 L 35 40 L 35 45 L 30 45 Z"');
+  expect(selected).toContain('d="M 60 70 L 65 70 L 65 75 Z"');
+  const cleared = render(new Set());
+  expect(cleared).not.toContain('d="M 30 40');
+  expect(cleared).not.toContain('d="M 60 70');
+});
+
+test.each(["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json"])(
+  "every saved outline in %s survives the real runtime validation and reaches its occurrence", async (filename) => {
+    const source = JSON.parse(await fs.readFile(`tools/callouts/review/${filename}`, "utf8")) as {
+      figures: { figureId: string; annotations: { calloutId: string; polygons: number[][][] }[] }[];
+    };
+    for (const figure of source.figures) {
+      const original = (await getFigureDetail(figure.figureId))!;
+      const result = await loadCalloutPreview(original, "hosted-review");
+      expect(result.notice, figure.figureId).not.toContain("unavailable");
+      for (const item of figure.annotations) {
+        const occurrence = result.detail.callouts.find((callout) => callout.id === item.calloutId);
+        expect(occurrence, `${figure.figureId}/${item.calloutId}`).toBeDefined();
+        if (item.polygons.length) expect(occurrence!.maskPath, item.calloutId).toMatch(/^M /);
+      }
+      expect((await getFigureDetail(figure.figureId))!).toEqual(original);
+    }
+  },
+);
