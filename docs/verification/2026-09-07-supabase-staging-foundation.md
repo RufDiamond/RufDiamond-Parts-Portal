@@ -37,6 +37,20 @@ key belongs in Git, this record, screenshots or email.
 `DATABASE_URL` has deliberately not been configured with those owner
 credentials; a separate least-privilege runtime role is required.
 
+The dedicated `rufdiamond_runtime` role has now been created with **NOLOGIN**
+and no password. It is not a superuser, cannot create roles/databases/schema
+objects, bypass RLS, truncate tables or read the migration ledger. Permissions
+are explicit: required application DML, read-only capabilities, append-only
+audit/drawing/release-child/order-line access, and RFQ sequence usage. Future
+migrations require a separate grant review rather than unrestricted default
+privileges. No runtime connection or customer account has been enabled.
+
+A disposable local PostgreSQL test found that a non-owner role with temporary
+table access could shadow an unqualified parent lookup in a snapshot trigger.
+Additive migration0007 and regression tests are assigned to integration Task5.
+Keep the runtime role NOLOGIN until that hardening is independently reviewed,
+applied and verified. No live snapshot data was changed by the diagnostic.
+
 ## Migration evidence
 
 Only reviewed committed migrations were exported into an isolated directory
@@ -82,8 +96,8 @@ future migrations must verify that those restrictions remain in place.
 
 - Complete API identity, capability/scope enforcement, immutable catalogue
   reads, controlled imports/publication, RFQ workflows and frontend integration.
-- Create a least-privilege runtime database role and configure runtime secrets
-  separately from migration credentials.
+- Complete/review/apply snapshot-trigger hardening, verify explicit runtime
+  grants, then enable the prepared runtime role with separate runtime secrets.
 - Configure source network allowlists when the backend host is selected. TLS
   does not make the database network-private; network restriction is not yet
   claimed.

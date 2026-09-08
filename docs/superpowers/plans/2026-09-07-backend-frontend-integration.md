@@ -215,7 +215,7 @@ Use TypeBox request and response schemas to emit OpenAPI.
 
 ### Task 5: Capability and scope enforcement
 
-**Files:** Create `apps/api/src/modules/authorization/{capabilities,types,policy,scope-sql}.ts`, `apps/api/src/db/seeds/pilot-roles.ts`; tests `apps/api/test/integration/authorization.test.ts`, `apps/api/test/unit/capabilities.test.ts`.
+**Files:** Create `apps/api/src/modules/authorization/{capabilities,types,policy,scope-sql}.ts`, `apps/api/src/db/seeds/pilot-roles.ts`, `apps/api/drizzle/0007_snapshot_trigger_hardening.sql` and generated metadata; tests `apps/api/test/integration/{authorization,trigger-security}.test.ts`, `apps/api/test/unit/capabilities.test.ts`. Update existing migration-count assertions without weakening them.
 
 **Interfaces:** `AuthorizationContext {userId:string;companyId:string;capabilities:ReadonlySet<string>;brandIds:"all"|readonly string[];accountIds:"all"|readonly string[];variantIds:"all"|readonly string[];canViewDraft:boolean;canViewPrices:boolean;scopeVersion:string;priceTierId:string|null;discountRate:string}`; `requireCapability(ctx:AuthorizationContext,key:string):void`; `loadAuthorization(tx:Transaction,userId:string):Promise<AuthorizationContext>`, importing `Transaction` from `db/client.ts`.
 
@@ -231,6 +231,7 @@ Use TypeBox request and response schemas to emit OpenAPI.
   Import `AppError` from the existing error plugin. Company product-line/fleet grants intersect user subsets; a subset cannot expand company access. Internal `all` is explicit. `orders.behalf` additionally requires `dealer_customer_scope` and target account/brand/fleet intersections; never treat arbitrary company ID as authority. Calculate prices from capability plus company technician-pricing setting and effective tier.
   Resolve explicitly assigned user tier, then company tier, otherwise company discount; apply that one effective discount exactly once, never tier plus company discount. For behalf-of RFQs use the authorized target company's pricing policy, not the dealer's own price. Keep internal `discountRate` out of hidden-price session responses.
 - [ ] Test price omission in all JSON/CSV/print DTOs; unknown keys, own-user role escalation, scope updates invalidating existing sessions/cursors. Do not grant named publishing to the whole admin role.
+- [ ] Harden snapshot triggers before enabling a runtime database login. A disposable PostgreSQL probe confirmed that a least-privilege role with temporary-table access could shadow unqualified `publication_release` and insert into a sealed public release. Write regression tests with a non-owner role and conflicting `pg_temp.publication_release`/`pg_temp."order"`: inserts into sealed public snapshots/submitted order lines must fail with `23514`, while legitimate building-release/unsubmitted-order inserts still work. Migration 0007 fully qualifies parent-table references in `protect_release_snapshot` and `protect_order_line` and pins the security-trigger functions' search path to `pg_catalog, public, pg_temp`; preserve invoker security and all existing lock/immutability behavior. Do not alter migrations 0001–0006 or substitute a provider-only permissions workaround. Verify empty/upgrade/replay and Drizzle no drift. This discovered hardening prerequisite shifts later MFA/quote migrations to 0008/0009.
 - [ ] Commit as `feat: enforce capability and tenant boundaries`.
 
 ### Task 6: Released catalogue reads and private drawing delivery
@@ -270,7 +271,7 @@ Use TypeBox request and response schemas to emit OpenAPI.
 
 ### Task 8: Account operations and privileged-access protection
 
-**Files:** Create `apps/api/src/modules/accounts/{schemas,repository,service,routes}.ts`, `apps/api/src/modules/identity/mfa.ts`, `apps/api/src/db/schema/mfa.ts`, `apps/api/drizzle/0007_privileged_mfa.sql`; modify schema index; tests `apps/api/test/integration/{accounts,mfa}.test.ts`.
+**Files:** Create `apps/api/src/modules/accounts/{schemas,repository,service,routes}.ts`, `apps/api/src/modules/identity/mfa.ts`, `apps/api/src/db/schema/mfa.ts`, `apps/api/drizzle/0008_privileged_mfa.sql`; modify schema index; tests `apps/api/test/integration/{accounts,mfa}.test.ts`.
 
 **Interfaces:** Versioned POST/PATCH company/fleet, users and role bundles; `POST /admin/users/:id/capabilities` grants named publisher rights only to authorized role managers; `GET /admin/audit` and `/admin/audit/export`; MFA enrollment/confirmation/challenge on `/auth/mfa/*`. `MfaChallenge {challengeId:string;expiresAt:string}` grants no catalogue session until completed.
 
@@ -318,7 +319,7 @@ other 15 source columns map exactly as `docs/catalog-data-structure.md` states.
 
 ### Task 10: Server-owned RFQ workflow
 
-**Files:** Create `apps/api/src/modules/orders/{schemas,money,repository,service,routes,events}.ts`, `apps/api/src/modules/outbox/handlers/rfq-confirmation.ts`, `apps/api/drizzle/0008_order_quote_snapshots.sql`; modify `apps/api/src/db/schema/operations.ts` and generated metadata; tests `apps/api/test/unit/money.test.ts`, `apps/api/test/integration/orders.test.ts`.
+**Files:** Create `apps/api/src/modules/orders/{schemas,money,repository,service,routes,events}.ts`, `apps/api/src/modules/outbox/handlers/rfq-confirmation.ts`, `apps/api/drizzle/0009_order_quote_snapshots.sql`; modify `apps/api/src/db/schema/operations.ts` and generated metadata; tests `apps/api/test/unit/money.test.ts`, `apps/api/test/integration/orders.test.ts`.
 
 **Interfaces:** `submitOrder(ctx,input:SubmitOrderInput,key:string):Promise<SubmitOrderResult>`; `getOrder(ctx,id:string):Promise<OrderDetail|null>`; extend `OrderDetail` with reference/customerReference/details/line comments and optional decimal money snapshots. `NotificationPort.deliver(input:{eventId:string;orderId:string;recipient:string}):Promise<{deliveryId:string}>` is provider-neutral.
 

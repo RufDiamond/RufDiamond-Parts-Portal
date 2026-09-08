@@ -21,10 +21,53 @@
 - Xero remains deferred; staging notifications are captured and cannot reach customers.
 - Tasks 1–5 are local/CI preparation. Task 6 makes paid external resources and requires actual authorized account/project/budget/DNS inputs. Do not invent them or provision during plan writing.
 - Never expose PostgreSQL, API/internal health metrics, Docker socket or worker ports to the public internet. Never run a persistent privileged CI runner on either application host.
+- Supabase is temporary staging PostgreSQL only. Keep first-party authentication and ordinary SQL/migrations; do not introduce Supabase Auth, browser Data API access or provider-specific business logic. The final two OVH environments each own their database.
+- A successful Git push or Vercel frontend build is not end-to-end deployment evidence. Deepshika receives staging-only portal access and deployment/testing instructions after the required services and tests pass; never send database or production credentials.
 
 ---
 
 ## Provider findings and selected defaults
+
+### Temporary Vercel/Supabase testing path
+
+The user confirmed that Supabase will be replaced by OVH and requested a
+runnable Vercel deployment plus a practical handoff for Deepshika. Use Vercel
+for the temporary frontend, with same-origin `/api/v1` proxying to the portable
+Fastify service on the authorized OVH staging host. Keep the existing durable
+worker on that host, not inside a request invocation. Until that host and its
+private drawing store exist, a frontend-only Vercel deployment is a UI preview,
+not the connected live portal.
+
+Vercel supports both [external rewrites](https://vercel.com/docs/routing/rewrites)
+and [Fastify Functions](https://vercel.com/docs/frameworks/backend/fastify).
+The selected design retains the already approved persistent API/worker model;
+it does not add a second serverless deployment model and duplicate worker
+delivery behavior merely for temporary hosting.
+
+| Phase | Frontend | API / worker | Database | Gate |
+| --- | --- | --- | --- | --- |
+| Temporary tester environment | Vercel, explicit staging origin | OVH staging host | Existing Supabase staging project | Connected smoke tests and named test accounts |
+| OVH staging rehearsal | OVH staging, same tested web build | Same staging services | Isolated OVH staging PostgreSQL | Portable restore and object-version remapping verified |
+| OVH production | Separate OVH production host | Production services | Separate production PostgreSQL | Approved catalogue, recovery evidence and owner promotion |
+
+Private drawings remain behind the API and use a version-aware object-store
+adapter. Their storage is not the Vercel public assets directory. Never assume
+provider object-version identifiers survive copying: migration exports record
+source key/version/hash, and a verified mapping resolves each immutable pin to
+the destination object/version without editing sealed snapshot content.
+
+Move temporary staging data through encrypted PostgreSQL export/restore and
+checksum-verified drawing transfer. Quiesce staging writers and workers for the
+final export; restore to a new isolated target, replay no notifications, revoke
+restored sessions, verify schema/active-release checksums/tenant scopes/RFQ
+history, then switch server-side connection settings. Keep the source intact
+for a controlled rollback; never dual-write or automatically delete Supabase.
+Test accounts and synthetic RFQs are not promoted into production.
+
+The handoff guide is `docs/deployment-and-testing-guide.md`. It must distinguish
+verified commands and actual URLs from planned steps; no shared password is
+placed in Git or in the completion email. Provision named tester access through
+an expiring, single-use invitation after the identity/account flow is ready.
 
 Use BHS/Beauharnois for compute and live drawings. Toronto is a candidate
 Canadian off-site object-storage region, not a second compute failover location:
@@ -77,6 +120,9 @@ infra/backup/pgbackrest.conf.template   encrypted continuous archive/base backup
 infra/backup/{nightly,archive-drawings,restore-verify,export-portable}.sh
 infra/backup/{ruf-backup.service,ruf-backup.timer}
 infra/runbooks/{provision,release,restore,incidents}.md
+infra/vercel/write-config.mjs           validated temporary same-origin proxy configuration
+infra/test/vercel.test.mjs              API routing, SPA and environment-isolation checks
+docs/deployment-and-testing-guide.md    Deepshika's operator/tester handoff
 infra/test/{environment,release,backup-policy}.test.mjs
 apps/api/src/ops/{readiness,metrics,portable-export,restore-check}.ts
 .github/workflows/{ci,release,deploy-staging,promote-production,restore-drill}.yml
@@ -132,6 +178,12 @@ relative `/api/v1` and non-sensitive display settings reach the web bundle.
 
 **Files:** Create `infra/deploy/{compose.yaml,nginx.conf.template,release.schema.json,validate-release.mjs}`; tests `infra/test/release.test.mjs`; create `infra/runbooks/release.md`.
 
+Also create `infra/vercel/write-config.mjs` and `infra/test/vercel.test.mjs` for
+the temporary frontend. Its `buildVercelConfig(input:{framework:"next"|"vite";apiOrigin:string}):object`
+rejects a non-HTTPS origin, embedded credentials, query/fragment and loopback
+upstream. `PORTAL_ORIGIN` is a separately configured exact frontend origin;
+do not allow wildcard preview origins or share production cookies/secrets.
+
 **Interfaces:** `validateRelease(value:unknown):ReleaseManifest` and service names `proxy`, `web`, `api`, `worker`, `db`; one-shot `migrate` profile uses API image and separate migration DB identity. `API_IMAGE`/`WEB_IMAGE` contain digests, not tags.
 
 - [ ] Write node:test assertions that mutable tags and mismatched schema compatibility reject, and `docker compose config --format json` contains no public DB/API port or plaintext secrets. Run `node --test infra/test/release.test.mjs` to RED.
@@ -158,6 +210,8 @@ relative `/api/v1` and non-sensitive display settings reach the web bundle.
   Complete service-specific secrets, network restrictions, resource limits and healthchecks in this file. PostgreSQL runs under its own image user on a mounted encrypted data volume and has no host-published ports; the app role cannot alter schema or disable immutability triggers. Proxy alone publishes 80/443. Worker gets only required API/storage/delivery credentials, never migration/admin credentials.
 - [ ] Route `/api/` without SPA fallback, `/health/` and `/metrics` deny externally, and unknown non-API routes return `index.html` for React Router. Set explicit upload/body/time limits, CSP, nosniff, frame restrictions and HTTPS redirect. HTML is no-cache, fingerprinted public assets immutable; authenticated API/drawings are private no-store. Stage HSTS without `includeSubDomains` until DNS ownership is confirmed.
 - [ ] Automate ACME renewal with a timer and proxy reload only after configuration validation; use ACME staging service in tests. Test direct deep-link refresh, API 404 as problem JSON, signed-in content not cached publicly, cookies on correct host and streaming images/fullscreen under CSP.
+- [ ] Write failing `node:test` assertions for Vercel configuration: `assert.throws(() => buildVercelConfig({framework:"vite",apiOrigin:"http://localhost:4000"}))`; a valid HTTPS upstream yields `/api/:path*` forwarding before the Vite SPA fallback, and Next mode leaves routing to Next without that fallback. Run `node --test infra/test/vercel.test.mjs`, implement the generator and rerun. Use the repository root for monorepo installs; final Vite output is `apps/web/dist`, never the old public drawing directory. Configure the exact temporary hostname only after provider readback; no automatic deployment in this local task.
+- [ ] Test the deployed temporary proxy with actual HTTPS cookie issuance, `/me`, CSRF mutations, drawing streaming, JSON API 404 and deep-link refresh. Confirm `__Host-ruf-session` remains host-only and authenticated responses are not cached. Validate trusted proxy handling and rate limits without trusting arbitrary forwarded headers. Until all checks pass, the temporary deployment is not reported runnable end-to-end.
 - [ ] Commit as `ops: add isolated runtime and reverse proxy configuration`.
 
 ### Task 3: Reproducible environment inventory and host provisioning
@@ -205,6 +259,7 @@ relative `/api/v1` and non-sensitive display settings reach the web bundle.
   Alert if the daily backup age exceeds 26 hours or WAL archive age exceeds 180 seconds. Version live drawings and archive all release-referenced originals/derivatives weekly and after bulk uploads; keep archive manifests/hashes for 12 months. Object Lock governance retention prevents application/backup credentials from deleting protected versions; lifecycle policies must not invalidate referenced releases or retained restore chains.
 - [ ] Export quarterly and before major migrations: working/released catalogue CSV/JSON, stable ID mappings, company/access configuration, orders, audit and schema manifests, exact drawings and checksums, portable DB dump and restore instructions. Encrypt identity/session/reset information; offline copies are confidential and keys are escrowed separately with RufDiamond. No raw secrets in normal JSON manifests. Retain provider-neutral outbox records; replay is disabled until reviewed to avoid duplicate customer mail.
 - [ ] Restore into a fresh isolated volume/cluster, replay to a chosen timestamp, verify migration ledger/FKs/counts/release checksums/complete callouts/object versions, then run scoped customer API reads. Disable outbound mail and reset/revoke restored sessions before any test login; do not overwrite normal staging with unmasked production data. Destroy temporary recovery infrastructure only through a separate approved teardown after preserving reports, not through broad shell cleanup.
+- [ ] Rehearse the Supabase-to-OVH staging cutover with the same portable export and restore checks. Compare application schema/data and capability grants rather than copying provider-owned roles/extensions blindly. Recreate least-privilege OVH roles from reviewed policy, map exact drawing object versions, switch API/worker together, and verify no outbox event is delivered twice. Record the source and destination identity plus rollback boundary; source deletion is a separate authorized operation.
 - [ ] Measure DB-loss RPO under five minutes/RTO under four hours; document actual region-loss limit and phone/email fallback. Monthly isolated automated test, quarterly human test and annual offline-only exercise are scheduled artifacts. Missing base/WAL/object/key makes the drill fail, never a warning-only green. Commit as `ops: add verified backup and portable recovery workflow`.
 
 ### Task 5: CI, safe push and immutable promotion
@@ -249,6 +304,8 @@ relative `/api/v1` and non-sensitive display settings reach the web bundle.
 **Interfaces:** Consumes integrated application completion, signed release manifest, complete approved real catalogue, real scoped accounts, functioning backups and operator launch authority. Produces verified production URL and exact deployed digest/schema/release IDs.
 
 - [ ] Deploy a synthetic complete catalogue to staging and run sign-in/reset/MFA, tenant tampering, price visibility, search/figures/drawing authorization, all viewer interactions, RFQ submit/retry/history, import review, publish/rollback, outbox capture and RFC 9457 tests. Staging staff preview can show unapproved proposals with warnings; customer routes cannot.
+- [ ] Create Deepshika's named staging tester account for `dghale@rufdiamond.com` through the reviewed invitation flow. Give it the Purchaser capability bundle and only the synthetic Fat Truck test company/fleet. Provide separate named technician and second-tenant test identities through the same secure process to verify hidden pricing, submission denial and catalogue isolation; never share one password across identities. Named publisher/admin test access is separate, staging-only and MFA-protected. No database/Supabase/production role is granted by a portal invitation.
+- [ ] Complete `docs/deployment-and-testing-guide.md` with the actual staging URL, tested release SHA/digests, migration version, deployment owner, verified deploy/rollback commands, invitation expiry and pass/fail evidence. Demonstrate the steps to Deepshika with the functionality video. Send the user-authorized completion email only after the claimed scope is verified; include guide/video links and account activation instructions, not passwords or secret environment values. Explicitly state any production/source-approval gate still outstanding.
 - [ ] Run browser checks at desktop/tablet/mobile sizes and record a new functionality video showing mouse-wheel zoom, toolbar zoom, pan, fullscreen, repeated-marker linking and RFQ confirmation. Check loading/error/focus/keyboard states, density/readability and print layouts.
 - [ ] Run an authenticated staging security scan and a synthetic load check: 25 concurrent browsing sessions for 15 minutes, separate five concurrent RFQ submissions with unique idempotency keys; require zero duplicated orders/cross-scope responses, no unhandled errors and p95 catalogue JSON latency under 500 ms excluding image transfer. These are pilot acceptance thresholds, not a capacity guarantee; resize/retest if missed.
 - [ ] Rehearse restore and application rollback on isolated resources; record measured RPO/RTO and image/schema compatibility. Restore complete active-release/customer/drawing flow, not only `SELECT 1`. A temporary restore VM is a drill resource, not a third permanent environment; any paid drill resource requires the recorded budget authorization.
