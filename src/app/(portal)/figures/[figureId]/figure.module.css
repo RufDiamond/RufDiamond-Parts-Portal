@@ -39,6 +39,21 @@
   font-weight: var(--weight-regular);
 }
 
+.controls {
+  display: grid;
+  gap: 6px;
+}
+
+.previewNotice {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid #c48a00;
+  border-radius: 4px;
+  background: #fff4cc;
+  color: #4a3600;
+  font: var(--weight-bold) var(--text-xs) / 1.35 var(--font-ui);
+}
+
 /* ── Toolbar ──────────────────────────────────────────────────────── */
 
 .toolbar {

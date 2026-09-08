@@ -1,393 +1,592 @@
-# Backend specification
+# Backend technical design
 
-RUFDiamond parts portal · FT3 Wagon pilot
+RUFDiamond Parts Portal · FT3 Wagon pilot · September 2026
 
-This is the single specification for the backend. It carries the client
-context, the data model, the operational requirements, and the open questions,
-and it records the schema changes made while the front end was built.
+Status: approved architecture, ready for implementation planning
 
-**Supporting documents** — detail lives in these; this spec references rather
-than repeats them:
+This is the authoritative technical design for the portal backend. It replaces
+the earlier provisional notes and incorporates the domain decisions made while
+the existing front end was built. It is a design document only; it does not
+authorize framework migration or implementation.
 
-| Document | Covers |
+## 1. Purpose and approved scope
+
+The portal gives RUFDiamond control of its parts catalog, drawing mappings,
+pricing, customer access, and parts requests. The FT3 Wagon is the pilot, but
+the design supports additional product lines, models, variants, and roles.
+
+The approved production stack is:
+
+- Vite and React for the browser application
+- Node.js, Fastify, and TypeScript for the HTTP API
+- PostgreSQL for transactional and catalog data
+- private S3-compatible object storage for drawings, imports, and exports
+
+The existing Next.js application remains a behavior reference until a separate
+implementation plan authorizes migration. Its asynchronous repository module
+(`src/data/repository.ts`) is the current data-access seam; the future client
+should preserve its useful composite read models rather than joining
+database-shaped responses in the browser.
+
+Xero integration is explicitly deferred. The pilot creates provider-neutral
+orders and accounting-export events only. It must not introduce Xero SDKs,
+credentials, identifiers, statuses, or Xero-shaped database columns.
+
+Supporting documents remain authoritative for specialist detail:
+
+| Document | Subject |
 |---|---|
-| `catalog-data-structure.md` | Table-by-table structure, source column mapping, import sequence |
-| `capability-and-role-spec.md` | Capability register, scopes, role bundles, enforcement |
-| `build-plan.md` | Eleven delivery stages and their order of risk |
-| `backup-and-recovery-plan.md` | Backup layers, recovery procedures, targets, verification |
+| `catalog-data-structure.md` | Source columns, hierarchy, import order |
+| `capability-and-role-spec.md` | Capabilities, role bundles, scopes |
+| `build-plan.md` | Delivery sequence and risk order |
+| `backup-and-recovery-plan.md` | Backup layers, recovery targets |
 
----
+Where an older document selects Next.js, Auth.js, mutable publication flags, or
+a managed database, this approved design takes precedence.
 
-## 1. Client context
+## 2. Architectural principles
 
-RUFDiamond distributes machines it does not manufacture — Fat Truck (Zeal
-Motor, Canada), Agilis and IronHorse (Sweden) — and sells the spare parts. The
-catalogue currently sits on a third-party portal that RUFDiamond cannot inspect
-and does not fully control; the project exists to bring it in-house so they can
-update prices and publish without their supplier or their developer.
+1. **The API is authoritative.** The browser may hide controls, but the API
+   validates identity, capability, scope, workflow, and invariants.
+2. **Draft and live are separate.** Administrators edit a working catalog.
+   Customers read one immutable active release.
+3. **Visibility is query-level.** Brand, fleet, account, release, and price
+   constraints apply while querying, before rows reach the browser.
+4. **Publication is atomic.** Customers see the old complete release or the new
+   complete release, never a mixture.
+5. **Relationships are normalized.** A part is global, its use on a figure is a
+   relationship, and each physical marker is its own callout.
+6. **Irreplaceable work is durable.** Callout coordinates, drawings, accounts,
+   and orders receive transactional audit and tested backups.
+7. **Integrations are adapters.** Email, exports, and future Xero delivery
+   consume committed outbox events and do not own domain state.
+8. **Use a modular monolith.** One API and database keep the pilot simple while
+   explicit modules preserve future separation.
 
-The pilot is one machine: **Fat Truck FT3 Wagon**, serial number
-`99FT3WXXXXXX and up`. The source export
-(`Database_FT3_Wagon_-_14-JUL-2026.xlsx`) contains 635 rows, 536 unique parts,
-45 figures, 12 systems, 1 model, 1 variant.
+## 3. System boundaries
 
-Two facts drive most of the design:
+### 3.1 Browser
 
-- **A part belongs to many callouts.** The same part number appears at several
-  positions on one figure — seven such cases in this single file. Selecting a
-  part must highlight *every* occurrence. This is the client's headline
-  request.
-- **A part belongs to many figures.** Part records are global; figure
-  membership is a relationship, not a property of the part.
+The browser owns presentation, navigation, transient state, and conversion of
+drawing clicks into percentage coordinates. It does not decide authorization,
+calculate authoritative order totals, publish data, or construct storage keys.
 
-### What is built
+### 3.2 Fastify API
 
-A Next.js front end against an in-memory repository. `src/data/repository.ts`
-is the seam: it is the only module that touches the seed, every function is
-async, and replacing it with API calls should not change a single call site.
-Canonical shapes are in `src/types/catalog.ts` (customer domain) and
-`src/types/admin.ts` (admin read models).
+The API has explicit modules:
 
-Screens built: customer sign-in, machine select, search, systems, figures,
-figure detail, request list, confirmation; admin catalog, model editor, hotspot
-editor, parts, orders, publishing.
-
----
-
-## 2. Data model
-
-The table structure is specified in `catalog-data-structure.md` §3 and is
-unchanged except where noted below. Names there are snake_case database
-columns; names here are the TypeScript shapes the front end consumes.
-
-### 2.1 Hierarchy
-
-```
-Product line          Fat Truck · Agilis · IronHorse
-  └─ Model            FT3 Wagon
-      └─ Variant      SERIAL NUMBER 99FT3WXXXXXX and up
-          └─ System   Filters · Cabin · Hydraulic · (12 total)
-              └─ Figure       Filters, FIG 1.1
-                  └─ Callout  PNC 1, 2, 3 …
-                      └─ Part 36-00304
-```
-
-Figures hang off the **variant**, not the model. That is what makes
-serial-range differences work.
-
----
-
-## 3. Schema changes made during the front-end build
-
-Three changes were needed to build the screens. Each is stated with what it
-was, what it is now, why it changed, and what the backend must guarantee.
-
-### 3.1 `Callout` — coordinates and part are both nullable
-
-```ts
-interface Callout {
-  id: string;
-  figureId: string;
-  figurePartId: string | null; // was: string
-  number: number;
-  x: number | null;            // was: number
-  y: number | null;            // was: number
-}
-```
-
-**Why.** The export carries the PNC-to-part mapping but no drawing and no
-coordinates — `catalog-data-structure.md` §4. So an imported callout knows its
-part and does not know where it sits. The original type had both fields
-required, which made the ordinary post-import state unrepresentable: the only
-options were to omit the callout, losing its number and its part, or to invent
-a position.
-
-The two nulls mean different things and arise at different rates:
-
-| Field | Null means | How often |
-|---|---|---|
-| `x` / `y` | Marker not yet placed on the plate | **Every callout, on every import.** This is the manual work the project exists to bring in-house |
-| `figurePartId` | No part behind the number | Exception only, where an export row was incomplete |
-
-**What the backend must guarantee.**
-
-- **Neither state may reach a customer.** A callout is servable only with both
-  a position and a part. Publication is what enforces this (§4); the client
-  also drops incomplete callouts when building markers
-  (`buildDrawingMarkers` in `src/lib/drawing.ts`), but the API should not
-  depend on it.
-- `(figureId, number)` is **not** unique. A part fitted in two places carries a
-  distinct PNC per position, and several callouts may resolve to the same part.
-  This is the basis of multi-occurrence highlighting and is a valid mapping,
-  never an error.
-- Counts shown to customers should count *placed* callouts. A figure claiming
-  six while only four can be drawn reads as a bug.
-- Coordinates are percentages, 0–100, of the drawing's dimensions — never
-  pixels. See §5.
-
-**Import behaviour.** Per `build-plan.md` stage 3, create `callout` rows from
-`PNC` with `figure_part_id` set and coordinates left null. The import should
-never fabricate a position.
-
-### 3.2 `Part.requires` — "also requires" at part level
-
-```ts
-interface Part {
-  // ...
-  supersededByPartId: string | null;
-  requires: PartRequirement[]; // new
-  status: PartStatus;
-}
-
-interface PartRequirement {
-  partId: string;
-  qty: number;
-}
-```
-
-**Why.** This is the front end catching up with a decision already made in
-`catalog-data-structure.md` §3 and §5, which specifies a `part_requires` table
-and argues that remarks should be parsed rather than only stored. The original
-TypeScript types had no equivalent, so the admin could not resolve a fitment
-rule to a record, link to it, or export it as structured data.
-
-Remarks live on `figure_part` — a part's appearance on *one* figure — which is
-the wrong level twice over: the relationship would repeat on every figure the
-part appears on, and would need hand-keeping in step. A seal kit travels with
-its filter element wherever that element appears.
-
-**What the backend must guarantee.**
-
-- `partId` must resolve. The repository drops unresolvable references rather
-  than emitting a dangling row; the API should reject them at write time.
-- The relationship is directional and not symmetric. The seal kit does not
-  require the element back — do not infer a reverse edge.
-- Supersession stays as specified: `superseded_by_part_id` on the superseded
-  record, pointing forward. The admin renders the reverse ("Replaces …") by
-  lookup; only the one edge is stored.
-- Free-text `figure_part.remarks` is still supported and still displayed. This
-  adds a structured channel beside it; per §5 of the data-structure document,
-  extraction is a reviewed import step, never silent.
-
-### 3.3 `Model.catalogState` and `Model.updatedAt`
-
-```ts
-type CatalogState = "live" | "draft" | "awaiting-import" | "not-registered";
-
-interface Model {
-  id: string;
-  productLineId: string;
-  name: string;
-  status: ModelStatus;      // unchanged: active | legacy | discontinued
-  catalogState: CatalogState; // new
-  updatedAt: string | null;   // new — ISO date
-}
-```
-
-**Why.** `catalog-data-structure.md` §3 specifies a single `model.status` of
-draft / published / awaiting_import. Building the console showed that two
-different lifecycles were being packed into one column:
-
-- **`ModelStatus`** — the machine. Whether the manufacturer still builds and
-  supports it. Owned by the manufacturer's product management.
-- **`catalogState`** — the catalogue for that machine. Owned by RUFDiamond's
-  catalogue team.
-
-They move independently. A model can be an active machine with no catalogue at
-all, which is the majority case today: nine models registered, one with data.
-Overloading one column would have made "active but not yet imported"
-unrepresentable.
-
-`updatedAt` is null until an export has been imported; the catalogue table
-renders that as `—`.
-
-| State | Meaning |
+| Module | Responsibility |
 |---|---|
-| `live` | Published; customers are seeing it |
-| `draft` | Data imported, not publishable yet — typically unmapped callouts |
-| `awaiting-import` | Registered, no export received from the manufacturer |
-| `not-registered` | Known to exist, no record set up |
+| Identity | Credentials, sessions, resets, current-user context |
+| Authorization | Capability and scope evaluation; query constraints |
+| Catalog | Working models, variants, systems, figures, parts, relationships |
+| Drawings | Upload lifecycle, metadata, versions, authorized retrieval |
+| Import | Staging, parsing, validation, diff, reviewed application |
+| Publication | Blockers, immutable releases, activation, rollback |
+| Orders | Submission, snapshots, totals, status workflow |
+| Accounts | Companies, users, fleets, price/visibility settings |
+| Audit | Append-only mutation record and authorized export |
+| Outbox | Durable email, export, and other asynchronous work |
 
-**What the backend must guarantee.**
+Route handlers validate transport input and call application services.
+Application services own transactions and policy orchestration. Repositories
+own SQL and accept authorization scope wherever records are restricted. Pure
+domain functions own rules such as money rounding and publish validation.
 
-- The customer side never branches on `catalogState`; it is an admin concern.
-  What customers may see is governed by publication and by the `environment`
-  scope in `capability-and-role-spec.md` §3.
-- A model must not reach `live` while any of its callouts are unmapped — see
-  §4. The client disables the control and states the reason, but the API must
-  enforce it.
-- `updatedAt` is set by the import and edit paths, never by the client.
+### 3.3 Data and external services
 
----
+PostgreSQL is the source of truth for identity, authorization, working state,
+immutable releases, drawing metadata, imports, orders, audit, and outbox.
+Object storage holds opaque immutable files; database rows give them meaning.
+Buckets are private and callers never receive permanent public URLs.
 
-## 4. Publish blocking is derived, not stored
+A worker claims committed outbox rows with `FOR UPDATE SKIP LOCKED`, performs
+external actions, and records attempts. Initial consumers are confirmation
+email and portable exports. Future Xero delivery may be another consumer but
+is not part of the pilot.
 
-A figure is publishable only when **every callout has both a position and a
-part**. A customer must never meet a numbered marker with nothing behind it, and
-must never meet a parts-list row whose number is nowhere on the plate.
+## 4. Catalog and publication model
 
-This is enforced by derivation rather than by a flag someone has to remember to
-clear. `getPublishQueue()` walks every model in `draft`, counts callouts that
-are unplaced (`x`/`y` null) and callouts that are partless (`figure_part_id`
-null or unresolvable), and emits a blocked entry naming the affected figures —
-leading on coordinates, because that is what an import is actually missing:
+### 4.1 Hierarchy and multi-occurrence callouts
 
-> **FT3 Wagon — first release.** 2 callouts have no position on the drawing,
-> and 1 has no part attached across 1 figure (FIG 1.1). Place the markers in
-> the figure editor.
+```
+Product line
+  └─ Model
+      └─ Variant
+          └─ System (through model_system)
+              └─ Figure
+                  ├─ Figure part ── Part
+                  └─ Callout ────── Figure part
+```
 
-Place the markers and the blocker disappears on its own; there is no second
-piece of state to keep in sync. Structural blockers that are not derivable
-(IronHorse has received no parts export at all) are held as data alongside.
+Figures belong to variants, not models. A `figure_part` records one part's use
+on one figure. A `callout` records one physical marker. Multiple callouts may
+point to the same `figure_part`, including repeated visible numbers when the
+drawing requires them. Selecting a part must return and highlight every
+matching callout. Repeated occurrences are valid data, not duplicates.
 
-**Requirements.**
+No uniqueness constraint may be placed on `(figure_id, number)` or on
+`callout.figure_part_id`. Imports use stable source-row identity rather than
+incorrectly treating PNC as unique.
 
-- The block is a server-side rule. `publish.execute` must re-check both
-  conditions at the moment of publishing, not trust the client's disabled
-  button.
-- `publish.block.override` exists in the capability register and should be
-  granted to nobody in the pilot, so that the eventual need for it is a
-  deliberate grant rather than a code change made under pressure.
-- Blocked controls stay visible and state their reason. A hidden control
-  explains nothing. (This is the one deliberate exception to the "absent, not
-  disabled" rule in `capability-and-role-spec.md` §6.2, which concerns
-  capabilities a user can never hold; a blocker is a condition they can clear.)
+### 4.2 Working catalog
 
-### 4.1 What the hotspot editor does
+Imports and admin edits update normalized working tables. Working records carry
+`created_at`, `updated_at`, and integer `version` for optimistic
+concurrency. `model.status` describes the machine lifecycle: active, legacy,
+or discontinued. A separate derived catalog state reports absent,
+awaiting-import, draft, or active-release state.
 
-Settled, and reflected in the built screen:
+Ordinary customer routes never query working tables. Preview requires
+`publish.draft.view` and is visibly identified as draft.
 
-- **Primary gesture: placing.** Select a callout — which already knows its part
-  from the import — then click the drawing to give it a position. The click is
-  converted to percentages of the plate and stored as `x`/`y`.
-- **Progress tracks positions.** The counter reads *"n of m placed"*, and the
-  record bar carries the same figure. This is the number that makes the
-  remaining eight models predictable, per `build-plan.md` stage 10.
-- **Secondary path: attaching.** Where a callout arrived without a part, the
-  editor offers a searchable picker and a quantity. It is offered only for that
-  case, so the ordinary flow is not cluttered by it.
-- **Completion requires both.** "Mark figure complete" stays disabled until
-  every callout has a position *and* a part, and any later edit clears the
-  complete flag.
-- A part may key several callouts. The picker states the count as information
-  ("Attached at 2 callouts in this figure"), never as a warning.
+### 4.3 Immutable releases
 
-## 5. Related invariants
+Publication creates a self-contained immutable snapshot for a model and its
+variants. Recommended tables mirror the customer-visible graph:
 
-Not schema changes, but load-bearing and easy to break silently.
+- `publication_release`
+- `release_model`, `release_variant`, and `release_system`
+- `release_figure` and `release_drawing`
+- `release_part` and `release_part_requires`
+- `release_figure_part` and `release_callout`
 
-- **Callout coordinates are percentages, 0–100, never pixels**, and are absent
-  until placed. Drawings are re-rendered at different widths and can be replaced
-  at a different resolution; pixel offsets would detach every marker. Already
-  specified in `catalog-data-structure.md` §3 and flagged in `build-plan.md`
-  stage 2 as painful to change later. Store them null rather than zero — `0, 0`
-  is a legitimate position, so it cannot double as "unplaced".
-- **Order lines are snapshots.** `order_line` copies part number, description
-  and unit price at submission so a price change next month cannot rewrite last
-  month's order.
-- **Discount is never stored on a line.** It belongs to the company reading the
-  list and is applied at display time from `company.discount_rate`. Totals are
-  a pure function of the lines and the rate; the pilot rate is 10% for dealers.
-- **A part may key several callouts in one figure, and this is not an error.**
-  The editor states it as information ("Attached at 2 callouts in this
-  figure"), never as a warning.
-- **Money rounds to cents at each step.** Line totals and discounts are rounded
-  individually; per-line net figures computed from unrounded values will not
-  always sum to a separately rounded total.
+Snapshot rows use release-local foreign keys plus stable working IDs for
+traceability. Customer responses never join release rows back to mutable
+working rows. Later price edits, drawing replacements, or imports cannot alter
+an active release.
 
----
+`publication_release` stores model ID, revision, status, summary, creator,
+timestamps, and source checksum. A partial unique index permits at most one
+active release per model.
 
-## 6. Open questions
+Every customer catalog request resolves the permitted model and exactly one
+active immutable release at the start of the query. All systems, figures,
+parts, prices, callouts, counts, searches, and drawing versions in that response
+come from that release. No endpoint may blend release and working rows.
 
-Carried forward from the supporting documents, plus one raised by the build.
-Questions 1 and 2 are the largest cost and scope determinants in the project.
+### 4.4 Publishing transaction and blockers
 
-1. **Can the current portal export drawing files** — PDF, SVG, DWG, or image?
-   And does RUFDiamond hold the original CAD independently of the portal?
-   (`catalog-data-structure.md` §4.) If the drawings arrive as SVG with the
-   callout numerals as text elements, coordinates can be extracted
-   automatically and the largest manual task mostly disappears. If they arrive
-   as flat raster, every marker is placed by hand — 45 figures for FT3 Wagon,
-   several thousand markers across nine models.
-2. **Are submitted orders binding purchase orders or requests for quote?**
-   (`capability-and-role-spec.md` §7.4.) The current portal treats them as
-   requests. Binding orders require stock integration and payment handling and
-   are a materially larger build.
-3. **Should technicians see pricing?** Recommend a per-company setting rather
-   than a global rule. (`capability-and-role-spec.md` §7.1.)
-4. **Who holds `publish.execute`** — one named person, or anyone in parts and
-   service? And do dealers order for end customers or for their own stock,
-   which determines whether `orders.behalf` is needed in phase one.
-   (`capability-and-role-spec.md` §7.2–7.3.)
-5. ~~**Which nullable field does "unmapped" mean?**~~ **Settled in favour of
-   the import data.** Callouts arrive from `PNC` with the part attached; what is
-   missing is `x`/`y`. The editor's primary gesture is placing a marker, the
-   progress counter tracks positions, and the publish blocker fires on missing
-   coordinates. Attaching a part remains as a secondary path for incomplete
-   export rows, and both conditions block publishing. See §3.1 and §4.1.
-6. **How long can the portal be unavailable before it costs money**, and **is
-   Canadian data residency contractually required** by any mining, utility or
-   defence customer? (`backup-and-recovery-plan.md`.) Both constrain
-   infrastructure and should be settled before it is selected.
+`publish.execute` runs in a serializable transaction:
 
----
+1. Lock the model publication state and verify the expected working version.
+2. Re-evaluate authorization and all blockers against current working data.
+3. Copy the complete customer-visible graph into a new release.
+4. Store a deterministic release checksum.
+5. Atomically deactivate the previous release and activate the new one.
+6. Append audit and outbox events.
+7. Commit, after which the new release becomes visible.
 
-## 7. Operational requirements
+The server never trusts a disabled UI control or previous validation result.
+Concurrent attempts yield one success and one `409`. Failure leaves the
+previous release active. Rollback requires `publish.rollback` and activates a
+prior snapshot without rewriting history. `publish.block.override` is granted
+to nobody in the pilot.
 
-### 7.1 Enforcement
+Blockers are derived, never manually cleared. Publication fails for:
 
-From `capability-and-role-spec.md` §6, restated because they are backend
-obligations:
+- missing or unvalidated drawing
+- null callout coordinate or coordinate outside 0–100
+- null or unresolvable `figure_part_id`
+- callout and figure part belonging to different figures
+- figure part with an unresolvable part
+- unreviewed relationship extracted from remarks
+- invalid or disabled hierarchy path
+- inconsistent currency or price required for display
 
-1. **Server-side authority.** Every capability check happens on the server.
-   Client-side checks control what renders, never what is permitted.
-2. **Deny by default.** An unrecognised capability key resolves to deny.
-3. **No role-name checks anywhere.** Code checks capability keys only, so
-   adding a role is a configuration change.
-4. **Fleet and brand filtering at the query layer**, not in the UI. A Fat Truck
-   user must not reach IronHorse data by editing a URL.
-5. **Draft isolation.** A user without `publish.draft.view` must never receive
-   draft data in any response, including search results.
-6. **Audit on every mutation** — actor, capability exercised, object, previous
-   value, new value, timestamp. Writing to the audit log is unconditional, not
-   a capability.
+The API groups blockers by model, variant, and figure with stable codes. A
+“figure complete” indicator is also derived; any later edit can make it
+incomplete.
 
-### 7.2 Durability
+## 5. PostgreSQL schema
 
-From `backup-and-recovery-plan.md`. The irreplaceable asset is the **callout
-mappings** — roughly 15,000 coordinate records at full scope, the output of the
-manual work this project exists to bring in-house. Losing the parts data costs
-a re-import; losing the mappings costs remapping every figure by hand.
+Identifiers are UUIDs and times are `timestamptz` in UTC. Currency uses ISO
+4217 codes. Money uses `numeric(14,2)` and rates use bounded decimals, never
+binary floating point. JSONB is for immutable source payloads, audit details,
+and validation reports rather than ordinary relational structure.
 
-| Scenario | Maximum data loss | Time to running again |
+### 5.1 Working catalog
+
+| Table | Principal columns and constraints |
+|---|---|
+| `product_line` | name, manufacturer, country, distributed flag; normalized-name uniqueness |
+| `model` | product-line FK, name, photo FK, order, lifecycle; unique name per line |
+| `variant` | model FK, label, serial bounds, revision; unique label per model |
+| `system` | name, sort order; unique normalized name |
+| `model_system` | model/system FKs, enabled; composite PK |
+| `figure` | variant/system FKs, name, group number, active drawing FK, order, stable source key |
+| `drawing_file` | object key, filename, type, bytes, SHA-256, dimensions/pages, version, validation, uploader |
+| `part` | normalized unique part number, display number, description, maker, list price, currency, replacement FK, status |
+| `part_requires` | part/required-part FKs, quantity, review state, provenance; no self-reference |
+| `figure_part` | figure/part FKs, source-row key, quantity, remarks, serviceable, effective dates |
+| `callout` | figure FK, nullable figure-part FK, source key, number, nullable percentage coordinates |
+
+`callout.figure_part_id` is nullable so incomplete imports are representable
+in draft. A composite FK or transaction validation guarantees a non-null
+figure part belongs to the same figure. Coordinates must both be null or both
+non-null and, when set, between 0 and 100. `(0, 0)` is valid.
+
+`part_requires` is directional and does not imply a reverse edge. Original
+`figure_part.remarks` remains after approval. Supersession is directional:
+the old part points to the replacement.
+
+### 5.2 Identity and access
+
+| Table | Purpose |
+|---|---|
+| `company` | Customer/dealer, status, discount, price tier, technician-pricing setting |
+| `company_product_line` | Lines visible to the company |
+| `company_machine` | Variants in the customer's fleet and unit reference |
+| `app_user` | Company, name, canonical email, password hash, role, status |
+| `role`, `capability`, `role_capability` | Configurable bundles of stable capabilities |
+| scope tables | Brand, account, fleet, environment, and price restrictions |
+| `session` | Hashed token, user, expiry, last use, revocation, security metadata |
+| `password_reset_token` | Hashed single-use token, user, expiry, consumption |
+
+Seed the complete capability register. Pilot bundles are Catalog Admin,
+Purchaser, and Technician. Later separation is configuration, not code.
+
+### 5.3 Orders and operations
+
+`order` stores company, submitting user, variant, reference, status, currency,
+list total, discount, net total, submission time, and version. `order_line`
+stores the part reference plus snapshots of number, description, unit price,
+quantity, and rounded line total. Submitted snapshots never change.
+
+`import_job` stores source checksum, target, state, summary, actor, and
+timestamps. `import_staging_row` stores normalized fields and stable source
+identity. `import_issue` stores severity, code, row/field context, and
+resolution.
+
+`audit_log` is append-only and stores actor, effective company, capability,
+object, before/after patch, request ID, correlation IDs, timestamp, and safe
+network metadata. Secrets, password hashes, tokens, and signed URLs are
+excluded.
+
+`outbox_event` stores event type, aggregate, versioned provider-neutral
+payload, occurrence/availability/completion times, attempts, and last error.
+Delivery is at least once, so consumers are idempotent.
+
+## 6. Authentication and authorization
+
+Use first-party server sessions for the pilot:
+
+- Argon2id password hashes with parameters reviewed at implementation
+- high-entropy session tokens stored only as hashes
+- Secure, HttpOnly, appropriately SameSite cookies
+- rotation at sign-in and after password/privilege changes
+- inactivity and absolute expiry, revocation, and logout-all
+- rate limits and non-enumerating sign-in/reset responses
+- hashed, expiring, single-use reset tokens
+- Origin/Referer validation plus CSRF tokens for cookie mutations
+
+Production CORS permits only configured portal origins. Admin authentication
+events are audited. MFA is recommended for catalog administrators before broad
+production rollout.
+
+Each protected route declares one concrete capability. Application services
+recheck sensitive operations. Unknown capabilities deny by default. Code never
+compares role names.
+
+Capabilities define *what* and scopes define *which records*. Effective access
+is their intersection. SQL repositories constrain brand, account, fleet,
+environment, and price visibility. Out-of-scope IDs return `404` where
+`403` would disclose existence. Counts, search, exports, errors, drawing
+metadata, and signed URLs use the same constraints as ordinary reads.
+
+Technician pricing is a per-company setting and defaults to visible for the
+pilot, preserving the current Technician bundle without hard-coding a global
+policy.
+
+## 7. API design
+
+Routes live under `/api/v1`. JSON uses camelCase to match TypeScript models;
+PostgreSQL uses snake_case. Times are ISO 8601 UTC. OpenAPI is generated from
+the Fastify schemas used for runtime request and response validation.
+
+### 7.1 Customer routes
+
+| Method and path | Purpose |
+|---|---|
+| `POST /auth/sign-in`, `POST /auth/sign-out` | Session lifecycle |
+| `POST /auth/password-reset/request`, `/complete` | Non-enumerating reset flow |
+| `GET /me` | User, safe capabilities, scope/UI settings |
+| `GET /catalog/product-lines` | Permitted released lines |
+| `GET /catalog/models` | Fleet-scoped models with active releases |
+| `GET /catalog/models/:id/variants` | Released variants |
+| `GET /catalog/variants/:id/systems` | Enabled released systems |
+| `GET /catalog/variants/:id/systems/:systemId/figures` | Figure summaries |
+| `GET /catalog/figures/:id` | Composite detail, rows, all callouts |
+| `GET /catalog/parts/search?q=` | Search active permitted releases only |
+| `POST /orders` | Idempotent request-for-quote submission |
+| `GET /orders`, `GET /orders/:id` | Account-scoped order history |
+
+The API assembles composite shapes equivalent to those consumed by
+`src/data/repository.ts`; the client does not perform sensitive joins.
+Drawing content uses an authorized route that issues a short-lived signed URL
+or streams the object after checking release and scope.
+
+### 7.2 Admin routes
+
+Admin routes cover catalog summary; model, variant, system, figure, part, and
+callout mutation; drawings; imports; publication; orders; accounts; users;
+roles; and audit. Important workflow routes include:
+
+- `POST /admin/imports`, `GET /admin/imports/:id`
+- `POST /admin/imports/:id/validate`, `POST /admin/imports/:id/apply`
+- `POST /admin/drawings/uploads`, `POST /admin/drawings/uploads/:id/finalize`
+- `PATCH /admin/callouts/:id`
+- `GET /admin/publication/queue`
+- `POST /admin/publication/releases`
+- `POST /admin/publication/releases/:id/activate`
+- `POST /admin/publication/releases/:id/rollback`
+- `GET /admin/audit`
+
+Mutations use `If-Match` or an explicit version. Import application, order
+submission, and publication accept `Idempotency-Key`; stored request hashes
+prevent reuse with different payloads. Lists use cursor pagination, bounded
+page sizes, and stable ordering.
+
+## 8. Import flow
+
+Import is a reviewed two-phase process, never spreadsheet-to-live:
+
+1. Authorize `parts.import`, upload privately, hash, and create an immutable
+   job.
+2. Parse all sixteen columns into staging without changing the catalog.
+3. Normalize, validate, and produce counts, warnings, errors, and a diff.
+4. Deduplicate global parts while retaining every figure occurrence.
+5. Propose `part_requires` from remarks, retaining prose and requiring review.
+6. Resolve blockers and approve parsed relationships.
+7. Revalidate and apply accepted changes to working tables in one transaction,
+   including audit and outbox events.
+
+Stable keys include normalized part number, target model/variant, figure source
+key, and source-row identity. The checksum detects exact reruns; uniqueness and
+upserts make changed reruns idempotent. Conflicts are reported, never silently
+chosen.
+
+Import creates callouts from PNC with `figure_part_id` where resolvable and
+coordinates null. It never fabricates a position. Existing manual coordinates
+are retained only when stable identities match unambiguously.
+
+Applying an import cannot activate a release. Customers keep seeing the old
+active release until a separate authorized publish succeeds.
+
+## 9. Drawings and object storage
+
+Buckets deny public access. Keys use opaque UUIDs and immutable versions;
+user filenames are metadata only.
+
+Upload sequence:
+
+1. Check `catalog.drawing.upload` and create an upload intent with limits.
+2. Return a short-lived presigned upload or stream small files through the API.
+3. Finalize by verifying existence, size, SHA-256, signature, allowed type, and
+   malware result.
+4. Extract dimensions/page count and create safe preview derivatives.
+5. Create a new immutable `drawing_file` and attach it to the working figure
+   in a transaction.
+
+SVG is sanitized before rendering; active content and external references are
+rejected. PDFs and rasters receive safe previews. The API never serves a
+caller-provided storage key without resolving authorized metadata.
+
+Coordinates are percentages of displayed dimensions. Moving requires
+`catalog.callout.manage`; attaching a missing part requires
+`catalog.callout.map`. The API checks paired coordinates and same-figure
+membership, increments the version, and audits before/after state.
+
+Published releases pin exact drawing and derivative versions. Replacing a
+working drawing cannot change live content.
+
+## 10. Orders and deferred integrations
+
+Authoritative order creation verifies each part against the caller's active
+release and selected variant, rejects non-serviceable items, resolves permitted
+prices and company discount, calculates decimal totals, snapshots lines, and
+inserts a confirmation outbox event in one transaction.
+
+Discount belongs to company/order, not catalog lines. Line totals and discounts
+round to cents at each documented step.
+
+The pilot treats submission as a request for quote. Inventory reservation,
+payment, tax determination, binding purchase orders, and automated accounting
+posting are outside scope.
+
+A neutral `accounting_export` or `order.submitted` event may contain the
+versioned order snapshot. A future Xero adapter maps it to Xero. Adapter failure
+must never roll back or mutate the order.
+
+## 11. Audit, observability, and operations
+
+Every mutation writes audit in the same transaction. Audit writing is
+unconditional, not a capability. Corrections append events rather than editing
+history. Reads require `audit.log.view` and exports require
+`audit.log.export`.
+
+Structured logs contain timestamp, version, environment, request ID, route
+template, latency, status, safe actor IDs, and error code. They exclude
+credentials, cookies, reset tokens, signed URLs, and sensitive payload values.
+
+Metrics and alerts cover latency/errors, authentication failures,
+publish/import outcomes, outbox age, database connections, storage failure,
+backup age and restore tests, disk, certificates, and uptime. Health endpoints
+separate liveness from dependency readiness and expose no business data.
+
+Deployments use backward-compatible migrations before traffic switches.
+Destructive cleanup waits until all running versions stop using the old shape.
+Production is deployed from source control and not edited manually.
+
+## 12. Backup and recovery
+
+| Layer | Policy |
+|---|---|
+| PostgreSQL PITR | Continuous WAL, seven-day window |
+| Database snapshots | Nightly, encrypted, separate storage; 30 daily, 12 monthly, 7 annual |
+| Drawing archive | Versioned weekly plus after bulk upload; 12 months |
+| Offline export | Quarterly and before migration, held independently by RUFDiamond |
+
+The portable export includes documented CSV/JSON, mappings and stable IDs,
+release/audit manifests, drawings with checksums, and restoration instructions.
+
+| Scenario | Maximum loss | Recovery time |
 |---|---|---|
-| Human error | The mistake only | < 1 hour |
-| Database failure | < 5 minutes | < 4 hours |
-| Region outage | < 5 minutes | Provider-dependent |
-| Provider loss | < 1 quarter | 2–3 days |
+| Human error | Erroneous operation only | Under 1 hour |
+| Database failure | Under 5 minutes | Under 4 hours |
+| Region outage | Under 5 minutes | Provider-dependent without standby |
+| Provider loss | Up to one quarter | 2–3 days |
 
-Four independent layers: continuous point-in-time recovery (7-day window),
-nightly snapshots (30 daily / 12 monthly / 7 annual, encrypted, Canadian
-region), weekly drawing-file archive held separately from the database, and a
-quarterly offline export held by RUFDiamond on hardware they control.
+Monthly automation restores a snapshot in isolation and checks migrations,
+foreign keys, row counts, release checksums, callout completeness, drawing
+checksums, and a sample customer read. A person performs a quarterly restore;
+RUFDiamond rehearses annual recovery from offline export alone. A proven
+restore is a launch gate.
 
-A restore rehearsal is a launch gate, per `build-plan.md` stage 9. An untested
-backup is a belief, not a plan.
+Default to Canadian primary and normal backup locations, with the independent
+archive in another failure domain. Do not buy a warm standby for the pilot
+while phone/email is an acceptable fallback.
 
-### 7.3 Import
+## 13. Errors and concurrency
 
-The import is scripted and **must be idempotent** — it will be run many times,
-and the second run must update rather than insert. Sequence, dependencies and
-the sixteen-column source mapping are in `catalog-data-structure.md` §2 and §6.
-Steps 1–6 run in minutes; drawing files and callout coordinates are the
-project's real work.
+Errors use RFC 9457 `application/problem+json` with `type`, `title`,
+`status`, safe `detail`, `instance`, stable `code`, and `requestId`.
+Validation adds field/domain issues. Publication and import add grouped
+blockers without exposing unauthorized records.
 
----
+| Status | Meaning |
+|---|---|
+| `400` | Malformed syntax or unsupported query |
+| `401` | Missing, expired, or invalid authentication |
+| `403` | Caller lacks a non-enumerating action permission |
+| `404` | Missing or out-of-scope resource |
+| `409` | Version, duplicate, idempotency, or workflow conflict |
+| `422` | Well-formed request violates domain rules |
+| `429` | Rate limit |
+| `503` | Required dependency unavailable |
 
-## 8. Status of this document
+Expected domain failures are not server exceptions. Unexpected failures return
+a generic problem and log context under the request ID. SQL, object keys, and
+stacks never reach clients.
 
-The schema sections in §3–§5 describe changes already made in the front-end
-code and verified against it. The data model, capability, operational and
-delivery detail is owned by the four supporting documents listed at the top;
-where this spec and those disagree, the supporting document is authoritative
-for its own subject and this one records only the deltas.
+Optimistic concurrency protects ordinary edits. Publication uses a serializable
+transaction and model lock. Order, import, and publish combine idempotency
+records with uniqueness so retries are safe.
+
+## 14. Test strategy
+
+### Unit
+
+- capability/scope evaluation and unknown-key denial
+- paired percentage coordinates and same-figure rules
+- multi-occurrence grouping and highlighting data
+- supersession and directional requirements
+- catalog state and publish blockers
+- decimal line, discount, and total rounding
+- session/token lifecycle
+- import normalization and remarks parsing
+
+### PostgreSQL integration
+
+- empty and upgrade migrations
+- FKs, partial uniqueness, paired-null/range checks
+- repository scope against brand, fleet, account, draft, and price leaks
+- rollback of failed import, order, audit, outbox, and publish
+- optimistic/serializable conflicts
+- snapshot completeness and checksum stability
+
+### API and security
+
+- OpenAPI conformance
+- cookies, CSRF/origin, expiry, rotation, and rate limits
+- complete pilot-role capability matrix
+- URL tampering across companies, fleets, releases, drawings, and orders
+- no draft leakage through search, counts, errors, exports, or URLs
+- signed URL expiry and object-substitution resistance
+- idempotency replay and mismatched payloads
+
+### Import and publication
+
+Fixtures cover every source column, 635-row/536-part expectations, missing
+values, conflicting duplicates, bad prices/dates, ambiguous remarks,
+unresolved requirements, and reruns. A rerun adds no duplicate and does not
+erase unambiguously matched manual coordinates.
+
+Publication tests prove every blocker stops activation, failure preserves the
+old release, success exposes one coherent graph, later working edits do not
+change it, rollback restores the exact snapshot, and concurrent publishers
+cannot split live state.
+
+The headline acceptance test selects a part appearing at several positions on
+one figure and highlights every callout. Customer responses contain no
+incomplete callouts.
+
+### End-to-end and operational
+
+- Catalog Admin imports, reviews, maps, uploads, publishes, and rolls back
+- Purchaser submits; Technician can build but not submit
+- a Fat Truck customer cannot discover IronHorse data
+- submitted lines survive later part and price edits unchanged
+- outbox retries do not duplicate logical notifications
+- OWASP ZAP and dependency/container scans against staging
+- restore checks meet the recovery objectives
+
+## 15. Defaults and confirmations
+
+| Topic | Approved design default |
+|---|---|
+| Order meaning | Request for quote, not binding PO |
+| Technician pricing | Per-company; visible by default |
+| Publisher | Named staff receive configurable `publish.execute` |
+| Dealer behalf-of | Deferred until workflow is confirmed |
+| Data residency | Canadian primary and normal backups |
+| Availability | No warm standby while phone/email fallback works |
+| Authentication | First-party sessions; admin MFA before broad rollout |
+| Accounting | Neutral export/outbox only; Xero deferred |
+
+One operational input remains urgent but does not change the architecture:
+RUFDiamond must confirm ownership and format of original drawings. SVG with
+usable text may allow coordinate extraction; flattened raster/PDF requires
+manual mapping. This changes schedule and cost, not the storage, publication,
+or authorization design.
+
+Before purchasing infrastructure, RUFDiamond should confirm Canadian residency
+against customer contracts and accept the four-hour database recovery target.
+Provider selection for PostgreSQL, storage, email, and monitoring belongs in
+the implementation plan and must preserve this design.
+
+## 16. Design acceptance
+
+An implementation satisfies this design when:
+
+- every customer read resolves exactly one active immutable release
+- draft, incomplete, unmapped, and out-of-scope data never reaches customers
+- one part can map to and highlight multiple callout occurrences
+- every mutation is capability-checked, scoped, audited, and transactional
+- import is staged, reviewed, idempotent, and cannot publish
+- drawings remain private and releases pin immutable versions
+- submitted order lines and totals are durable snapshots
+- release activation and rollback are atomic
+- tested backups restore catalog, mappings, releases, drawings, accounts, and orders
+- external delivery failures cannot corrupt domain transactions
+- Xero remains a deferred adapter, not a hidden domain dependency

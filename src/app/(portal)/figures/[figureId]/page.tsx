@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { loadCalloutPreview } from "@/data/callout-preview.server";
 import {
   getFigureDetail,
   getFigures,
@@ -20,6 +21,7 @@ export default async function FigurePage({
   const { figureId } = await params;
   const detail = await getFigureDetail(figureId);
   if (!detail) notFound();
+  const preview = await loadCalloutPreview(detail);
 
   // The sheet pager walks the figures of this system, in catalogue order.
   const siblings = await getFigures(detail.figure.variantId, detail.system.id);
@@ -30,7 +32,8 @@ export default async function FigurePage({
 
   return (
     <FigureWorkspace
-      detail={detail}
+      detail={preview.detail}
+      previewNotice={preview.notice}
       usage={usage}
       sheet={index === -1 ? "—" : `${pad(index + 1)} / ${pad(total)}`}
       index={index === -1 ? 0 : index}

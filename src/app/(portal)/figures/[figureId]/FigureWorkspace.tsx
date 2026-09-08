@@ -47,6 +47,7 @@ function clampSplit(value: number): number {
 
 export interface FigureWorkspaceProps {
   detail: FigureDetail;
+  previewNotice?: string | null;
   /** Where each part is used — the quote view opens inside this screen. */
   usage: Record<string, PartUsageSummary>;
   /** Sheet number as printed, e.g. "01 / 04". */
@@ -62,6 +63,7 @@ export interface FigureWorkspaceProps {
 
 export function FigureWorkspace({
   detail,
+  previewNotice = null,
   usage,
   sheet,
   index,
@@ -254,7 +256,15 @@ export function FigureWorkspace({
         ]}
       />
 
-      <div className={styles.toolbar}>
+      <div className={styles.controls}>
+        {previewNotice ? (
+          <p role="status" className={styles.previewNotice}>
+            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
+            open the full illustration.
+          </p>
+        ) : null}
+
+        <div className={styles.toolbar}>
         <div className={styles.pager}>
           <button
             type="button"
@@ -423,6 +433,7 @@ export function FigureWorkspace({
             className={styles.buttonIcon} />
           Check cart · {lines.length}
         </button>
+        </div>
       </div>
 
       {quoting ? (
@@ -624,6 +635,7 @@ export function FigureWorkspace({
           height={drawing?.height}
           note={`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
+          previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
           onTogglePart={toggleSelected}

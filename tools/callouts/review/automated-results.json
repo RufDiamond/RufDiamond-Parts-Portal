@@ -1,0 +1,4677 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-07",
+  "fontSource": "Arial regular/bold at sizes 12,14,16,18,20,24,32,48; no oracle coordinates used",
+  "status": "UNRELIABLE_OUTSIDE_ORACLE_DO_NOT_APPLY",
+  "figures": [
+    {
+      "figureId": "fig-accessories-12-1",
+      "proposals": []
+    },
+    {
+      "figureId": "fig-cabin-6-1",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 79.296875,
+          "y": 2.7777777777777777,
+          "box": [
+            997,
+            5,
+            1034,
+            36
+          ],
+          "shapeScore": 0.7307692307692307,
+          "margin": 0.2636779356524579,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 18.0859375,
+          "y": 3.75,
+          "box": [
+            214,
+            12,
+            250,
+            43
+          ],
+          "shapeScore": 0.8259023354564756,
+          "margin": 0.1315560457038254,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 53.8671875,
+          "y": 5.555555555555555,
+          "box": [
+            672,
+            25,
+            708,
+            56
+          ],
+          "shapeScore": 0.8207171314741036,
+          "margin": 0.16591286101147018,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 97.3046875,
+          "y": 23.75,
+          "box": [
+            1228,
+            156,
+            1264,
+            187
+          ],
+          "shapeScore": 0.796875,
+          "margin": 0.2238412921348315,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 3.515625,
+          "y": 49.44444444444444,
+          "box": [
+            27,
+            341,
+            64,
+            372
+          ],
+          "shapeScore": 0.7757936507936508,
+          "margin": 0.10550379572118707,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 97.3828125,
+          "y": 53.05555555555556,
+          "box": [
+            1229,
+            367,
+            1265,
+            398
+          ],
+          "shapeScore": 0.8036649214659686,
+          "margin": 0.27146795176899885,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 97.34375,
+          "y": 73.88888888888889,
+          "box": [
+            1228,
+            517,
+            1265,
+            548
+          ],
+          "shapeScore": 0.8888888888888888,
+          "margin": 0.3677621283255086,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 17.7734375,
+          "y": 75.13888888888889,
+          "box": [
+            210,
+            526,
+            246,
+            557
+          ],
+          "shapeScore": 0.8452380952380952,
+          "margin": 0.44807497467071933,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 44.921875,
+          "y": 96.66666666666667,
+          "box": [
+            557,
+            681,
+            594,
+            712
+          ],
+          "shapeScore": 0.8088888888888889,
+          "margin": 0.294037403740374,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-10",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 39.140625,
+          "y": 3.888888888888889,
+          "box": [
+            483,
+            15,
+            520,
+            42
+          ],
+          "shapeScore": 0.7797927461139896,
+          "margin": 0.4033221578786955,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 63.4375,
+          "y": 11.527777777777779,
+          "box": [
+            794,
+            70,
+            831,
+            97
+          ],
+          "shapeScore": 0.6372093023255814,
+          "margin": 0.14772555471563875,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 21.09375,
+          "y": 21.666666666666668,
+          "box": [
+            252,
+            143,
+            289,
+            170
+          ],
+          "shapeScore": 0.7649667405764967,
+          "margin": 0.2537307855203169,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 64.609375,
+          "y": 26.944444444444443,
+          "box": [
+            809,
+            181,
+            846,
+            208
+          ],
+          "shapeScore": 0.6905263157894737,
+          "margin": 0.1386032388663967,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 71.171875,
+          "y": 29.930555555555554,
+          "box": [
+            893,
+            203,
+            930,
+            229
+          ],
+          "shapeScore": 0.7314629258517034,
+          "margin": 0.09892179239649312,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 76.7578125,
+          "y": 33.33333333333333,
+          "box": [
+            964,
+            227,
+            1002,
+            254
+          ],
+          "shapeScore": 0.7564102564102564,
+          "margin": 0.2840698308783415,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 21.4453125,
+          "y": 35.138888888888886,
+          "box": [
+            256,
+            240,
+            294,
+            267
+          ],
+          "shapeScore": 0.8652173913043478,
+          "margin": 0.28521739130434787,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 82.4609375,
+          "y": 40.55555555555556,
+          "box": [
+            1037,
+            279,
+            1075,
+            306
+          ],
+          "shapeScore": 0.7712305025996534,
+          "margin": 0.14876560400370964,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 84.1015625,
+          "y": 50.69444444444444,
+          "box": [
+            1058,
+            352,
+            1096,
+            379
+          ],
+          "shapeScore": 0.8052930056710775,
+          "margin": 0.08267816468167821,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-11",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 56.71874999999999,
+          "y": 15.555555555555555,
+          "box": [
+            706,
+            97,
+            747,
+            128
+          ],
+          "shapeScore": 0.8596491228070176,
+          "margin": 0.3527998077385244,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 71.171875,
+          "y": 50.34722222222222,
+          "box": [
+            891,
+            347,
+            932,
+            379
+          ],
+          "shapeScore": 0.7448275862068966,
+          "margin": 0.14119122257053296,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 23.28125,
+          "y": 56.388888888888886,
+          "box": [
+            278,
+            391,
+            319,
+            422
+          ],
+          "shapeScore": 0.8778625954198473,
+          "margin": 0.374819999070963,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 20.234375,
+          "y": 64.72222222222223,
+          "box": [
+            239,
+            451,
+            280,
+            482
+          ],
+          "shapeScore": 0.7212713936430318,
+          "margin": 0.20422593909757725,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 75.703125,
+          "y": 77.5,
+          "box": [
+            949,
+            543,
+            990,
+            574
+          ],
+          "shapeScore": 0.7859327217125383,
+          "margin": 0.428910725096633,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 17.96875,
+          "y": 79.02777777777777,
+          "box": [
+            210,
+            554,
+            251,
+            585
+          ],
+          "shapeScore": 0.8380281690140845,
+          "margin": 0.2591899947402255,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 65.3125,
+          "y": 79.375,
+          "box": [
+            816,
+            556,
+            857,
+            588
+          ],
+          "shapeScore": 0.7700205338809035,
+          "margin": 0.11444323446798765,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 65.3125,
+          "y": 88.54166666666666,
+          "box": [
+            816,
+            622,
+            857,
+            654
+          ],
+          "shapeScore": 0.6543909348441926,
+          "margin": 0.1565648478876709,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 16.328125,
+          "y": 90.20833333333333,
+          "box": [
+            189,
+            634,
+            230,
+            666
+          ],
+          "shapeScore": 0.763265306122449,
+          "margin": 0.10839804948528087,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-12",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 53.1640625,
+          "y": 3.888888888888889,
+          "box": [
+            663,
+            12,
+            699,
+            45
+          ],
+          "shapeScore": 0.8424242424242424,
+          "margin": 0.4506014144855712,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 21.484375,
+          "y": 9.444444444444445,
+          "box": [
+            258,
+            52,
+            293,
+            85
+          ],
+          "shapeScore": 0.726027397260274,
+          "margin": 0.25734489186070597,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 62.8515625,
+          "y": 13.61111111111111,
+          "box": [
+            787,
+            82,
+            823,
+            115
+          ],
+          "shapeScore": 0.7927565392354124,
+          "margin": 0.1690346578448194,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 15.351562499999998,
+          "y": 16.11111111111111,
+          "box": [
+            179,
+            100,
+            215,
+            133
+          ],
+          "shapeScore": 0.6860706860706861,
+          "margin": 0.13180712017921326,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 41.9921875,
+          "y": 19.305555555555557,
+          "box": [
+            520,
+            123,
+            556,
+            156
+          ],
+          "shapeScore": 0.8342391304347826,
+          "margin": 0.28337540682633733,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 72.6171875,
+          "y": 26.25,
+          "box": [
+            912,
+            173,
+            948,
+            206
+          ],
+          "shapeScore": 0.9166666666666666,
+          "margin": 0.348763853367434,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 14.6875,
+          "y": 27.152777777777775,
+          "box": [
+            171,
+            179,
+            206,
+            213
+          ],
+          "shapeScore": 0.7804347826086957,
+          "margin": 0.10707711837511902,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 97.0703125,
+          "y": 52.15277777777778,
+          "box": [
+            1225,
+            359,
+            1261,
+            393
+          ],
+          "shapeScore": 0.7822410147991543,
+          "margin": 0.10670909990553734,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 5.546875,
+          "y": 60.69444444444444,
+          "box": [
+            54,
+            421,
+            89,
+            454
+          ],
+          "shapeScore": 0.8198757763975155,
+          "margin": 0.1968984301191984,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 2.8515625,
+          "y": 80.34722222222223,
+          "box": [
+            19,
+            562,
+            55,
+            596
+          ],
+          "shapeScore": 0.9325842696629213,
+          "margin": 0.4081087451873968,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-13",
+      "proposals": [
+        {
+          "number": 2,
+          "x": 75.9375,
+          "y": 15.902777777777777,
+          "box": [
+            952,
+            101,
+            993,
+            129
+          ],
+          "shapeScore": 0.7183406113537117,
+          "margin": 0.22243897200944945,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 16.328125,
+          "y": 20.48611111111111,
+          "box": [
+            189,
+            134,
+            230,
+            162
+          ],
+          "shapeScore": 0.8480392156862745,
+          "margin": 0.31984372696446994,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 22.2265625,
+          "y": 49.375,
+          "box": [
+            264,
+            342,
+            306,
+            370
+          ],
+          "shapeScore": 0.7890625,
+          "margin": 0.08128261385199242,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 37.3046875,
+          "y": 51.24999999999999,
+          "box": [
+            457,
+            356,
+            499,
+            383
+          ],
+          "shapeScore": 0.8140589569160998,
+          "margin": 0.3407493483751745,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 35.0390625,
+          "y": 58.26388888888889,
+          "box": [
+            428,
+            406,
+            470,
+            434
+          ],
+          "shapeScore": 0.7259615384615384,
+          "margin": 0.20964675919090503,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 75,
+          "y": 65.76388888888889,
+          "box": [
+            940,
+            460,
+            981,
+            488
+          ],
+          "shapeScore": 0.7208333333333333,
+          "margin": 0.10544871794871791,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 23.9453125,
+          "y": 68.26388888888889,
+          "box": [
+            286,
+            478,
+            328,
+            506
+          ],
+          "shapeScore": 0.7777777777777778,
+          "margin": 0.2055555555555556,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 84.7265625,
+          "y": 69.65277777777777,
+          "box": [
+            1064,
+            488,
+            1106,
+            516
+          ],
+          "shapeScore": 0.7303571428571428,
+          "margin": 0.060682052604435266,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 24.609375,
+          "y": 91.18055555555556,
+          "box": [
+            295,
+            643,
+            336,
+            671
+          ],
+          "shapeScore": 0.712166172106825,
+          "margin": 0.2558761934287866,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-14",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 56.32812499999999,
+          "y": 8.055555555555555,
+          "box": [
+            704,
+            44,
+            739,
+            73
+          ],
+          "shapeScore": 0.90625,
+          "margin": 0.3737824675324676,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 57.421875,
+          "y": 19.72222222222222,
+          "box": [
+            718,
+            128,
+            753,
+            157
+          ],
+          "shapeScore": 0.8151447661469933,
+          "margin": 0.3021707142507857,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 14.921875000000002,
+          "y": 25.416666666666664,
+          "box": [
+            174,
+            169,
+            209,
+            198
+          ],
+          "shapeScore": 0.7862453531598513,
+          "margin": 0.1313157756950626,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 58.12500000000001,
+          "y": 29.305555555555557,
+          "box": [
+            727,
+            197,
+            762,
+            226
+          ],
+          "shapeScore": 0.8151041666666666,
+          "margin": 0.2877518690736688,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 15.312500000000002,
+          "y": 36.666666666666664,
+          "box": [
+            179,
+            250,
+            214,
+            279
+          ],
+          "shapeScore": 0.7570621468926554,
+          "margin": 0.2673927254050521,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 59.53125,
+          "y": 43.611111111111114,
+          "box": [
+            745,
+            300,
+            780,
+            329
+          ],
+          "shapeScore": 0.8085106382978723,
+          "margin": 0.2302793457808655,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 15.234375,
+          "y": 48.61111111111111,
+          "box": [
+            178,
+            336,
+            213,
+            365
+          ],
+          "shapeScore": 0.842741935483871,
+          "margin": 0.17717902157658627,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 68.046875,
+          "y": 53.19444444444444,
+          "box": [
+            854,
+            369,
+            889,
+            398
+          ],
+          "shapeScore": 0.8564476885644768,
+          "margin": 0.39198487864712145,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 26.171875,
+          "y": 81.11111111111111,
+          "box": [
+            318,
+            570,
+            353,
+            599
+          ],
+          "shapeScore": 0.6952965235173824,
+          "margin": 0.11771031662083065,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 74.0625,
+          "y": 86.11111111111111,
+          "box": [
+            931,
+            606,
+            966,
+            635
+          ],
+          "shapeScore": 0.7693965517241379,
+          "margin": 0.0857601880877743,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-16",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 22.5,
+          "y": 11.180555555555555,
+          "box": [
+            269,
+            64,
+            308,
+            98
+          ],
+          "shapeScore": 0.8606965174129353,
+          "margin": 0.3331103105163835,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 66.171875,
+          "y": 12.152777777777777,
+          "box": [
+            828,
+            71,
+            867,
+            105
+          ],
+          "shapeScore": 0.7948164146868251,
+          "margin": 0.31373533360574396,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 64.7265625,
+          "y": 20.416666666666668,
+          "box": [
+            810,
+            131,
+            848,
+            164
+          ],
+          "shapeScore": 0.9024390243902439,
+          "margin": 0.3566514786026982,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 62.5,
+          "y": 28.749999999999996,
+          "box": [
+            781,
+            191,
+            820,
+            224
+          ],
+          "shapeScore": 0.7259887005649718,
+          "margin": 0.35846733304360423,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 85,
+          "y": 74.58333333333333,
+          "box": [
+            1069,
+            521,
+            1108,
+            554
+          ],
+          "shapeScore": 0.7766599597585513,
+          "margin": 0.18233947294313546,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-17",
+      "proposals": [
+        {
+          "number": 2,
+          "x": 33.7890625,
+          "y": 15.069444444444443,
+          "box": [
+            421,
+            98,
+            445,
+            120
+          ],
+          "shapeScore": 0.700587084148728,
+          "margin": 0.12538383211620763,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-18",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 81.953125,
+          "y": 6.319444444444445,
+          "box": [
+            1036,
+            29,
+            1063,
+            63
+          ],
+          "shapeScore": 0.7780612244897959,
+          "margin": 0.1978414442700156,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 24.8828125,
+          "y": 6.875000000000001,
+          "box": [
+            305,
+            33,
+            333,
+            67
+          ],
+          "shapeScore": 0.806949806949807,
+          "margin": 0.13203814617242182,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 43.28125,
+          "y": 13.402777777777777,
+          "box": [
+            541,
+            80,
+            568,
+            114
+          ],
+          "shapeScore": 0.8409090909090909,
+          "margin": 0.29201319185546315,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 12.65625,
+          "y": 24.583333333333332,
+          "box": [
+            149,
+            161,
+            176,
+            194
+          ],
+          "shapeScore": 0.8283378746594006,
+          "margin": 0.41021940776044585,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 71.25,
+          "y": 36.041666666666664,
+          "box": [
+            899,
+            243,
+            926,
+            277
+          ],
+          "shapeScore": 0.8067226890756303,
+          "margin": 0.05378151260504205,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 29.531249999999996,
+          "y": 60.55555555555555,
+          "box": [
+            365,
+            420,
+            392,
+            453
+          ],
+          "shapeScore": 0.720164609053498,
+          "margin": 0.17471006359895258,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 95.15625,
+          "y": 63.81944444444444,
+          "box": [
+            1205,
+            443,
+            1232,
+            477
+          ],
+          "shapeScore": 0.8722222222222222,
+          "margin": 0.18073286052009452,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 2.03125,
+          "y": 67.43055555555556,
+          "box": [
+            13,
+            469,
+            40,
+            503
+          ],
+          "shapeScore": 0.7960199004975125,
+          "margin": 0.3164280637628186,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 52.65625000000001,
+          "y": 95.27777777777777,
+          "box": [
+            661,
+            670,
+            688,
+            703
+          ],
+          "shapeScore": 0.7295774647887324,
+          "margin": 0.18782157613776884,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-2",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 39.8828125,
+          "y": 41.52777777777778,
+          "box": [
+            499,
+            285,
+            523,
+            314
+          ],
+          "shapeScore": 0.7012987012987013,
+          "margin": 0.1540149990854216,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 37.3828125,
+          "y": 41.66666666666667,
+          "box": [
+            467,
+            286,
+            491,
+            315
+          ],
+          "shapeScore": 0.7594654788418709,
+          "margin": 0.2291940800944805,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 42.3828125,
+          "y": 41.736111111111114,
+          "box": [
+            531,
+            286,
+            555,
+            316
+          ],
+          "shapeScore": 0.7714932126696833,
+          "margin": 0.2898932126696833,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 44.921875,
+          "y": 41.736111111111114,
+          "box": [
+            563,
+            286,
+            588,
+            316
+          ],
+          "shapeScore": 0.7516778523489933,
+          "margin": 0.16985967053081152,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 34.8046875,
+          "y": 42.15277777777778,
+          "box": [
+            434,
+            289,
+            458,
+            319
+          ],
+          "shapeScore": 0.7818574514038877,
+          "margin": 0.23218857723170228,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 47.421875,
+          "y": 42.56944444444444,
+          "box": [
+            595,
+            292,
+            620,
+            322
+          ],
+          "shapeScore": 0.7009009009009008,
+          "margin": 0.04465090090090085,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 37.265625,
+          "y": 80.34722222222223,
+          "box": [
+            465,
+            564,
+            490,
+            594
+          ],
+          "shapeScore": 0.7238095238095238,
+          "margin": 0.2495605967708972,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 40.3515625,
+          "y": 84.09722222222223,
+          "box": [
+            505,
+            591,
+            529,
+            621
+          ],
+          "shapeScore": 0.8039538714991763,
+          "margin": 0.1563028647877669,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 43.4765625,
+          "y": 87.01388888888889,
+          "box": [
+            545,
+            612,
+            569,
+            642
+          ],
+          "shapeScore": 0.7398843930635838,
+          "margin": 0.06341380482828962,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-3",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 30,
+          "y": 14.791666666666666,
+          "box": [
+            362,
+            89,
+            407,
+            125
+          ],
+          "shapeScore": 0.8454258675078864,
+          "margin": 0.4751187002723915,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 17.5,
+          "y": 80.48611111111111,
+          "box": [
+            202,
+            562,
+            247,
+            598
+          ],
+          "shapeScore": 0.8552631578947368,
+          "margin": 0.35106147722246794,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 74.0234375,
+          "y": 80.90277777777779,
+          "box": [
+            926,
+            565,
+            970,
+            601
+          ],
+          "shapeScore": 0.7651515151515151,
+          "margin": 0.25184353036064067,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 23.28125,
+          "y": 94.23611111111111,
+          "box": [
+            276,
+            661,
+            321,
+            697
+          ],
+          "shapeScore": 0.8150134048257373,
+          "margin": 0.34069833633258656,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-4",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 78.3984375,
+          "y": 5.416666666666667,
+          "box": [
+            991,
+            29,
+            1017,
+            50
+          ],
+          "shapeScore": 0.7622259696458684,
+          "margin": 0.14267709746541724,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 7.382812499999999,
+          "y": 54.861111111111114,
+          "box": [
+            82,
+            385,
+            108,
+            406
+          ],
+          "shapeScore": 0.9113924050632911,
+          "margin": 0.35443037974683544,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 17.6953125,
+          "y": 57.56944444444444,
+          "box": [
+            214,
+            405,
+            240,
+            425
+          ],
+          "shapeScore": 0.757847533632287,
+          "margin": 0.16566876268256625,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 77.1875,
+          "y": 70.83333333333334,
+          "box": [
+            975,
+            500,
+            1002,
+            521
+          ],
+          "shapeScore": 0.771900826446281,
+          "margin": 0.1136516681971228,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 73.8671875,
+          "y": 76.18055555555556,
+          "box": [
+            933,
+            539,
+            959,
+            559
+          ],
+          "shapeScore": 0.810126582278481,
+          "margin": 0.13179324894514766,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-5",
+      "proposals": []
+    },
+    {
+      "figureId": "fig-cabin-6-6",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 73.3984375,
+          "y": 5.763888888888889,
+          "box": [
+            924,
+            26,
+            956,
+            58
+          ],
+          "shapeScore": 0.8015075376884422,
+          "margin": 0.2224634200413833,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 65.1171875,
+          "y": 7.569444444444444,
+          "box": [
+            818,
+            39,
+            850,
+            71
+          ],
+          "shapeScore": 0.7825159914712153,
+          "margin": 0.21729860016686753,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 59.9609375,
+          "y": 11.041666666666666,
+          "box": [
+            752,
+            64,
+            784,
+            96
+          ],
+          "shapeScore": 0.8158508158508159,
+          "margin": 0.3318764568764569,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 45.4296875,
+          "y": 16.944444444444446,
+          "box": [
+            566,
+            107,
+            598,
+            138
+          ],
+          "shapeScore": 0.8064516129032258,
+          "margin": 0.2075922973138722,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 40.1953125,
+          "y": 18.958333333333332,
+          "box": [
+            499,
+            121,
+            531,
+            153
+          ],
+          "shapeScore": 0.8156312625250501,
+          "margin": 0.11205983395362151,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 34.5703125,
+          "y": 20.555555555555554,
+          "box": [
+            427,
+            133,
+            459,
+            164
+          ],
+          "shapeScore": 0.7160804020100503,
+          "margin": 0.11438548675581306,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 15.78125,
+          "y": 30.416666666666664,
+          "box": [
+            186,
+            204,
+            219,
+            235
+          ],
+          "shapeScore": 0.9337121212121212,
+          "margin": 0.3327804441934876,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 40.8984375,
+          "y": 60,
+          "box": [
+            508,
+            417,
+            540,
+            448
+          ],
+          "shapeScore": 0.7628083491461101,
+          "margin": 0.07022884384575667,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 53.8671875,
+          "y": 66.94444444444444,
+          "box": [
+            674,
+            467,
+            706,
+            498
+          ],
+          "shapeScore": 0.7915194346289752,
+          "margin": 0.14005363658337266,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 49.4140625,
+          "y": 92.91666666666667,
+          "box": [
+            617,
+            654,
+            649,
+            685
+          ],
+          "shapeScore": 0.8584686774941995,
+          "margin": 0.2934686774941996,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-7",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 30,
+          "y": 6.458333333333334,
+          "box": [
+            369,
+            33,
+            400,
+            61
+          ],
+          "shapeScore": 0.7351190476190477,
+          "margin": 0.2565782750868588,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 50.4296875,
+          "y": 8.541666666666666,
+          "box": [
+            630,
+            48,
+            662,
+            76
+          ],
+          "shapeScore": 0.7588495575221239,
+          "margin": 0.21092912352574056,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 70.5859375,
+          "y": 13.472222222222221,
+          "box": [
+            888,
+            83,
+            920,
+            112
+          ],
+          "shapeScore": 0.6311300639658849,
+          "margin": 0.1173089257545028,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 2.6953125,
+          "y": 17.98611111111111,
+          "box": [
+            19,
+            116,
+            51,
+            144
+          ],
+          "shapeScore": 0.7488888888888889,
+          "margin": 0.10698412698412707,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 93.2421875,
+          "y": 22.708333333333332,
+          "box": [
+            1178,
+            150,
+            1210,
+            178
+          ],
+          "shapeScore": 0.774468085106383,
+          "margin": 0.2114909858697418,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 2.9296875,
+          "y": 24.65277777777778,
+          "box": [
+            22,
+            164,
+            54,
+            192
+          ],
+          "shapeScore": 0.8038834951456311,
+          "margin": 0.14388349514563104,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 4.8828125,
+          "y": 61.59722222222223,
+          "box": [
+            47,
+            430,
+            79,
+            458
+          ],
+          "shapeScore": 0.80440097799511,
+          "margin": 0.3631258102098751,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 9.5703125,
+          "y": 70.76388888888889,
+          "box": [
+            107,
+            496,
+            139,
+            524
+          ],
+          "shapeScore": 0.8764044943820225,
+          "margin": 0.34967320261437906,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 28.7109375,
+          "y": 73.125,
+          "box": [
+            352,
+            513,
+            384,
+            541
+          ],
+          "shapeScore": 0.783625730994152,
+          "margin": 0.1702135021973078,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 97.96875,
+          "y": 80.34722222222223,
+          "box": [
+            1239,
+            565,
+            1270,
+            593
+          ],
+          "shapeScore": 0.7682242990654206,
+          "margin": 0.09214143654188012,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-8",
+      "proposals": [
+        {
+          "number": 6,
+          "x": 38.046875,
+          "y": 5.555555555555555,
+          "box": [
+            471,
+            26,
+            504,
+            55
+          ],
+          "shapeScore": 0.7843137254901961,
+          "margin": 0.11524897728875727,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 40.703125,
+          "y": 13.750000000000002,
+          "box": [
+            505,
+            85,
+            538,
+            114
+          ],
+          "shapeScore": 0.782608695652174,
+          "margin": 0.17208237986270025,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 47.2265625,
+          "y": 14.305555555555555,
+          "box": [
+            589,
+            89,
+            621,
+            118
+          ],
+          "shapeScore": 0.771875,
+          "margin": 0.29062499999999997,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 62.34375,
+          "y": 16.944444444444446,
+          "box": [
+            782,
+            108,
+            815,
+            137
+          ],
+          "shapeScore": 0.7864077669902912,
+          "margin": 0.10696525827948988,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 6.8359375,
+          "y": 41.52777777777778,
+          "box": [
+            72,
+            285,
+            104,
+            314
+          ],
+          "shapeScore": 0.7177777777777777,
+          "margin": 0.21290448343079915,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 32.421875,
+          "y": 50.138888888888886,
+          "box": [
+            399,
+            347,
+            432,
+            376
+          ],
+          "shapeScore": 0.7867132867132867,
+          "margin": 0.12221817270677204,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 19.921875,
+          "y": 61.94444444444444,
+          "box": [
+            239,
+            432,
+            272,
+            461
+          ],
+          "shapeScore": 0.8192488262910798,
+          "margin": 0.33072423612714535,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 36.4453125,
+          "y": 85,
+          "box": [
+            451,
+            598,
+            483,
+            627
+          ],
+          "shapeScore": 0.8153153153153153,
+          "margin": 0.2988919576510818,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 44.296875,
+          "y": 95.41666666666667,
+          "box": [
+            551,
+            673,
+            584,
+            702
+          ],
+          "shapeScore": 0.851063829787234,
+          "margin": 0.2710638297872341,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cabin-6-9",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 74.4921875,
+          "y": 8.680555555555555,
+          "box": [
+            936,
+            46,
+            972,
+            80
+          ],
+          "shapeScore": 0.76,
+          "margin": 0.14267148014440434,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 82.8125,
+          "y": 15.625,
+          "box": [
+            1042,
+            96,
+            1079,
+            130
+          ],
+          "shapeScore": 0.8808411214953271,
+          "margin": 0.18887683578104142,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 42.421875,
+          "y": 18.333333333333332,
+          "box": [
+            525,
+            115,
+            562,
+            150
+          ],
+          "shapeScore": 0.788659793814433,
+          "margin": 0.22185817438123456,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 15.6640625,
+          "y": 20.97222222222222,
+          "box": [
+            183,
+            134,
+            219,
+            169
+          ],
+          "shapeScore": 0.7285714285714285,
+          "margin": 0.23800539083557948,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 66.6796875,
+          "y": 27.152777777777775,
+          "box": [
+            836,
+            179,
+            872,
+            213
+          ],
+          "shapeScore": 0.7879377431906615,
+          "margin": 0.12417467698857088,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 60.1171875,
+          "y": 40.486111111111114,
+          "box": [
+            752,
+            275,
+            788,
+            309
+          ],
+          "shapeScore": 0.8044554455445545,
+          "margin": 0.3637774794428596,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 16.0546875,
+          "y": 67.77777777777779,
+          "box": [
+            188,
+            471,
+            224,
+            506
+          ],
+          "shapeScore": 0.7551020408163265,
+          "margin": 0.26503581565076356,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 21.09375,
+          "y": 70.55555555555556,
+          "box": [
+            252,
+            491,
+            289,
+            526
+          ],
+          "shapeScore": 0.9302325581395349,
+          "margin": 0.45801033591731266,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 26.484375,
+          "y": 72.36111111111111,
+          "box": [
+            321,
+            504,
+            358,
+            539
+          ],
+          "shapeScore": 0.7564469914040115,
+          "margin": 0.24006934207838526,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 61.1328125,
+          "y": 2.1527777777777777,
+          "box": [
+            772,
+            3,
+            794,
+            29
+          ],
+          "shapeScore": 0.7796901893287436,
+          "margin": 0.12800479607031656,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 13.671875,
+          "y": 68.75,
+          "box": [
+            164,
+            483,
+            187,
+            508
+          ],
+          "shapeScore": 0.8875,
+          "margin": 0.2900974025974026,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "proposals": []
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 21.328125,
+          "y": 10.277777777777777,
+          "box": [
+            257,
+            58,
+            290,
+            91
+          ],
+          "shapeScore": 0.7468671679197995,
+          "margin": 0.2539665594005297,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 12.5,
+          "y": 12.777777777777777,
+          "box": [
+            144,
+            76,
+            177,
+            109
+          ],
+          "shapeScore": 0.7794871794871795,
+          "margin": 0.3054612054612055,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-electric-11-1",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 75.9375,
+          "y": 4.097222222222222,
+          "box": [
+            950,
+            13,
+            995,
+            47
+          ],
+          "shapeScore": 0.8695652173913043,
+          "margin": 0.31546073977936406,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 46.8359375,
+          "y": 8.055555555555555,
+          "box": [
+            578,
+            41,
+            622,
+            76
+          ],
+          "shapeScore": 0.8125,
+          "margin": 0.33662645590682194,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 44.2578125,
+          "y": 17.083333333333332,
+          "box": [
+            545,
+            106,
+            589,
+            141
+          ],
+          "shapeScore": 0.8575197889182058,
+          "margin": 0.28044469010397655,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 41.9140625,
+          "y": 25.833333333333336,
+          "box": [
+            515,
+            169,
+            559,
+            204
+          ],
+          "shapeScore": 0.7736318407960199,
+          "margin": 0.3565464136603415,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 78.6328125,
+          "y": 42.01388888888889,
+          "box": [
+            985,
+            286,
+            1029,
+            320
+          ],
+          "shapeScore": 0.7865384615384615,
+          "margin": 0.13533252461823886,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 24.4921875,
+          "y": 50.90277777777777,
+          "box": [
+            292,
+            350,
+            336,
+            384
+          ],
+          "shapeScore": 0.7579462102689487,
+          "margin": 0.21421997452750385,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 25,
+          "y": 60.97222222222223,
+          "box": [
+            298,
+            422,
+            343,
+            457
+          ],
+          "shapeScore": 0.828125,
+          "margin": 0.15303474729241873,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 78.828125,
+          "y": 76.52777777777777,
+          "box": [
+            987,
+            534,
+            1032,
+            569
+          ],
+          "shapeScore": 0.8099762470308789,
+          "margin": 0.1691820232041641,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 27.382812499999996,
+          "y": 88.54166666666666,
+          "box": [
+            329,
+            621,
+            373,
+            655
+          ],
+          "shapeScore": 0.6983606557377049,
+          "margin": 0.19619615357320275,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-electric-11-2",
+      "proposals": [
+        {
+          "number": 6,
+          "x": 61.79687499999999,
+          "y": 29.166666666666668,
+          "box": [
+            775,
+            192,
+            808,
+            229
+          ],
+          "shapeScore": 0.704,
+          "margin": 0.10508892921960067,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 78.6328125,
+          "y": 29.444444444444446,
+          "box": [
+            991,
+            194,
+            1023,
+            231
+          ],
+          "shapeScore": 0.7020648967551623,
+          "margin": 0.23953813015987319,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 33.9453125,
+          "y": 30.416666666666664,
+          "box": [
+            419,
+            201,
+            451,
+            238
+          ],
+          "shapeScore": 0.8513189448441247,
+          "margin": 0.3792794711599142,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 48.6328125,
+          "y": 30.416666666666664,
+          "box": [
+            607,
+            201,
+            639,
+            238
+          ],
+          "shapeScore": 0.7649769585253456,
+          "margin": 0.20211428927969766,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 24.5703125,
+          "y": 31.52777777777778,
+          "box": [
+            299,
+            209,
+            331,
+            246
+          ],
+          "shapeScore": 0.7325301204819277,
+          "margin": 0.2434790255914167,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 11.09375,
+          "y": 32.22222222222222,
+          "box": [
+            126,
+            214,
+            159,
+            251
+          ],
+          "shapeScore": 0.875,
+          "margin": 0.3994755244755245,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 18.3203125,
+          "y": 32.22222222222222,
+          "box": [
+            219,
+            214,
+            251,
+            251
+          ],
+          "shapeScore": 0.7782805429864253,
+          "margin": 0.27828054298642535,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-electric-11-3",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 38.984375,
+          "y": 6.666666666666667,
+          "box": [
+            483,
+            34,
+            516,
+            63
+          ],
+          "shapeScore": 0.7396313364055299,
+          "margin": 0.29337726474429215,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 27.4609375,
+          "y": 11.180555555555555,
+          "box": [
+            335,
+            66,
+            369,
+            96
+          ],
+          "shapeScore": 0.7002398081534772,
+          "margin": 0.19416693365955007,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 79.8046875,
+          "y": 14.23611111111111,
+          "box": [
+            1005,
+            88,
+            1039,
+            118
+          ],
+          "shapeScore": 0.6935817805383023,
+          "margin": 0.12461626329692299,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 14.0625,
+          "y": 18.26388888888889,
+          "box": [
+            164,
+            117,
+            197,
+            147
+          ],
+          "shapeScore": 0.8154897494305239,
+          "margin": 0.30695084999978384,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 86.09375,
+          "y": 26.180555555555557,
+          "box": [
+            1086,
+            174,
+            1119,
+            204
+          ],
+          "shapeScore": 0.8035320088300221,
+          "margin": 0.13427130844091706,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 3.1640625,
+          "y": 28.888888888888886,
+          "box": [
+            24,
+            194,
+            58,
+            223
+          ],
+          "shapeScore": 0.6557788944723618,
+          "margin": 0.2440141885900089,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 48.59375,
+          "y": 50.69444444444444,
+          "box": [
+            606,
+            351,
+            639,
+            380
+          ],
+          "shapeScore": 0.7694524495677233,
+          "margin": 0.2631762989401082,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 42.5390625,
+          "y": 53.888888888888886,
+          "box": [
+            528,
+            374,
+            562,
+            403
+          ],
+          "shapeScore": 0.7937743190661478,
+          "margin": 0.11599654128837,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 34.2578125,
+          "y": 58.40277777777778,
+          "box": [
+            422,
+            406,
+            456,
+            436
+          ],
+          "shapeScore": 0.7398843930635838,
+          "margin": 0.09715548821618702,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-electric-11-4",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 17.5,
+          "y": 6.527777777777779,
+          "box": [
+            208,
+            30,
+            241,
+            65
+          ],
+          "shapeScore": 0.6915254237288135,
+          "margin": 0.2288061254831995,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 82.0703125,
+          "y": 15,
+          "box": [
+            1034,
+            91,
+            1068,
+            126
+          ],
+          "shapeScore": 0.8432203389830508,
+          "margin": 0.1963801902841661,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 12.9296875,
+          "y": 20.694444444444443,
+          "box": [
+            149,
+            132,
+            183,
+            167
+          ],
+          "shapeScore": 0.8794642857142857,
+          "margin": 0.3465695488721804,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 3.1640625,
+          "y": 41.388888888888886,
+          "box": [
+            24,
+            281,
+            58,
+            316
+          ],
+          "shapeScore": 0.7348837209302326,
+          "margin": 0.0994255535995553,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 80.9765625,
+          "y": 63.33333333333333,
+          "box": [
+            1020,
+            439,
+            1054,
+            474
+          ],
+          "shapeScore": 0.8815489749430524,
+          "margin": 0.22121142220043633,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 97.9296875,
+          "y": 66.52777777777777,
+          "box": [
+            1237,
+            462,
+            1271,
+            497
+          ],
+          "shapeScore": 0.9173913043478261,
+          "margin": 0.348763853367434,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 86.2109375,
+          "y": 69.02777777777777,
+          "box": [
+            1087,
+            480,
+            1121,
+            515
+          ],
+          "shapeScore": 0.7338308457711443,
+          "margin": 0.21114482036279592,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 22.6953125,
+          "y": 89.16666666666667,
+          "box": [
+            274,
+            625,
+            308,
+            660
+          ],
+          "shapeScore": 0.7824175824175824,
+          "margin": 0.17130647130647125,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 75.8984375,
+          "y": 96.52777777777779,
+          "box": [
+            955,
+            678,
+            989,
+            713
+          ],
+          "shapeScore": 0.8230958230958231,
+          "margin": 0.3838279362405818,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 86.4453125,
+          "y": 96.80555555555556,
+          "box": [
+            1090,
+            680,
+            1124,
+            715
+          ],
+          "shapeScore": 0.8601583113456465,
+          "margin": 0.35253303901449173,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-electric-11-5",
+      "proposals": [
+        {
+          "number": 5,
+          "x": 28.4375,
+          "y": 4.444444444444445,
+          "box": [
+            351,
+            19,
+            378,
+            46
+          ],
+          "shapeScore": 0.78125,
+          "margin": 0.21531593406593408,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 12.4609375,
+          "y": 6.111111111111111,
+          "box": [
+            146,
+            31,
+            174,
+            58
+          ],
+          "shapeScore": 0.8859223300970874,
+          "margin": 0.3463274866348407,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 72.03125,
+          "y": 12.222222222222221,
+          "box": [
+            909,
+            75,
+            936,
+            102
+          ],
+          "shapeScore": 0.7257281553398058,
+          "margin": 0.17133484990047532,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 93.4375,
+          "y": 44.166666666666664,
+          "box": [
+            1183,
+            305,
+            1210,
+            332
+          ],
+          "shapeScore": 0.827027027027027,
+          "margin": 0.11516262024736601,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 3.4375000000000004,
+          "y": 47.986111111111114,
+          "box": [
+            31,
+            332,
+            58,
+            360
+          ],
+          "shapeScore": 0.7051282051282052,
+          "margin": 0.17717789456919897,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 98.3203125,
+          "y": 58.05555555555556,
+          "box": [
+            1245,
+            405,
+            1273,
+            432
+          ],
+          "shapeScore": 0.7976470588235294,
+          "margin": 0.33673500670626555,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 1.6015624999999998,
+          "y": 58.611111111111114,
+          "box": [
+            7,
+            409,
+            35,
+            436
+          ],
+          "shapeScore": 0.8116883116883117,
+          "margin": 0.2872583442616016,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 84.6484375,
+          "y": 84.72222222222221,
+          "box": [
+            1070,
+            597,
+            1098,
+            624
+          ],
+          "shapeScore": 0.7701149425287356,
+          "margin": 0.13122605363984674,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 91.0546875,
+          "y": 91.18055555555556,
+          "box": [
+            1152,
+            643,
+            1180,
+            671
+          ],
+          "shapeScore": 0.7523992322456814,
+          "margin": 0.10203691340510168,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-1",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 66.2890625,
+          "y": 25.555555555555554,
+          "box": [
+            834,
+            168,
+            864,
+            201
+          ],
+          "shapeScore": 0.8345070422535211,
+          "margin": 0.15656823387993013,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 59.9609375,
+          "y": 26.944444444444443,
+          "box": [
+            753,
+            178,
+            783,
+            211
+          ],
+          "shapeScore": 0.8212669683257918,
+          "margin": 0.2712669683257918,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 39.5703125,
+          "y": 36.25,
+          "box": [
+            492,
+            245,
+            522,
+            278
+          ],
+          "shapeScore": 0.8258823529411765,
+          "margin": 0.33404561824729895,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 33.1640625,
+          "y": 39.513888888888886,
+          "box": [
+            410,
+            269,
+            440,
+            301
+          ],
+          "shapeScore": 0.8755555555555555,
+          "margin": 0.15452551263710057,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 23.7109375,
+          "y": 43.333333333333336,
+          "box": [
+            289,
+            296,
+            319,
+            329
+          ],
+          "shapeScore": 0.7372262773722628,
+          "margin": 0.21279018714669884,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 14.921875000000002,
+          "y": 46.80555555555556,
+          "box": [
+            176,
+            321,
+            207,
+            354
+          ],
+          "shapeScore": 0.7442396313364056,
+          "margin": 0.2947282306849398,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 8.4375,
+          "y": 48.19444444444444,
+          "box": [
+            93,
+            331,
+            124,
+            364
+          ],
+          "shapeScore": 0.7703862660944206,
+          "margin": 0.07146153491162488,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 2.421875,
+          "y": 48.888888888888886,
+          "box": [
+            16,
+            336,
+            47,
+            369
+          ],
+          "shapeScore": 0.8478260869565217,
+          "margin": 0.29077910709074994,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 70.234375,
+          "y": 63.888888888888886,
+          "box": [
+            884,
+            444,
+            915,
+            477
+          ],
+          "shapeScore": 0.7486486486486487,
+          "margin": 0.24551712464029796,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-2",
+      "proposals": [
+        {
+          "number": 15,
+          "x": 27.65625,
+          "y": 77.77777777777779,
+          "box": [
+            346,
+            552,
+            363,
+            569
+          ],
+          "shapeScore": 0.71875,
+          "margin": 0.03125,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 40.7421875,
+          "y": 81.52777777777777,
+          "box": [
+            510,
+            575,
+            534,
+            600
+          ],
+          "shapeScore": 0.7975609756097561,
+          "margin": 0.25629418098403633,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 36.796875,
+          "y": 92.63888888888889,
+          "box": [
+            459,
+            655,
+            484,
+            680
+          ],
+          "shapeScore": 0.6954545454545454,
+          "margin": 0.14050949050949046,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-3",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 22.1484375,
+          "y": 13.680555555555557,
+          "box": [
+            270,
+            85,
+            298,
+            113
+          ],
+          "shapeScore": 0.8599033816425121,
+          "margin": 0.2957524382462857,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 85.1171875,
+          "y": 24.09722222222222,
+          "box": [
+            1076,
+            160,
+            1104,
+            188
+          ],
+          "shapeScore": 0.8018867924528302,
+          "margin": 0.30501831646118094,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 76.1328125,
+          "y": 50.208333333333336,
+          "box": [
+            961,
+            348,
+            989,
+            376
+          ],
+          "shapeScore": 0.7644341801385681,
+          "margin": 0.22597264167702968,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 67.0703125,
+          "y": 79.375,
+          "box": [
+            845,
+            558,
+            873,
+            586
+          ],
+          "shapeScore": 0.7660044150110376,
+          "margin": 0.13335135378654772,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 46.5234375,
+          "y": 82.70833333333333,
+          "box": [
+            582,
+            582,
+            610,
+            610
+          ],
+          "shapeScore": 0.7398058252427184,
+          "margin": 0.08864303454504396,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 47.3828125,
+          "y": 92.63888888888889,
+          "box": [
+            593,
+            654,
+            621,
+            681
+          ],
+          "shapeScore": 0.863517060367454,
+          "margin": 0.4485727042466273,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 64.9609375,
+          "y": 93.88888888888889,
+          "box": [
+            818,
+            663,
+            846,
+            690
+          ],
+          "shapeScore": 0.6555819477434679,
+          "margin": 0.11425963369388115,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-4",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 52.430005282620186,
+          "y": 2.5871766029246346,
+          "box": [
+            972,
+            3,
+            1014,
+            44
+          ],
+          "shapeScore": 0.7680798004987531,
+          "margin": 0.2515749461298211,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 42.55150554675119,
+          "y": 2.7559055118110236,
+          "box": [
+            785,
+            4,
+            827,
+            46
+          ],
+          "shapeScore": 0.7430167597765364,
+          "margin": 0.26632184452229907,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 83.80876914949815,
+          "y": 13.385826771653544,
+          "box": [
+            1566,
+            99,
+            1608,
+            140
+          ],
+          "shapeScore": 0.7365269461077845,
+          "margin": 0.15897592569962116,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 59.11251980982567,
+          "y": 20.80989876265467,
+          "box": [
+            1099,
+            165,
+            1140,
+            206
+          ],
+          "shapeScore": 0.8359375,
+          "margin": 0.38390497967479675,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 6.418383518225039,
+          "y": 24.296962879640045,
+          "box": [
+            101,
+            196,
+            143,
+            237
+          ],
+          "shapeScore": 0.8623326959847036,
+          "margin": 0.31028222279858375,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 14.39513998943476,
+          "y": 26.152980877390323,
+          "box": [
+            252,
+            212,
+            294,
+            254
+          ],
+          "shapeScore": 0.8087557603686636,
+          "margin": 0.31532236449624335,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 84.6539883782356,
+          "y": 32.227221597300336,
+          "box": [
+            1582,
+            266,
+            1624,
+            308
+          ],
+          "shapeScore": 0.754880694143167,
+          "margin": 0.09005564810265143,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 33.254094030639195,
+          "y": 54.21822272215972,
+          "box": [
+            609,
+            462,
+            651,
+            503
+          ],
+          "shapeScore": 0.7702702702702703,
+          "margin": 0.24443591056494274,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 46.35499207606973,
+          "y": 68.8413948256468,
+          "box": [
+            857,
+            592,
+            899,
+            633
+          ],
+          "shapeScore": 0.8003992015968064,
+          "margin": 0.11598855520897378,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 47.91336502905441,
+          "y": 85.77052868391452,
+          "box": [
+            887,
+            742,
+            928,
+            784
+          ],
+          "shapeScore": 0.7591093117408907,
+          "margin": 0.12111648019967203,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-5",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 16.2109375,
+          "y": 3.888888888888889,
+          "box": [
+            192,
+            12,
+            224,
+            45
+          ],
+          "shapeScore": 0.8851674641148325,
+          "margin": 0.3281821699971854,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 58.32031250000001,
+          "y": 4.652777777777778,
+          "box": [
+            731,
+            18,
+            763,
+            50
+          ],
+          "shapeScore": 0.7644710578842315,
+          "margin": 0.09959650591290536,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 44.84375,
+          "y": 4.930555555555555,
+          "box": [
+            558,
+            20,
+            591,
+            52
+          ],
+          "shapeScore": 0.8112449799196787,
+          "margin": 0.13606249816785387,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 83.90625,
+          "y": 5.069444444444445,
+          "box": [
+            1058,
+            21,
+            1091,
+            53
+          ],
+          "shapeScore": 0.6623376623376623,
+          "margin": 0.18276776986454407,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 16.2109375,
+          "y": 11.666666666666666,
+          "box": [
+            192,
+            68,
+            224,
+            101
+          ],
+          "shapeScore": 0.8560411311053985,
+          "margin": 0.36243966858254656,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 16.5625,
+          "y": 20.27777777777778,
+          "box": [
+            196,
+            130,
+            229,
+            163
+          ],
+          "shapeScore": 0.7425287356321839,
+          "margin": 0.13538587848932682,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 17.96875,
+          "y": 34.65277777777778,
+          "box": [
+            214,
+            234,
+            247,
+            266
+          ],
+          "shapeScore": 0.7602739726027398,
+          "margin": 0.2879612690196779,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 49.0625,
+          "y": 44.72222222222222,
+          "box": [
+            612,
+            306,
+            645,
+            339
+          ],
+          "shapeScore": 0.791907514450867,
+          "margin": 0.10309632563967819,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 19.1015625,
+          "y": 57.49999999999999,
+          "box": [
+            229,
+            398,
+            261,
+            431
+          ],
+          "shapeScore": 0.7592137592137592,
+          "margin": 0.1791721791721792,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-engine-8-6",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 71.9921875,
+          "y": 6.944444444444445,
+          "box": [
+            907,
+            34,
+            937,
+            67
+          ],
+          "shapeScore": 0.8245614035087719,
+          "margin": 0.41180972565642293,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 20.9765625,
+          "y": 7.569444444444444,
+          "box": [
+            254,
+            38,
+            284,
+            72
+          ],
+          "shapeScore": 0.8961038961038961,
+          "margin": 0.3970823696851094,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 4.140625,
+          "y": 12.36111111111111,
+          "box": [
+            39,
+            73,
+            68,
+            106
+          ],
+          "shapeScore": 0.8876404494382022,
+          "margin": 0.3699099529843015,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 31.4453125,
+          "y": 13.61111111111111,
+          "box": [
+            388,
+            82,
+            418,
+            115
+          ],
+          "shapeScore": 0.7615571776155717,
+          "margin": 0.1758998070976434,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 89.453125,
+          "y": 22.22222222222222,
+          "box": [
+            1131,
+            144,
+            1160,
+            177
+          ],
+          "shapeScore": 0.7545045045045045,
+          "margin": 0.20126859636254202,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 68.59375,
+          "y": 58.54166666666667,
+          "box": [
+            864,
+            405,
+            893,
+            439
+          ],
+          "shapeScore": 0.7988394584139265,
+          "margin": 0.1370212765957446,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 45.7421875,
+          "y": 67.36111111111111,
+          "box": [
+            571,
+            469,
+            601,
+            502
+          ],
+          "shapeScore": 0.78515625,
+          "margin": 0.1015198863636364,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 75.4296875,
+          "y": 75.41666666666667,
+          "box": [
+            951,
+            527,
+            981,
+            560
+          ],
+          "shapeScore": 0.7203947368421053,
+          "margin": 0.2268049932523617,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 95.1953125,
+          "y": 94.72222222222221,
+          "box": [
+            1204,
+            666,
+            1234,
+            699
+          ],
+          "shapeScore": 0.775,
+          "margin": 0.12783687943262412,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-filters-1-1",
+      "proposals": [
+        {
+          "number": 3,
+          "x": 58.47656249999999,
+          "y": 3.4027777777777777,
+          "box": [
+            732,
+            6,
+            766,
+            44
+          ],
+          "shapeScore": 0.6955017301038062,
+          "margin": 0.05459263919471535,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 33.515625,
+          "y": 4.930555555555555,
+          "box": [
+            413,
+            17,
+            446,
+            55
+          ],
+          "shapeScore": 0.5831903945111492,
+          "margin": 0.04500211742411542,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 81.1328125,
+          "y": 6.041666666666667,
+          "box": [
+            1023,
+            25,
+            1055,
+            63
+          ],
+          "shapeScore": 0.7616279069767442,
+          "margin": 0.19775929383805813,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 32.4609375,
+          "y": 51.18055555555555,
+          "box": [
+            399,
+            350,
+            433,
+            388
+          ],
+          "shapeScore": 0.7092198581560284,
+          "margin": 0.04893277681631547,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 60.5078125,
+          "y": 55.208333333333336,
+          "box": [
+            758,
+            379,
+            792,
+            417
+          ],
+          "shapeScore": 0.7638603696098563,
+          "margin": 0.22948536960985622,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 82.6171875,
+          "y": 60.34722222222222,
+          "box": [
+            1041,
+            416,
+            1075,
+            454
+          ],
+          "shapeScore": 0.8292682926829268,
+          "margin": 0.12338593974175027,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 11.6796875,
+          "y": 18.680555555555557,
+          "box": [
+            133,
+            119,
+            167,
+            151
+          ],
+          "shapeScore": 0.7682291666666666,
+          "margin": 0.24903724747474743,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 13.6328125,
+          "y": 38.125,
+          "box": [
+            158,
+            259,
+            192,
+            291
+          ],
+          "shapeScore": 0.8131212723658051,
+          "margin": 0.12453995748691238,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 66.5234375,
+          "y": 46.458333333333336,
+          "box": [
+            835,
+            319,
+            869,
+            351
+          ],
+          "shapeScore": 0.7075664621676891,
+          "margin": 0.12500616532167796,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 14.179687499999998,
+          "y": 48.95833333333333,
+          "box": [
+            165,
+            337,
+            199,
+            369
+          ],
+          "shapeScore": 0.8169491525423729,
+          "margin": 0.10448908864460926,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 75.390625,
+          "y": 52.84722222222222,
+          "box": [
+            949,
+            365,
+            982,
+            397
+          ],
+          "shapeScore": 0.7780172413793104,
+          "margin": 0.2639985497905254,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 9.9609375,
+          "y": 60.48611111111111,
+          "box": [
+            111,
+            420,
+            145,
+            452
+          ],
+          "shapeScore": 0.8359375,
+          "margin": 0.08416445035460995,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 81.796875,
+          "y": 63.05555555555556,
+          "box": [
+            1031,
+            438,
+            1064,
+            471
+          ],
+          "shapeScore": 0.7703862660944206,
+          "margin": 0.27204739566252695,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 29.9609375,
+          "y": 75.69444444444444,
+          "box": [
+            367,
+            529,
+            401,
+            562
+          ],
+          "shapeScore": 0.7742616033755274,
+          "margin": 0.18253498467049145,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 64.53125,
+          "y": 89.79166666666667,
+          "box": [
+            810,
+            631,
+            843,
+            663
+          ],
+          "shapeScore": 0.8905109489051095,
+          "margin": 0.2935643840196134,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 11.6796875,
+          "y": 18.680555555555557,
+          "box": [
+            133,
+            119,
+            167,
+            151
+          ],
+          "shapeScore": 0.7682291666666666,
+          "margin": 0.24903724747474743,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 13.6328125,
+          "y": 38.125,
+          "box": [
+            158,
+            259,
+            192,
+            291
+          ],
+          "shapeScore": 0.8131212723658051,
+          "margin": 0.12453995748691238,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 66.5234375,
+          "y": 46.458333333333336,
+          "box": [
+            835,
+            319,
+            869,
+            351
+          ],
+          "shapeScore": 0.7075664621676891,
+          "margin": 0.12500616532167796,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 14.179687499999998,
+          "y": 48.95833333333333,
+          "box": [
+            165,
+            337,
+            199,
+            369
+          ],
+          "shapeScore": 0.8169491525423729,
+          "margin": 0.10448908864460926,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 75.390625,
+          "y": 52.84722222222222,
+          "box": [
+            949,
+            365,
+            982,
+            397
+          ],
+          "shapeScore": 0.7780172413793104,
+          "margin": 0.2639985497905254,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 9.9609375,
+          "y": 60.48611111111111,
+          "box": [
+            111,
+            420,
+            145,
+            452
+          ],
+          "shapeScore": 0.8359375,
+          "margin": 0.08416445035460995,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 81.796875,
+          "y": 63.05555555555556,
+          "box": [
+            1031,
+            438,
+            1064,
+            471
+          ],
+          "shapeScore": 0.7703862660944206,
+          "margin": 0.27204739566252695,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 29.9609375,
+          "y": 75.69444444444444,
+          "box": [
+            367,
+            529,
+            401,
+            562
+          ],
+          "shapeScore": 0.7742616033755274,
+          "margin": 0.18253498467049145,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 64.53125,
+          "y": 89.79166666666667,
+          "box": [
+            810,
+            631,
+            843,
+            663
+          ],
+          "shapeScore": 0.8905109489051095,
+          "margin": 0.2935643840196134,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-fuel-system-9-1",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 77.5390625,
+          "y": 4.930555555555555,
+          "box": [
+            981,
+            24,
+            1005,
+            48
+          ],
+          "shapeScore": 0.7905882352941176,
+          "margin": 0.2635863730967246,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 77.5,
+          "y": 11.875,
+          "box": [
+            980,
+            74,
+            1005,
+            98
+          ],
+          "shapeScore": 0.7716186252771619,
+          "margin": 0.2224535046834698,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 78.4375,
+          "y": 29.65277777777778,
+          "box": [
+            992,
+            202,
+            1017,
+            226
+          ],
+          "shapeScore": 0.8070953436807096,
+          "margin": 0.3252628002367917,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 34.1796875,
+          "y": 35.06944444444444,
+          "box": [
+            426,
+            241,
+            450,
+            265
+          ],
+          "shapeScore": 0.8773006134969326,
+          "margin": 0.17787864817901344,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 80.1953125,
+          "y": 38.19444444444444,
+          "box": [
+            1015,
+            263,
+            1039,
+            288
+          ],
+          "shapeScore": 0.7130124777183601,
+          "margin": 0.10952663893840364,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 32.5,
+          "y": 41.66666666666667,
+          "box": [
+            404,
+            288,
+            429,
+            313
+          ],
+          "shapeScore": 0.7795138888888888,
+          "margin": 0.15384543969102793,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 75.46875,
+          "y": 45.48611111111111,
+          "box": [
+            954,
+            316,
+            979,
+            340
+          ],
+          "shapeScore": 0.7763157894736842,
+          "margin": 0.20776003078995475,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 81.6796875,
+          "y": 47.013888888888886,
+          "box": [
+            1034,
+            327,
+            1058,
+            351
+          ],
+          "shapeScore": 0.6618181818181819,
+          "margin": 0.03218855218855221,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 46.640625,
+          "y": 52.15277777777778,
+          "box": [
+            585,
+            364,
+            610,
+            388
+          ],
+          "shapeScore": 0.7325581395348837,
+          "margin": 0.23575643377795408,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-1",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 52.42187499999999,
+          "y": 10.208333333333334,
+          "box": [
+            652,
+            57,
+            691,
+            91
+          ],
+          "shapeScore": 0.7799227799227799,
+          "margin": 0.12361565012387676,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 17.34375,
+          "y": 12.5,
+          "box": [
+            203,
+            74,
+            242,
+            107
+          ],
+          "shapeScore": 0.87248322147651,
+          "margin": 0.4889215776408936,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 84.9609375,
+          "y": 18.26388888888889,
+          "box": [
+            1069,
+            115,
+            1107,
+            149
+          ],
+          "shapeScore": 0.7596899224806202,
+          "margin": 0.17704529438144667,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 42.3046875,
+          "y": 50.48611111111111,
+          "box": [
+            523,
+            347,
+            561,
+            381
+          ],
+          "shapeScore": 0.7760617760617761,
+          "margin": 0.1333433294598343,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 17.0703125,
+          "y": 52.43055555555556,
+          "box": [
+            200,
+            361,
+            238,
+            395
+          ],
+          "shapeScore": 0.7517241379310344,
+          "margin": 0.287056043712619,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 90.5078125,
+          "y": 62.291666666666664,
+          "box": [
+            1140,
+            432,
+            1178,
+            466
+          ],
+          "shapeScore": 0.8559782608695652,
+          "margin": 0.38315217391304346,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 18.7890625,
+          "y": 64.23611111111111,
+          "box": [
+            222,
+            446,
+            260,
+            480
+          ],
+          "shapeScore": 0.7183770883054893,
+          "margin": 0.16218661211501306,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 16.484375,
+          "y": 80,
+          "box": [
+            192,
+            560,
+            231,
+            593
+          ],
+          "shapeScore": 0.826302729528536,
+          "margin": 0.3297273870627826,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 41.25,
+          "y": 95.34722222222223,
+          "box": [
+            509,
+            670,
+            548,
+            704
+          ],
+          "shapeScore": 0.7896749521988528,
+          "margin": 0.10785677038067099,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "proposals": [
+        {
+          "number": 7,
+          "x": 6.5234375,
+          "y": 2.5,
+          "box": [
+            68,
+            1,
+            100,
+            36
+          ],
+          "shapeScore": 0.6445182724252492,
+          "margin": 0.2032139245991622,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 18.9453125,
+          "y": 5.277777777777778,
+          "box": [
+            227,
+            21,
+            259,
+            56
+          ],
+          "shapeScore": 0.7566539923954373,
+          "margin": 0.10244838491880182,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 3.9453125,
+          "y": 20.13888888888889,
+          "box": [
+            35,
+            128,
+            67,
+            163
+          ],
+          "shapeScore": 0.8288888888888889,
+          "margin": 0.1487183131959251,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 52.85156250000001,
+          "y": 46.38888888888889,
+          "box": [
+            661,
+            317,
+            693,
+            352
+          ],
+          "shapeScore": 0.8045454545454546,
+          "margin": 0.21279287722586693,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 11,
+          "x": 48.0078125,
+          "y": 46.666666666666664,
+          "box": [
+            599,
+            319,
+            631,
+            354
+          ],
+          "shapeScore": 0.8362282878411911,
+          "margin": 0.3630739254250837,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 2.6171875,
+          "y": 67.91666666666667,
+          "box": [
+            18,
+            472,
+            50,
+            507
+          ],
+          "shapeScore": 0.8895705521472392,
+          "margin": 0.45901499659168365,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 12.4609375,
+          "y": 70,
+          "box": [
+            144,
+            487,
+            176,
+            522
+          ],
+          "shapeScore": 0.9069148936170213,
+          "margin": 0.41451945635466386,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 16.6796875,
+          "y": 71.66666666666667,
+          "box": [
+            198,
+            499,
+            230,
+            534
+          ],
+          "shapeScore": 0.6888888888888889,
+          "margin": 0.13674164962508517,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 23.8671875,
+          "y": 75.41666666666667,
+          "box": [
+            290,
+            526,
+            322,
+            561
+          ],
+          "shapeScore": 0.8171091445427728,
+          "margin": 0.4285173441862666,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 88.59375,
+          "y": 94.58333333333333,
+          "box": [
+            1118,
+            664,
+            1151,
+            699
+          ],
+          "shapeScore": 0.8058455114822547,
+          "margin": 0.12450748331324057,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "proposals": [
+        {
+          "number": 8,
+          "x": 14.2578125,
+          "y": 5.069444444444445,
+          "box": [
+            165,
+            22,
+            201,
+            52
+          ],
+          "shapeScore": 0.8108651911468813,
+          "margin": 0.14921105580853544,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 85.703125,
+          "y": 6.180555555555555,
+          "box": [
+            1079,
+            30,
+            1116,
+            60
+          ],
+          "shapeScore": 0.7556818181818182,
+          "margin": 0.3130930916682483,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 40.3515625,
+          "y": 10.069444444444445,
+          "box": [
+            499,
+            58,
+            535,
+            88
+          ],
+          "shapeScore": 0.8244111349036403,
+          "margin": 0.1276026242653424,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 55.8984375,
+          "y": 18.40277777777778,
+          "box": [
+            698,
+            118,
+            734,
+            148
+          ],
+          "shapeScore": 0.8921568627450981,
+          "margin": 0.34754719731758876,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 3.3984374999999996,
+          "y": 22.01388888888889,
+          "box": [
+            26,
+            144,
+            62,
+            174
+          ],
+          "shapeScore": 0.8402366863905325,
+          "margin": 0.4295224006762468,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 97.890625,
+          "y": 38.54166666666667,
+          "box": [
+            1235,
+            263,
+            1272,
+            293
+          ],
+          "shapeScore": 0.7720739219712526,
+          "margin": 0.17277690966896786,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 93.75,
+          "y": 55.34722222222223,
+          "box": [
+            1182,
+            384,
+            1219,
+            414
+          ],
+          "shapeScore": 0.7939914163090128,
+          "margin": 0.0966229952563813,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 84.8828125,
+          "y": 72.08333333333333,
+          "box": [
+            1069,
+            504,
+            1105,
+            535
+          ],
+          "shapeScore": 0.855036855036855,
+          "margin": 0.3480786045398371,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 83.359375,
+          "y": 83.95833333333333,
+          "box": [
+            1049,
+            590,
+            1086,
+            620
+          ],
+          "shapeScore": 0.7427884615384616,
+          "margin": 0.23035065059318793,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-4",
+      "proposals": [
+        {
+          "number": 2,
+          "x": 12.109375,
+          "y": 39.65277777777778,
+          "box": [
+            135,
+            268,
+            176,
+            304
+          ],
+          "shapeScore": 0.8408488063660478,
+          "margin": 0.36286138498239995,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 8.90625,
+          "y": 58.68055555555556,
+          "box": [
+            94,
+            405,
+            135,
+            441
+          ],
+          "shapeScore": 0.8695652173913043,
+          "margin": 0.29786710418375717,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 7.187499999999999,
+          "y": 80.69444444444444,
+          "box": [
+            72,
+            564,
+            113,
+            599
+          ],
+          "shapeScore": 0.7613636363636364,
+          "margin": 0.2551907968574635,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-inflation-10-1",
+      "proposals": [
+        {
+          "number": 4,
+          "x": 67.34375,
+          "y": 4.305555555555555,
+          "box": [
+            848,
+            17,
+            877,
+            46
+          ],
+          "shapeScore": 0.830423940149626,
+          "margin": 0.3918857341695595,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 37.96875,
+          "y": 9.722222222222223,
+          "box": [
+            472,
+            56,
+            501,
+            85
+          ],
+          "shapeScore": 0.7746781115879828,
+          "margin": 0.2195179692392284,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 81.015625,
+          "y": 11.11111111111111,
+          "box": [
+            1023,
+            66,
+            1052,
+            95
+          ],
+          "shapeScore": 0.8236559139784946,
+          "margin": 0.24933158965417024,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 68.28125,
+          "y": 13.472222222222221,
+          "box": [
+            860,
+            83,
+            889,
+            112
+          ],
+          "shapeScore": 0.7653061224489796,
+          "margin": 0.2680787657022143,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 29.843750000000004,
+          "y": 17.77777777777778,
+          "box": [
+            368,
+            114,
+            397,
+            143
+          ],
+          "shapeScore": 0.7720306513409961,
+          "margin": 0.13960689532173454,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 51.48437500000001,
+          "y": 25.34722222222222,
+          "box": [
+            645,
+            169,
+            674,
+            197
+          ],
+          "shapeScore": 0.8101503759398496,
+          "margin": 0.11630979622970472,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 26.09375,
+          "y": 29.72222222222222,
+          "box": [
+            320,
+            200,
+            349,
+            229
+          ],
+          "shapeScore": 0.7504690431519699,
+          "margin": 0.11301199847843046,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 52.1875,
+          "y": 33.81944444444444,
+          "box": [
+            654,
+            230,
+            683,
+            258
+          ],
+          "shapeScore": 0.7588235294117647,
+          "margin": 0.3097590803473156,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 52.6953125,
+          "y": 49.02777777777778,
+          "box": [
+            661,
+            339,
+            689,
+            368
+          ],
+          "shapeScore": 0.7119815668202765,
+          "margin": 0.12474752426708502,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-inflation-10-2",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 26.718750000000004,
+          "y": 3.4722222222222223,
+          "box": [
+            320,
+            6,
+            365,
+            45
+          ],
+          "shapeScore": 0.8053333333333333,
+          "margin": 0.32427272727272727,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 14.0625,
+          "y": 3.6111111111111107,
+          "box": [
+            158,
+            7,
+            203,
+            46
+          ],
+          "shapeScore": 0.6773255813953488,
+          "margin": 0.21479881480005975,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 38.6328125,
+          "y": 6.041666666666667,
+          "box": [
+            472,
+            24,
+            518,
+            64
+          ],
+          "shapeScore": 0.8081841432225064,
+          "margin": 0.33252871251089594,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 55.46875,
+          "y": 7.152777777777778,
+          "box": [
+            688,
+            32,
+            733,
+            72
+          ],
+          "shapeScore": 0.7912087912087912,
+          "margin": 0.11606202017160916,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 8,
+          "x": 73.515625,
+          "y": 22.98611111111111,
+          "box": [
+            919,
+            146,
+            964,
+            186
+          ],
+          "shapeScore": 0.7888198757763976,
+          "margin": 0.11262939958592133,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 59.765625,
+          "y": 27.500000000000004,
+          "box": [
+            743,
+            179,
+            788,
+            218
+          ],
+          "shapeScore": 0.7978436657681941,
+          "margin": 0.2692395467750591,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 9,
+          "x": 2.5390625,
+          "y": 44.23611111111111,
+          "box": [
+            10,
+            299,
+            56,
+            339
+          ],
+          "shapeScore": 0.7558139534883721,
+          "margin": 0.12274943735933985,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 76.2890625,
+          "y": 44.375,
+          "box": [
+            954,
+            300,
+            1000,
+            340
+          ],
+          "shapeScore": 0.8366834170854272,
+          "margin": 0.39969487371390505,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 97.3828125,
+          "y": 51.52777777777777,
+          "box": [
+            1224,
+            352,
+            1270,
+            391
+          ],
+          "shapeScore": 0.7885572139303483,
+          "margin": 0.21423288960602394,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "proposals": [
+        {
+          "number": 5,
+          "x": 84.6875,
+          "y": 5.902777777777778,
+          "box": [
+            1065,
+            19,
+            1104,
+            67
+          ],
+          "shapeScore": 0.8181818181818182,
+          "margin": 0.2561209282520759,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 35.3125,
+          "y": 27.013888888888886,
+          "box": [
+            433,
+            171,
+            472,
+            219
+          ],
+          "shapeScore": 0.7346938775510204,
+          "margin": 0.36075140716184956,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 24.53125,
+          "y": 31.38888888888889,
+          "box": [
+            295,
+            203,
+            334,
+            250
+          ],
+          "shapeScore": 0.8425414364640884,
+          "margin": 0.3828464473573346,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 15.312500000000002,
+          "y": 35.208333333333336,
+          "box": [
+            177,
+            230,
+            216,
+            278
+          ],
+          "shapeScore": 0.847887323943662,
+          "margin": 0.2973496895350598,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 7.968749999999999,
+          "y": 43.26388888888889,
+          "box": [
+            83,
+            288,
+            122,
+            336
+          ],
+          "shapeScore": 0.8314606741573034,
+          "margin": 0.14973179400013248,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 2.03125,
+          "y": 45.34722222222222,
+          "box": [
+            7,
+            303,
+            46,
+            351
+          ],
+          "shapeScore": 0.6666666666666666,
+          "margin": 0.19068413391557493,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 1,
+          "x": 67.265625,
+          "y": 93.40277777777779,
+          "box": [
+            842,
+            649,
+            881,
+            697
+          ],
+          "shapeScore": 0.8883495145631068,
+          "margin": 0.3497465733866363,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "proposals": [
+        {
+          "number": 1,
+          "x": 58.47656249999999,
+          "y": 12.708333333333332,
+          "box": [
+            735,
+            79,
+            763,
+            105
+          ],
+          "shapeScore": 0.8294930875576036,
+          "margin": 0.2556923495502236,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 3,
+          "x": 54.6875,
+          "y": 25.34722222222222,
+          "box": [
+            687,
+            170,
+            714,
+            196
+          ],
+          "shapeScore": 0.64375,
+          "margin": 0.14833715596330277,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 4,
+          "x": 44.453125,
+          "y": 26.319444444444446,
+          "box": [
+            556,
+            177,
+            583,
+            203
+          ],
+          "shapeScore": 0.8255813953488372,
+          "margin": 0.33375132998936013,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 2,
+          "x": 31.796875000000004,
+          "y": 29.583333333333332,
+          "box": [
+            394,
+            200,
+            421,
+            227
+          ],
+          "shapeScore": 0.824468085106383,
+          "margin": 0.3225450081833061,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 5,
+          "x": 18.046875,
+          "y": 31.25,
+          "box": [
+            218,
+            212,
+            245,
+            239
+          ],
+          "shapeScore": 0.80625,
+          "margin": 0.21016459074733096,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 6,
+          "x": 12.2265625,
+          "y": 32.56944444444444,
+          "box": [
+            143,
+            222,
+            171,
+            248
+          ],
+          "shapeScore": 0.7805825242718447,
+          "margin": 0.0766114051382707,
+          "status": "proposed-needs-human-review"
+        },
+        {
+          "number": 7,
+          "x": 6.015625,
+          "y": 33.75,
+          "box": [
+            64,
+            230,
+            91,
+            257
+          ],
+          "shapeScore": 0.8113207547169812,
+          "margin": 0.30504460408936607,
+          "status": "proposed-needs-human-review"
+        }
+      ]
+    }
+  ]
+}

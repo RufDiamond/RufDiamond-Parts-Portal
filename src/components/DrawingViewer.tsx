@@ -66,6 +66,28 @@ function stepFrom(zoom: number, direction: 1 | -1): number {
   return ZOOM_STEPS[Math.min(ZOOM_STEPS.length - 1, Math.max(0, next))];
 }
 
+/** Apply one wheel gesture only when it originated over the rendered drawing. */
+export function handleDrawingWheel(
+  event: Pick<WheelEvent, "deltaY" | "preventDefault" | "target">,
+  drawing: Pick<HTMLDivElement, "contains"> | null,
+  zoom: number,
+  onZoomChange?: (zoom: number) => void,
+): boolean {
+  if (
+    !drawing ||
+    !onZoomChange ||
+    event.deltaY === 0 ||
+    event.target === null ||
+    !drawing.contains(event.target as Node)
+  ) {
+    return false;
+  }
+
+  event.preventDefault();
+  onZoomChange(stepFrom(zoom, event.deltaY < 0 ? 1 : -1));
+  return true;
+}
+
 const NO_SELECTION: ReadonlySet<string> = new Set();
 
 /** The drawing plate with its callouts overlaid. */
@@ -116,6 +138,7 @@ export function DrawingViewer({
    * they ride along at every step.
    */
   const sheet = useRef<HTMLDivElement>(null);
+  const drawing = useRef<HTMLDivElement>(null);
   const from = useRef<{
     x: number;
     y: number;
@@ -126,23 +149,23 @@ export function DrawingViewer({
   const [dragging, setDragging] = useState(false);
 
   /*
-   * Pinching a trackpad and ctrl-scrolling a mouse both arrive as a wheel
-   * event with ctrlKey set. Bound by hand because preventDefault is needed to
-   * stop the browser zooming the whole page, and React's onWheel is passive.
+   * Ordinary vertical wheel input and trackpad pinches share the existing zoom
+   * steps while the pointer is over the drawing itself. Bound by hand because
+   * preventDefault is needed to keep that gesture local, and React's onWheel
+   * is passive. Blank space around the drawing retains normal page scrolling.
    */
   useEffect(() => {
     const box = sheet.current;
-    if (!box || !onZoomChange) return;
+    const area = drawing.current;
+    if (!box || !area || !src || !onZoomChange) return;
 
     const onWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey && !event.metaKey) return;
-      event.preventDefault();
-      onZoomChange(stepFrom(zoom, event.deltaY < 0 ? 1 : -1));
+      handleDrawingWheel(event, area, zoom, onZoomChange);
     };
 
     box.addEventListener("wheel", onWheel, { passive: false });
     return () => box.removeEventListener("wheel", onWheel);
-  }, [zoom, onZoomChange]);
+  }, [src, zoom, onZoomChange]);
 
   const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const box = sheet.current;
@@ -202,6 +225,7 @@ export function DrawingViewer({
         }}
       >
         <div
+          ref={drawing}
           className={styles.stage}
           style={
             {

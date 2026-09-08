@@ -44,9 +44,6 @@ def drawing_for(figure_id):
     """The plate a figure is drawn on."""
     root = Path(__file__).resolve().parents[2]
     text = (root / "src/data/ft3-wagon.ts").read_text()
-    m = re.search(
-        r'id: "(?P<d>df-[^"]+)",[^}]*?storagePath: "(?P<p>[^"]+)"[^}]*?'
-        , text, re.S)
     # Figures name their drawing by id; resolve through the figure record.
     fm = re.search(
         r'id: "%s",.*?drawingFileId: "([^"]+)"' % re.escape(figure_id),
