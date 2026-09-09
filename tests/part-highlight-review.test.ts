@@ -73,6 +73,24 @@ test("Filters review supplies six physical contours while preserving the six ori
   expect(original.callouts.every((c) => c.maskPath === null)).toBe(true);
 });
 
+test("Hydraulic 4.2 shroud retains its solid left side face outside the circular opening", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-hydraulic-4-2"))!,"hosted-review");
+  const geometry = result.detail.callouts.find((c) => c.number === 2)!.componentGeometry!;
+  expect(geometry.regions.some((r) => pointInRegion([171,363],r))).toBe(true);
+  expect(geometry.regions.some((r) => pointInRegion([248,320],r))).toBe(false);
+});
+
+test.each([
+  {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
+  {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},
+  {figure:"fig-cabin-6-5",ref:7,inside:[715,445],outside:[835,280]},
+])("new $figure ref$ref preserves source apertures and foreground occlusions", async ({figure,ref,outside}) => {
+  const result = await loadCalloutPreview((await getFigureDetail(figure))!,"hosted-review");
+  const geometry = result.detail.callouts.find((c) => c.number === ref)!.componentGeometry!;
+  expect(geometry.regions.length).toBeGreaterThan(0);
+  expect(geometry.regions.some((r) => pointInRegion(outside as [number,number],r))).toBe(false);
+});
+
 test.each([
   {figure:"fig-tire-wheel-5-1",ref:1,regions:3,hole:[630,450]},
   {figure:"fig-tire-wheel-5-1",ref:6,regions:1,hole:[137,580]},

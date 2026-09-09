@@ -11,10 +11,17 @@ const cases = [
   { name:"task10c Wheel 5.1 hole", route:"/review/figures/fig-tire-wheel-5-1", ref:1 },
   { name:"task10c Electrical 11.5 hole", route:"/review/figures/fig-electric-11-5", ref:8 },
   { name:"task10c Inflation 10.1 hole", route:"/review/figures/fig-tire-inflation-10-1", ref:12 },
+  { name:"task10c Hydraulic 4.3 shroud", route:"/review/figures/fig-hydraulic-4-3", ref:2 },
+  { name:"task10c Cabin 6.4 hinge", route:"/review/figures/fig-cabin-6-4", ref:7 },
+  { name:"task10c Cabin 6.5 hinge", route:"/review/figures/fig-cabin-6-5", ref:7 },
 ];
 
 test("task10c source openings exclude clicks in both Bumper plates and the four converted rings", async ({page},info) => {
   const checks = [
+    {figure:"fig-hydraulic-4-3",ref:2,hole:[510,433]},
+    {figure:"fig-hydraulic-4-3",ref:2,hole:[738,475]},
+    {figure:"fig-cabin-6-4",ref:7,hole:[980,285]},
+    {figure:"fig-cabin-6-5",ref:7,hole:[935,348]},
     {figure:"fig-frame-assy-2-1",ref:5,hole:[397,359]},
     {figure:"fig-frame-assy-2-2",ref:3,hole:[674,447]},
     {figure:"fig-frame-assy-2-2",ref:5,hole:[481,400]},
@@ -39,6 +46,44 @@ test("task10c source openings exclude clicks in both Bumper plates and the four 
     await page.mouse.click(p.x,p.y);await page.mouse.move(0,0);
     await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)})).toHaveAttribute("aria-pressed","false");
     await page.getByRole("button",{name:"Close the illustration"}).click();
+  }
+});
+
+test("task10c detailed added contours converge through physical click, label and row", async ({page},info) => {
+  test.setTimeout(180000);
+  for (const entry of [
+    {figure:"fig-filters-1-1",refs:[1,2,3,4,5,6]},
+    {figure:"fig-hydraulic-4-2",refs:[1,2,3,4]},
+    {figure:"fig-hydraulic-4-3",refs:[2]},
+    {figure:"fig-cabin-6-4",refs:[7]},
+    {figure:"fig-cabin-6-5",refs:[7]},
+    {figure:"fig-cabin-6-11",refs:[2,4,9,10]},
+    {figure:"fig-engine-8-1",refs:[1,2]},
+  ]) {
+    await page.goto(`${base}/review/figures/${entry.figure}`);
+    for (const ref of entry.refs) {
+      const label=figure(page).getByRole("button",{name:new RegExp(`^Callout ${ref}:`)});
+      await label.click();await page.mouse.move(0,0);
+      const row=page.locator("tr[data-figure-part-id][data-active]").first();
+      await expect(row).toBeVisible();
+      await row.click();await page.mouse.move(0,0);
+      await expect(label).toHaveAttribute("aria-pressed","true");
+      await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
+      const dialog=page.getByRole("dialog"),scope=dialog.locator("figure");
+      await page.screenshot({path:info.outputPath(`${entry.figure}-ref${ref}-overlay.png`)});
+      const zoomIn=dialog.getByRole("button",{name:"Zoom in",exact:true});
+      for(let i=0;i<4 && await zoomIn.isEnabled();i++) await zoomIn.click();
+      await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
+      await scope.locator(`svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).first().scrollIntoViewIfNeeded();
+      await settled(page);
+      const p=await componentPoint(scope,ref);
+      expect(p,`${entry.figure}/${ref} has a usable visible physical pixel at zoom`).not.toBeNull();
+      await page.mouse.click(p!.x,p!.y);await page.mouse.move(0,0);
+      const chooser=page.getByRole("group",{name:"Choose overlapping component"});
+      if(await chooser.count()) await chooser.getByRole("button",{name:new RegExp(`^Ref ${ref} `)}).click();
+      await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)})).toHaveAttribute("aria-pressed","true");
+      await page.getByRole("button",{name:"Close the illustration"}).click();
+    }
   }
 });
 const figure = (page:Page) => page.locator("figure").first();
