@@ -7,6 +7,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -390,6 +391,8 @@ function writeStoredConfirmation(value: RequestConfirmation | null): void {
 export interface RequestContextValue extends RequestTotals {
   submissionAvailable: boolean;
   requestError: string;
+  hydrationError: string;
+  retryHydration: () => void;
   lines: OrderLine[];
   /**
    * The lines actually going on the request. Totals, the piece count and the
@@ -410,7 +413,8 @@ export interface RequestContextValue extends RequestTotals {
   linesHydrated: boolean;
   lastConfirmation: RequestConfirmation | null;
   confirmationHydrated: boolean;
-  addParts: (parts: RequestPartInput[]) => void;
+  /** True only after validated lines and identity persistence commit. */
+  addParts: (parts: RequestPartInput[]) => Promise<boolean>;
   updateQty: (partId: string, qty: number) => void;
   removeLine: (partId: string) => void;
   clear: () => void;
@@ -443,7 +447,16 @@ function RequestProviderState({
 }: RequestProviderProps) {
   const [state, dispatch] = useReducer(requestReducer, initialRequestState);
   const [requestError, setRequestError] = useState("");
+  const [hydrationError, setHydrationError] = useState("");
+  const [hydrationAttempt, retryHydration] = useReducer((attempt: number) => attempt + 1, 0);
   const apiKey = apiSession ? `rdpp:api-request:${scopeKey(apiSession)}` : null;
+  const lifetime = useRef(0);
+  const commits = useRef<((committed: boolean) => void)[]>([]);
+  useEffect(() => {
+    const token = ++lifetime.current;
+    const pending = commits.current;
+    return () => { lifetime.current = token + 1; for (const settle of pending.splice(0)) settle(false); };
+  }, []);
 
   // A twenty-line request built on a mine site must survive an accidental
   // refresh. Read after mount — the server cannot see sessionStorage.
@@ -455,9 +468,10 @@ function RequestProviderState({
       if (cancelled) return;
       dispatch({ type: "add", parts });
       dispatch({ type: "hydrateLines", stored: null });
-    }).catch(() => { if (!cancelled) { setRequestError("Saved parts could not be revalidated. Add them again from the current catalogue."); dispatch({ type: "hydrateLines", stored: null }); } });
+      setHydrationError("");
+    }).catch(() => { if (!cancelled) setHydrationError("Saved parts could not be revalidated. Your saved identities are retained; retry when catalogue access is available."); });
     return () => { cancelled = true; };
-  }, [apiKey]);
+  }, [apiKey, hydrationAttempt]);
 
   useEffect(() => {
     // Don't write before the read has happened, or the empty initial state
@@ -470,6 +484,9 @@ function RequestProviderState({
       excluded: state.excluded,
     });
   }, [apiKey, state.linesHydrated, state.lines, state.currency, state.excluded]);
+
+  // Resolve after React commits the lines and the persistence effect above.
+  useEffect(() => { for (const settle of commits.current.splice(0)) settle(true); }, [state.lines]);
 
   // The confirmation outlives the request list so /request/confirmed survives
   // a refresh too.
@@ -486,13 +503,25 @@ function RequestProviderState({
   }, [apiKey, state.confirmationHydrated, state.lastConfirmation]);
 
   const addParts = useCallback(
-    (parts: RequestPartInput[]) => {
-      if (!apiKey) { dispatch({ type: "add", parts }); return; }
-      void revalidateRequestIdentities(parts.map(({ part, qty = 1 }) => ({ partId: part.id, releasePartId: part.releasePartId ?? "", qty })))
-        .then(fresh => dispatch({ type: "add", parts: fresh }))
-        .catch(() => setRequestError("Parts could not be revalidated. Refresh the catalogue and try again."));
+    async (parts: RequestPartInput[]): Promise<boolean> => {
+      if (!state.linesHydrated) { setRequestError("Saved request loading has not completed. Open the request and retry before adding parts."); return false; }
+      const token = lifetime.current;
+      const additions = parts.filter(({ qty = 1 }) => Number.isFinite(qty) && qty > 0);
+      if (!additions.length) return true;
+      setRequestError("");
+      try {
+        const fresh = apiKey ? await revalidateRequestIdentities(additions.map(({ part, qty = 1 }) => ({ partId: part.id, releasePartId: part.releasePartId ?? "", qty }))) : additions;
+        if (token !== lifetime.current) return false;
+        return await new Promise<boolean>(resolve => {
+          commits.current.push(resolve);
+          dispatch({ type: "add", parts: fresh });
+        });
+      } catch {
+        if (token === lifetime.current) setRequestError("Parts could not be revalidated. Refresh the catalogue and try again.");
+        return false;
+      }
     },
-    [apiKey],
+    [apiKey, state.linesHydrated],
   );
   const updateQty = useCallback(
     (partId: string, qty: number) =>
@@ -570,6 +599,8 @@ function RequestProviderState({
     () => ({
       submissionAvailable: !apiKey,
       requestError,
+      hydrationError,
+      retryHydration,
       lines: state.lines,
       includedLines,
       isIncluded,
@@ -592,6 +623,7 @@ function RequestProviderState({
     [
       apiKey,
       requestError,
+      hydrationError,
       state.lines,
       includedLines,
       isIncluded,

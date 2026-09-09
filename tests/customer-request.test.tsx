@@ -1,10 +1,14 @@
 // @vitest-environment jsdom
 import React from "react";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { initialRequestState, requestReducer, RequestProvider, useRequest } from "@/state/RequestContext";
 import type { MeResponse } from "@rufdiamond/contracts";
 import { revalidateRequestIdentities, writeRequestIdentities } from "@/state/customer-request";
+import { scopeKey } from "@/state/customer-session";
+import { MachineProvider } from "@/state/MachineContext";
+import { QuoteRequest } from "@/app/(portal)/request/QuoteRequest";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 const session: MeResponse = { id: "user", companyId: "company", displayName: "Synthetic", capabilities: ["catalog.figure.view", "parts.record.view"], csrfToken: "synthetic", company: { id: "company", name: "Test", type: "customer", defaultShippingAddress: null }, scopes: { brandIds: "all", accountIds: "all", fleet: "all", environment: "published", priceTier: "none", scopeVersion: "1", canViewPrices: false } };
 afterEach(() => { cleanup(); sessionStorage.clear(); vi.unstubAllGlobals(); });
 function ReadRequest() {
@@ -23,6 +27,54 @@ it("never hydrates old unscoped price-bearing requests or fake confirmations in 
 it("persists only identities and quantities, never prices or descriptions", () => {
   writeRequestIdentities("request-test", [{ partId: "part", releasePartId: "release-part", qty: 2, descriptionSnapshot: "PRIVATE DESCRIPTION", partNumberSnapshot: "SECRET", unitPriceSnapshot: "12.40", lineTotal: 24.8 }]);
   expect(JSON.parse(sessionStorage.getItem("request-test")!)).toEqual([{ partId: "part", releasePartId: "release-part", qty: 2 }]);
+});
+
+it("retains saved identities after transient failure and retries into current authorized quote lines", async () => {
+  const partId = "10000000-0000-4000-8000-000000000001";
+  const key = `rdpp:api-request:${scopeKey(session)}`;
+  const saved = JSON.stringify([{ partId, releasePartId: "rp", qty: 2 }]);
+  sessionStorage.setItem(key, saved);
+  vi.stubGlobal("fetch", async () => new Response(null, { status: 503 }));
+  render(<MachineProvider persist={false}><RequestProvider apiSession={session}><QuoteRequest usage={{}} /></RequestProvider></MachineProvider>);
+  await waitFor(() => expect(screen.getByRole("alert")).toBeTruthy());
+  expect(sessionStorage.getItem(key)).toBe(saved);
+  expect(screen.queryByText("Nothing in the request list")).toBeNull();
+  expect(screen.queryByText("Current authorized part")).toBeNull();
+  vi.stubGlobal("fetch", async () => Response.json({ items: [{ part: { id: partId, releasePartId: "rp", partNumber: "P", description: "Current authorized part", manufacturer: null, currency: "CAD", status: "active", supersededByPartId: null, requires: [] }, figureId: "figure", groupNo: "A.1", assemblyName: "Current assembly", systemName: "System", modelName: "Model", serial: "Range" }], nextCursor: null, releases: [{ modelId: "model", releaseId: "release", revision: 1 }] }));
+  fireEvent.click(screen.getByRole("button", { name: /retry/i }));
+  await waitFor(() => expect(screen.getByText("Current authorized part")).toBeTruthy());
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(sessionStorage.getItem(key)).toBe(saved);
+});
+
+it("settles an addition only after current authorized lines and identity storage commit", async () => {
+  const part = { id: "10000000-0000-4000-8000-000000000001", releasePartId: "rp", partNumber: "P", description: "Authorized", manufacturer: null, currency: "CAD" as const, status: "active" as const, supersededByPartId: null, requires: [] };
+  let complete!: (response: Response) => void;
+  vi.stubGlobal("fetch", () => new Promise<Response>(resolve => { complete = resolve; }));
+  const hook = renderHook(useRequest, { wrapper: ({ children }) => <RequestProvider apiSession={session}>{children}</RequestProvider> });
+  await waitFor(() => expect(hook.result.current.linesHydrated).toBe(true));
+  let addition!: Promise<boolean>;
+  act(() => { addition = hook.result.current.addParts([{ part }]); });
+  expect(addition).toBeInstanceOf(Promise);
+  expect(hook.result.current.lines).toEqual([]);
+  await act(async () => complete(Response.json({ items: [{ part, figureId: "figure", groupNo: "A.1", assemblyName: "Assembly", systemName: "System", modelName: "Model", serial: "Range" }], nextCursor: null, releases: [{ modelId: "model", releaseId: "release", revision: 1 }] })));
+  expect(await addition).toBe(true);
+  expect(hook.result.current.lines[0].descriptionSnapshot).toBe("Authorized");
+  expect(JSON.parse(sessionStorage.getItem(`rdpp:api-request:${scopeKey(session)}`)!)).toEqual([{ partId: part.id, releasePartId: "rp", qty: 1 }]);
+});
+
+it("does not report success or persist an addition after its identity provider unmounts", async () => {
+  const part = { id: "10000000-0000-4000-8000-000000000001", releasePartId: "rp", partNumber: "P", description: "Authorized", manufacturer: null, currency: "CAD" as const, status: "active" as const, supersededByPartId: null, requires: [] };
+  let complete!: (response: Response) => void;
+  vi.stubGlobal("fetch", () => new Promise<Response>(resolve => { complete = resolve; }));
+  const hook = renderHook(useRequest, { wrapper: ({ children }) => <RequestProvider apiSession={session}>{children}</RequestProvider> });
+  await waitFor(() => expect(hook.result.current.linesHydrated).toBe(true));
+  let addition!: Promise<boolean>;
+  act(() => { addition = hook.result.current.addParts([{ part }]); });
+  hook.unmount();
+  complete(Response.json({ items: [{ part, figureId: "figure", groupNo: "A.1", assemblyName: "Assembly", systemName: "System", modelName: "Model", serial: "Range" }], nextCursor: null, releases: [{ modelId: "model", releaseId: "release", revision: 1 }] }));
+  expect(await addition).toBe(false);
+  expect(sessionStorage.getItem(`rdpp:api-request:${scopeKey(session)}`)).toBe("[]");
 });
 
 it("replaces an API line snapshot with the revalidated release part, including omitted prices", () => {

@@ -18,6 +18,8 @@ export default defineConfig({
       "tests/customer-repository.test.ts",
       "tests/customer-drawing.test.tsx",
       "tests/customer-session.test.ts",
+      "tests/customer-boundary-state.test.tsx",
+      "tests/customer-additions.test.tsx",
       "tests/customer-money.test.tsx",
       "tests/customer-request.test.tsx",
       "tests/customer-privacy.test.ts",

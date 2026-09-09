@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { ComingSoon, EmptyState } from "@/components";
 import { formatFigureRef, formatPrice } from "@/lib/format";
 import { useRequest } from "@/state/RequestContext";
+import { useRequestAddition } from "@/state/useRequestAddition";
 import type { PartUsageRow } from "@/types/catalog";
 import styles from "./search.module.css";
 
@@ -36,7 +37,8 @@ const NONE = "—";
  */
 export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) {
   const router = useRouter();
-  const { addParts, lines } = useRequest();
+  const { lines } = useRequest();
+  const addition = useRequestAddition(JSON.stringify([query, mode, brand]));
 
   /*
    * Rows are keyed by part AND figure: the same part on two figures is two
@@ -48,6 +50,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
   const [ticked, setTicked] = useState<ReadonlySet<string>>(() => new Set());
 
   const toggle = (key: string) => {
+    if (addition.pending) return;
     setAdded(null);
     setTicked((current) => {
       const next = new Set(current);
@@ -59,6 +62,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
   const allTicked = rows.length > 0 && ticked.size === rows.length;
 
   const toggleAll = () => {
+    if (addition.pending) return;
     setAdded(null);
     setTicked(
       allTicked ? new Set() : new Set(rows.map((row, i) => keyOf(row, i))),
@@ -102,14 +106,14 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
    * The ticks clear on success: they are a shortlist for one action, and
    * leaving them set invites a second click that silently does nothing.
    */
-  const addTickedToCart = () => {
+  const addTickedToCart = (openQuote = false) => {
     const additions = tickedParts
       .filter((part) => !onCart.has(part.id))
       .map((part) => ({ part, qty: 1 }));
-    if (additions.length === 0) return;
-    addParts(additions);
-    setAdded(additions.length);
-    setTicked(new Set());
+    return addition.add(additions, () => {
+      if (additions.length) { setAdded(additions.length); setTicked(new Set()); }
+      if (openQuote) router.push("/request");
+    });
   };
 
   const emailTicked = () => {
@@ -143,6 +147,8 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
 
   return (
     <div className={styles.screen}>
+      {addition.pending && <p role="status">Validating selected parts…</p>}
+      {addition.error && <p role="alert">{addition.error}</p>}
       <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
       <div className={styles.bar}>
         <form
@@ -178,11 +184,8 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
         <button
           type="button"
           className={styles.button}
-          onClick={() => {
-            addTickedToCart();
-            router.push("/request");
-          }}
-          disabled={rows.length === 0}
+          onClick={() => { void addTickedToCart(true); }}
+          disabled={addition.pending || rows.length === 0}
           title="Add anything ticked, then open the request list"
         >
           <Image src="/toolbar/quote.png" alt="" width={40} height={52}
@@ -193,8 +196,8 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
         <button
           type="button"
           className={styles.button}
-          onClick={addTickedToCart}
-          disabled={toAdd === 0}
+          onClick={() => { void addTickedToCart(); }}
+          disabled={addition.pending || toAdd === 0}
           title={
             tickedParts.length === 0
               ? "Tick a row first"
@@ -276,6 +279,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
                       type="checkbox"
                       className={styles.checkbox}
                       checked={allTicked}
+                      disabled={addition.pending}
                       onChange={toggleAll}
                       aria-label="Select every result"
                     />
@@ -312,6 +316,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
                           type="checkbox"
                           className={styles.checkbox}
                           checked={on}
+                          disabled={addition.pending}
                           onChange={() => toggle(key)}
                           onClick={(event) => event.stopPropagation()}
                           aria-label={`Select ${part.partNumber}`}

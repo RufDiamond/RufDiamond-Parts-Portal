@@ -57,6 +57,8 @@ export function QuoteRequest({
     company,
     submissionAvailable,
     requestError,
+    hydrationError,
+    retryHydration,
   } = useRequest();
 
   const machineName = selectedModel?.name ?? "Catalogue";
@@ -111,6 +113,7 @@ export function QuoteRequest({
   };
 
   if (!linesHydrated) {
+    if (hydrationError) return <div><p role="alert">{hydrationError}</p><button type="button" onClick={retryHydration}>Retry saved request</button></div>;
     return <p className={styles.loading}>Loading…</p>;
   }
 

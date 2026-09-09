@@ -23,6 +23,7 @@ import {
 import { buildDiagramRegions, buildDrawingMarkers } from "@/lib/drawing";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
+import { useRequestAddition } from "@/state/useRequestAddition";
 import { useSelection } from "@/state/useSelection";
 import { useDiagramSelection } from "@/state/useDiagramSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
@@ -83,7 +84,8 @@ export function FigureWorkspace({
   const { figure, drawing, system, variant, rows, callouts } = detail;
   const releasedDrawing = useReleasedDrawing(detail);
   const { selectedModel } = useMachine();
-  const { addParts, lines } = useRequest();
+  const { lines } = useRequest();
+  const addition = useRequestAddition(figure.id);
 
   const { selectedPartIds: quotePartIds, toggle: toggleQuote, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
@@ -129,9 +131,9 @@ export function FigureWorkspace({
     [rows, quotePartIds, requestedPartIds],
   );
 
-  const addSelectedToCart = () => {
+  const addSelectedToCart = (openQuote = false) => {
     if (reviewOnly) return;
-    if (pending.length > 0) addParts(pending);
+    return addition.add(pending, () => { if (openQuote) setQuoting(true); });
   };
 
   const go = (id: string | null) => {
@@ -244,6 +246,8 @@ export function FigureWorkspace({
 
   return (
     <div className={styles.screen}>
+      {addition.pending && <p role="status">Validating selected parts…</p>}
+      {addition.error && !quoting && <p role="alert">{addition.error}</p>}
       {releasedDrawing.error && <p role="alert">{releasedDrawing.error}</p>}
       <Trail
         steps={[
@@ -385,13 +389,9 @@ export function FigureWorkspace({
            * on the cart, so jumping straight to the request list would have
            * arrived empty — which is exactly what it did.
            */
-          onClick={() => {
-            if (reviewOnly) return;
-            addSelectedToCart();
-            setQuoting(true);
-          }}
+          onClick={() => { void addSelectedToCart(true); }}
           title="Add anything ticked, then draw up the request"
-          disabled={reviewOnly}
+          disabled={reviewOnly || addition.pending}
           aria-pressed={quoting}
           data-armed={quoting || undefined}
         >
@@ -403,8 +403,8 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={addSelectedToCart}
-          disabled={reviewOnly || pending.length === 0}
+          onClick={() => { void addSelectedToCart(); }}
+          disabled={reviewOnly || addition.pending || pending.length === 0}
           title={
             quotePartIds.size === 0
               ? "Tick a part first"
