@@ -918,49 +918,49 @@
         {
           "figurePartId": "fp-4-2-10",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-11",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-12",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-13",
           "sourceRefNo": "13",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
@@ -990,13 +990,13 @@
         {
           "figurePartId": "fp-4-2-16",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
@@ -1038,109 +1038,109 @@
         {
           "figurePartId": "fp-4-2-20",
           "sourceRefNo": "20",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-21",
           "sourceRefNo": "21",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "image-resolution-limited",
+          "evidence": "Directly labelled tiny clip21/plug23 visible silhouette traced at3x original inspection. Similar unlabelled clips not associated; plug dark face not inferred empty.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Very small inner/edge details do not support complete physical material certification"
           ]
         },
         {
           "figurePartId": "fp-4-2-22",
           "sourceRefNo": "22",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-23",
           "sourceRefNo": "23",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "image-resolution-limited",
+          "evidence": "Directly labelled tiny clip21/plug23 visible silhouette traced at3x original inspection. Similar unlabelled clips not associated; plug dark face not inferred empty.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Very small inner/edge details do not support complete physical material certification"
           ]
         },
         {
           "figurePartId": "fp-4-2-24",
           "sourceRefNo": "24",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-25",
           "sourceRefNo": "25",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-26",
           "sourceRefNo": "26",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-27",
           "sourceRefNo": "27",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {
           "figurePartId": "fp-4-2-28",
           "sourceRefNo": "28",
-          "category": "clear-tracing",
-          "evidence": "Original4.2 PNG individually labels spacer10,hub11,hose12/13,thin vent16,clamp20,upper-rightclip21,upperring22,plug23,U-hose24 and individual fittings25–28. All visible source targets, no quantity-derived copies.",
+          "category": "partial",
+          "evidence": "Original PNG directly labelled component now has independently traced visible material, with established apertures retained and no quantity-inferred copies. Hoses follow bends rather than bounding envelopes.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace thin bands/tubes and actual holes/inner walls; no filled broad envelopes"
+            "Fine port bores, interior-wall material, thread edges and tight joins not fully measured; proposal is partial"
           ]
         },
         {

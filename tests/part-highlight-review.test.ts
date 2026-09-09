@@ -109,6 +109,15 @@ test("Hydraulic 4.1 fittings do not infer similar copies or fill established bor
     expect(result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.length).toBeGreaterThan(0);
 });
 
+test("Hydraulic 4.2 hoses retain bend background and only labelled clips", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-hydraulic-4-2"))!, "hosted-review");
+  const contains = (ref: number, point: [number, number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point, r));
+  for (const [ref, point] of [[10,[539,391]],[11,[571,394]],[13,[828,278]],[16,[1010,326]],[20,[572,259]],[22,[1169,415]],[24,[656,577]]] as const)
+    expect(contains(ref, [...point])).toBe(false);
+  expect(contains(16,[900,269])).toBe(true);
+  expect(contains(24,[650,603])).toBe(true);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},

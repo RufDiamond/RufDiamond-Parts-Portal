@@ -51,7 +51,7 @@ test("task10c source openings exclude clicks in both Bumper plates and the four 
 
 for (const entry of [
     {figure:"fig-filters-1-1",refs:[1,2,3,4,5,6]},
-    {figure:"fig-hydraulic-4-2",refs:[1,2,3,4]},
+    {figure:"fig-hydraulic-4-2",refs:[1,2,3,4,10,11,12,13,16,20,21,22,23,24,25,26,27,28]},
     {figure:"fig-hydraulic-4-3",refs:[2]},
     {figure:"fig-cabin-6-4",refs:[7]},
     {figure:"fig-cabin-6-5",refs:[7]},
