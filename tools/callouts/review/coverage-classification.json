@@ -3215,37 +3215,37 @@
         {
           "figurePartId": "fp-6-9-04",
           "sourceRefNo": "4",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original4 directly labelled front offset traverse: only separable right material traced; lower U-shaped crossbar occludes left/middle continuation. Source full/crop and native overlay personally inspected2026-09-09.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Left/middle continuation hidden by crossing tube; small fastening bores and precise touching joins remain partial. No opaque envelope over crossing tube."
           ]
         },
         {
           "figurePartId": "fp-6-9-05",
           "sourceRefNo": "5",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original5 and6 each directly identify a different individual narrow traverse. Each source-visible channel traced separately at useful source zoom; other quantity copies and deck field excluded. Native overlay personally inspected2026-09-09.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine fastener/end bores, close neighbouring channel edges and leader-obscured joins remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-9-06",
           "sourceRefNo": "6",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original5 and6 each directly identify a different individual narrow traverse. Each source-visible channel traced separately at useful source zoom; other quantity copies and deck field excluded. Native overlay personally inspected2026-09-09.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine fastener/end bores, close neighbouring channel edges and leader-obscured joins remain partial."
           ]
         },
         {
@@ -3263,13 +3263,13 @@
         {
           "figurePartId": "fp-6-9-08",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original8 back truss traced with all twelve clearly enclosed triangular holes; source full/crop and native overlay personally inspected2026-09-09. End plates and opaque lip retained.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Tiny fastening bores, leader-dot occlusion and fine inner wall margins remain partial; complete required regions are not yet independently declared."
           ]
         },
         {

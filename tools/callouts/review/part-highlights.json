@@ -12422,6 +12422,370 @@
           "evidence": "Printed reference 3 leader terminates on the small isolated search-light support, matching 86-00240 (Search light support). Contour traced from the current source PNG; no label or leader is included."
         },
         {
+          "calloutId": "co-6-9-0239",
+          "figurePartId": "fp-6-9-04",
+          "partNumber": "82-00398",
+          "number": 4,
+          "x": 60.1172,
+          "y": 40.4861,
+          "polygons": [
+            [
+              [
+                48.3203,
+                38.3333
+              ],
+              [
+                54.5703,
+                40.4167
+              ],
+              [
+                54.668,
+                40.8333
+              ],
+              [
+                53.8867,
+                42.1875
+              ],
+              [
+                49.7266,
+                40.6597
+              ],
+              [
+                49.6289,
+                40.1042
+              ],
+              [
+                49.3164,
+                39.375
+              ],
+              [
+                49.0234,
+                38.9236
+              ],
+              [
+                48.6133,
+                38.6458
+              ]
+            ]
+          ],
+          "evidence": "Original4 leader reaches the front offset fixation traverse, whose left/middle material is hidden by the crossing lower U-shaped tube. Only separable right-hand sheet/end material is traced; crossing tube, rack slats and roof are excluded. Occluded continuation and small fastening bores remain partial, not a full-width envelope. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-9-0240",
+          "figurePartId": "fp-6-9-05",
+          "partNumber": "82-00264",
+          "number": 5,
+          "x": 42.4219,
+          "y": 18.3333,
+          "polygons": [
+            [
+              [
+                46.875,
+                24.0278
+              ],
+              [
+                62.5977,
+                29.2361
+              ],
+              [
+                62.6953,
+                29.4792
+              ],
+              [
+                62.5195,
+                29.7569
+              ],
+              [
+                62.2461,
+                30.1042
+              ],
+              [
+                46.6016,
+                25.0347
+              ],
+              [
+                46.5039,
+                24.8611
+              ],
+              [
+                46.6406,
+                24.3403
+              ]
+            ]
+          ],
+          "evidence": "Original5 leader targets the uppermost fixation traverse across the slat field. Its individual narrow channel exterior and end are traced, not the other two quantity copies or the whole deck. Fine fastener bores and closely adjacent edge detail remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-9-0241",
+          "figurePartId": "fp-6-9-06",
+          "partNumber": "82-00254",
+          "number": 6,
+          "x": 66.6797,
+          "y": 27.1528,
+          "polygons": [
+            [
+              [
+                46.0547,
+                25.2083
+              ],
+              [
+                61.8555,
+                30.3819
+              ],
+              [
+                61.9336,
+                30.6944
+              ],
+              [
+                61.4648,
+                31.3194
+              ],
+              [
+                45.7031,
+                26.1806
+              ],
+              [
+                45.6445,
+                25.9722
+              ],
+              [
+                45.8008,
+                25.4514
+              ]
+            ]
+          ],
+          "evidence": "Original6 leader reaches the next individual traverse below5 at its right end. Only that narrow visible channel is traced, not all eight similar deck slats. Small end/fastener details and leader-obscured material remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-9-0243",
+          "figurePartId": "fp-6-9-08",
+          "partNumber": "82-00397",
+          "number": 8,
+          "x": 74.4922,
+          "y": 8.6806,
+          "polygons": [
+            [
+              [
+                48.0938,
+                21.3056
+              ],
+              [
+                48.3125,
+                21.0556
+              ],
+              [
+                48.5313,
+                21.0556
+              ],
+              [
+                63.5156,
+                25.8889
+              ],
+              [
+                63.5625,
+                27.9722
+              ],
+              [
+                63.4844,
+                28.1667
+              ],
+              [
+                48.0469,
+                23.3056
+              ],
+              [
+                48.0156,
+                23.0833
+              ],
+              [
+                48.125,
+                22.9444
+              ],
+              [
+                48.1719,
+                21.6667
+              ],
+              [
+                48.0625,
+                21.5833
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  49.6094,
+                  21.9444
+                ],
+                [
+                  50.2344,
+                  22.1111
+                ],
+                [
+                  49.9219,
+                  22.6389
+                ]
+              ],
+              [
+                [
+                  51.2188,
+                  22.4722
+                ],
+                [
+                  50.8281,
+                  22.9167
+                ],
+                [
+                  51.5156,
+                  23.1944
+                ]
+              ],
+              [
+                [
+                  51.9844,
+                  22.75
+                ],
+                [
+                  52.625,
+                  22.9722
+                ],
+                [
+                  52.2656,
+                  23.4167
+                ]
+              ],
+              [
+                [
+                  53.4531,
+                  23.25
+                ],
+                [
+                  53.0781,
+                  23.7222
+                ],
+                [
+                  53.7813,
+                  23.9722
+                ]
+              ],
+              [
+                [
+                  54.2031,
+                  23.5
+                ],
+                [
+                  54.8594,
+                  23.7222
+                ],
+                [
+                  54.5156,
+                  24.2222
+                ]
+              ],
+              [
+                [
+                  55.7344,
+                  24
+                ],
+                [
+                  55.3906,
+                  24.4722
+                ],
+                [
+                  56.1563,
+                  24.6944
+                ]
+              ],
+              [
+                [
+                  56.4375,
+                  24.2778
+                ],
+                [
+                  57.1094,
+                  24.5
+                ],
+                [
+                  56.8281,
+                  25
+                ]
+              ],
+              [
+                [
+                  58.0625,
+                  24.8056
+                ],
+                [
+                  57.7188,
+                  25.3056
+                ],
+                [
+                  58.4375,
+                  25.5278
+                ]
+              ],
+              [
+                [
+                  58.8906,
+                  25.0556
+                ],
+                [
+                  59.6094,
+                  25.3056
+                ],
+                [
+                  59.25,
+                  25.8333
+                ]
+              ],
+              [
+                [
+                  60.4063,
+                  25.6111
+                ],
+                [
+                  60.0469,
+                  26.0278
+                ],
+                [
+                  60.7969,
+                  26.25
+                ]
+              ],
+              [
+                [
+                  61.2813,
+                  25.8889
+                ],
+                [
+                  61.9219,
+                  26.1389
+                ],
+                [
+                  61.6094,
+                  26.5833
+                ]
+              ],
+              [
+                [
+                  62.8906,
+                  26.3056
+                ],
+                [
+                  63.3438,
+                  26.4444
+                ],
+                [
+                  63.0781,
+                  26.7222
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Original8 detached back truss exterior with all twelve clearly enclosed triangular openings individually excluded. Opaque end plates/top lip retained; tiny fastening bores, leader-dot occlusion and fine inner wall margins remain partial. No copies or other rack members included. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
           "calloutId": "co-6-9-0245",
           "figurePartId": "fp-6-9-10",
           "partNumber": "86-00290",

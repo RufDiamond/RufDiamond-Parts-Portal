@@ -154,6 +154,16 @@ test("Lower gate tracing preserves ladder space and foreground/source ownership"
   expect(contains(3,[227,302])).toBe(true);
 });
 
+test("Roof rack singles do not infer adjacent slats and back truss holes stay open", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-9"))!, "hosted-review");
+  const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
+  for (const [ref,point] of [[4,[622,279]],[5,[700,204]],[6,[700,193]],[8,[655,164]],[8,[788,188]]] as [number,[number,number]][]) expect(contains(ref,point), `${ref}/${point}`).toBe(false);
+  expect(contains(5,[700,194])).toBe(true);
+  expect(contains(6,[700,204])).toBe(true);
+  expect(contains(8,[670,173])).toBe(true);
+  expect(result.detail.callouts.find(c=>c.number===8)!.componentGeometry!.regions[0].holes).toHaveLength(12);
+});
+
 test("Roof rack detached members preserve open ladder and guard centres", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-9"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
