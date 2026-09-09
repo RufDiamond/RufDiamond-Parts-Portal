@@ -28,16 +28,16 @@ import { parseImport } from "./parser.js";
 import {
   applyGraph,
   detail,
-  jobRows,
   missing,
   persistProblems,
-  rowValue,
   sameSource,
   scopedJob,
   targetScope,
   validationProblems,
 } from "./repository.js";
 import type { ImportSourceStorage } from "./source-storage.js";
+import { resolvedImportRows } from "../catalog-review/quantity.js";
+import { bindAppliedQuantityReviews } from "../catalog-review/service.js";
 export type ImportActor = { userId: string; requestId: string };
 export type ImportWrite = { expectedVersion: number; idempotencyKey: string };
 const stale = () =>
@@ -314,7 +314,7 @@ export function createImportService(
                 tx,
                 job,
                 target,
-                (await jobRows(tx, id)).map(rowValue),
+                await resolvedImportRows(tx,job,target),
               ),
             );
             const [updated] = await tx
@@ -449,6 +449,7 @@ export function createImportService(
         409,
         "The stored source does not match its immutable hash and byte count.",
       );
+    const parsed = await parseImport(bytes,source.format!);
     return mappingTransaction(database, async (tx) => {
       const ctx = await authorize(tx, actor),
         { job, target } = await scopedJob(tx, ctx, id, true),
@@ -484,7 +485,7 @@ export function createImportService(
                   tx,
                   job,
                   target,
-                  (await jobRows(tx, id)).map(rowValue),
+                  await resolvedImportRows(tx,job,target),
                 )
               ).length
             )
@@ -497,7 +498,10 @@ export function createImportService(
               .update(importJob)
               .set({ state: "applying" })
               .where(eq(importJob.id, id));
-            await applyGraph(tx, job);
+            const effective = await resolvedImportRows(tx,job,target);
+            const reparsed = normalizeImport(parsed,effective.filter(r=>r.fields && "quantitySemantics" in r.fields).map(r=>r.rowNumber));
+            if (reparsed.issues.some(i=>i.severity==="error") || effective.some(r=>canonicalJsonHash(r.fields)!==canonicalJsonHash(reparsed.rows.find(p=>p.sourceRowKey===r.sourceRowKey)?.fields))) throw new AppError("IMPORT_SOURCE_CONFLICT",409,"The reviewed interpretation no longer matches the exact source.");
+            await applyGraph(tx, job,effective);
             const [updated] = await tx
               .update(importJob)
               .set({
@@ -512,6 +516,7 @@ export function createImportService(
               sourceChecksum: job.sourceChecksum,
               version: updated.version,
             });
+            await bindAppliedQuantityReviews(tx,id,ctx);
             return { status: 200, body: await detail(tx, updated) };
           },
         )

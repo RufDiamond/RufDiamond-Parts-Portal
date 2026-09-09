@@ -14,7 +14,7 @@ const session: MeResponse = { id: "user", companyId: "company", displayName: "Sy
 const part = { id: "10000000-0000-4000-8000-000000000001", releasePartId: "rp", partNumber: "P", description: "Authorized part", manufacturer: null, currency: "CAD" as const, status: "active" as const, supersededByPartId: null, requires: [] };
 const row = { part, figureId: "figure", groupNo: "A.1", assemblyName: "Assembly", systemName: "System", modelName: "Model", serial: "Range" };
 const response = () => Response.json({ items: [row], nextCursor: null, releases: [{ modelId: "model", releaseId: "release", revision: 1 }] });
-function Status() { const request = useRequest(); return <span>{request.linesHydrated ? `Committed ${request.lines.length}` : "Hydrating"}</span>; }
+function Status() { const request = useRequest(); return <span data-qty={request.lines[0]?.qty}>{request.linesHydrated ? `Committed ${request.lines.length}` : "Hydrating"}</span>; }
 const tree = (search = true) => <RequestProvider apiSession={session}><Status />{search ? <SearchResults query="P" mode="part" brand="" rows={[row]} /> : <p>Another page</p>}</RequestProvider>;
 afterEach(() => { cleanup(); sessionStorage.clear(); vi.unstubAllGlobals(); navigation.push.mockClear(); });
 it("keeps selected search rows pending and on rejection without announcing success or navigating", async () => {
@@ -101,12 +101,14 @@ it("permits A to B to A query round trips without an old completion settling the
   expect(navigation.push).toHaveBeenCalledOnce();
   expect(screen.getByText(/added to the cart/)).toBeTruthy();
 });
-it("keeps a figure on its selected parts until quote additions succeed, and exposes rejection", async () => {
+it.each([false,true])("keeps figure quote selection independent of unspecified installed quantity %s", async (unspecified) => {
   const detail: FigureDetail = { release: { modelId: "model", releaseId: "release", revision: 1 }, mapping: null, figure: { id: "figure", variantId: "variant", systemId: "system", name: "Assembly", groupNo: "A.1", drawingFileId: null, status: "published" }, system: { id: "system", name: "System", sortOrder: 1 }, variant: { id: "variant", modelId: "model", label: "Range", serialFrom: null, serialTo: null, catalogRevision: null }, drawing: null, rows: [{ part, figurePart: { id: "row", figureId: "figure", partId: part.id, qty: 1, remarks: null, serviceable: true }, calloutNumbers: ["A*"] }], callouts: [] };
+  if(unspecified)detail.rows[0].figurePart={...detail.rows[0].figurePart,qty:null,quantitySemantics:"unspecified-installed"};
   let complete!: (response: Response) => void;
   vi.stubGlobal("fetch", () => new Promise<Response>(resolve => { complete = resolve; }));
   render(<MachineProvider persist={false}><RequestProvider apiSession={session}><Status /><FigureWorkspace detail={detail} usage={{}} sheet="1" index={0} total={1} previousId={null} nextId={null} firstId={null} lastId={null} /></RequestProvider></MachineProvider>);
   await screen.findByText("Committed 0");
+  if(unspecified)expect(screen.getByText("Unspecified")).toBeTruthy();
   fireEvent.click(screen.getByRole("checkbox", { name: "Add P to the cart" }));
   fireEvent.click(screen.getByRole("button", { name: "Request a quote" }));
   expect(screen.getByRole("button", { name: "Request a quote" }).getAttribute("aria-pressed")).toBe("false");
@@ -117,4 +119,6 @@ it("keeps a figure on its selected parts until quote additions succeed, and expo
   await act(async () => complete(response()));
   await waitFor(() => expect(screen.getByRole("button", { name: "Request a quote" }).getAttribute("aria-pressed")).toBe("true"));
   expect(screen.getByText("Committed 1")).toBeTruthy();
+  expect(detail.rows[0].figurePart.qty).toBe(unspecified?null:1);
+  expect(screen.getByText("Committed 1").getAttribute("data-qty")).toBe("1");
 });

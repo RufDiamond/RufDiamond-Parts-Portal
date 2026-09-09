@@ -27,33 +27,35 @@ export type FigureMetadata = {
   figure: typeof s.releaseFigure.$inferSelect;
   variant: typeof s.releaseVariant.$inferSelect;
   system: typeof s.releaseSystem.$inferSelect;
-  drawing: Pick<typeof s.releaseDrawing.$inferSelect, "id" | "workingId" | "filename" | "mediaType" | "width" | "height" | "fileVersion">;
+  drawing: Pick<typeof s.releaseDrawing.$inferSelect, "id" | "workingId" | "filename" | "mediaType" | "width" | "height" | "fileVersion"> | null;
 };
 export type FigureRow = { row: typeof s.releaseFigurePart.$inferSelect; part: Part };
 
-export function projectFigure(scope: CatalogScope, metadata: FigureMetadata, rows: FigureRow[], calls: Array<typeof s.releaseCallout.$inferSelect>, mapping: typeof s.releaseDiagramMapping.$inferSelect | undefined): FigureDetail {
+export function projectFigure(scope: CatalogScope, metadata: FigureMetadata, rows: FigureRow[], calls: Array<typeof s.releaseCallout.$inferSelect>, mapping: typeof s.releaseDiagramMapping.$inferSelect | undefined,references:Array<typeof s.releaseSourceReference.$inferSelect>=[]): FigureDetail {
   const { figure: f, variant: v, system, drawing } = metadata;
-  if (!drawing.width || !drawing.height || !["image/png", "image/jpeg"].includes(drawing.mediaType)) throw new AppError("DRAWING_UNAVAILABLE", 503, "Historical drawing metadata needs restoration.");
-  const stableIds = new Map([[f.id, f.workingId], [drawing.id, drawing.workingId], ...rows.map(({ row }) => [row.id, row.workingId] as [string, string]), ...calls.map(c => [c.id, c.workingId] as [string, string])]);
+  if (f.depictionMode!=="table-only"&&(!drawing?.width || !drawing.height || !["image/png", "image/jpeg"].includes(drawing.mediaType))) throw new AppError("DRAWING_UNAVAILABLE", 503, "Historical drawing metadata needs restoration.");
+  const stableIds = new Map<string,string>([[f.id, f.workingId], ...(drawing?[[drawing.id,drawing.workingId] as [string,string]]:[]), ...rows.map(({ row }) => [row.id, row.workingId] as [string, string]), ...calls.map(c => [c.id, c.workingId] as [string, string])]);
   const stable = (id: string) => { const value = stableIds.get(id); if (!value) throw new Error("Broken same-release mapping identity"); return value; };
   const calloutNumbers = new Map<string, Set<string>>();
-  for (const call of calls) {
+  for (const call of [...calls,...references]) {
     const numbers = calloutNumbers.get(call.figurePartId) ?? new Set<string>();
-    numbers.add(call.number); calloutNumbers.set(call.figurePartId, numbers);
+    if(call.number)numbers.add(call.number); calloutNumbers.set(call.figurePartId, numbers);
   }
   const document = mapping ? remapDocument(mapping.document, stable) : null;
   const release = scope.refs.get(f.releaseId)!;
-  return {
+  const result = {
+    ...(references.length?{sourceReferences:references.filter(r=>r.number).map(r=>({figurePartId:stable(r.figurePartId),number:r.number}))}:{}),
     release,
-    figure: { id: f.workingId, variantId: v.workingId, systemId: system.workingId, name: f.name, groupNo: f.groupNo, drawingFileId: drawing.workingId, status: "published" },
-    drawing: { id: drawing.workingId, contentUrl: `/api/v1/catalog/figures/${f.workingId}/drawing?releaseId=${f.releaseId}`, filename: drawing.filename, format: drawing.mediaType === "image/png" ? "png" : "jpg", width: drawing.width, height: drawing.height, version: drawing.fileVersion },
+    figure: { id: f.workingId, variantId: v.workingId, systemId: system.workingId, name: f.name, groupNo: f.groupNo, drawingFileId: drawing?.workingId??null, status: "published",...(f.depictionMode==="table-only"?{depictionMode:"table-only"}: {}) },
+    drawing: drawing?{ id: drawing.workingId, contentUrl: `/api/v1/catalog/figures/${f.workingId}/drawing?releaseId=${f.releaseId}`, filename: drawing.filename, format: drawing.mediaType === "image/png" ? "png" : "jpg", width: drawing.width!, height: drawing.height!, version: drawing.fileVersion }:null,
     system: { id: system.workingId, name: system.name, sortOrder: system.sortOrder },
     variant: { id: v.workingId, modelId: release.modelId, label: v.label, serialFrom: v.serialFrom, serialTo: v.serialTo, catalogRevision: v.catalogRevision },
     mapping: mapping && document ? { document, sourceRevisionId: mapping.sourceRevisionId, sourceDocumentChecksum: mapping.sourceDocumentChecksum, storedDocumentChecksum: canonicalJsonHash(mapping.document), documentChecksum: canonicalJsonHash(document), reviewerId: mapping.reviewedByUserId, reviewedAt: mapping.reviewedAt.toISOString() } : null,
     callouts: calls.map(c => ({ id: c.workingId, figureId: f.workingId, figurePartId: stable(c.figurePartId), number: c.number, x: Number(c.x), y: Number(c.y), maskPath: c.maskPath })),
     rows: rows.map(({ row, part }) => ({
-      figurePart: { id: row.workingId, figureId: f.workingId, partId: part.id, qty: row.qty, remarks: row.remarks, serviceable: row.serviceable }, part,
+      figurePart: { id: row.workingId, figureId: f.workingId, partId: part.id, qty: row.qty,...(row.quantitySemantics==="unspecified-installed"?{quantitySemantics:"unspecified-installed"}:{}), remarks: row.remarks, serviceable: row.serviceable }, part,
       calloutNumbers: [...(calloutNumbers.get(row.id) ?? [])].sort((a, b) => a.localeCompare(b, "en", { numeric: true })),
     })),
   };
+  return result as FigureDetail;
 }

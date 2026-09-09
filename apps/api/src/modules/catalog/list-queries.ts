@@ -43,8 +43,8 @@ export async function navigationPage(tx: Transaction, scope: CatalogScope, query
       const result = await tx.execute<{ id: string }>(sql`SELECT id FROM release_system WHERE release_id=${variant.release_id}::uuid AND working_id=${requiredId(query.systemId)}::uuid LIMIT 1`);
       const system = result.rows[0]; if (!system) unavailable();
       candidates = sql`SELECT f.working_id::text AS key,f.release_id,
-        jsonb_build_object('id',f.working_id,'variantId',${query.id}::text,'systemId',${query.systemId}::text,'name',f.name,'groupNo',f.group_no,'drawingFileId',d.working_id,'status','published') AS item
-        FROM release_figure f JOIN release_drawing d ON d.release_id=f.release_id AND d.id=f.drawing_id
+        jsonb_build_object('id',f.working_id,'variantId',${query.id}::text,'systemId',${query.systemId}::text,'name',f.name,'groupNo',f.group_no,'drawingFileId',d.working_id,'status','published') || CASE WHEN f.depiction_mode='table-only' THEN jsonb_build_object('depictionMode','table-only') ELSE '{}'::jsonb END AS item
+        FROM release_figure f LEFT JOIN release_drawing d ON d.release_id=f.release_id AND d.id=f.drawing_id
         WHERE f.release_id=${variant.release_id}::uuid AND f.variant_id=${variant.id}::uuid AND f.system_id=${system.id}::uuid`;
       break;
     }

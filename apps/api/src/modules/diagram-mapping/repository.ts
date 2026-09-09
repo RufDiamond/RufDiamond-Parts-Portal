@@ -4,6 +4,7 @@ import type { Database, Transaction } from "../../db/client.js";
 import { callout, diagramMapping, diagramMappingApproval, diagramMappingRevision, drawingFile, figure, figurePart, model, part, variant } from "../../db/schema/index.js";
 import { AppError } from "../../plugins/error-handler.js";
 import type { AuthorizationContext } from "../authorization/types.js";
+import { loadSourceReviews } from "../catalog-review/binding.js";
 
 function notFound(): never { throw new AppError("FIGURE_NOT_FOUND", 404, "The requested figure was not found."); }
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -35,7 +36,9 @@ export async function loadGraph(tx: Transaction, ctx: AuthorizationContext, figu
   const rows = await (lock ? rowQuery.for("share") : rowQuery);
   const occurrenceQuery = tx.select().from(callout).where(eq(callout.figureId, figureId)).orderBy(callout.id);
   const occurrences = await (lock ? occurrenceQuery.for("update") : occurrenceQuery);
-  return { ...scope, head, drawing: drawing ?? null, rows, occurrences };
+  const graph={...scope,head,drawing:drawing??null,rows,occurrences};
+  const sourceReview=await loadSourceReviews(tx,graph);
+  return {...graph,allOccurrences:occurrences,occurrences:occurrences.filter(c=>!c.figurePartId||!sourceReview.excludedRowIds.has(c.figurePartId)),sourceReview};
 }
 export type MappingGraph = Awaited<ReturnType<typeof loadGraph>>;
 

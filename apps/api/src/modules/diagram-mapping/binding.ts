@@ -12,7 +12,8 @@ export function catalogueBindingSha256(graph: MappingGraph): string {
     variant: { id: variant.id, version: variant.version },
     drawing: drawing ? { id: drawing.id, sha256: drawing.sha256, width: drawing.width, height: drawing.height, fileVersion: drawing.fileVersion, objectVersionId: drawing.objectVersionId, validationStatus: drawing.validationStatus, mediaType: drawing.mediaType } : null,
     rows: graph.rows.map(({ row, part }) => ({ id: row.id, version: row.version, sourceRowKey: row.sourceRowKey, partId: part.id, partVersion: part.version })).sort((a, b) => a.id.localeCompare(b.id)),
-    occurrences: graph.occurrences.map(c => ({ id: c.id, version: c.version, sourceKey: c.sourceKey, figurePartId: c.figurePartId, refNo: c.number })).sort((a, b) => a.id.localeCompare(b.id)),
+    occurrences: graph.allOccurrences.map(c => ({ id: c.id, version: c.version, sourceKey: c.sourceKey, figurePartId: c.figurePartId, refNo: c.number })).sort((a, b) => a.id.localeCompare(b.id)),
+    ...(graph.sourceReview.current.length?{sourceReview:{bindingSha256:graph.sourceReview.bindingSha256,decisions:graph.sourceReview.current.map(r=>({id:r.id,mode:r.mode,rowIds:r.rowIds})),physicalOccurrences:graph.occurrences.map(c=>c.id)}}:{}),
   });
 }
 export function sourceContext(graph: MappingGraph): MappingSource {
@@ -21,7 +22,7 @@ export function sourceContext(graph: MappingGraph): MappingSource {
     figure: { id: figure.id, name: figure.name, version: figure.version, variantId: figure.variantId, modelId: model.id },
     drawing: drawing ? { id: drawing.id, filename: drawing.filename, sha256: drawing.sha256, width: drawing.width, height: drawing.height, fileVersion: drawing.fileVersion, mediaType: drawing.mediaType, validationStatus: drawing.validationStatus } : null,
     catalogueBindingSha256: catalogueBindingSha256(graph),
-    rows: graph.rows.map(({ row, part }) => ({ id: row.id, partId: part.id, partNumber: part.partNumber, description: part.description, qty: row.qty, version: row.version, refLabels: graph.occurrences.filter(c => c.figurePartId === row.id).map(c => c.number) })),
+    rows: graph.rows.map(({ row, part }) => ({ id: row.id, partId: part.id, partNumber: part.partNumber, description: part.description, ...(row.quantitySemantics === "unspecified-installed" ? {qty:null,quantitySemantics:"unspecified-installed" as const}:{qty:row.qty!}), version: row.version, refLabels: graph.allOccurrences.filter(c => c.figurePartId === row.id).map(c => c.number) })),
     occurrences: graph.occurrences.map(c => ({ id: c.id, figurePartId: c.figurePartId, refNo: c.number, version: c.version })),
   };
 }

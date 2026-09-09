@@ -26,4 +26,8 @@ export async function grantLocalRuntime(setup: Pool, role: string) {
   await setup.query(`GRANT UPDATE (qty,remarks,serviceable,effective_from,effective_to,version,updated_at) ON TABLE figure_part TO ${target}`);
   await setup.query(`GRANT UPDATE (state,summary,applied_at,version,updated_at) ON TABLE import_job TO ${target}`);
   await setup.query(`GRANT UPDATE (resolution,resolved_by_user_id,resolved_at,version,updated_at) ON TABLE import_issue TO ${target}`);
+  await setup.query(`GRANT SELECT,INSERT ON TABLE import_quantity_review TO ${target}`);
+  await setup.query(`GRANT UPDATE (quantity_semantics) ON TABLE figure_part TO ${target}`);
+  await setup.query(`GRANT SELECT,INSERT ON TABLE catalog_depiction_review,release_depiction_review,release_source_reference TO ${target}`);
+  await setup.query(`GRANT UPDATE (source_review_version) ON TABLE diagram_mapping TO ${target}`);
 }

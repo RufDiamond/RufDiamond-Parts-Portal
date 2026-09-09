@@ -90,7 +90,7 @@ export function PartsTable({
         ref: row.calloutNumbers.join(" "),
         partNo: row.part.partNumber,
         description: row.part.description,
-        qty: String(row.figurePart.qty),
+        qty: row.figurePart.qty===null?"Unspecified":String(row.figurePart.qty),
         price: formatPrice(row.part.listPrice, row.part.currency),
         remarks: row.figurePart.remarks ?? "",
       };
@@ -277,7 +277,7 @@ export function PartsTable({
                   </th>
 
                   <td className={styles.description}>{part.description}</td>
-                  <td className={styles.qty}>{figurePart.qty}</td>
+                  <td className={styles.qty}>{figurePart.qty===null?<span title="Installed quantity is unspecified in the reviewed assembly reference">Unspecified</span>:figurePart.qty}</td>
                   <td className={styles.price}>
                     {formatPrice(part.listPrice, part.currency)}
                   </td>

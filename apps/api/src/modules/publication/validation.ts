@@ -10,6 +10,7 @@ import { currentRevision, loadGraph, type MappingGraph } from "../diagram-mappin
 import { requireCurrentSource, validateDocument } from "../diagram-mapping/binding.js";
 import { canonicalJsonHash } from "../outbox/idempotency.js";
 import { isPinnedVersion } from "../drawings/storage.js";
+import { validateSnapshotReviews } from "../catalog-review/snapshot.js";
 
 export const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function unavailable(): never { throw new AppError("CATALOG_NOT_FOUND", 404, "The requested catalogue resource was not found."); }
@@ -42,17 +43,21 @@ export async function validateModel(tx: Transaction, ctx: AuthorizationContext, 
   const issue = (code: string, message: string, variantId?: string, figureId?: string) => issues.push({ code, message, path: `models[${modelId}]${variantId ? `.variants[${variantId}]` : ""}${figureId ? `.figures[${figureId}]` : ""}` });
   if (!line || !scope.variants.length || !figures.length) issue("INVALID_HIERARCHY", "A complete model, variant and figure hierarchy is required.");
   for (const variant of scope.variants) if (!figures.some(f => f.variantId === variant.id)) issue("VARIANT_FIGURES_REQUIRED", "Every released variant requires source-backed figures.", variant.id);
-  const graphs: Array<{ graph: MappingGraph; revision: MappingRevision }> = [];
+  const graphs: Array<{ graph: MappingGraph; revision: MappingRevision | null }> = [];
   for (const figure of figures) {
     const add = (code: string, message: string) => issue(code, message, figure.variantId, figure.id);
     if (!systems.some(x => x.system.id === figure.systemId && x.enabled)) add("DISABLED_HIERARCHY", "The figure system must be enabled for this model.");
     let graph: MappingGraph;
     try { graph = await loadGraph(tx, ctx, figure.id, lock); }
     catch (error) { if (error instanceof AppError && error.code === "MAPPING_UNAVAILABLE") { add(error.code, error.message); continue; } throw error; }
+    for(const {row} of graph.rows)if(row.quantitySemantics==="unspecified-installed"&&!graph.sourceReview.current.some(r=>r.mode==="assembly-reference-unspecified"&&r.rowIds.includes(row.id)))add("ASSEMBLY_REVIEW_REQUIRED","An unspecified installed quantity requires its exact attributable source review.");
+    if(graph.sourceReview.tableOnly){graphs.push({graph,revision:null});continue;}
     if (!graph.drawing || graph.drawing.validationStatus !== "valid") add("DRAWING_INVALID", "A validated drawing is required.");
     if (!isPinnedVersion(graph.drawing?.objectVersionId ?? undefined)) add("DRAWING_VERSION_REQUIRED", "An immutable object version is required.");
     if (!graph.rows.length) add("ROWS_REQUIRED", "Source-backed figure rows are required.");
-    for (const { row } of graph.rows) if (!graph.occurrences.some(c => c.figurePartId === row.id)) add("ROW_NOT_DEPICTED_UNRESOLVED", "Every row requires reviewed depiction or an explicit source-verified exemption.");
+    for (const { row } of graph.rows) {
+      if (!graph.sourceReview.excludedRowIds.has(row.id) && !graph.occurrences.some(c => c.figurePartId === row.id)) add("ROW_NOT_DEPICTED_UNRESOLVED", "Every row requires reviewed depiction or an explicit source-verified exemption.");
+    }
     for (const c of graph.occurrences) if (!c.figurePartId || !graph.rows.some(r => r.row.id === c.figurePartId)) add("CALLOUT_ROW_UNRESOLVED", "Every occurrence must reference a part row in its own figure.");
     const revision = await currentRevision(tx, graph);
     if (!revision?.approval) { add("MAPPING_APPROVAL_REQUIRED", "The current complete mapping requires attributable approval."); continue; }
@@ -98,10 +103,14 @@ export async function requireIntactSnapshot(tx: Transaction, releaseId: string) 
   const drawings = await tx.select().from(s.releaseDrawing).where(eq(s.releaseDrawing.releaseId, releaseId));
   const parts = await tx.select().from(s.releasePart).where(eq(s.releasePart.releaseId, releaseId));
   const mappings = await tx.select().from(s.releaseDiagramMapping).where(eq(s.releaseDiagramMapping.releaseId, releaseId));
+  const reviews=await tx.select().from(s.releaseDepictionReview).where(eq(s.releaseDepictionReview.releaseId,releaseId));
+  const references=await tx.select().from(s.releaseSourceReference).where(eq(s.releaseSourceReference.releaseId,releaseId));
+  const qualified=validateSnapshotReviews(figures,rows,reviews,references);
   const invalid = () => { throw new AppError("RELEASE_INCOMPLETE", 422, "The sealed snapshot is incomplete or inconsistent and cannot be activated."); };
   if (!variants.length || variants.some(v => !figures.some(f => f.variantId === v.id))) invalid();
-  if (!figures.length || figures.some(f => !rows.some(r => r.figureId === f.id) || !calls.some(c => c.figureId === f.id) || !drawings.some(d => d.id === f.drawingId))) invalid();
-  if (rows.some(r => !calls.some(c => c.figureId === r.figureId && c.figurePartId === r.id))) invalid();
+  if (!figures.length || figures.some(f => !rows.some(r => r.figureId === f.id) || (qualified.tableOnly.has(f.id)?calls.some(c=>c.figureId===f.id)||mappings.some(m=>m.figureId===f.id):!calls.some(c => c.figureId === f.id) || !drawings.some(d => d.id === f.drawingId)))) invalid();
+  if (rows.some(r => !qualified.excluded.has(r.id)&&!calls.some(c => c.figureId === r.figureId && c.figurePartId === r.id))) invalid();
+  if(calls.some(c=>qualified.excluded.has(c.figurePartId)))invalid();
   if (parts.some(p => !p.listPrice || !["CAD", "USD"].includes(p.currency)) || new Set(parts.map(p => p.currency)).size > 1) invalid();
   for (const mapping of mappings) {
     const document = mapping.document;

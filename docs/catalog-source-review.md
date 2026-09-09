@@ -1,0 +1,38 @@
+# Catalogue source review
+
+This workflow records attributable source decisions. It does not approve real Fat Truck data automatically, correct conflicting part identities, or approve component geometry. Tests and local operators are synthetic software evidence only.
+
+## Operator sequence
+
+1. Stage and validate the exact private original source using [catalog import](catalog-import.md). Keep its object version, full SHA-256, lineage and raw cells. Ingestion remains API-only; no generic upload proxy was added.
+2. Open `/admin/catalog-review/imports/<job UUID>` for an invalid informational assembly row. Select its exact QTY issue, supply meaningful source evidence, and explicitly confirm **both** informational nondepiction and unspecified installed quantity. Only raw `QTY=0`, `PNC=-`, otherwise valid fields and conflict-free canonical identity qualify. Ordinary zero quantities and other invalid fields remain blocking. Raw staging and invalid normalization envelopes never change.
+3. Apply that reviewed import with its current job version. The transaction reparses pinned original bytes and verifies all interpreted fields and actual target/alias identities. It binds the same named decision to the actual canonical row; it neither invents a second reviewer nor approves any other row or geometry. Installed quantity becomes `null` with `quantitySemantics=unspecified-installed`, never 1. Requested order quantity remains independently chosen.
+4. Open `/admin/catalog-review/figures/<figure UUID>` (linked from Draft administration). Review exact source rows, original references, raw quantity, remarks, checksums and history. A table-only decision must select every current row of a drawingless figure. A not-depicted decision covers only selected rows. Unassociated source references cannot be waived.
+5. A first/replacement PNG, source/target/row/part version change, new import lineage binding or loss of reviewer authority invalidates the current decision. For a stale applied assembly, select “Re-review an existing unspecified assembly reference” and explicitly confirm both semantics against the new source. This action must match the original quantity decision and unchanged canonical source fields; it cannot repair unrelated changes. History remains immutable.
+6. Review/approve complete geometry for every remaining physical occurrence, then use the existing Publisher queue. Publication is a separate named action. A table-only list has no dummy drawing or mapping; its printed references are retained as source references. A mixed figure keeps source references separate from physical geometry.
+
+## Authority and transport
+
+- Reads require authenticated draft access, `publish.draft.view`, `catalog.figure.view` and current model/variant scope. Import source review also requires `parts.import` and the existing named publisher check.
+- Quantity decisions require `parts.import` plus named `publish.execute`; depiction decisions additionally require `catalog.callout.manage` and `catalog.callout.map`. Proposal editing is not approval authority. Server checks apply before replay and are refreshed transactionally.
+- GET `/api/v1/admin/catalog-review/imports/:id` and `/figures/:id` return strict safe source details, not storage keys, signed URLs or prices.
+- POST `/api/v1/admin/catalog-review/imports/:id/quantity-decisions` uses `AssemblyReferenceReviewInput`; POST `/figures/:id/decisions` uses `DepictionReviewInput`. Both require exact `sourceBindingSha256`, meaningful evidence, `confirmed:true`, CSRF, `If-Match` and `Idempotency-Key`. Reviewer identity/time are server-derived; unknown/spoofed actor fields are rejected.
+- On an uncertain network/5xx outcome, retry the exact body/version/key. On 409/412 reload the current source before a new decision. Missing preconditions are 428; source/key changes 409; stale versions 412; invalid decisions 422; out-of-scope resources 404; insufficient authority 403.
+
+## Immutable storage and release behavior
+
+Migration `0012_catalog_source_reviews.sql` adds append-only `import_quantity_review` and `catalog_depiction_review`, a separate figure source-review coordination version, paired quantity semantics, explicit nullable table-only release drawings, and immutable `release_depiction_review` / `release_source_reference` snapshots. Runtime grants permit only required reads/inserts and narrow coordination updates; owner and runtime history edits are rejected. GET never creates coordination heads.
+
+Source bindings cover original object/hash/version/lineage and staging identities, canonical figure/model/variant/row/part versions, drawing identity/version/hash and **all** source observations. Decision-head increments do not change the source hash. Mapping bindings include current decision IDs and the applicable physical occurrence set. Geometry approval is therefore invalidated when that set changes.
+
+Before a fresh depiction decision, canonical values must agree with retained source fields: quantity/semantics, remarks, serviceability, effective dates, part number/description/manufacturer/list price/currency, figure name/group, system/model/variant names, row identity and literal reference association. Hierarchy names use the existing import's case-insensitive identity normalization; original spelling is retained. This is conservative: even a legitimate later price/catalogue edit that differs from retained source needs a corrected/new source revision and consistent canonical binding, subject to existing import conflict guards. A depiction re-review alone is not a pricing/identity reconciliation tool.
+
+New publication and sealed activation validate the same source exceptions. Sealed provenance and references use release-local row identities and checksums. Customer reads/rollback use those snapshots without current draft/import/reviewer joins. Later draft edits do not rewrite customer content. Denied prices remain absent before serialization.
+
+## Task 10c coverage seam
+
+`buildMappingCoverage(figures, callouts, revisions)` accepts optional `CoverageFigure.sourceReviews`. Supply only decisions the authoritative current source-review loader has qualified: `decisionId`, `mode`, exact canonical `rowIds`, original `sourceChecksum`, current **mapping** `catalogueBindingSha256`, authenticated `reviewerId`, `reviewedAt` and evidence. Do not substitute `sourceBindingSha256` for the mapping binding, and do not treat locally filled records as approval. The pure helper compares inputs but cannot independently recheck database authority.
+
+Pass all retained callout observations, including source-only references. Exact table-only coverage is reported as `approvedTableOnly`, not `complete` physical tracing. Qualified excluded rows/occurrences are `approvedNonDepictedRowIds` / `approved-nondepicted`; all other occurrences still require explicit expected region IDs and complete current approved geometry. Unknown region counts, stale hashes, extra rows and unresolved source observations remain incomplete. The real legacy inventory supplies no approvals and remains unchanged.
+
+The workbook SHA-256 `3a6a66571058ac238f707fed4421755f9a678e4baff708b452382f439d876599` is distinct from legacy TypeScript and database mapping bindings. Preserve original group/name keys, including both differently named electrical assemblies printed as 11.3. Safety 6.15 references 1,3–10, Cowling 7.1 reference 34, and raw-zero assembly rows 222/241 need explicit real review. Cabin/Bumper/Accessories identity conflicts remain unresolved, never exemptions. No contours, manifests, source cells or remote deployment are changed by this task.

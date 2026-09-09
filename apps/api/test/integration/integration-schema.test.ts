@@ -132,7 +132,7 @@ describe("integration schema migration", () => {
     await postgres.migrate();
     await postgres.migrate();
 
-    expect((await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations")).rows[0].count).toBe(11);
+    expect((await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations")).rows[0].count).toBe(12);
     expect((await postgres.pool.query("select nextval('rfq_reference_seq') as value")).rows[0].value).toBe("1");
     expect((await postgres.pool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 5)).toEqual(oldHistory);
     expect((await postgres.pool.query("select id,status,published_at,source_checksum from publication_release where id=$1", [ids.release])).rows[0]).toEqual(oldRelease);

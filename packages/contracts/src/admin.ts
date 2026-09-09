@@ -18,6 +18,40 @@ const count = () => Type.Integer({ minimum: 0 });
 
 const importUuid = () => Type.String({ pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" });
 const importHash = () => Type.String({ pattern: "^[a-f0-9]{64}$" });
+const reviewEvidence = Type.String({ minLength: 10, maxLength: 4000, pattern: "^\\S[\\s\\S]{8,}\\S$" });
+export const AssemblyReferenceReviewInputSchema = Type.Object({
+  decision: Type.Literal("assembly-reference-unspecified"), confirmed: Type.Literal(true),
+  sourceBindingSha256: importHash(), stagingRowId: importUuid(), stagingRowVersion: Type.Integer({ minimum: 1 }),
+  issueId: importUuid(), issueVersion: Type.Integer({ minimum: 1 }), evidence: reviewEvidence,
+}, { additionalProperties: false });
+export type AssemblyReferenceReviewInput = Static<typeof AssemblyReferenceReviewInputSchema>;
+const depictionReviewFields = {
+  confirmed: Type.Literal(true),
+  sourceBindingSha256: importHash(), rowIds: Type.Array(importUuid(), { minItems: 1, maxItems: 1000, uniqueItems: true }), evidence: reviewEvidence,
+};
+export const DepictionReviewInputSchema = Type.Union([
+  Type.Object({...depictionReviewFields,mode:Type.Union([Type.Literal("table-only"),Type.Literal("not-depicted")])},{additionalProperties:false}),
+  Type.Object({...depictionReviewFields,mode:Type.Literal("assembly-reference-unspecified"),rowIds:Type.Array(importUuid(),{minItems:1,maxItems:1}),quantityDecisionId:importUuid()},{additionalProperties:false}),
+]);
+export type DepictionReviewInput = Static<typeof DepictionReviewInputSchema>;
+export const SourceApprovalSchema = Type.Object({
+  decisionId: importUuid(), reviewerId: importUuid(), reviewerName: Type.String({ minLength: 1 }), reviewedAt: Type.String(), evidence: reviewEvidence,
+}, { additionalProperties: false });
+export type SourceApproval = Static<typeof SourceApprovalSchema>;
+export const ReviewSourceRowSchema = Type.Object({
+  stagingRowId: importUuid(), stagingRowVersion: Type.Integer({ minimum: 1 }), sourceRowKey: Type.String(), identityKey: importHash(), contentHash: importHash(),
+  sourceChecksum: importHash(), jobId: importUuid(), lineageKey: Type.String(), rowNumber: Type.Union([Type.Integer(), Type.Null()]),
+  partNumber: Type.String(), description: Type.String(), reference: nullableString(), rawQuantity: Type.Union([Type.String(), Type.Number(), Type.Null()]), remarks: nullableString(),
+  figurePartId: Type.Union([importUuid(), Type.Null()]), figurePartVersion: Type.Union([Type.Integer(), Type.Null()]),
+}, { additionalProperties: false });
+export type ReviewSourceRow = Static<typeof ReviewSourceRowSchema>;
+export const SourceReviewDetailSchema = Type.Object({
+  id: importUuid(), version: Type.Integer({ minimum: 1 }), target: Type.Union([Type.Literal("import"), Type.Literal("figure")]),
+  sourceBindingSha256: importHash(), sourceConflict: Type.Boolean(), canReview: Type.Boolean(), rows: Type.Array(ReviewSourceRowSchema),
+  issues: Type.Array(Type.Object({ id: importUuid(), version: Type.Integer({ minimum: 1 }), stagingRowId: Type.Union([importUuid(), Type.Null()]), code: Type.String(), field: nullableString(), message: Type.String() }, { additionalProperties: false })),
+  approvals: Type.Array(Type.Object({ ...SourceApprovalSchema.properties, mode: Type.Union([Type.Literal("table-only"), Type.Literal("not-depicted"), Type.Literal("assembly-reference-unspecified")]), rowIds: Type.Array(importUuid()), current: Type.Boolean(),quantityDecisionId:Type.Optional(Type.Union([importUuid(),Type.Null()])) }, { additionalProperties: false })),
+}, { additionalProperties: false });
+export type SourceReviewDetail = Static<typeof SourceReviewDetailSchema>;
 export const NormalizedImportFieldsSchema = Type.Object({
   partNumber: Type.String(), description: Type.String(), model: Type.String(), variant: Type.String(), system: Type.String(), groupNo: nullableString(), figureName: Type.String(),
   effectiveFrom: nullableString(), effectiveTo: nullableString(), qty: Type.Integer({ minimum: 1, maximum: 2147483647 }), pnc: nullableString(),

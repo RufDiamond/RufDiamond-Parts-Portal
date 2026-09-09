@@ -8,6 +8,7 @@ import {
   figurePart,
   importIssue,
   importJob,
+  importQuantityReview,
   importSourceAlias,
   importStagingRow,
   model,
@@ -23,6 +24,7 @@ import { canonicalJsonHash } from "../outbox/idempotency.js";
 import type {
   ImportProblem,
   ImportRow,
+  AppliedImportRow,
   NormalizedImportFields,
 } from "./normalizer.js";
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -141,6 +143,7 @@ export async function detail(
       .select()
       .from(importSourceAlias)
       .where(eq(importSourceAlias.jobId, job.id));
+  const interpretations = await tx.select().from(importQuantityReview).where(eq(importQuantityReview.jobId,job.id));
   return {
     id: job.id,
     state: job.state,
@@ -155,7 +158,7 @@ export async function detail(
     validRowCount: rows.filter(
       (row) => rowValue(row).normalizationState === "valid",
     ).length,
-    blockingIssueCount: issues.filter((i) => i.severity === "error").length,
+    blockingIssueCount: issues.filter((i) => i.severity === "error" && !interpretations.some(r=>r.issueId===i.id && r.issueVersion===i.version && r.stagingRowId===i.stagingRowId)).length,
     issues: issues.map((issue) => ({
       id: issue.id,
       version: issue.version,
@@ -176,9 +179,9 @@ export async function detail(
         figureKey: alias.figureKey,
         figureId: alias.figureId,
         figurePartId: alias.figurePartId,
-        partNumber: rowValue(row).fields!.partNumber,
+        partNumber: rowValue(row).fields?.partNumber ?? interpretations.find(r=>r.stagingRowId===row.id)!.interpretedFields.partNumber,
         calloutId: alias.calloutId,
-        refNo: rowValue(row).fields!.pnc,
+        refNo: rowValue(row).fields?.pnc ?? interpretations.find(r=>r.stagingRowId===row.id)?.interpretedFields.pnc ?? null,
       };
     }),
   };
@@ -222,11 +225,11 @@ export async function validationProblems(
   tx: Transaction,
   job: StoredJob,
   target: Awaited<ReturnType<typeof targetScope>>,
-  rows: ImportRow[],
+  rows: AppliedImportRow[],
 ): Promise<ImportProblem[]> {
   const problems: ImportProblem[] = [];
   const add = (
-    row: ImportRow,
+    row: AppliedImportRow,
     code: string,
     message: string,
     field: string | null = null,
@@ -432,7 +435,7 @@ export function sameSource(job: StoredJob, input: ImportUploadMetadata) {
 }
 
 /** Called only under target-model serializable lock after all source issues are checked. */
-export async function applyGraph(tx: Transaction, job: StoredJob) {
+export async function applyGraph(tx: Transaction, job: StoredJob, effectiveRows?: AppliedImportRow[]) {
   const staged = await jobRows(tx, job.id),
     prior = await latestLineage(tx, job);
   let changed = false;
@@ -440,7 +443,7 @@ export async function applyGraph(tx: Transaction, job: StoredJob) {
     parts = new Map<string, typeof part.$inferSelect>(),
     newParts = new Set<string>();
   for (const stored of staged) {
-    const row = rowValue(stored),
+    const row = effectiveRows?.find(r=>r.sourceRowKey===stored.sourceRowKey) ?? rowValue(stored),
       f = row.fields;
     if (!f)
       throw new AppError(
@@ -526,6 +529,7 @@ export async function applyGraph(tx: Transaction, job: StoredJob) {
           .update(figurePart)
           .set({
             qty: f.qty,
+            quantitySemantics: "quantitySemantics" in f ? f.quantitySemantics : "known",
             remarks: f.remarks,
             serviceable: f.serviceable,
             effectiveFrom: f.effectiveFrom,
@@ -546,6 +550,7 @@ export async function applyGraph(tx: Transaction, job: StoredJob) {
           partId: p.id,
           sourceRowKey: row.identityKey,
           qty: f.qty,
+          quantitySemantics: "quantitySemantics" in f ? f.quantitySemantics : "known",
           remarks: f.remarks,
           serviceable: f.serviceable,
           effectiveFrom: f.effectiveFrom,
@@ -582,7 +587,7 @@ export async function applyGraph(tx: Transaction, job: StoredJob) {
       });
   }
   for (const stored of staged) {
-    const row = rowValue(stored),
+    const row = effectiveRows?.find(r=>r.sourceRowKey===stored.sourceRowKey) ?? rowValue(stored),
       p = parts.get(row.fields!.partNumber)!;
     if (!newParts.has(p.id)) continue;
     for (const hint of row.hints) {

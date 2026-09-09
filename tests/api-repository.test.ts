@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createApiRepository } from "@/data/api-repository.server";
 import type { FigureDetail } from "@rufdiamond/contracts";
+import { adaptFigureDetail } from "@/data/customer-adapter";
 
 const ids = { figure: "00000000-0000-4000-8000-000000000001", variant: "00000000-0000-4000-8000-000000000002", model: "00000000-0000-4000-8000-000000000003", release: "00000000-0000-4000-8000-000000000004", system: "00000000-0000-4000-8000-000000000005" };
 const release = { modelId: ids.model, releaseId: ids.release, revision: 1 };
@@ -15,6 +16,15 @@ function detail(): FigureDetail {
 const page = (items: unknown[], nextCursor: string | null = null, refs = [release]) => Response.json({ items, nextCursor, releases: refs });
 
 describe("contract-only API repository", () => {
+  it("adapts an explicitly table-only snapshot with retained references and unspecified installed quantity",async()=>{
+    const source=detail();
+    const table={...source,figure:{...source.figure,drawingFileId:null,depictionMode:"table-only" as const},drawing:null,callouts:[],mapping:null,sourceReferences:[{figurePartId:"row",number:"A*"}],rows:[{...source.rows[0],figurePart:{...source.rows[0].figurePart,qty:null,quantitySemantics:"unspecified-installed" as const}}]};
+    const result=await createApiRepository(async()=>Response.json(table)).getFigureDetail(ids.figure);
+    const adapted=adaptFigureDetail(result);
+    expect(adapted.drawing).toBeNull();
+    expect(adapted.rows[0].figurePart.qty).toBeNull();
+    expect(adapted.rows[0].calloutNumbers).toEqual(["A*"]);
+  });
   it.each([
     ["search", false], ["search", true], ["part", false], ["part", true],
   ] as const)("preserves legitimate %s usage multiplicity with pagination=%s", async (method, paginated) => {
@@ -98,10 +108,10 @@ describe("contract-only API repository", () => {
   it.each(["row", "drawing", "release", "callout", "content-url"])("rejects cross-identity %s responses", async field => {
     const source = detail();
     if (field === "row") source.rows[0].figurePart.figureId = "foreign";
-    if (field === "drawing") source.drawing.id = "foreign";
+    if (field === "drawing") source.drawing!.id = "foreign";
     if (field === "release") source.release = { ...release, modelId: "foreign" };
     if (field === "callout") source.callouts[0].figurePartId = "foreign";
-    if (field === "content-url") source.drawing.contentUrl = "https://public.example/drawing.png";
+    if (field === "content-url") source.drawing!.contentUrl = "https://public.example/drawing.png";
     await expect(createApiRepository(async () => Response.json(source)).getFigureDetail(ids.figure)).rejects.toMatchObject({ code: "INVALID_CATALOG_IDENTITY" });
   });
   it("restarts the entire aggregate on stale cursor and retains only new release metadata", async () => {

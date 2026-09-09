@@ -7,6 +7,16 @@ import {
   type MappingRevision,
 } from "@rufdiamond/contracts";
 export interface CoverageFigure {
+  sourceReviews?: Array<{
+    decisionId: string;
+    mode: "table-only" | "not-depicted" | "assembly-reference-unspecified";
+    rowIds: string[];
+    sourceChecksum: string;
+    catalogueBindingSha256: string;
+    reviewerId: string;
+    reviewedAt: string;
+    evidence: string;
+  }>;
   id: string;
   identityKind: "canonical" | "legacy";
   sourceChecksum: string;
@@ -44,6 +54,37 @@ export function buildMappingCoverage(
   revisions: CoverageRevision[],
 ) {
   const results = figures.map((figure) => {
+    const sourceReviews = (figure.sourceReviews ?? []).filter(
+      (r) =>
+        figure.identityKind === "canonical" &&
+        !figure.conflicts.length &&
+        r.sourceChecksum === figure.sourceChecksum &&
+        r.catalogueBindingSha256 === figure.catalogueBindingSha256 &&
+        r.decisionId.trim() &&
+        r.reviewerId.trim() &&
+        Number.isFinite(Date.parse(r.reviewedAt)) &&
+        r.evidence.trim().length >= 10 &&
+        r.rowIds.length > 0 &&
+        new Set(r.rowIds).size === r.rowIds.length &&
+        r.rowIds.every((id) => figure.rowIds.includes(id)) &&
+        (r.mode !== "table-only" ||
+          (!figure.drawing && r.rowIds.length === figure.rowIds.length)),
+    );
+    const qualifiedReviews = sourceReviews.filter(
+      (r) =>
+        r.mode !== "table-only" ||
+        !callouts.some(
+          (c) =>
+            c.figureId === figure.id &&
+            (!c.figurePartId || !figure.rowIds.includes(c.figurePartId)),
+        ),
+    );
+    const approvedTableOnly = qualifiedReviews.some(
+        (r) => r.mode === "table-only",
+      ),
+      approvedNonDepictedRowIds = [
+        ...new Set(qualifiedReviews.flatMap((r) => r.rowIds)),
+      ];
     const entries = revisions.filter((r) => r.figureId === figure.id),
       entry = entries.length === 1 ? entries[0] : undefined,
       revision = entry?.revision,
@@ -92,17 +133,19 @@ export function buildMappingCoverage(
           id: c.id,
           refNo: c.refNo,
           state:
-            entry && !current
-              ? "stale-source"
-              : !associated
-                ? "unresolved-association"
-                : complete
-                  ? "persisted-complete"
-                  : mapped
-                    ? "persisted-partial"
-                    : proposalCurrent
-                      ? "proposal-only"
-                      : "missing",
+            c.figurePartId && approvedNonDepictedRowIds.includes(c.figurePartId)
+              ? "approved-nondepicted"
+              : entry && !current
+                ? "stale-source"
+                : !associated
+                  ? "unresolved-association"
+                  : complete
+                    ? "persisted-complete"
+                    : mapped
+                      ? "persisted-partial"
+                      : proposalCurrent
+                        ? "proposal-only"
+                        : "missing",
           persisted: !!mapped,
           proposalSourceBound: proposalCurrent,
           proposedRegions: proposalCurrent ? proposal!.regionIds.length : 0,
@@ -114,12 +157,13 @@ export function buildMappingCoverage(
       });
     const unresolvedRowIds = figure.rowIds.filter(
       (id) =>
+        !approvedNonDepictedRowIds.includes(id) &&
         !callouts.some(
           (c) => c.figureId === figure.id && c.figurePartId === id,
         ),
     );
     const mappingApproved = current && !!revision?.approval,
-      sourceApproved = false;
+      sourceApproved = approvedTableOnly;
     return {
       id: figure.id,
       identityKind: figure.identityKind,
@@ -133,10 +177,15 @@ export function buildMappingCoverage(
       occurrences,
       mappingApproved,
       sourceApproved,
+      approvedTableOnly,
+      approvedNonDepictedRowIds,
       complete:
         !!figure.drawing &&
         occurrences.length > 0 &&
-        occurrences.every((c) => c.complete) &&
+        occurrences.some((c) => c.state !== "approved-nondepicted") &&
+        occurrences.every(
+          (c) => c.complete || c.state === "approved-nondepicted",
+        ) &&
         !unresolvedRowIds.length &&
         !figure.conflicts.length &&
         entries.length === 1 &&
@@ -152,7 +201,13 @@ export function buildMappingCoverage(
         .flatMap((f) => f.occurrences)
         .filter((c) => c.persisted).length,
       completeFigures: results.filter((f) => f.complete).length,
-      sourceApprovedFigures: 0,
+      sourceApprovedFigures: results.filter((f) => f.sourceApproved).length,
+      approvedTableOnlyFigures: results.filter((f) => f.approvedTableOnly)
+        .length,
+      approvedNonDepictedRows: results.reduce(
+        (n, f) => n + f.approvedNonDepictedRowIds.length,
+        0,
+      ),
     },
   };
 }

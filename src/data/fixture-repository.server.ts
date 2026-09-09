@@ -546,7 +546,7 @@ export async function getAllParts(
       part,
       systems,
       figures: usedFigures.map((figure) => figure.groupNo),
-      totalQty: uses.reduce((sum, use) => sum + use.qty, 0),
+      totalQty: uses.some(use=>use.qty===null)?null:uses.reduce((sum, use) => sum + use.qty!, 0),
       remarks: [
         ...new Set(
           uses

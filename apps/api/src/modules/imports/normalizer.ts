@@ -41,6 +41,9 @@ export interface ImportProblem {
   severity: "warning" | "error";
   message: string;
 }
+export type ReviewedAssemblyFields = Omit<NormalizedImportFields, "qty"> & { qty: null; quantitySemantics: "unspecified-installed" };
+export type AppliedImportRow = Omit<ImportRow, "fields"> & { fields: NormalizedImportFields | ReviewedAssemblyFields | null };
+export type ReviewedImport = Omit<NormalizedImport, "rows"> & { rows: AppliedImportRow[] };
 export interface NormalizedImport {
   sourceChecksum: string;
   rows: ImportRow[];
@@ -50,7 +53,9 @@ const hash = (value: unknown) =>
   createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const str = (value: RawCell) => (value === null ? "" : String(value).trim());
 const nullable = (value: RawCell) => str(value) || null;
-export function normalizeImport(parsed: ParsedImport): NormalizedImport {
+export function normalizeImport(parsed: ParsedImport): NormalizedImport;
+export function normalizeImport(parsed: ParsedImport, reviewedAssemblyRows: readonly number[]): ReviewedImport;
+export function normalizeImport(parsed: ParsedImport, reviewedAssemblyRows: readonly number[] = []): ReviewedImport {
   const issues: ImportProblem[] = [];
   const rows = parsed.rows.map((raw) => {
     const p = raw.sourcePayload,
@@ -114,12 +119,13 @@ export function normalizeImport(parsed: ParsedImport): NormalizedImport {
     const quantity = str(p.QTY),
       validQuantity =
         /^[1-9]\d{0,8}$/.test(quantity) && Number(quantity) <= 2147483647;
-    if (!validQuantity)
+    const reviewedAssembly = reviewedAssemblyRows.includes(raw.rowNumber) && quantity === "0" && str(p.PNC) === "-";
+    if (!validQuantity && !reviewedAssembly)
       invalid("QTY", "A positive integer quantity is required.");
     const serviceability = str(p["S/NS"]);
     if (!["S", "NS"].includes(serviceability))
       invalid("S/NS", "Only explicit S or NS is accepted.");
-    const fields: NormalizedImportFields = {
+    const fields: NormalizedImportFields | ReviewedAssemblyFields = {
       partNumber: required("PART NO").toUpperCase(),
       description: required("DESCRIPTION"),
       model: required("MODEL"),
@@ -129,7 +135,7 @@ export function normalizeImport(parsed: ParsedImport): NormalizedImport {
       figureName: required("ASSEMBLY NAME - PAGE"),
       effectiveFrom: date("START DATE"),
       effectiveTo: date("END DATE"),
-      qty: validQuantity ? Number(quantity) : 0,
+      ...(reviewedAssembly ? { qty: null, quantitySemantics: "unspecified-installed" as const } : { qty: validQuantity ? Number(quantity) : 0 }),
       pnc: nullable(p.PNC),
       listPrice,
       currency: "CAD",
@@ -151,7 +157,7 @@ export function normalizeImport(parsed: ParsedImport): NormalizedImport {
     ]);
     // No. and row position are raw provenance only. This key is usable only when unique in the lineage.
     const identityKey = hash([figureKey, fields.partNumber, fields.pnc]);
-    const row: ImportRow = {
+    const row: AppliedImportRow = {
       ...raw,
       fields: pending.length ? null : fields,
       normalizationState: pending.length ? "invalid" : "valid",

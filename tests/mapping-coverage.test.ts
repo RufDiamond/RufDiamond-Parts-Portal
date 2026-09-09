@@ -17,6 +17,65 @@ const figure: CoverageFigure = {
   rowIds: ["row-1"],
   conflicts: [],
 };
+it("classifies exact source-approved table-only coverage separately from complete physical tracing", () => {
+  const sourceReviews = [
+    {
+      decisionId: "review",
+      mode: "table-only" as const,
+      rowIds: ["row-1"],
+      sourceChecksum: sha,
+      catalogueBindingSha256: binding,
+      reviewerId: "named-reviewer",
+      reviewedAt: "2026-09-09T00:00:00Z",
+      evidence: "Synthetic table-only source review",
+    },
+  ];
+  const report = buildMappingCoverage(
+    [{ ...figure, drawing: null, sourceReviews }],
+    [],
+    [],
+  );
+  expect(report.figures[0]).toMatchObject({
+    approvedTableOnly: true,
+    complete: false,
+    unresolvedRowIds: [],
+  });
+  expect(
+    buildMappingCoverage(
+      [
+        {
+          ...figure,
+          drawing: null,
+          sourceReviews,
+          rowIds: ["row-1", "new-row"],
+        },
+      ],
+      [],
+      [],
+    ).figures[0],
+  ).toMatchObject({ approvedTableOnly: false, complete: false });
+  expect(
+    buildMappingCoverage(
+      [
+        {
+          ...figure,
+          drawing: null,
+          sourceReviews,
+          conflicts: ["SOURCE_CONFLICT"],
+        },
+      ],
+      [],
+      [],
+    ).figures[0],
+  ).toMatchObject({ approvedTableOnly: false, complete: false });
+  expect(
+    buildMappingCoverage(
+      [{ ...figure, drawing: null, sourceReviews }],
+      [{ ...occurrence, figurePartId: null }],
+      [],
+    ).figures[0].approvedTableOnly,
+  ).toBe(false);
+});
 const occurrence: CoverageOccurrence = {
   id: "callout-1",
   figureId: "figure-1",

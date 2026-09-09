@@ -127,7 +127,7 @@ export function FigureWorkspace({
             quotePartIds.has(row.part.id) &&
             !requestedPartIds.has(row.part.id),
         )
-        .map((row) => ({ part: row.part, qty: row.figurePart.qty })),
+        .map((row) => ({ part: row.part, qty: row.figurePart.qty ?? 1 })),
     [rows, quotePartIds, requestedPartIds],
   );
 
@@ -227,7 +227,7 @@ export function FigureWorkspace({
     const lines = rows.map(
       (row) =>
         `${row.calloutNumbers.join(", ") || "-"}\t${row.part.partNumber}\t` +
-        `${row.part.description}\tx${row.figurePart.qty}`,
+        `${row.part.description}\t${row.figurePart.qty===null?"Installed quantity unspecified":`x${row.figurePart.qty}`}`,
     );
     const body = [
       `${figure.name} — Fat Truck ${machineName}`,
@@ -524,7 +524,7 @@ export function FigureWorkspace({
               src={releasedDrawing.src}
               width={drawing?.width}
               height={drawing?.height}
-              note={`Assembly drawing not supplied — ${figure.name}`}
+              note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
               document={regions}
               selectionActivation={activation}
@@ -657,7 +657,7 @@ export function FigureWorkspace({
           src={releasedDrawing.src}
           width={drawing?.width}
           height={drawing?.height}
-          note={`Assembly drawing not supplied — ${figure.name}`}
+          note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
           document={regions}
           selectionActivation={activation}

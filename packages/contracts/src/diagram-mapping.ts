@@ -120,6 +120,10 @@ export const MappingWriteContextSchema = Type.Object(
 );
 export type MappingWriteContext = Static<typeof MappingWriteContextSchema>;
 
+const mappingSourceRow = {
+  id: Type.String(), partId: Type.String(), partNumber: Type.String(), description: Type.String(),
+  refLabels: Type.Array(Type.String()), version: Type.Integer({ minimum: 1 }),
+};
 export const MappingSourceSchema = Type.Object({
   figure: Type.Object({ id: Type.String(), name: Type.String(), version: Type.Integer({ minimum: 1 }), variantId: Type.String(), modelId: Type.String() }, { additionalProperties: false }),
   drawing: Type.Union([Type.Null(), Type.Object({
@@ -128,10 +132,10 @@ export const MappingSourceSchema = Type.Object({
     fileVersion: Type.Integer({ minimum: 1 }), mediaType: Type.String(), validationStatus: Type.Union([Type.Literal("pending"), Type.Literal("valid"), Type.Literal("rejected")]),
   }, { additionalProperties: false })]),
   catalogueBindingSha256: Sha256Schema,
-  rows: Type.Array(Type.Object({
-    id: Type.String(), partId: Type.String(), partNumber: Type.String(), description: Type.String(), qty: Type.Integer({ minimum: 1 }),
-    refLabels: Type.Array(Type.String()), version: Type.Integer({ minimum: 1 }),
-  }, { additionalProperties: false })),
+  rows: Type.Array(Type.Union([
+    Type.Object({...mappingSourceRow,qty:Type.Integer({minimum:1}),quantitySemantics:Type.Optional(Type.Literal("known"))},{additionalProperties:false}),
+    Type.Object({...mappingSourceRow,qty:Type.Null(),quantitySemantics:Type.Literal("unspecified-installed")},{additionalProperties:false}),
+  ])),
   occurrences: Type.Array(Type.Object({ id: Type.String(), figurePartId: Type.Union([Type.String(), Type.Null()]), refNo: Type.String(), version: Type.Integer({ minimum: 1 }) }, { additionalProperties: false })),
 }, { $id: "MappingSource", additionalProperties: false });
 export type MappingSource = Static<typeof MappingSourceSchema>;

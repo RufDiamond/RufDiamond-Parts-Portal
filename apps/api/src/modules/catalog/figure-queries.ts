@@ -15,7 +15,7 @@ export async function readFigure(tx: Transaction, scope: CatalogScope, figureId:
   }).from(s.releaseFigure)
     .innerJoin(s.releaseVariant, and(eq(s.releaseVariant.releaseId, s.releaseFigure.releaseId), eq(s.releaseVariant.id, s.releaseFigure.variantId)))
     .innerJoin(s.releaseSystem, and(eq(s.releaseSystem.releaseId, s.releaseFigure.releaseId), eq(s.releaseSystem.id, s.releaseFigure.systemId)))
-    .innerJoin(s.releaseDrawing, and(eq(s.releaseDrawing.releaseId, s.releaseFigure.releaseId), eq(s.releaseDrawing.id, s.releaseFigure.drawingId)))
+    .leftJoin(s.releaseDrawing, and(eq(s.releaseDrawing.releaseId, s.releaseFigure.releaseId), eq(s.releaseDrawing.id, s.releaseFigure.drawingId)))
     .where(and(eq(s.releaseFigure.workingId, requiredId(figureId)), inArray(s.releaseFigure.releaseId, scope.releases.map(r => r.releaseId)), scopeSql(s.releaseVariant.workingId, scope.authority.variantIds))).limit(1);
   if (!metadata) unavailable();
   const f = metadata.figure;
@@ -24,7 +24,8 @@ export async function readFigure(tx: Transaction, scope: CatalogScope, figureId:
     .where(and(eq(s.releaseFigurePart.releaseId, f.releaseId), eq(s.releaseFigurePart.figureId, f.id))).orderBy(s.releaseFigurePart.workingId);
   const calls = await tx.select().from(s.releaseCallout).where(and(eq(s.releaseCallout.releaseId, f.releaseId), eq(s.releaseCallout.figureId, f.id))).orderBy(s.releaseCallout.workingId);
   const [mapping] = await tx.select().from(s.releaseDiagramMapping).where(and(eq(s.releaseDiagramMapping.releaseId, f.releaseId), eq(s.releaseDiagramMapping.figureId, f.id)));
-  return projectFigure(scope, metadata, rows, calls, mapping);
+  const references=await tx.select().from(s.releaseSourceReference).where(and(eq(s.releaseSourceReference.releaseId,f.releaseId),eq(s.releaseSourceReference.figureId,f.id)));
+  return projectFigure(scope, metadata, rows, calls, mapping,references);
 }
 
 type DrawingIdentity = { release_id: string; object_key: string; object_version_id: string | null; sha256: string; bytes: string };

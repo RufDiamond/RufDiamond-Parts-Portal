@@ -35,6 +35,7 @@ export const diagramMapping = pgTable("diagram_mapping", {
   id: id(),
   figureId: uuid("figure_id").notNull().references(() => figure.id),
   version: integer("version").notNull().default(1),
+  sourceReviewVersion: integer("source_review_version").notNull().default(1),
   currentRevisionId: uuid("current_revision_id"),
 }, t => [
   unique("diagram_mapping_figure").on(t.figureId),

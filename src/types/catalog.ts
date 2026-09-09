@@ -84,6 +84,7 @@ export interface Figure {
   /** Handle for the drawing asset; null while the plate is unattached. */
   drawingFileId: string | null;
   status: FigureStatus;
+  depictionMode?: "physical" | "table-only";
 }
 
 /**
@@ -133,15 +134,7 @@ export interface PartRequirement {
 }
 
 /** A part's appearance on a figure, with the quantity used there. */
-export interface FigurePart {
-  id: string;
-  figureId: string;
-  partId: string;
-  qty: number;
-  remarks: string | null;
-  /** False for reference-only items that cannot be ordered separately. */
-  serviceable: boolean;
-}
+export type FigurePart = import("@rufdiamond/contracts").FigurePart;
 
 /**
  * A numbered marker on a drawing. One figure part may have several callouts

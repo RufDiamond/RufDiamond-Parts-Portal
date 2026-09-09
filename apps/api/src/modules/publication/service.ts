@@ -9,6 +9,7 @@ import { mappingTransaction } from "../diagram-mapping/repository.js";
 import { canonicalJsonHash, withIdempotency } from "../outbox/idempotency.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
 import { assertScope, modelScope, publisher, requireIntactSnapshot, unavailable, uuid, validateModel, type PublicationGraph } from "./validation.js";
+import { depictionProvenance } from "../catalog-review/binding.js";
 
 type Context = { userId: string; requestId: string };
 const jsonValue = (value: unknown) => JSON.parse(JSON.stringify(value, (_key, nested) => typeof nested === "bigint" ? nested.toString() : nested));
@@ -31,9 +32,22 @@ async function snapshot(tx: Transaction, graph: PublicationGraph, releaseId: str
   // One statement permits self-table supersession references regardless of order.
   if (graph.parts.length) await tx.insert(s.releasePart).values(graph.parts.map(p => ({ releaseId, id: local(p.id), workingId: p.id, partNumber: p.partNumber, description: p.description, manufacturer: p.manufacturer, listPrice: p.listPrice, currency: p.currency, status: p.status, supersededByPartId: p.supersededByPartId ? local(p.supersededByPartId) : null })));
   for (const r of graph.relationships) await tx.insert(s.releasePartRequires).values({ releaseId, partId: local(r.partId), requiredPartId: local(r.requiredPartId), qty: r.qty });
-  for (const f of graph.figures) await tx.insert(s.releaseFigure).values({ releaseId, id: local(f.id), workingId: f.id, variantId: local(f.variantId), systemId: local(f.systemId), drawingId: local(f.drawingFileId!), name: f.name, groupNo: f.groupNo, sourceKey: f.sourceKey, sortOrder: f.sortOrder });
-  for (const r of graph.allRows) await tx.insert(s.releaseFigurePart).values({ releaseId, id: local(r.id), workingId: r.id, figureId: local(r.figureId), partId: local(r.partId), sourceRowKey: r.sourceRowKey, qty: r.qty, remarks: r.remarks, serviceable: r.serviceable, effectiveFrom: r.effectiveFrom, effectiveTo: r.effectiveTo });
+  for (const f of graph.figures) await tx.insert(s.releaseFigure).values({ releaseId, id: local(f.id), workingId: f.id, variantId: local(f.variantId), systemId: local(f.systemId), drawingId: f.drawingFileId?local(f.drawingFileId):null,depictionMode:graph.graphs.find(g=>g.graph.figure.id===f.id)!.graph.sourceReview.tableOnly?"table-only":"physical", name: f.name, groupNo: f.groupNo, sourceKey: f.sourceKey, sortOrder: f.sortOrder });
+  for (const r of graph.allRows) await tx.insert(s.releaseFigurePart).values({ releaseId, id: local(r.id), workingId: r.id, figureId: local(r.figureId), partId: local(r.partId), sourceRowKey: r.sourceRowKey, qty: r.qty,quantitySemantics:r.quantitySemantics, remarks: r.remarks, serviceable: r.serviceable, effectiveFrom: r.effectiveFrom, effectiveTo: r.effectiveTo });
   for (const { graph: source, revision } of graph.graphs) {
+    const decisions=new Map<string,string>();
+    for(const review of source.sourceReview.current){
+      const id=randomUUID(),provenance=depictionProvenance(review),rowIds=review.rowIds.map(local);
+      await tx.insert(s.releaseDepictionReview).values({releaseId,id,figureId:local(source.figure.id),rowIds,provenance,checksum:canonicalJsonHash({provenance,rowIds})});
+      for(const rowId of review.rowIds)if(!decisions.has(rowId)||review.mode==="assembly-reference-unspecified")decisions.set(rowId,id);
+    }
+    for(const [rowId,decisionId] of decisions){
+      const calls=source.allOccurrences.filter(c=>c.figurePartId===rowId);
+      const alias=source.sourceReview.aliases.find(a=>a.alias.figurePartId===rowId)!;
+      const refs=calls.length?calls.map(c=>({number:c.number,sourceCalloutId:c.id})):[{number:String((alias.staging.sourcePayload as Record<string,unknown>).PNC??""),sourceCalloutId:null}];
+      for(const ref of refs)await tx.insert(s.releaseSourceReference).values({releaseId,figureId:local(source.figure.id),figurePartId:local(rowId),decisionId,...ref});
+    }
+    if(!revision)continue;
     for (const c of source.occurrences) {
       const rect = revision.document.occurrences.find(o => o.calloutId === c.id)!.labelRegion!;
       await tx.insert(s.releaseCallout).values({ releaseId, id: local(c.id), workingId: c.id, figureId: local(c.figureId), figurePartId: local(c.figurePartId!), sourceKey: c.sourceKey, number: c.number, x: ((rect.x + rect.width / 2) / revision.document.imageWidth * 100).toFixed(4), y: ((rect.y + rect.height / 2) / revision.document.imageHeight * 100).toFixed(4), maskPath: c.maskPath });
@@ -63,10 +77,11 @@ export function createPublicationService(database: Database, now: () => Date = (
         if (graph.issues.length) throw new AppError("PUBLICATION_BLOCKED", 422, "The model has publication blockers.", graph.issues);
         const [latest] = await tx.select().from(s.publicationRelease).where(eq(s.publicationRelease.modelId, input.modelId)).orderBy(desc(s.publicationRelease.revision)).limit(1);
         // Source checksum describes source values, not randomized release-local IDs.
-        const checksum = canonicalJsonHash(jsonValue({ line: graph.line, model: { ...graph.model, publicationVersion: undefined }, variants: graph.variants, systems: graph.systems, figures: graph.figures, parts: graph.parts, relationships: graph.relationships, drawings: graph.drawings, rows: graph.allRows, mappings: graph.graphs.map(x => ({ revision: x.revision, occurrences: x.graph.occurrences })) }));
+        const checksum = canonicalJsonHash(jsonValue({ line: graph.line, model: { ...graph.model, publicationVersion: undefined }, variants: graph.variants, systems: graph.systems, figures: graph.figures, parts: graph.parts, relationships: graph.relationships, drawings: graph.drawings, rows: graph.allRows, mappings: graph.graphs.map(x => ({ revision: x.revision, occurrences: x.graph.occurrences,sourceReviews:x.graph.sourceReview.current.map(depictionProvenance),sourceObservations:x.graph.allOccurrences })) }));
         const releaseId = randomUUID(); const revision = (latest?.revision ?? 0) + 1;
         await tx.insert(s.publicationRelease).values({ id: releaseId, modelId: input.modelId, revision, summary: input.summary, createdByUserId: current.userId, sourceChecksum: checksum });
         await snapshot(tx, graph, releaseId);
+        await requireIntactSnapshot(tx,releaseId);
         await tx.update(s.publicationRelease).set({ status: "inactive", publishedAt: now() }).where(eq(s.publicationRelease.id, releaseId));
         await activate(tx, mutation, input.modelId, releaseId, input.expectedPublicationVersion, "published", now());
         return { status: 201, body: { modelId: input.modelId, releaseId, revision, checksum } satisfies PublishResult };

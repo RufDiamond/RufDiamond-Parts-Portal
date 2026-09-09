@@ -12,6 +12,7 @@ import { registerCatalogRoutes } from "./modules/catalog/routes.js";
 import { createS3DrawingStorage } from "./modules/drawings/s3-storage.js";
 import { createClamdScanner, createClamdImportScanner } from "./modules/drawings/scanner.js";
 import { registerImportRoutes } from "./modules/imports/routes.js";
+import { registerCatalogReviewRoutes } from "./modules/catalog-review/routes.js";
 import { createS3ImportStorage, type ImportSourceStorage } from "./modules/imports/source-storage.js";
 import type { DrawingScanner, DrawingStorage } from "./modules/drawings/storage.js";
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
@@ -60,6 +61,7 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   const ownedImportStorage = dependencies.importStorage ? null : createS3ImportStorage(config.s3);
   if (ownedImportStorage) app.addHook("onClose", async () => ownedImportStorage.close());
   registerImportRoutes(app, config, database.db, dependencies.importStorage ?? ownedImportStorage!, dependencies.importScanner ?? createClamdImportScanner(config.drawingScanner), now);
+  registerCatalogReviewRoutes(app,config,database.db,dependencies.importStorage ?? ownedImportStorage!,now);
   registerCatalogRoutes(app, database.db, dependencies.drawingStorage ?? ownedStorage!);
   registerErrorHandler(app);
   registerNotFoundHandler(app);

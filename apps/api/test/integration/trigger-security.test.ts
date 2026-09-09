@@ -123,7 +123,7 @@ describe("snapshot trigger security", () => {
       const oldHistory = (await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows;
       await migrate(drizzle(upgradePool), { migrationsFolder });
       await migrate(drizzle(upgradePool), { migrationsFolder });
-      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(11);
+      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(12);
       expect((await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 6)).toEqual(oldHistory);
     } finally {
       await closePostgresPool(upgradePool);
