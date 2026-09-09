@@ -15,6 +15,34 @@ function detail(): FigureDetail {
 const page = (items: unknown[], nextCursor: string | null = null, refs = [release]) => Response.json({ items, nextCursor, releases: refs });
 
 describe("contract-only API repository", () => {
+  it.each([
+    ["search", false], ["search", true], ["part", false], ["part", true],
+  ] as const)("preserves legitimate %s usage multiplicity with pagination=%s", async (method, paginated) => {
+    // Distinct source figure-part rows project to identical DTOs: no row ID is supplied.
+    const usage = { part: detail().rows[0].part, figureId: ids.figure, groupNo: "A.1", assemblyName: "Synthetic figure", systemName: "Synthetic system", modelName: "Synthetic model", serial: "Test" };
+    let reads = 0;
+    const repository = createApiRepository(async () => {
+      reads++;
+      return paginated ? page([usage], reads === 1 ? "next-usage" : null) : page([usage, usage]);
+    });
+    const result = await (method === "search" ? repository.searchPartUsages("P") : repository.getPartUsages(ids.figure));
+    expect(result.items).toEqual([usage, usage]);
+    expect(result.items).toHaveLength(2);
+    expect(result.releases).toEqual([release]);
+    expect(result.nextCursor).toBeNull();
+    expect(reads).toBe(paginated ? 2 : 1);
+  });
+  it.each(["search", "part"] as const)("retains cursor, release and page-size guards for %s usages", async method => {
+    const usage = { part: detail().rows[0].part, figureId: ids.figure, groupNo: "A.1", assemblyName: "Synthetic figure", systemName: "Synthetic system", modelName: "Synthetic model", serial: "Test" };
+    const get = (read: (path: string) => Promise<Response>) => {
+      const repository = createApiRepository(read);
+      return method === "search" ? repository.searchPartUsages("P") : repository.getPartUsages(ids.figure);
+    };
+    await expect(get(async () => page([usage], "repeated"))).rejects.toMatchObject({ code: "INVALID_CATALOG_PAGINATION" });
+    let reads = 0;
+    await expect(get(async () => page([usage], ++reads === 1 ? "next" : null, [{ ...release, revision: reads }]))).rejects.toMatchObject({ code: "INVALID_CATALOG_PAGINATION" });
+    await expect(get(async () => page(Array.from({ length: 101 }, () => usage)))).rejects.toMatchObject({ code: "INVALID_CATALOG_PAGINATION" });
+  });
   it("keeps separate mapping checksums and rejects mismatched mapping occurrences", async () => {
     const source = detail();
     source.mapping = { document: { schemaVersion: 1, figureId: ids.figure, drawingFileId: "drawing", drawingSha256: "a".repeat(64), imageWidth: 100, imageHeight: 100, catalogueBindingSha256: "b".repeat(64), occurrences: [{ calloutId: "callout", figurePartId: "row", refNo: "A*", labelRegion: { x: 8, y: 8, width: 4, height: 4 }, regions: [{ id: "region", outer: [[30, 30], [40, 30], [40, 40]], holes: [] }], evidence: "Synthetic evidence" }] }, sourceRevisionId: "review", sourceDocumentChecksum: "c".repeat(64), storedDocumentChecksum: "d".repeat(64), documentChecksum: "e".repeat(64), reviewerId: "synthetic-reviewer", reviewedAt: "2026-09-09T00:00:00Z" };

@@ -49,8 +49,12 @@ callout/drawing identities. The unused `getDrawingFile(id)` seam explicitly thro
 `DRAWING_LOOKUP_UNAVAILABLE`; use the figure's release-pinned content URL instead.
 
 `CATALOG_CURSOR_STALE` restarts the entire aggregate at most once. Repeated
-cursors, duplicated items, contradictory same-model releases and oversized
+cursors, duplicated entity identities, contradictory same-model releases and oversized
 aggregates fail visibly; partial/stale data and fixture fallback are never returned.
+Usage rows preserve multiplicity: distinct figure-part records can share a part
+and figure, while their DTO omits the source row identity. The client cannot
+distinguish those legitimate identical projections from duplicate backend rows;
+cursor/release/page limits remain enforced without inventing usage IDs.
 Task9b must also keep separately requested page fragments mutually consistent and
 adapt nullable/optional shared types without reconstructing prices or reference
 labels. The Task9a unit tests exercise injected Request/Response boundaries; they

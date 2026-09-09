@@ -16,7 +16,7 @@ function id(value: string): string {
 
 /** Dormant server repository. No seed imports, global session/cache or implicit mode selection. */
 export function createApiRepository(read: ApiRead) {
-  async function aggregate<S extends TSchema>(path: string, item: S, identity: (entry: Static<S>) => string): Promise<Page<Static<S>>> {
+  async function aggregate<S extends TSchema>(path: string, item: S, identity: ((entry: Static<S>) => string) | null): Promise<Page<Static<S>>> {
     for (let attempt = 0; attempt < 2; attempt++) {
       const items: Static<S>[] = [];
       const refs = new Map<string, ReleaseRef>();
@@ -34,9 +34,11 @@ export function createApiRepository(read: ApiRead) {
             refs.set(ref.modelId, ref);
           }
           for (const entry of page.items) {
-            const key = identity(entry);
-            if (!key || identities.has(key)) throw new CatalogApiError(502, "INVALID_CATALOG_PAGINATION");
-            identities.add(key);
+            if (identity) {
+              const key = identity(entry);
+              if (!key || identities.has(key)) throw new CatalogApiError(502, "INVALID_CATALOG_PAGINATION");
+              identities.add(key);
+            }
             items.push(entry);
           }
           if (page.nextCursor === null) return { items, releases: [...refs.values()], nextCursor: null };
@@ -78,8 +80,10 @@ export function createApiRepository(read: ApiRead) {
     getFigureDetail,
     getFigure: getFigureDetail,
     searchParts: (query: string) => aggregate(`catalog/parts/search?${searchQuery(query)}`, PartSchema, part => part.releasePartId),
-    searchPartUsages: (query: string, mode: "any" | "part" | "description" = "any") => aggregate(`catalog/parts/usages?${searchQuery(query, mode)}`, PartUsageRowSchema, row => JSON.stringify([row.part.releasePartId, row.figureId])),
-    getPartUsages: (partId: string) => aggregate(`catalog/parts/${id(partId)}/usages`, PartUsageRowSchema, row => JSON.stringify([row.part.releasePartId, row.figureId])),
+    // Usage DTOs omit source figure-part IDs. Identical projected rows may be distinct
+    // usages, so preserve multiplicity; cursor/release/page limits remain authoritative.
+    searchPartUsages: (query: string, mode: "any" | "part" | "description" = "any") => aggregate(`catalog/parts/usages?${searchQuery(query, mode)}`, PartUsageRowSchema, null),
+    getPartUsages: (partId: string) => aggregate(`catalog/parts/${id(partId)}/usages`, PartUsageRowSchema, null),
     async getPartUsageIndex(): Promise<{ items: Record<string, PartUsageSummary>; releases: ReleaseRef[] }> {
       const result = await aggregate("catalog/parts/usage-index", PartUsageIndexEntrySchema, entry => entry.partId);
       const items: Record<string, PartUsageSummary> = Object.create(null);
