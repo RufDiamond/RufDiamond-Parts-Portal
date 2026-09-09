@@ -4078,14 +4078,14 @@
         {
           "figurePartId": "fp-6-14-01",
           "sourceRefNo": "1",
-          "category": "partial",
-          "evidence": "PDFphysical30/footer26 explicitly uses67-00008 for BACKREST1 and REARSEAT4; source does not settle kit-versus-erroneous-repeatedPN semantics. Distinct per-row depictions retained; no proven wrongPN inferred. Original slots/open seat spaces need refinement.",
+          "category": "unknown",
+          "evidence": "Full manufacturer PDF physical30/footer26 personally viewed2026-09-09: ref1 PN67-00008 REAR SEAT BACK REST and ref4 same PN REAR SEAT. Distinct source-matched depictions remain unapproved proposals; source does not explain shared seat-kit versus erroneous repeated PN semantics.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Named source clarification of kit/distinct-item semantics; retain distinct geometry, no global rename or duplicate contour copy",
-            "Trace visible slots/seat open material"
+            "Named source clarification of shared kit versus distinct orderable item identity is required; not a proven wrong PN and no row merge, geometry copy or quantity change is inferred.",
+            "Existing seat/backrest contours also retain fine cutout/occlusion debt; unresolved semantics are separate from polygon presence."
           ]
         },
         {
@@ -4115,14 +4115,14 @@
         {
           "figurePartId": "fp-6-14-04",
           "sourceRefNo": "4",
-          "category": "partial",
-          "evidence": "PDFphysical30/footer26 explicitly uses67-00008 for BACKREST1 and REARSEAT4; source does not settle kit-versus-erroneous-repeatedPN semantics. Distinct per-row depictions retained; no proven wrongPN inferred. Original slots/open seat spaces need refinement.",
+          "category": "unknown",
+          "evidence": "Full manufacturer PDF physical30/footer26 personally viewed2026-09-09: ref1 PN67-00008 REAR SEAT BACK REST and ref4 same PN REAR SEAT. Distinct source-matched depictions remain unapproved proposals; source does not explain shared seat-kit versus erroneous repeated PN semantics.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Named source clarification of kit/distinct-item semantics; retain distinct geometry, no global rename or duplicate contour copy",
-            "Trace visible slots/seat open material"
+            "Named source clarification of shared kit versus distinct orderable item identity is required; not a proven wrong PN and no row merge, geometry copy or quantity change is inferred.",
+            "Existing seat/backrest contours also retain fine cutout/occlusion debt; unresolved semantics are separate from polygon presence."
           ]
         },
         {
@@ -7152,13 +7152,14 @@
         {
           "figurePartId": "fp-11-2-04",
           "sourceRefNo": "4",
-          "category": "partial",
-          "evidence": "Original-source audit11.2 controller4 and controlplate6 have small corner mounting holes; opaque display/knobs retained. Dial-description versus display-style4 keeps existing retrofit/source-version question.",
+          "category": "source-conflicted",
+          "evidence": "Original PNG f69e36771cbaa8d073d84da228e4f2e27721fcc74c19aa33799ac10c20bb7330 has a rectangular display-style ref4. Full manufacturer PDF physical49/footer45 personally viewed2026-09-09 at tmp/pdfs/electrical-source-NqOGjj/FT3-11.3-overhead-controls-page45.png shows a different two-knob dial-panel photo at ref4 PN84-00311 A/C DIAL CONTROLLER; row10 says convert digital old controller into dial. This is direct artwork-version evidence, not appearance alone.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Inspect/cut true mounting apertures; source-version question remains unapproved"
+            "Confirm controlling controller/artwork revision and intended current ref4 depiction; no replacement PN, ref10 reassignment or automatic geometry reuse is inferred.",
+            "Existing original-PNG unapproved contour is preserved, not approved by this classification; corner mounting holes and fine face extent remain partial."
           ]
         },
         {

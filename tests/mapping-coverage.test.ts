@@ -37,6 +37,16 @@ it("exports every real legacy row, source-only observations and proposal topolog
     expect(windows.coverage.clearUntracedRefs).toEqual(["1", "3"]);
     expect(windows.coverage.sourceQuestionRefs).toEqual([]);
     expect(report.figures.find(f => f.id === "fig-electric-11-3")!.coverage.sourceQuestionRefs).toContain("18");
+    const seat = report.figures.find(f => f.id === "fig-cabin-6-14")!;
+    expect(seat.coverage.sourceQuestionRefs).toEqual(expect.arrayContaining(["1", "4"]));
+    for (const ref of ["1", "4"]) {
+        const c = seat.rowDetails.flatMap(r => r.occurrences).find(c => c.refNo === ref)!;
+        expect(c.shape).toMatchObject({ category: "unknown", complete: false });
+        expect(c.proposal?.numericValid).toBe(true);
+    }
+    const controls = report.figures.find(f => f.id === "fig-electric-11-2")!;
+    expect(controls.coverage.sourceQuestionRefs).toEqual(expect.arrayContaining(["4", "10"]));
+    expect(controls.rowDetails.flatMap(r => r.occurrences).find(c => c.refNo === "4")!.shape.category).toBe("source-conflicted");
     const hydraulic = report.figures.find(f => f.id === "fig-hydraulic-4-1")!;
     expect(hydraulic.sourceOnlyObservations.map(o => o.refNo)).toEqual(expect.arrayContaining(["27", "28", "29"]));
     expect(report.persistence).toMatchObject({ targetInspected: false, realWorkbookApplied: false, revisionsCreatedByTask: 0 });
