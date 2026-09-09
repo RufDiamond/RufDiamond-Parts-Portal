@@ -4094,24 +4094,24 @@
           "figurePartId": "fp-6-14-02",
           "sourceRefNo": "2",
           "category": "partial",
-          "evidence": "Original PNG source-visible seat back1 has three slots, support2 central slot/bolt holes, plate3 three lower slots, seat4 open slats, support5 folded apertures. Each is directly labelled; background frame is separate.",
+          "evidence": "Original2 backrest support personally inspected full/crop2026-09-09; rounded central opening and three small apertures excluded, opaque folded face retained. Distinct support PN67-00075, unrelated to unresolved seat/backrest shared PN.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Existing exterior shapes need source-visible holes/slats and foreground occlusion refinement; not complete by presence"
+            "Fine aperture walls, folded edge thickness and outer contour detail remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-14-03",
           "sourceRefNo": "3",
           "category": "partial",
-          "evidence": "Original PNG source-visible seat back1 has three slots, support2 central slot/bolt holes, plate3 three lower slots, seat4 open slats, support5 folded apertures. Each is directly labelled; background frame is separate.",
+          "evidence": "Original3 backrest rear plate personally inspected full/crop2026-09-09; three lower elongated slots excluded while upper bent sheet remains opaque.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Existing exterior shapes need source-visible holes/slats and foreground occlusion refinement; not complete by presence"
+            "Upper fastening bores, fine slot walls and close frame/bolt occlusion still require material work."
           ]
         },
         {
@@ -4142,73 +4142,73 @@
         {
           "figurePartId": "fp-6-14-06",
           "sourceRefNo": "6",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "partial",
+          "evidence": "Original individually labelled rear-seat screws personally inspected2026-09-09 at useful source zoom. Only directly indicated body/head/shaft traced; similar quantity copies and assembly guide extensions excluded.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Fine thread, socket/head recess and leader-obscured contact edges remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-14-07",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "partial",
+          "evidence": "Original individually labelled rear-seat screws personally inspected2026-09-09 at useful source zoom. Only directly indicated body/head/shaft traced; similar quantity copies and assembly guide extensions excluded.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Fine thread, socket/head recess and leader-obscured contact edges remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-14-08",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "image-resolution-limited",
+          "evidence": "Original8 upper-left loose M8 bolt and10 right lower nut personally inspected at8x source zoom2026-09-09; compact visible contours traced individually without leader/guide extensions or quantity copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Leader merges with tiny shaft/head or nut bore; internal aperture/recess and edge cannot be established completely at source resolution."
           ]
         },
         {
           "figurePartId": "fp-6-14-09",
           "sourceRefNo": "9",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "partial",
+          "evidence": "Original individually labelled rear-seat screws personally inspected2026-09-09 at useful source zoom. Only directly indicated body/head/shaft traced; similar quantity copies and assembly guide extensions excluded.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Fine thread, socket/head recess and leader-obscured contact edges remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-14-10",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "image-resolution-limited",
+          "evidence": "Original8 upper-left loose M8 bolt and10 right lower nut personally inspected at8x source zoom2026-09-09; compact visible contours traced individually without leader/guide extensions or quantity copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Leader merges with tiny shaft/head or nut bore; internal aperture/recess and edge cannot be established completely at source resolution."
           ]
         },
         {
           "figurePartId": "fp-6-14-11",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Original PNG individually labels detached hardware6left upper bolt,7vertical upper bolt,8left mid bolt,9right lower bolt,10lower vertical nut,11upper seat bolt. Similar unlabelled copies not assigned.",
+          "category": "partial",
+          "evidence": "Original individually labelled rear-seat screws personally inspected2026-09-09 at useful source zoom. Only directly indicated body/head/shaft traced; similar quantity copies and assembly guide extensions excluded.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny physical hardware at useful zoom; preserve bore/under-head limitations"
+            "Fine thread, socket/head recess and leader-obscured contact edges remain partial."
           ]
         },
         {

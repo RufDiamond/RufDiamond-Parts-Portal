@@ -154,6 +154,13 @@ test("Lower gate tracing preserves ladder space and foreground/source ownership"
   expect(contains(3,[227,302])).toBe(true);
 });
 
+test("Rear seat supports exclude source slots without changing shared-seat identities", async () => {
+  const result=await loadCalloutPreview((await getFigureDetail("fig-cabin-6-14"))!,"hosted-review");
+  const contains=(ref:number,p:[number,number])=>result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(r=>pointInRegion(p,r));
+  for(const [ref,p] of [[2,[573,222]],[3,[568,381]],[3,[598,356]],[3,[631,369]]] as [number,[number,number]][])expect(contains(ref,p)).toBe(false);
+  expect(contains(3,[594,318])).toBe(true);
+});
+
 test("Front seat support excludes its large window while preserving inner wall", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-11"))!, "hosted-review");
   const regions=result.detail.callouts.find(c=>c.number===3)!.componentGeometry!.regions;

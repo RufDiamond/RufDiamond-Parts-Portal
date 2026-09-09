@@ -70,6 +70,7 @@ for (const entry of [
     {figure:"fig-fuel-system-9-1",refs:[2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,19,22],crowdedFitLabels:true},
     {figure:"fig-cabin-6-8",refs:[2,3,7,8,9,10,11,12,13,14,15,16]},
     {figure:"fig-cabin-6-9",refs:[4,5,6,7,8,9,10,11,12,13,16]},
+    {figure:"fig-cabin-6-14",refs:[2,3,6,7,8,9,10,11]},
   ]) {
   test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
     test.setTimeout(90000);

@@ -17062,7 +17062,127 @@
               ]
             ]
           ],
-          "evidence": "Printed reference 2 leader terminates on the detached back-rest support bracket, matching 67-00075 (Back rest support). Contour traced from the current source PNG; no label or leader is included."
+          "holes": [
+            [
+              [
+                [
+                  43.5156,
+                  30.7292
+                ],
+                [
+                  46.1133,
+                  29.7222
+                ],
+                [
+                  46.3086,
+                  29.7917
+                ],
+                [
+                  46.4063,
+                  30.1389
+                ],
+                [
+                  46.4063,
+                  31.1458
+                ],
+                [
+                  46.2695,
+                  31.4931
+                ],
+                [
+                  43.6523,
+                  32.2222
+                ],
+                [
+                  43.4375,
+                  32.1181
+                ],
+                [
+                  43.3789,
+                  31.8403
+                ],
+                [
+                  43.3789,
+                  31.2153
+                ]
+              ],
+              [
+                [
+                  42.4219,
+                  31.9097
+                ],
+                [
+                  42.6563,
+                  31.8056
+                ],
+                [
+                  42.7344,
+                  31.9444
+                ],
+                [
+                  42.6953,
+                  32.2222
+                ],
+                [
+                  42.4414,
+                  32.3264
+                ]
+              ],
+              [
+                [
+                  44.707,
+                  28.5764
+                ],
+                [
+                  44.9219,
+                  28.4375
+                ],
+                [
+                  45,
+                  28.5764
+                ],
+                [
+                  44.9609,
+                  28.8194
+                ],
+                [
+                  44.7461,
+                  28.9583
+                ],
+                [
+                  44.6484,
+                  28.8194
+                ]
+              ],
+              [
+                [
+                  47.3438,
+                  30.2431
+                ],
+                [
+                  47.5586,
+                  30.1042
+                ],
+                [
+                  47.6367,
+                  30.2431
+                ],
+                [
+                  47.5977,
+                  30.5556
+                ],
+                [
+                  47.3633,
+                  30.6944
+                ],
+                [
+                  47.2852,
+                  30.5208
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Original2 backrest support: central rounded slot and three source-visible small mounting apertures excluded, retaining opaque folded left face and inner wall margins. Fine slot walls and close source edges remain partial; existing exterior retained. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
           "calloutId": "co-6-14-0296",
@@ -17115,7 +17235,109 @@
               ]
             ]
           ],
-          "evidence": "Printed reference 3 leader terminates on the rear plate for the seat back rest, matching 67-00076 (Rear plate - seat back rest). Contour traced from the current source PNG; no label or leader is included."
+          "holes": [
+            [
+              [
+                [
+                  44.2578,
+                  52.4653
+                ],
+                [
+                  44.2969,
+                  52.1528
+                ],
+                [
+                  44.4336,
+                  52.1528
+                ],
+                [
+                  44.4727,
+                  52.5
+                ],
+                [
+                  44.5313,
+                  53.3333
+                ],
+                [
+                  44.5117,
+                  53.5764
+                ],
+                [
+                  44.3945,
+                  53.6458
+                ],
+                [
+                  44.3359,
+                  53.3681
+                ]
+              ],
+              [
+                [
+                  46.582,
+                  48.9931
+                ],
+                [
+                  46.7188,
+                  48.7153
+                ],
+                [
+                  46.8359,
+                  48.8542
+                ],
+                [
+                  46.8555,
+                  49.4444
+                ],
+                [
+                  46.9336,
+                  50.1042
+                ],
+                [
+                  46.8555,
+                  50.3819
+                ],
+                [
+                  46.7188,
+                  50.3819
+                ],
+                [
+                  46.6602,
+                  50.0347
+                ]
+              ],
+              [
+                [
+                  49.1797,
+                  50.5903
+                ],
+                [
+                  49.2773,
+                  50.4167
+                ],
+                [
+                  49.375,
+                  50.5556
+                ],
+                [
+                  49.4336,
+                  51.4931
+                ],
+                [
+                  49.375,
+                  51.8056
+                ],
+                [
+                  49.2383,
+                  51.7708
+                ],
+                [
+                  49.1992,
+                  51.3889
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Original3 rear backrest plate: three elongated lower mounting slots excluded, while opaque upper bent plate is retained. Upper fastening holes, fine inner walls and adjacent frame occlusion remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
           "calloutId": "co-6-14-0297",
@@ -17266,6 +17488,452 @@
             ]
           ],
           "evidence": "Printed reference 5 leader terminates on the vertical rear seat support below the cushion, matching 67-00036 (Rear seat support). Contour traced from the current source PNG; no label or leader is included."
+        },
+        {
+          "calloutId": "co-6-14-0299",
+          "figurePartId": "fp-6-14-06",
+          "partNumber": "10-208020-121",
+          "number": 6,
+          "x": 14.9219,
+          "y": 25.4167,
+          "polygons": [
+            [
+              [
+                22.5488,
+                25.9896
+              ],
+              [
+                22.7051,
+                25.7813
+              ],
+              [
+                22.998,
+                25.5382
+              ],
+              [
+                23.2031,
+                25.5208
+              ],
+              [
+                23.418,
+                25.6944
+              ],
+              [
+                23.5449,
+                25.9549
+              ],
+              [
+                23.6328,
+                26.0069
+              ],
+              [
+                23.8477,
+                25.9722
+              ],
+              [
+                24.0332,
+                26.0938
+              ],
+              [
+                24.043,
+                26.5104
+              ],
+              [
+                23.9258,
+                26.7014
+              ],
+              [
+                23.6914,
+                26.6667
+              ],
+              [
+                23.4961,
+                26.7014
+              ],
+              [
+                23.3887,
+                27.0139
+              ],
+              [
+                23.1055,
+                27.1701
+              ],
+              [
+                22.832,
+                26.9965
+              ],
+              [
+                22.627,
+                26.684
+              ],
+              [
+                22.5195,
+                26.3542
+              ]
+            ]
+          ],
+          "evidence": "Original6 only the left directly labelled M8 bolt: flanged head and compact exposed shaft; trailing straight guide and other two bolts excluded. Leader-obscured head and fine thread detail remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-14-0300",
+          "figurePartId": "fp-6-14-07",
+          "partNumber": "10-210020-121",
+          "number": 7,
+          "x": 15.3125,
+          "y": 36.6667,
+          "polygons": [
+            [
+              [
+                41.7188,
+                36.7014
+              ],
+              [
+                42.4023,
+                36.6667
+              ],
+              [
+                42.5195,
+                36.9097
+              ],
+              [
+                42.5586,
+                37.2569
+              ],
+              [
+                42.793,
+                37.5
+              ],
+              [
+                42.6953,
+                37.7083
+              ],
+              [
+                42.3633,
+                37.8472
+              ],
+              [
+                42.4023,
+                39.0972
+              ],
+              [
+                42.2656,
+                39.4792
+              ],
+              [
+                41.9727,
+                39.5139
+              ],
+              [
+                41.7969,
+                39.3056
+              ],
+              [
+                41.7578,
+                37.8472
+              ],
+              [
+                41.543,
+                37.6736
+              ],
+              [
+                41.5039,
+                37.3264
+              ],
+              [
+                41.6406,
+                37.0486
+              ]
+            ]
+          ],
+          "evidence": "Original7 directly labelled left upper M10 screw only, visible flanged head and downward shaft. Right lookalike and assembly guide down into plate excluded. Fine thread/head edges remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-14-0301",
+          "figurePartId": "fp-6-14-08",
+          "partNumber": "10-008020-120",
+          "number": 8,
+          "x": 15.2344,
+          "y": 48.6111,
+          "polygons": [
+            [
+              [
+                20.3223,
+                53.9931
+              ],
+              [
+                20.4199,
+                53.6979
+              ],
+              [
+                20.7031,
+                53.6111
+              ],
+              [
+                20.8203,
+                53.7326
+              ],
+              [
+                20.9766,
+                53.5069
+              ],
+              [
+                21.1719,
+                53.3333
+              ],
+              [
+                21.416,
+                53.3681
+              ],
+              [
+                21.5723,
+                53.6458
+              ],
+              [
+                21.6309,
+                54.0799
+              ],
+              [
+                21.5918,
+                54.5139
+              ],
+              [
+                21.4551,
+                54.8611
+              ],
+              [
+                21.2402,
+                55.0521
+              ],
+              [
+                21.0059,
+                54.9479
+              ],
+              [
+                20.8203,
+                54.6701
+              ],
+              [
+                20.791,
+                54.4271
+              ],
+              [
+                20.498,
+                54.4965
+              ],
+              [
+                20.3418,
+                54.3056
+              ]
+            ]
+          ],
+          "evidence": "Original8 leader targets upper-left of three loose M8 bolts: exact compact head and left shaft only. Other two copies and trailing guide excluded. Leader merges with shaft/face; tiny recess and threads remain resolution-limited. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-14-0302",
+          "figurePartId": "fp-6-14-09",
+          "partNumber": "10-310020-123",
+          "number": 9,
+          "x": 74.0625,
+          "y": 86.1111,
+          "polygons": [
+            [
+              [
+                70.9766,
+                81.0417
+              ],
+              [
+                71.0254,
+                80.7639
+              ],
+              [
+                71.2109,
+                80.6944
+              ],
+              [
+                71.6504,
+                80.8333
+              ],
+              [
+                71.8359,
+                80.5556
+              ],
+              [
+                72.1094,
+                80.3819
+              ],
+              [
+                72.3926,
+                80.3993
+              ],
+              [
+                72.6172,
+                80.6076
+              ],
+              [
+                72.7637,
+                80.9896
+              ],
+              [
+                72.8027,
+                81.3889
+              ],
+              [
+                72.7344,
+                81.7361
+              ],
+              [
+                72.5586,
+                81.9965
+              ],
+              [
+                72.3047,
+                82.1354
+              ],
+              [
+                72.041,
+                82.0833
+              ],
+              [
+                71.7871,
+                81.9097
+              ],
+              [
+                71.6309,
+                81.5972
+              ],
+              [
+                71.1523,
+                81.5625
+              ],
+              [
+                70.9961,
+                81.4063
+              ]
+            ]
+          ],
+          "evidence": "Original9 only lower-left directly labelled socket-head screw in right-hand group, head and shaft excluding guide. Two unlabelled upper copies not inferred. Leader-obscured socket recess and fine threading remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-14-0303",
+          "figurePartId": "fp-6-14-10",
+          "partNumber": "12-210000-121",
+          "number": 10,
+          "x": 64.1406,
+          "y": 90.4167,
+          "polygons": [
+            [
+              [
+                50.1758,
+                80.7465
+              ],
+              [
+                50.3906,
+                80.625
+              ],
+              [
+                51.1426,
+                80.625
+              ],
+              [
+                51.3867,
+                80.7986
+              ],
+              [
+                51.416,
+                81.0243
+              ],
+              [
+                51.3086,
+                81.2153
+              ],
+              [
+                51.2598,
+                81.6667
+              ],
+              [
+                51.0645,
+                81.875
+              ],
+              [
+                50.4785,
+                81.9097
+              ],
+              [
+                50.2832,
+                81.684
+              ],
+              [
+                50.2246,
+                81.3021
+              ],
+              [
+                50.1367,
+                81.0243
+              ]
+            ]
+          ],
+          "evidence": "Original10 leader targets right lower M10 nut, not left similar nut. Outer flange and compact body only; long vertical guide is excluded. Tiny central bore is merged with guide/leader, so remains resolution-limited partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-14-0304",
+          "figurePartId": "fp-6-14-11",
+          "partNumber": "10-310025-123",
+          "number": 11,
+          "x": 59.5312,
+          "y": 43.6111,
+          "polygons": [
+            [
+              [
+                50.2148,
+                57.8125
+              ],
+              [
+                50.6055,
+                57.7431
+              ],
+              [
+                50.8398,
+                57.9861
+              ],
+              [
+                50.8594,
+                58.6806
+              ],
+              [
+                50.6836,
+                58.9583
+              ],
+              [
+                50.7031,
+                60.4514
+              ],
+              [
+                50.5859,
+                60.8333
+              ],
+              [
+                50.2344,
+                60.8333
+              ],
+              [
+                50.1172,
+                60.5903
+              ],
+              [
+                50.1172,
+                58.9583
+              ],
+              [
+                49.9805,
+                58.6458
+              ],
+              [
+                49.9805,
+                58.0556
+              ]
+            ]
+          ],
+          "evidence": "Original11 directly labelled detached seat socket screw just right of plate: compact head and vertical shaft only, no assembly line extension. Fine socket recess and thread detail remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
       "notes": "5 of 11 listed references have manually traced component contours. Only directly leader-indicated occurrences are included. Remaining overlapping assembly boundaries, trim seals, repeated components or untraced references are withheld. Approximate review geometry requires RUF Diamond approval. References without a proposed silhouette: 6, 7, 8, 9, 10, 11."
