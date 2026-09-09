@@ -6,6 +6,8 @@ export type CalloutMarkerState = "default" | "active" | "muted";
 
 export interface CalloutMarkerProps {
   number: number;
+  /** Stable drawing occurrence identity; omitted for inline table references. */
+  occurrenceId?: string;
   /** Percentages, 0-100. Omit to render inline rather than on a drawing. */
   x?: number;
   y?: number;
@@ -24,6 +26,7 @@ export interface CalloutMarkerProps {
  */
 export function CalloutMarker({
   number,
+  occurrenceId,
   x,
   y,
   state = "default",
@@ -39,6 +42,7 @@ export function CalloutMarker({
   return (
     <button
       type="button"
+      data-callout-id={occurrenceId}
       className={`${styles.marker} ${styles[state]} ${size === "sm" ? styles.sm : ""} ${placed ? styles.placed : ""}`}
       style={placed ? { left: `${x}%`, top: `${y}%` } : undefined}
       title={title}

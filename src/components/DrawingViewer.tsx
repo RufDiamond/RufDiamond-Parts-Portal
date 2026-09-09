@@ -191,20 +191,31 @@ export function DrawingViewer({
       stableFrames = Math.abs(plate.width - lastWidth) < 0.01 ? stableFrames + 1 : 0;
       lastWidth = plate.width;
       if (stableFrames < 2) { frame = requestAnimationFrame(run); return; }
-      const points = numericDocument?.occurrences.filter((item) => selectedPartIds.has(item.partId))
-        .flatMap((item) => item.regions.flatMap((region) => region.outer)) ?? [];
-      let targets: ViewportRect[];
-      if (points.length && numericDocument) {
-        const xs = points.map(([x]) => plate.left + x / numericDocument.imageWidth * plate.width);
-        const ys = points.map(([, y]) => plate.top + y / numericDocument.imageHeight * plate.height);
-        targets = [{ left:Math.min(...xs), top:Math.min(...ys), right:Math.max(...xs), bottom:Math.max(...ys) }];
-      } else {
-        // Legacy paths remain display-only and unchanged. Measure the live SVG
-        // shape, never parse or reinterpret its arbitrary path string.
-        targets = Array.from(area.querySelectorAll<SVGPathElement>("path[data-legacy-selected]"))
-          .map((path) => path.getBoundingClientRect()).filter((rect) => rect.width || rect.height);
-        if (!targets.length) targets = Array.from(area.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]'))
-          .map((marker) => marker.getBoundingClientRect());
+      const targets: ViewportRect[] = [];
+      const represented = new Set<string>();
+      if (numericDocument) {
+        for (const occurrence of numericDocument.occurrences) {
+          if (!selectedPartIds.has(occurrence.partId)) continue;
+          const points = occurrence.regions.flatMap((region) => region.outer);
+          if (!points.length) continue;
+          const xs = points.map(([x]) => plate.left + x / numericDocument.imageWidth * plate.width);
+          const ys = points.map(([, y]) => plate.top + y / numericDocument.imageHeight * plate.height);
+          targets.push({ left:Math.min(...xs), top:Math.min(...ys), right:Math.max(...xs), bottom:Math.max(...ys) });
+          represented.add(occurrence.calloutId);
+        }
+      }
+      const legacyPaths = new Map(Array.from(area.querySelectorAll<SVGPathElement>("path[data-legacy-selected][data-callout-id]"))
+        .map((path) => [path.dataset.calloutId, path]));
+      const markerElements = new Map(Array.from(area.querySelectorAll<HTMLButtonElement>(":scope > button[data-callout-id]"))
+        .map((marker) => [marker.dataset.calloutId, marker]));
+      for (const marker of markers) {
+        if (!selectedPartIds.has(marker.partId) || represented.has(marker.id)) continue;
+        // Fallback is per occurrence, never per part: measure its unchanged SVG
+        // shape first, then its own marker. Do not parse arbitrary legacy paths.
+        const legacy = legacyPaths.get(marker.id)?.getBoundingClientRect();
+        const target = legacy && (legacy.width || legacy.height) ? legacy : markerElements.get(marker.id)?.getBoundingClientRect();
+        if (target) targets.push(target);
+        represented.add(marker.id);
       }
       previous.pending = false;
       if (!targets.length) return;
@@ -226,7 +237,7 @@ export function DrawingViewer({
     };
     frame = requestAnimationFrame(run);
     return () => cancelAnimationFrame(frame);
-  }, [selectionActivation, revealRequest, src, numericDocument, selectedPartIds, zoom, onZoomChange]);
+  }, [selectionActivation, revealRequest, src, numericDocument, markers, selectedPartIds, zoom, onZoomChange]);
 
   /*
    * Ordinary vertical wheel input and trackpad pinches share the existing zoom
@@ -347,7 +358,7 @@ export function DrawingViewer({
             aria-hidden="true"
           >
             {highlighted.map((marker) => (
-              <path key={marker.id} d={marker.maskPath} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
+              <path key={marker.id} d={marker.maskPath} data-callout-id={marker.id} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
             ))}
           </svg>
         ) : null}
@@ -360,6 +371,7 @@ export function DrawingViewer({
         {markers.map((marker) => (
           <CalloutMarker
             key={marker.id}
+            occurrenceId={marker.id}
             number={marker.number}
             x={marker.x}
             y={marker.y}

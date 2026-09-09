@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, expect, test } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DrawingViewer } from "@/components/DrawingViewer";
 import { PartsTable } from "@/components/PartsTable";
@@ -78,4 +78,37 @@ test("table activation and Show selected reveal numeric regions at existing zoom
   expect(sheet.scrollTop).toBe(0);
   view.rerender(<DrawingViewer {...props} selectionActivation={activation} revealRequest={1} />);
   await waitFor(() => expect(sheet.scrollTop).toBe(260));
+});
+
+test("mixed selected occurrences reveal numeric, legacy and marker union once, excluding their lower-priority fallbacks and unrelated parts", async () => {
+  const props = { label:"Mixed", src:"/test.png", width:100, height:100, zoom:4, onZoomChange:vi.fn(),
+    selectedPartIds:new Set(["part"]), markers:[
+      { id:"numeric", number:1, figurePartId:"row", partId:"part", x:1, y:1, maskPath:"M0 0 L100 0 L100 100 Z" },
+      { id:"legacy", number:1, figurePartId:"row", partId:"part", x:2, y:2, maskPath:"M85 85 L90 85 L90 90 Z" },
+      { id:"marker", number:1, figurePartId:"row", partId:"part", x:92, y:92 },
+      { id:"unrelated", number:1, figurePartId:"other", partId:"other", x:0, y:0, maskPath:"M0 0 L100 0 L100 100 Z" },
+    ], document:{ imageWidth:100, imageHeight:100, occurrences:[{
+      calloutId:"numeric", figurePartId:"row", partId:"part", partNumber:"P", refNo:"1",
+      regions:[{ id:"region", outer:[[80,80],[85,80],[85,85]] as [number,number][], holes:[] }],
+    }] } };
+  const view = render(<DrawingViewer {...props} hoveredPartId="other" />);
+  const stage = view.container.querySelector("img")!.parentElement!;
+  const sheet = stage.parentElement!;
+  Object.defineProperty(sheet, "clientHeight", { value:100 });
+  Object.defineProperty(sheet, "clientWidth", { value:100 });
+  sheet.getBoundingClientRect = () => ({ left:0, top:0, width:100, height:100 }) as DOMRect;
+  stage.getBoundingClientRect = () => ({ left:-sheet.scrollLeft, top:-sheet.scrollTop, width:400, height:400 }) as DOMRect;
+  const rect = (low:number, high:number) => ({ left:low-sheet.scrollLeft, top:low-sheet.scrollTop,
+    right:high-sheet.scrollLeft, bottom:high-sheet.scrollTop, width:high-low, height:high-low }) as DOMRect;
+  for (const path of stage.querySelectorAll("path[data-legacy-selected]")) path.getBoundingClientRect = () => rect(340,360);
+  // All references intentionally share the same printed number. DOM order is
+  // used only to install this jsdom geometry fixture, never to resolve identity.
+  stage.querySelectorAll("button").forEach((button,index) => {
+    button.getBoundingClientRect = () => index === 2 ? rect(360,380) : rect(0,20);
+  });
+  Object.defineProperty(sheet, "scrollBy", { value:({ top=0, left=0 }:ScrollToOptions) => { sheet.scrollTop+=top;sheet.scrollLeft+=left; } });
+  view.rerender(<DrawingViewer {...props} hoveredPartId="other" selectionActivation={{ origin:"table", sequence:1 }} />);
+  await waitFor(() => expect(sheet.scrollTop).toBe(280));
+  expect(sheet.scrollLeft).toBe(280);
+  expect(props.onZoomChange).not.toHaveBeenCalled();
 });

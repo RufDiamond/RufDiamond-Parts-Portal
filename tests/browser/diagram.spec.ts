@@ -202,3 +202,28 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await info.attach("synthetic-geometry.json", { body:JSON.stringify(measurements,null,2), contentType:"application/json" });
   await info.attach("synthetic-tall.png", { body:await page.screenshot(), contentType:"image/png" });
 });
+
+test("mixed occurrence union reveals numeric, legacy shape and marker together without counting lower-priority fallbacks", async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion:"reduce" });
+  await page.goto("http://localhost:3101/?mixed");
+  const scope = figure(page);
+  await expect(scope.locator("img")).toBeVisible();
+  for (let i=0;i<4;i++) await page.getByRole("button", { name:"Zoom in", exact:true }).click();
+  await page.locator('tr[data-figure-part-id="row-39"]').click();
+  await expect.poll(() => scope.evaluate((root) => {
+    const image=root.querySelector("img")!;
+    const sheet=image.parentElement!.parentElement!;
+    const viewport=sheet.getBoundingClientRect();
+    const elements=[root.querySelector('svg[data-diagram-regions] path[data-selected]'),
+      root.querySelector('path[data-callout-id="mixed-legacy"]'), root.querySelector('button[data-callout-id="mixed-marker"]')];
+    return elements.every((element) => {
+      if (!element) return false;
+      const box=element.getBoundingClientRect();
+      return box.top>=viewport.top-1 && box.left>=viewport.left-1 && box.bottom<=viewport.bottom+1 && box.right<=viewport.right+1;
+    });
+  })).toBe(true);
+  expect(await zoom(scope)).toBe(4);
+  await expect(scope.locator('path[data-callout-id="c0"]')).toHaveCount(0);
+  await info.attach("mixed-geometry.json", { body:JSON.stringify(await geometry(scope)), contentType:"application/json" });
+  await info.attach("mixed-occurrences.png", { body:await page.screenshot(), contentType:"image/png" });
+});

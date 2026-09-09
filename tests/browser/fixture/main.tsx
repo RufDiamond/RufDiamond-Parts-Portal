@@ -12,6 +12,7 @@ const context = canvas.getContext("2d")!;
 context.fillStyle = "white"; context.fillRect(0,0,400,1000);
 context.strokeRect(40,800,40,100); context.strokeRect(280,100,40,100);
 const src = canvas.toDataURL("image/png");
+const mixed = new URLSearchParams(window.location.search).has("mixed");
 const rows: FigurePartRow[] = Array.from({ length:40 }, (_, index) => ({
   figurePart:{ id:`row-${index}`, figureId:"tall", partId:`part-${index}`, qty:1, remarks:null, serviceable:true },
   part:{ id:`part-${index}`, partNumber:`P-${index}`, description:`Synthetic component ${index}`, currency:"CAD", listPrice:1,
@@ -33,7 +34,12 @@ function App() {
     <button onClick={() => setRequest((n) => n+1)}>Show selected part</button><button onClick={focus.clear}>Clear selection</button>
     <div style={{ display:"grid", gridTemplateColumns:"500px 600px", height:500 }}>
       <DrawingViewer label="Synthetic tall PNG" src={src} width={400} height={1000} document={doc}
-        markers={[{ id:"c0", number:40, partId:"part-39", figurePartId:"row-39", x:15, y:85 }]}
+        markers={mixed ? [
+          { id:"c0", number:40, partId:"part-39", figurePartId:"row-39", x:15, y:10, maskPath:"M0 0 L100 0 L100 100 Z" },
+          { id:"mixed-legacy", number:40, partId:"part-39", figurePartId:"row-39", x:50, y:20, maskPath:"M40 92.5 L50 92.5 L50 95 L40 95 Z" },
+          { id:"mixed-marker", number:40, partId:"part-39", figurePartId:"row-39", x:50, y:98 },
+          { id:"mixed-unrelated", number:40, partId:"part-0", figurePartId:"row-0", x:10, y:5 },
+        ] : [{ id:"c0", number:40, partId:"part-39", figurePartId:"row-39", x:15, y:85 }]}
         selectedPartIds={focus.selectedPartIds} onSelectPart={focus.selectPart} selectionActivation={focus.activation} revealRequest={request}
         zoom={zoom} onZoomChange={setZoom} />
       <PartsTable rows={rows} selectedPartIds={focus.selectedPartIds} onSelectPart={focus.selectPart}
