@@ -143,6 +143,17 @@ test("Fuel tank and neck corrections exclude foreground cover and established op
   expect(contains(6,[715,555])).toBe(true);
 });
 
+test("Lower gate tracing preserves ladder space and foreground/source ownership", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-8"))!, "hosted-review");
+  const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
+  for (const [ref,point] of [[2,[800,500]],[2,[700,430]],[3,[260,110]],[3,[273,300]],[7,[628,268]],[11,[280,530]],[13,[203,429]]] as [number,[number,number]][]) expect(contains(ref,point)).toBe(false);
+  expect(contains(2,[550,480])).toBe(true);
+  expect(contains(3,[280,35])).toBe(true);
+  expect(contains(3,[213,244])).toBe(false);
+  expect(contains(3,[216,302])).toBe(false);
+  expect(contains(3,[227,302])).toBe(true);
+});
+
 test("Engine 8.3 removes established support voids but retains visible rear material", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-engine-8-3"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point,r));

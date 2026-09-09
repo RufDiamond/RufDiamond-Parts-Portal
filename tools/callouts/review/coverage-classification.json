@@ -2981,25 +2981,25 @@
         {
           "figurePartId": "fp-6-8-03",
           "sourceRefNo": "2",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original2 lid visible sheet and upper cut-out boundary traced independently from foreground gate1. Large side slots and opening beneath bent flap excluded; flap opaque material retained. Hidden right/lower sheet is not bridged across gate1. Fine bores and close fold/foreground joins remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine bores and close fold/foreground joins remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-8-04",
           "sourceRefNo": "3",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original3 complete source-visible ladder exterior and clear upper opening traced, preserving open space below the cross rung through concave outer boundary. Printed ladder top is at y15, not cropped. Cubic mounts and tubular feet retained; small mounting bores/serrated rung detail remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Cubic mounts and tubular feet retained; small mounting bores/serrated rung detail remain partial."
           ]
         },
         {
@@ -3041,121 +3041,121 @@
         {
           "figurePartId": "fp-6-8-08",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original7 directly labelled upper ring-support mechanism: clear bracket material and upper aperture only. Adjacent U-shaped cable is not merged solely by proximity; exact cable/support ownership and lower fine joins remain partial source work.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Adjacent U-shaped cable is not merged solely by proximity; exact cable/support ownership and lower fine joins remain partial source work."
           ]
         },
         {
           "figurePartId": "fp-6-8-09",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original8 left detached rotary latch: visible case/lever and clear upper window. Separate cable beside it and tailgate nut10 excluded. Tiny lower latch detail/bores remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Tiny lower latch detail/bores remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-8-10",
           "sourceRefNo": "9",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original9 directly labelled right detached rotary latch, preserving obvious gaps around separate arms via concave outline. Fine sockets, cable attachment and tiny holes remain partial; no neighboring plate/cable included.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine sockets, cable attachment and tiny holes remain partial; no neighboring plate/cable included."
           ]
         },
         {
           "figurePartId": "fp-6-8-11",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original10 small detached latch nut beside8, directly established narrow body only. Leader obscures part of centre; no generic filled enlarged ellipse. Bore/wall detail remains resolution-limited partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Bore/wall detail remains resolution-limited partial."
           ]
         },
         {
           "figurePartId": "fp-6-8-12",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original11 directly labelled thin diagonal tailgate cable and terminal eyes; two exposed eye openings excluded. No broad triangular envelope and no parallel/unlabelled gas spring copy. Fine cable/terminal joins remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine cable/terminal joins remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-8-13",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original12 directly labelled shoulder screw only. Head/shaft exterior visible, but leader over head and fine thread edges remain partial; neighboring sleeve not included.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Head/shaft exterior visible, but leader over head and fine thread edges remain partial; neighboring sleeve not included."
           ]
         },
         {
           "figurePartId": "fp-6-8-14",
           "sourceRefNo": "13",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original13 directly labelled lower-left sleeve bearing, not similar upper-right ring. Outer exposed material only; central leader endpoint prevents confident complete annular void boundary at this scale, retained as partial detail.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Outer exposed material only; central leader endpoint prevents confident complete annular void boundary at this scale, retained as partial detail."
           ]
         },
         {
           "figurePartId": "fp-6-8-15",
           "sourceRefNo": "14",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original14 ball stud: only exposed right cap edge separable from dark leader endpoint is traced. Central/head/shaft extent remains source-resolution-limited; do not outline the printed dot or nearby pivot plate.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Central/head/shaft extent remains source-resolution-limited; do not outline the printed dot or nearby pivot plate."
           ]
         },
         {
           "figurePartId": "fp-6-8-16",
           "sourceRefNo": "15",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original15 directly labelled RIGHT pivot bracket below ladder foot, not similar left bracket. Three clear bores/slots excluded; upper folded ramp remains opaque material. Fine ramp-to-slot walls remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine ramp-to-slot walls remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-8-17",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original16 directly labelled detached precision screw below ladder. Only compact visible screw silhouette, not printed leader. Fine head/thread separation remains partial at source scale.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine head/thread separation remains partial at source scale."
           ]
         },
         {
