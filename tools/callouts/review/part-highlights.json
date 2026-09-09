@@ -6709,7 +6709,501 @@
               ]
             ]
           ],
-          "evidence": "Printed reference 1 leader terminates on the large detached rear window pane at right, matching 61-00141 (Rear window). Contour traced from the current source PNG; no label or leader is included."
+          "evidence": "Printed reference 1 leader terminates on the large detached rear window pane at right, matching 61-00141 (Rear window). Contour traced from the current source PNG; no label or leader is included. Task10c independently traced two visible pane apertures. Bottom pane is clipped by source raster: original visible-only exterior preserved, no hidden physical extent invented; partial until complete source extent available.",
+          "holes": [
+            [
+              [
+                [
+                  73.8281,
+                  76.25
+                ],
+                [
+                  74.1406,
+                  75.5556
+                ],
+                [
+                  74.8438,
+                  75
+                ],
+                [
+                  75.0781,
+                  75.1389
+                ],
+                [
+                  75.0781,
+                  76.3889
+                ],
+                [
+                  74.7656,
+                  77.3611
+                ],
+                [
+                  74.2188,
+                  78.0556
+                ],
+                [
+                  73.9063,
+                  78.0556
+                ],
+                [
+                  73.75,
+                  77.7778
+                ]
+              ],
+              [
+                [
+                  77.1094,
+                  73.1944
+                ],
+                [
+                  77.3438,
+                  72.6389
+                ],
+                [
+                  77.7344,
+                  72.3611
+                ],
+                [
+                  77.8906,
+                  72.5
+                ],
+                [
+                  77.8125,
+                  73.6111
+                ],
+                [
+                  77.5781,
+                  74.4444
+                ],
+                [
+                  77.1875,
+                  74.7222
+                ],
+                [
+                  77.0313,
+                  74.5833
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "calloutId": "co-6-7-0202",
+          "figurePartId": "fp-6-7-03",
+          "partNumber": "19-00368",
+          "number": 2,
+          "x": 70.5859,
+          "y": 13.4722,
+          "polygons": [
+            [
+              [
+                38.3594,
+                41.5278
+              ],
+              [
+                38.5938,
+                39.1667
+              ],
+              [
+                39.4531,
+                36.9444
+              ],
+              [
+                40.625,
+                35.5556
+              ],
+              [
+                65.7031,
+                19.7222
+              ],
+              [
+                66.4063,
+                19.7222
+              ],
+              [
+                67.1094,
+                20.5556
+              ],
+              [
+                67.5781,
+                22.0833
+              ],
+              [
+                67.6563,
+                24.3056
+              ],
+              [
+                66.7188,
+                47.9167
+              ],
+              [
+                66.1719,
+                48.3333
+              ],
+              [
+                67.0313,
+                24.1667
+              ],
+              [
+                66.9531,
+                22.3611
+              ],
+              [
+                66.5625,
+                21.25
+              ],
+              [
+                66.0938,
+                20.8333
+              ],
+              [
+                41.0156,
+                36.6667
+              ],
+              [
+                40.0781,
+                38.0556
+              ],
+              [
+                39.375,
+                40
+              ],
+              [
+                39.0625,
+                41.6667
+              ],
+              [
+                39.5313,
+                79.7222
+              ],
+              [
+                39.8438,
+                81.1111
+              ],
+              [
+                40.7813,
+                81.8056
+              ],
+              [
+                41.9531,
+                81.9444
+              ],
+              [
+                61.7969,
+                64.3056
+              ],
+              [
+                61.7969,
+                65.6944
+              ],
+              [
+                42.2656,
+                82.9167
+              ],
+              [
+                40.7813,
+                83.0556
+              ],
+              [
+                39.6875,
+                82.6389
+              ],
+              [
+                39.0625,
+                81.6667
+              ],
+              [
+                38.75,
+                80.1389
+              ]
+            ]
+          ],
+          "evidence": "Printed2 leader targets19-00368 trim seal. Actual thin U-shaped visible band traced around open centre, only visible portion before foreground pane occlusion; hidden right/bottom continuation remains partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0203",
+          "figurePartId": "fp-6-7-04",
+          "partNumber": "61-00145",
+          "number": 3,
+          "x": 50.4297,
+          "y": 8.5417,
+          "polygons": [
+            [
+              [
+                21.4063,
+                27.2222
+              ],
+              [
+                48.125,
+                13.1944
+              ],
+              [
+                48.3594,
+                13.6111
+              ],
+              [
+                48.2813,
+                48.3333
+              ],
+              [
+                48.0469,
+                49.1667
+              ],
+              [
+                24.2188,
+                66.8056
+              ],
+              [
+                23.6719,
+                67.0833
+              ],
+              [
+                23.2813,
+                66.5278
+              ],
+              [
+                23.0469,
+                61.5278
+              ],
+              [
+                22.5781,
+                61.3889
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  22.4219,
+                  28.1944
+                ],
+                [
+                  47.1094,
+                  15.1389
+                ],
+                [
+                  47.1875,
+                  39.1667
+                ],
+                [
+                  23.4375,
+                  54.3056
+                ]
+              ],
+              [
+                [
+                  23.8281,
+                  56.25
+                ],
+                [
+                  47.2656,
+                  40.9722
+                ],
+                [
+                  47.2656,
+                  42.6389
+                ],
+                [
+                  23.9063,
+                  59.4444
+                ]
+              ],
+              [
+                [
+                  23.9063,
+                  62.0833
+                ],
+                [
+                  47.2656,
+                  45.2778
+                ],
+                [
+                  47.2656,
+                  48.0556
+                ],
+                [
+                  23.9844,
+                  65.6944
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed3 leader reaches61-00145 rear window framework. Outer rails and three large visible openings traced; detached cover4, holders/latches and empty central area excluded. Small fastener holes and tiny occlusions remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0204",
+          "figurePartId": "fp-6-7-05",
+          "partNumber": "61-00146",
+          "number": 4,
+          "x": 4.8828,
+          "y": 61.5972,
+          "polygons": [
+            [
+              [
+                11.4063,
+                47.7778
+              ],
+              [
+                21.5625,
+                41.8056
+              ],
+              [
+                21.7188,
+                46.9444
+              ],
+              [
+                12.2656,
+                52.9167
+              ],
+              [
+                11.6406,
+                52.5
+              ],
+              [
+                11.6406,
+                51.6667
+              ],
+              [
+                11.4063,
+                50.6944
+              ]
+            ],
+            [
+              [
+                23.2031,
+                40.9722
+              ],
+              [
+                36.3281,
+                32.6389
+              ],
+              [
+                36.9531,
+                33.0556
+              ],
+              [
+                37.1094,
+                33.8889
+              ],
+              [
+                36.5625,
+                34.3056
+              ],
+              [
+                36.5625,
+                34.8611
+              ],
+              [
+                37.0313,
+                35.1389
+              ],
+              [
+                36.875,
+                35.8333
+              ],
+              [
+                36.4063,
+                35.8333
+              ],
+              [
+                36.4063,
+                36.6667
+              ],
+              [
+                36.7188,
+                36.8056
+              ],
+              [
+                36.6406,
+                37.5
+              ],
+              [
+                23.4375,
+                46.25
+              ]
+            ]
+          ],
+          "evidence": "Printed4 leader targets61-00146 detached channel. Two exposed solid channel faces around foreground frame upright traced without joining across occluding rail. White channel back face is actual material, not a long aperture; small mounting holes and end fold recess remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0205",
+          "figurePartId": "fp-6-7-06",
+          "partNumber": "61-00147",
+          "number": 5,
+          "x": 28.7109,
+          "y": 73.125,
+          "polygons": [
+            [
+              [
+                28.6719,
+                47.3611
+              ],
+              [
+                29.8438,
+                47.9167
+              ],
+              [
+                29.9219,
+                46.5278
+              ],
+              [
+                30.9375,
+                45.6944
+              ],
+              [
+                31.3281,
+                46.25
+              ],
+              [
+                31.25,
+                48.3333
+              ],
+              [
+                30.1563,
+                49.0278
+              ],
+              [
+                29.6875,
+                48.6111
+              ],
+              [
+                28.5938,
+                48.1944
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  30.1563,
+                  47.2222
+                ],
+                [
+                  30.5469,
+                  46.8056
+                ],
+                [
+                  30.8594,
+                  46.9444
+                ],
+                [
+                  30.8594,
+                  47.7778
+                ],
+                [
+                  30.4688,
+                  48.3333
+                ],
+                [
+                  30.1563,
+                  48.1944
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed5 leader reaches lower double-cable holder61-00147 with visible aperture. Upper similar loose holder not assigned solely from qty2; tiny side fold remains partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
           "calloutId": "co-6-7-0209",
@@ -6817,6 +7311,83 @@
           "evidence": "Printed reference 9 leader terminates on the detached front push button handle at lower right, matching 17-00150 (Front push button handle). Contour traced from the current source PNG; no label or leader is included."
         },
         {
+          "calloutId": "co-6-7-0210",
+          "figurePartId": "fp-6-7-11",
+          "partNumber": "17-00151",
+          "number": 10,
+          "x": 13.4766,
+          "y": 41.7361,
+          "polygons": [
+            [
+              [
+                16.4844,
+                37.7778
+              ],
+              [
+                18.6719,
+                36.1111
+              ],
+              [
+                19.6875,
+                35.6944
+              ],
+              [
+                20.3125,
+                36.1111
+              ],
+              [
+                20.9375,
+                35.5556
+              ],
+              [
+                21.4844,
+                35.6944
+              ],
+              [
+                21.875,
+                36.25
+              ],
+              [
+                21.6406,
+                37.9167
+              ],
+              [
+                21.0938,
+                38.0556
+              ],
+              [
+                20.5469,
+                37.3611
+              ],
+              [
+                19.6875,
+                36.8056
+              ],
+              [
+                18.9844,
+                37.0833
+              ],
+              [
+                17.2656,
+                38.4722
+              ],
+              [
+                17.1875,
+                39.3056
+              ],
+              [
+                16.7188,
+                39.1667
+              ],
+              [
+                16.4844,
+                38.6111
+              ]
+            ]
+          ],
+          "evidence": "Printed10 leader targets rear pushbutton handle17-00151. Actual bent strip/body contour, no filled centre envelope; fine end recesses remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
           "calloutId": "co-6-7-0213",
           "figurePartId": "fp-6-7-14",
           "partNumber": "17-00050",
@@ -6890,7 +7461,7 @@
           "evidence": "Printed reference 13 leader terminates on the left directly indicated gas spring, matching 17-00050 (Gas spring (lexan windshield)). Contour traced from the current source PNG; no label or leader is included."
         }
       ],
-      "notes": "3 of 18 listed references have manually traced component contours. Only directly leader-indicated occurrences are included. Remaining overlapping assembly boundaries, trim seals, repeated components or untraced references are withheld. Approximate review geometry requires RUF Diamond approval. References without a proposed silhouette: 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18."
+      "notes": "Task10c adds visible trim2, frame3 with large openings, separately exposed channel4, directly labelled holder5 and handle10. Cropped pane1 needs aperture refinement; untraced hinges/hardware retained as unfinished source-visible work."
     },
     {
       "figureId": "fig-cabin-6-8",
@@ -8691,9 +9262,309 @@
             ]
           ],
           "evidence": "Printed reference 5 leader terminates on the detached rear floor tray, matching 60-00521 (Rear floor). Contour traced from the current source PNG; no label or leader is included."
+        },
+        {
+          "calloutId": "co-6-12-0280",
+          "figurePartId": "fp-6-12-08",
+          "partNumber": "65-00451",
+          "number": 8,
+          "x": 5.5469,
+          "y": 60.6944,
+          "polygons": [
+            [
+              [
+                14.375,
+                70.9722
+              ],
+              [
+                14.6875,
+                71.1111
+              ],
+              [
+                17.1094,
+                77.3611
+              ],
+              [
+                17.3438,
+                81.5278
+              ],
+              [
+                17.1875,
+                82.2222
+              ],
+              [
+                16.9531,
+                81.9444
+              ],
+              [
+                14.375,
+                75.9722
+              ],
+              [
+                14.2188,
+                71.6667
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  14.6875,
+                  72.7778
+                ],
+                [
+                  16.7188,
+                  77.7778
+                ],
+                [
+                  17.0313,
+                  80.6944
+                ],
+                [
+                  14.7656,
+                  75.5556
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed8 leader reaches detached65-00451 seal lower-left. One thin visible seal ring with central opening traced, not adjacent upper-left similar ring; guides excluded. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-12-0281",
+          "figurePartId": "fp-6-12-09",
+          "partNumber": "65-00388",
+          "number": 9,
+          "x": 14.6875,
+          "y": 27.1528,
+          "polygons": [
+            [
+              [
+                20.5469,
+                37.6389
+              ],
+              [
+                27.1094,
+                36.1111
+              ],
+              [
+                28.0469,
+                36.25
+              ],
+              [
+                30.8594,
+                40.4167
+              ],
+              [
+                31.0937,
+                41.1111
+              ],
+              [
+                30.7031,
+                41.8056
+              ],
+              [
+                23.75,
+                42.9167
+              ],
+              [
+                23.2813,
+                42.6389
+              ],
+              [
+                20.7813,
+                38.8889
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  21.4063,
+                  38.1944
+                ],
+                [
+                  27.1875,
+                  36.9444
+                ],
+                [
+                  27.8125,
+                  37.2222
+                ],
+                [
+                  30.3906,
+                  40.8333
+                ],
+                [
+                  30.3125,
+                  41.1111
+                ],
+                [
+                  23.8281,
+                  42.0833
+                ],
+                [
+                  23.5156,
+                  41.8056
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed9 leader reaches65-00388 footwell seal below detached footwell. Actual closed band and empty centre independently traced; assembly guides excluded. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-12-0283",
+          "figurePartId": "fp-6-12-11",
+          "partNumber": "65-00366",
+          "number": 11,
+          "x": 72.6172,
+          "y": 26.25,
+          "polygons": [
+            [
+              [
+                46.0938,
+                32.6389
+              ],
+              [
+                62.8125,
+                29.5833
+              ],
+              [
+                63.5938,
+                30
+              ],
+              [
+                67.1094,
+                33.6111
+              ],
+              [
+                67.3438,
+                34.3056
+              ],
+              [
+                66.875,
+                34.8611
+              ],
+              [
+                50.7031,
+                37.7778
+              ],
+              [
+                50,
+                37.6389
+              ],
+              [
+                46.0938,
+                33.4722
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  47.0313,
+                  33.0556
+                ],
+                [
+                  62.8906,
+                  30.4167
+                ],
+                [
+                  66.25,
+                  34.0278
+                ],
+                [
+                  50.5469,
+                  36.9444
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed11 leader reaches65-00366 rear floor panel seal under tray. Thin outer band and large centre void traced; tray and guide lines excluded. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-12-0284",
+          "figurePartId": "fp-6-12-12",
+          "partNumber": "65-00367",
+          "number": 12,
+          "x": 83.8672,
+          "y": 43.4028,
+          "polygons": [
+            [
+              [
+                76.7969,
+                57.5
+              ],
+              [
+                77.2656,
+                57.2222
+              ],
+              [
+                82.1094,
+                62.3611
+              ],
+              [
+                82.5,
+                63.3333
+              ],
+              [
+                82.5,
+                71.1111
+              ],
+              [
+                82.2656,
+                71.9444
+              ],
+              [
+                76.875,
+                66.1111
+              ],
+              [
+                76.6406,
+                65.2778
+              ],
+              [
+                76.6406,
+                58.3333
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  77.1875,
+                  58.4722
+                ],
+                [
+                  81.875,
+                  63.3333
+                ],
+                [
+                  82.1094,
+                  64.1667
+                ],
+                [
+                  82.1094,
+                  70.5556
+                ],
+                [
+                  77.2656,
+                  65.4167
+                ],
+                [
+                  77.1094,
+                  64.8611
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Printed12 leader reaches65-00367 rear engine-panel seal left of conflicting panel6. One separate thin ring and its true opening traced; refs6/7/10 remain source-conflicted and receive no inferred geometry. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
-      "notes": "5 of 12 listed references have manually traced component contours. Only directly leader-indicated occurrences are included. Remaining overlapping assembly boundaries, trim seals, repeated components or untraced references are withheld. Approximate review geometry requires RUF Diamond approval. References without a proposed silhouette: 6, 7, 8, 9, 10, 11, 12."
+      "notes": "Task10c adds clear seal8/9/11/12 outer+hole contours. Source conflicts6/7/10 retained; no duplicatePN reuse or automatic source approval."
     },
     {
       "figureId": "fig-cabin-6-14",

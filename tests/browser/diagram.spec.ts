@@ -49,9 +49,7 @@ test("task10c source openings exclude clicks in both Bumper plates and the four 
   }
 });
 
-test("task10c detailed added contours converge through physical click, label and row", async ({page},info) => {
-  test.setTimeout(180000);
-  for (const entry of [
+for (const entry of [
     {figure:"fig-filters-1-1",refs:[1,2,3,4,5,6]},
     {figure:"fig-hydraulic-4-2",refs:[1,2,3,4]},
     {figure:"fig-hydraulic-4-3",refs:[2]},
@@ -63,7 +61,11 @@ test("task10c detailed added contours converge through physical click, label and
     {figure:"fig-hydraulic-4-1",refs:[19,20,21,22,23,24,25,26]},
     {figure:"fig-cabin-6-6",refs:[7,14]},
     {figure:"fig-cabin-6-18",refs:[5,6,7,8]},
+    {figure:"fig-cabin-6-12",refs:[8,9,11,12]},
+    {figure:"fig-cabin-6-7",refs:[1,2,3,4,5,10]},
   ]) {
+  test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
+    test.setTimeout(90000);
     await page.goto(`${base}/review/figures/${entry.figure}`);
     for (const ref of entry.refs) {
       const label=figure(page).getByRole("button",{name:new RegExp(`^Callout ${ref}:`)});
@@ -88,8 +90,8 @@ test("task10c detailed added contours converge through physical click, label and
       await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)})).toHaveAttribute("aria-pressed","true");
       await page.getByRole("button",{name:"Close the illustration"}).click();
     }
-  }
-});
+  });
+}
 const figure = (page:Page) => page.locator("figure").first();
 const stage = (scope:Locator) => scope.locator("img").locator("..");
 
