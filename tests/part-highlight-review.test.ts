@@ -135,6 +135,14 @@ test("Fuel 9.1 excludes unlabelled lookalikes and source-visible clamp bores", a
   expect(contains(13,[332,612])).toBe(true);
 });
 
+test("Fuel tank and neck corrections exclude foreground cover and established openings", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-fuel-system-9-1"))!, "hosted-review");
+  const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
+  for (const [ref,point] of [[2,[780,147]],[6,[744,412]],[6,[575,577]],[6,[561,512]],[8,[491,376]]] as [number,[number,number]][]) expect(contains(ref,point)).toBe(false);
+  expect(contains(2,[786,117])).toBe(true);
+  expect(contains(6,[715,555])).toBe(true);
+});
+
 test("Engine 8.3 removes established support voids but retains visible rear material", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-engine-8-3"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point,r));

@@ -67,7 +67,7 @@ for (const entry of [
     {figure:"fig-electric-11-3",refs:[2,12,15]},
     {figure:"fig-cabin-6-2",refs:[1,8,16,20,21,24,26],crowdedFitLabels:true},
     {figure:"fig-engine-8-3",refs:[1,2,3]},
-    {figure:"fig-fuel-system-9-1",refs:[3,4,5,7,9,10,11,12,13,16,18,19],crowdedFitLabels:true},
+    {figure:"fig-fuel-system-9-1",refs:[2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,19],crowdedFitLabels:true},
   ]) {
   test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
     test.setTimeout(90000);
@@ -78,7 +78,7 @@ for (const entry of [
         // Fixed-size labels overlap at embedded fit scale; verify the keyboard
         // equivalent here and an actual native label click in fullscreen below.
         await label.focus(); await page.keyboard.press("Enter");
-      } else await label.click();
+      } else await label.click({timeout:7000});
       await page.mouse.move(0,0);
       const row=page.locator("tr[data-figure-part-id][data-active]").first();
       await expect(row).toBeVisible();
@@ -88,7 +88,7 @@ for (const entry of [
       const dialog=page.getByRole("dialog"),scope=dialog.locator("figure");
       if ("crowdedFitLabels" in entry) {
         await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
-        await scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).click();
+        await scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).click({timeout:7000});
         await page.mouse.move(0,0);
       }
       await page.screenshot({path:info.outputPath(`${entry.figure}-ref${ref}-overlay.png`)});

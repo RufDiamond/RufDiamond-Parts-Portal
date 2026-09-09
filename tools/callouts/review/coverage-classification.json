@@ -6435,12 +6435,12 @@
           "figurePartId": "fp-9-1-02",
           "sourceRefNo": "2",
           "category": "partial",
-          "evidence": "Original9.1 audit identifies fillerframe2 rectangle/bores, tank6 ports/support voids and hose8 end mouths/inner walls absent from current exterior contours.",
+          "evidence": "Original2 filler frame: actual lower opening and narrow gap separated from attached neck/strap faces visible through frame. Four mounting bores excluded; rear side sheet and opaque neck material retained. Fine side joins and inner wall edges remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Cut only genuine empty space, preserve visible inner metal/walls and exclude detached fittings"
+            "Fine side joins and inner wall edges remain partial."
           ]
         },
         {
@@ -6483,13 +6483,12 @@
           "figurePartId": "fp-9-1-06",
           "sourceRefNo": "6",
           "category": "partial",
-          "evidence": "Original9.1 audit identifies fillerframe2 rectangle/bores, tank6 ports/support voids and hose8 end mouths/inner walls absent from current exterior contours.",
+          "evidence": "Original6 tank upper visible boundary retraced along foreground cover3 lower contour instead of filling the cover/sender silhouette; opaque main tank faces retained. Thirteen source-visible connection bore interiors excluded. Mount loop voids, tiny foreground screw-dot exclusions, residual upper-wall/cover joins and fine port-wall details remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Cut only genuine empty space, preserve visible inner metal/walls and exclude detached fittings",
-            "Existing tank envelope includes foreground cover3 and sender material. Same-SVG overlap chooser verification is not proof that this tank occlusion overfill is complete or corrected."
+            "Mount loop voids, tiny foreground screw-dot exclusions, residual upper-wall/cover joins and fine port-wall details remain partial."
           ]
         },
         {
@@ -6508,12 +6507,12 @@
           "figurePartId": "fp-9-1-08",
           "sourceRefNo": "8",
           "category": "partial",
-          "evidence": "Original9.1 audit identifies fillerframe2 rectangle/bores, tank6 ports/support voids and hose8 end mouths/inner walls absent from current exterior contours.",
+          "evidence": "Original8 fill hose lower end split into established empty subregions around visible curved inner wall. Detached lower clamp not added. Upper end and fine wall/bead transitions remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Cut only genuine empty space, preserve visible inner metal/walls and exclude detached fittings"
+            "Upper end and fine wall/bead transitions remain partial."
           ]
         },
         {
@@ -6579,13 +6578,13 @@
         {
           "figurePartId": "fp-9-1-14",
           "sourceRefNo": "14",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original14 small detached plug: actual stepped body and opaque front retained. Leader crosses face but is not separately outlined. Fine rear rim transition remains partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine rear rim transition remains partial."
           ]
         },
         {
