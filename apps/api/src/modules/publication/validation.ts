@@ -91,6 +91,7 @@ export type PublicationGraph = Awaited<ReturnType<typeof validateModel>>;
 /** Validate only sealed snapshot contents; legacy geometry absence is permitted,
  * while malformed or disconnected numeric geometry is never activated. */
 export async function requireIntactSnapshot(tx: Transaction, releaseId: string) {
+  const variants = await tx.select().from(s.releaseVariant).where(eq(s.releaseVariant.releaseId, releaseId));
   const figures = await tx.select().from(s.releaseFigure).where(eq(s.releaseFigure.releaseId, releaseId));
   const rows = await tx.select().from(s.releaseFigurePart).where(eq(s.releaseFigurePart.releaseId, releaseId));
   const calls = await tx.select().from(s.releaseCallout).where(eq(s.releaseCallout.releaseId, releaseId));
@@ -98,7 +99,9 @@ export async function requireIntactSnapshot(tx: Transaction, releaseId: string) 
   const parts = await tx.select().from(s.releasePart).where(eq(s.releasePart.releaseId, releaseId));
   const mappings = await tx.select().from(s.releaseDiagramMapping).where(eq(s.releaseDiagramMapping.releaseId, releaseId));
   const invalid = () => { throw new AppError("RELEASE_INCOMPLETE", 422, "The sealed snapshot is incomplete or inconsistent and cannot be activated."); };
+  if (!variants.length || variants.some(v => !figures.some(f => f.variantId === v.id))) invalid();
   if (!figures.length || figures.some(f => !rows.some(r => r.figureId === f.id) || !calls.some(c => c.figureId === f.id) || !drawings.some(d => d.id === f.drawingId))) invalid();
+  if (rows.some(r => !calls.some(c => c.figureId === r.figureId && c.figurePartId === r.id))) invalid();
   if (parts.some(p => !p.listPrice || !["CAD", "USD"].includes(p.currency)) || new Set(parts.map(p => p.currency)).size > 1) invalid();
   for (const mapping of mappings) {
     const document = mapping.document;

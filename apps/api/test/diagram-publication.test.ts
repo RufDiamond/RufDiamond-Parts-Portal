@@ -236,3 +236,40 @@ it("copies required-part closure to same-release identities and searches permitt
   expect(result.json().items[0].releasePartId).toBe(stored.required_part_id);
   expect((await get("/catalog/parts/usages?q=TARGET")).json().items[0]).toMatchObject({ figureId: null, part: { id: target } });
 });
+
+async function cloneSealedFixture(sourceReleaseId: string, defect: "empty-variant" | "unmapped-row" | "legacy") {
+  const releaseId = randomUUID();
+  await pg.pool.query("insert into publication_release(id,model_id,revision,source_checksum) values($1,$2,2,repeat('a',64))", [releaseId, ids.model]);
+  for (const table of ["release_drawing", "release_model", "release_variant", "release_system", "release_part", "release_part_requires", "release_figure", "release_figure_part", "release_callout"]) {
+    const columns = (await pg.pool.query("select column_name from information_schema.columns where table_schema='public' and table_name=$1 order by ordinal_position", [table])).rows.map(r => r.column_name as string);
+    await pg.pool.query(`insert into ${table} (${columns.map(c => `"${c}"`).join(",")}) select ${columns.map(c => c === "release_id" ? "$1" : `"${c}"`).join(",")} from ${table} where release_id=$2`, [releaseId, sourceReleaseId]);
+  }
+  // All three historical fixtures intentionally lack numeric mapping. The
+  // exception for legacy geometry must not exempt their hierarchy or rows.
+  if (defect === "empty-variant") await pg.pool.query("insert into release_variant(release_id,working_id,model_id,label) select $1,$2,id,'Empty historical variant' from release_model where release_id=$1", [releaseId, randomUUID()]);
+  if (defect === "unmapped-row") await pg.pool.query("insert into release_figure_part(release_id,working_id,figure_id,part_id,source_row_key,qty) select $1,$2,figure_id,part_id,'unmapped-historical-row',1 from release_figure_part where release_id=$1 limit 1", [releaseId, randomUUID()]);
+  await pg.pool.query("update publication_release set status='inactive',published_at=now() where id=$1", [releaseId]);
+  return releaseId;
+}
+
+it.each(["activate", "rollback"] as const)("%s rejects an empty historical variant despite another complete figure", async action => {
+  await approve(); const first = (await publish()).json(); const historical = await cloneSealedFixture(first.releaseId, "empty-variant");
+  const active = action === "rollback" ? (await publish(2)).json() : first;
+  const response = await app.inject({ method: "POST", url: `/api/v1/admin/publication/releases/${historical}/${action}`, headers: { ...headers, "idempotency-key": randomUUID() }, payload: { expectedPublicationVersion: action === "rollback" ? 3 : 2, expectedActiveReleaseId: active.releaseId } });
+  expect(response.statusCode, response.body).toBe(422);
+  expect((await get(`/catalog/figures/${ids.figure}`)).json().release.releaseId).toBe(active.releaseId);
+});
+
+it.each(["activate", "rollback"] as const)("%s rejects a historical figure's extra unmapped row", async action => {
+  await approve(); const first = (await publish()).json(); const historical = await cloneSealedFixture(first.releaseId, "unmapped-row");
+  const active = action === "rollback" ? (await publish(2)).json() : first;
+  const response = await app.inject({ method: "POST", url: `/api/v1/admin/publication/releases/${historical}/${action}`, headers: { ...headers, "idempotency-key": randomUUID() }, payload: { expectedPublicationVersion: action === "rollback" ? 3 : 2, expectedActiveReleaseId: active.releaseId } });
+  expect(response.statusCode, response.body).toBe(422);
+});
+it.each(["activate", "rollback"] as const)("%s accepts complete historical hierarchy with legacy masks and no numeric mapping", async action => {
+  await approve(); const first = (await publish()).json(); const historical = await cloneSealedFixture(first.releaseId, "legacy");
+  const active = action === "rollback" ? (await publish(2)).json() : first;
+  const response = await app.inject({ method: "POST", url: `/api/v1/admin/publication/releases/${historical}/${action}`, headers: { ...headers, "idempotency-key": randomUUID() }, payload: { expectedPublicationVersion: action === "rollback" ? 3 : 2, expectedActiveReleaseId: active.releaseId } });
+  expect(response.statusCode, response.body).toBe(200);
+  expect((await get(`/catalog/figures/${ids.figure}`)).json().mapping).toBeNull();
+});
