@@ -3287,49 +3287,49 @@
         {
           "figurePartId": "fp-6-9-10",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original PNG and useful source crops personally inspected2026-09-09: directly labelled upper crossbar10, ladder11, manufacturer-confirmed narrow LINK12 and two tubular guards13/16 traced. Ladder/guard empty centres and visible reinforcing material are separately retained; no quantity-derived second crossbar or copied guard.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine mounting/eye bores, tube end walls, weld and leader-obscured joins remain partial; trace presence is not independently measured complete material coverage."
           ]
         },
         {
           "figurePartId": "fp-6-9-11",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original PNG and useful source crops personally inspected2026-09-09: directly labelled upper crossbar10, ladder11, manufacturer-confirmed narrow LINK12 and two tubular guards13/16 traced. Ladder/guard empty centres and visible reinforcing material are separately retained; no quantity-derived second crossbar or copied guard.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine mounting/eye bores, tube end walls, weld and leader-obscured joins remain partial; trace presence is not independently measured complete material coverage."
           ]
         },
         {
           "figurePartId": "fp-6-9-12",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Manufacturer PDF physical25/footer21 explicitly names brushguard LINK for PN86-00105/86-00108; omitted LINK in legacy description explained apparent guard mismatch. Leader identifies separate narrow link, not larger guard13/16. Read-only source audit, not approval.",
+          "category": "partial",
+          "evidence": "Original PNG and useful source crops personally inspected2026-09-09: directly labelled upper crossbar10, ladder11, manufacturer-confirmed narrow LINK12 and two tubular guards13/16 traced. Ladder/guard empty centres and visible reinforcing material are separately retained; no quantity-derived second crossbar or copied guard.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace detached narrow original-PNG link and visible openings"
+            "Fine mounting/eye bores, tube end walls, weld and leader-obscured joins remain partial; trace presence is not independently measured complete material coverage."
           ]
         },
         {
           "figurePartId": "fp-6-9-13",
           "sourceRefNo": "13",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original PNG and useful source crops personally inspected2026-09-09: directly labelled upper crossbar10, ladder11, manufacturer-confirmed narrow LINK12 and two tubular guards13/16 traced. Ladder/guard empty centres and visible reinforcing material are separately retained; no quantity-derived second crossbar or copied guard.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine mounting/eye bores, tube end walls, weld and leader-obscured joins remain partial; trace presence is not independently measured complete material coverage."
           ]
         },
         {
@@ -3359,13 +3359,13 @@
         {
           "figurePartId": "fp-6-9-16",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original PNG and useful source crops personally inspected2026-09-09: directly labelled upper crossbar10, ladder11, manufacturer-confirmed narrow LINK12 and two tubular guards13/16 traced. Ladder/guard empty centres and visible reinforcing material are separately retained; no quantity-derived second crossbar or copied guard.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine mounting/eye bores, tube end walls, weld and leader-obscured joins remain partial; trace presence is not independently measured complete material coverage."
           ]
         },
         {
