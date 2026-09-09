@@ -8,13 +8,14 @@ import {
 import { canonicalJsonHash } from "../outbox/idempotency.js";
 import type { AuthorizationContext } from "../authorization/types.js";
 import { AppError } from "../../plugins/error-handler.js";
-import { reviewSourceRow } from "./quantity.js";
+import { quantityReviewer, reviewSourceRow } from "./quantity.js";
 import { publisher } from "../publication/validation.js";
 
 export type SourceGraph = {
   figure: typeof s.figure.$inferSelect;
   model: typeof s.model.$inferSelect;
   variant: typeof s.variant.$inferSelect;
+  system: typeof s.system.$inferSelect;
   drawing: typeof s.drawingFile.$inferSelect | null;
   rows: Array<{
     row: typeof s.figurePart.$inferSelect;
@@ -72,6 +73,11 @@ export async function loadSourceReviews(tx: Transaction, graph: SourceGraph) {
     return a ? [a] : [];
   });
   const source = {
+    system: {
+      id: graph.system.id,
+      version: graph.system.version,
+      name: graph.system.name,
+    },
     figure: {
       id: graph.figure.id,
       version: graph.figure.version,
@@ -141,7 +147,10 @@ export async function loadSourceReviews(tx: Transaction, graph: SourceGraph) {
     )
       continue;
     try {
-      const ctx = await sourceReviewer(tx, decision.actorId, true);
+      const ctx =
+        decision.mode === "assembly-reference-unspecified"
+          ? await quantityReviewer(tx, decision.actorId, true)
+          : await sourceReviewer(tx, decision.actorId, true);
       if (!scoped(ctx, graph)) continue;
     } catch (error) {
       if (

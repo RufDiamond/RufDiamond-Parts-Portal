@@ -14,7 +14,11 @@ import { createDatabase } from "../../src/db/client.js";
 import { grantLocalRuntime } from "../../src/db/local-runtime-grants.js";
 import { startPostgres } from "../helpers/postgres.js";
 import { SOURCE_COLUMNS } from "../../src/modules/imports/parser.js";
-import type { MappingDraftManifest } from "@rufdiamond/contracts";
+import type {
+  MappingDraftManifest,
+  SourceReviewDetail,
+} from "@rufdiamond/contracts";
+import { createDepictionReviewService } from "../../src/modules/catalog-review/service.js";
 import * as schema from "../../src/db/schema/index.js";
 import { validateSnapshotReviews } from "../../src/modules/catalog-review/snapshot.js";
 import { canonicalJsonHash } from "../../src/modules/outbox/idempotency.js";
@@ -234,9 +238,19 @@ describe("scoped canonical staged imports with non-owner runtime", () => {
     await runtime?.close();
     await pg?.stop();
   }, 30000);
-  it("reviews a staged assembly reference explicitly before apply while preserving raw zero and invalid normalization", async () => {
+  it("keeps an exact-minimum quantity reviewer current through apply and renewal without granting ordinary depiction or geometry authority", async () => {
     await pg.pool.query(
-      "insert into user_capability(user_id,capability_key) values($1,'publish.execute'),($1,'catalog.figure.view'),($1,'catalog.callout.manage'),($1,'catalog.callout.map') on conflict do nothing",
+      "insert into role(key,name) values('quantity_only','Quantity only') on conflict do nothing",
+    );
+    await pg.pool.query(
+      "update app_user set role_id=(select id from role where key='quantity_only') where id=$1",
+      [ids.actor],
+    );
+    await pg.pool.query("delete from user_capability where user_id=$1", [
+      ids.actor,
+    ]);
+    await pg.pool.query(
+      "insert into user_capability(user_id,capability_key) values($1,'publish.execute'),($1,'catalog.figure.view'),($1,'publish.draft.view'),($1,'parts.import')",
       [ids.actor],
     );
     const raw = [...base];
@@ -355,6 +369,132 @@ describe("scoped canonical staged imports with non-owner runtime", () => {
         current: true,
       }),
     ]);
+    expect(canonical.json()).toMatchObject({
+      canReview: false,
+      canReviewAssembly: true,
+    });
+    const figureId = applied.json().aliases[0].figureId;
+    const canonicalUrl = `/api/v1/admin/catalog-review/figures/${figureId}`;
+    const renew = (
+      source: SourceReviewDetail,
+      mode = "assembly-reference-unspecified",
+    ) =>
+      app.inject({
+        method: "POST",
+        url: `${canonicalUrl}/decisions`,
+        headers: {
+          ...headers,
+          "if-match": `"${source.version}"`,
+          "idempotency-key": randomUUID(),
+        },
+        payload: {
+          mode,
+          sourceBindingSha256: source.sourceBindingSha256,
+          rowIds: [source.rows[0].figurePartId],
+          evidence:
+            "Synthetic explicit renewal: informational nondepiction and unspecified installed quantity.",
+          confirmed: true,
+          ...(mode === "assembly-reference-unspecified"
+            ? { quantityDecisionId: source.approvals[0].quantityDecisionId }
+            : {}),
+        },
+      });
+    for (const mode of ["table-only", "not-depicted"])
+      expect((await renew(canonical.json(), mode)).statusCode).toBe(403);
+    expect(
+      (
+        await app.inject({
+          method: "POST",
+          url: `/api/v1/admin/figures/${figureId}/diagram-mapping/approve`,
+          headers: {
+            ...headers,
+            "if-match": '"1"',
+            "idempotency-key": randomUUID(),
+          },
+          payload: { revisionId: randomUUID(), checksum: "a".repeat(64) },
+        })
+      ).statusCode,
+    ).toBe(403);
+    await pg.pool.query("update figure set version=version+1 where id=$1", [
+      figureId,
+    ]);
+    const stale = (
+      await app.inject({ method: "GET", url: canonicalUrl, headers })
+    ).json();
+    expect(stale.approvals[0].current).toBe(false);
+    const renewed = await renew(stale);
+    expect(renewed.statusCode, renewed.body).toBe(200);
+    expect(
+      renewed.json().approvals.map((a: { current: boolean }) => a.current),
+    ).toEqual([false, true]);
+    for (const capability of ["parts.import", "publish.execute"]) {
+      await pg.pool.query(
+        "delete from user_capability where user_id=$1 and capability_key=$2",
+        [ids.actor, capability],
+      );
+      const revoked = (
+        await app.inject({ method: "GET", url: canonicalUrl, headers })
+      ).json();
+      expect(
+        revoked.approvals.every((a: { current: boolean }) => !a.current),
+      ).toBe(true);
+      expect(revoked.canReviewAssembly).toBe(false);
+      expect((await renew(revoked)).statusCode).toBe(403);
+      await pg.pool.query(
+        "insert into user_capability(user_id,capability_key) values($1,$2)",
+        [ids.actor, capability],
+      );
+    }
+    const observer = randomUUID();
+    await pg.pool.query(
+      "insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,company_id,'Synthetic observer','observer@example.test','observer@example.test',password_hash,role_id from app_user where id=$2",
+      [observer, ids.actor],
+    );
+    await pg.pool.query(
+      "insert into user_capability(user_id,capability_key) values($1,'publish.draft.view'),($1,'catalog.figure.view')",
+      [observer],
+    );
+    await pg.pool.query(
+      "insert into user_scope(user_id,brand_mode,account_mode,fleet_mode,environment) values($1,'all','all','all','published_and_draft')",
+      [observer],
+    );
+    const inspect = () =>
+      createDepictionReviewService(runtime.db, () => new Date()).read(
+        { userId: observer, requestId: randomUUID() },
+        figureId,
+      );
+    for (const capability of ["publish.draft.view", "catalog.figure.view"]) {
+      await pg.pool.query(
+        "delete from user_capability where user_id=$1 and capability_key=$2",
+        [ids.actor, capability],
+      );
+      expect((await inspect()).approvals.every((a) => !a.current)).toBe(true);
+      expect((await renew(renewed.json())).statusCode).toBe(403);
+      await pg.pool.query(
+        "insert into user_capability(user_id,capability_key) values($1,$2)",
+        [ids.actor, capability],
+      );
+    }
+    for (const patch of [
+      "brand_mode='subset'",
+      "fleet_mode='subset'",
+      "environment='published'",
+    ]) {
+      await pg.pool.query(
+        `update user_scope set ${patch},version=version+1 where user_id=$1`,
+        [ids.actor],
+      );
+      expect((await inspect()).approvals.every((a) => !a.current)).toBe(true);
+      expect([403, 404]).toContain((await renew(renewed.json())).statusCode);
+      await pg.pool.query(
+        "update user_scope set brand_mode='all',fleet_mode='all',environment='published_and_draft',version=version+1 where user_id=$1",
+        [ids.actor],
+      );
+    }
+    expect((await inspect()).approvals.map((a) => a.current)).toEqual([
+      false,
+      true,
+    ]);
   });
   it("publishes only exact reviewed table-only rows with retained printed references and immutable source provenance", async () => {
     await pg.pool.query(
@@ -457,6 +597,7 @@ describe("scoped canonical staged imports with non-owner runtime", () => {
       reviewerId: ids.actor,
       reviewerName: "Importer",
       evidence: payload.evidence,
+      source: { system: { name: "FRAME", version: 1 } },
     });
     const snapshotFigures = await runtime.db
         .select()
@@ -513,6 +654,24 @@ describe("scoped canonical staged imports with non-owner runtime", () => {
       },
     });
     expect(secondRelease.statusCode, secondRelease.body).toBe(201);
+    await pg.pool.query(
+      "update system set name='Renamed system',normalized_name='renamed system',version=version+1",
+    );
+    const renamed = (await app.inject({ method: "GET", url, headers })).json();
+    expect(renamed.approvals[0].current).toBe(false);
+    expect(renamed.sourceBindingSha256).not.toBe(source.sourceBindingSha256);
+    const blocked = await app.inject({
+      method: "POST",
+      url: "/api/v1/admin/publication/releases",
+      headers: { ...headers, "idempotency-key": randomUUID() },
+      payload: {
+        modelId: ids.model,
+        expectedWorkingVersion: 2,
+        expectedPublicationVersion: 3,
+        summary: "Must not publish renamed system",
+      },
+    });
+    expect(blocked.statusCode, blocked.body).toBe(422);
     const rollback = await app.inject({
       method: "POST",
       url: `/api/v1/admin/publication/releases/${publication.json().releaseId}/rollback`,

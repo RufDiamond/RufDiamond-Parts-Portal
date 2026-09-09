@@ -17,26 +17,27 @@ import { enqueueOutboxEvent } from "../outbox/repository.js";
 import type { ImportActor, ImportWrite } from "../imports/service.js";
 import type { AuthorizationContext } from "../authorization/types.js";
 import { sourceReviewer } from "./binding.js";
-import { quantityReviews, reviewSourceRow } from "./quantity.js";
+import {
+  quantityReviewer,
+  quantityReviews,
+  reviewSourceRow,
+} from "./quantity.js";
 import type {
   NormalizedImportFields,
   ReviewedAssemblyFields,
 } from "../imports/normalizer.js";
 import { rowValue } from "../imports/repository.js";
 
-async function exactAssemblyFields(
-  tx: Transaction,
+function exactAssemblyFields(
   graph: MappingGraph,
   rowId: string,
   fields: ReviewedAssemblyFields,
 ) {
   const entry = graph.rows.find((r) => r.row.id === rowId);
-  const [system] = await tx
-    .select()
-    .from(s.system)
-    .where(eq(s.system.id, graph.figure.systemId));
-  if (!entry || !system) return false;
-  return fields.pnc === "-" && exactFields(graph, entry, fields, system.name);
+  if (!entry) return false;
+  return (
+    fields.pnc === "-" && exactFields(graph, entry, fields, graph.system.name)
+  );
 }
 function exactFields(
   graph: MappingGraph,
@@ -66,10 +67,6 @@ function exactFields(
   );
 }
 async function sourceFieldConflicts(tx: Transaction, graph: MappingGraph) {
-  const [system] = await tx
-    .select()
-    .from(s.system)
-    .where(eq(s.system.id, graph.figure.systemId));
   const conflicts: string[] = [];
   for (const { alias, staging, job } of graph.sourceReview.aliases) {
     const row = graph.rows.find((r) => r.row.id === alias.figurePartId);
@@ -85,10 +82,9 @@ async function sourceFieldConflicts(tx: Transaction, graph: MappingGraph) {
     if (
       !row ||
       !fields ||
-      !system ||
       row.row.sourceRowKey !== alias.identityKey ||
       alias.identityKey !== normalized.identityKey ||
-      !exactFields(graph, row, fields, system.name) ||
+      !exactFields(graph, row, fields, graph.system.name) ||
       (alias.calloutId
         ? !call ||
           call.figurePartId !== row.row.id ||
@@ -117,6 +113,13 @@ async function detail(
     if (!(error instanceof AppError) || error.status !== 403) throw error;
     canReview = false;
   }
+  let canReviewAssembly = true;
+  try {
+    await quantityReviewer(tx, userId, true);
+  } catch (error) {
+    if (!(error instanceof AppError) || error.status !== 403) throw error;
+    canReviewAssembly = false;
+  }
   return {
     id: graph.figure.id,
     version: graph.head.sourceReviewVersion,
@@ -127,6 +130,7 @@ async function detail(
       fieldConflicts.length > 0 ||
       source.history.some((r) => !source.current.some((c) => c.id === r.id)),
     canReview,
+    canReviewAssembly,
     rows: source.aliases.map(({ job, staging, alias }) => ({
       ...reviewSourceRow(job, staging),
       figurePartId: alias.figurePartId,
@@ -188,12 +192,11 @@ export async function bindAppliedQuantityReviews(
       row = graph.rows.find((r) => r.row.id === alias.figurePartId);
     if (
       !row ||
-      !(await exactAssemblyFields(
-        tx,
+      !exactAssemblyFields(
         graph,
         alias.figurePartId,
         review.interpretedFields,
-      )) ||
+      ) ||
       row.row.qty !== null ||
       row.row.quantitySemantics !== "unspecified-installed" ||
       row.part.partNumber !== review.interpretedFields.partNumber ||
@@ -248,7 +251,10 @@ export function createDepictionReviewService(
     input: DepictionReviewInput,
   ) {
     return mappingTransaction(database, async (tx) => {
-      const ctx = await sourceReviewer(tx, actor.userId, true),
+      const ctx =
+          input.mode === "assembly-reference-unspecified"
+            ? await quantityReviewer(tx, actor.userId, true)
+            : await sourceReviewer(tx, actor.userId, true),
         graph = await loadGraph(tx, ctx, id, true);
       const audit = {
         actorUserId: actor.userId,
@@ -329,12 +335,11 @@ export function createDepictionReviewService(
                 quantity.stagingRowVersion !== alias.staging.version ||
                 canonicalJsonHash(quantity.source) !==
                   quantity.sourceBindingSha256 ||
-                !(await exactAssemblyFields(
-                  tx,
+                !exactAssemblyFields(
                   graph,
                   row.row.id,
                   quantity.interpretedFields,
-                )) ||
+                ) ||
                 quantity.stagingRowId !== alias.staging.id ||
                 quantity.jobId !== alias.job.id ||
                 row.row.qty !== null ||

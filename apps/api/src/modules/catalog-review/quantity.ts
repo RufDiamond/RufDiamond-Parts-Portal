@@ -195,6 +195,7 @@ export function createQuantityReviewService(
       sourceBindingSha256: binding,
       sourceConflict: reviews.some((r) => r.sourceBindingSha256 !== binding),
       canReview: canReview && job.state !== "applied",
+      canReviewAssembly: canReview && job.state !== "applied",
       rows: rows.map((r) => reviewSourceRow(job, r)),
       issues: issues.map((i) => ({
         id: i.id,

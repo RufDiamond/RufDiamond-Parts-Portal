@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import type { MappingHistory, MappingRevision, DiagramMappingDocument } from "@rufdiamond/contracts";
 import type { Database, Transaction } from "../../db/client.js";
-import { callout, diagramMapping, diagramMappingApproval, diagramMappingRevision, drawingFile, figure, figurePart, model, part, variant } from "../../db/schema/index.js";
+import { callout, diagramMapping, diagramMappingApproval, diagramMappingRevision, drawingFile, figure, figurePart, model, part, system, variant } from "../../db/schema/index.js";
 import { AppError } from "../../plugins/error-handler.js";
 import type { AuthorizationContext } from "../authorization/types.js";
 import { loadSourceReviews } from "../catalog-review/binding.js";
@@ -12,7 +12,9 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Transactions lock model before figure/head. Serializable isolation also detects graph phantoms. */
 export async function loadGraph(tx: Transaction, ctx: AuthorizationContext, figureId: string, lock: boolean) {
   if (!uuid.test(figureId)) notFound();
-  const query = tx.select({ figure, model, variant }).from(figure).innerJoin(variant, eq(figure.variantId, variant.id)).innerJoin(model, eq(variant.modelId, model.id)).where(and(
+  // System identity and fields share the graph's repeatable-read/serializable
+  // snapshot. Keep model → figure/head lock order; no new runtime grants.
+  const query = tx.select({ figure, model, variant, system }).from(figure).innerJoin(system, eq(figure.systemId, system.id)).innerJoin(variant, eq(figure.variantId, variant.id)).innerJoin(model, eq(variant.modelId, model.id)).where(and(
     eq(figure.id, figureId),
     ctx.brandIds === "all" ? undefined : inArray(model.productLineId, [...ctx.brandIds]),
     ctx.variantIds === "all" ? undefined : inArray(figure.variantId, [...ctx.variantIds]),

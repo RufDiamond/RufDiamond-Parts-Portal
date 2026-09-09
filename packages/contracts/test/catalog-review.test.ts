@@ -75,6 +75,33 @@ describe("installed quantity semantics", () => {
 describe("attributable source review inputs", () => {
   const id = "11111111-1111-4111-8111-111111111111";
   const sha = "a".repeat(64);
+  it("requires separate server authority flags for ordinary and assembly review", () => {
+    const detail = {
+      id,
+      version: 1,
+      target: "figure",
+      sourceBindingSha256: sha,
+      sourceConflict: false,
+      rows: [],
+      issues: [],
+      approvals: [],
+      canReview: false,
+      canReviewAssembly: true,
+    };
+    expect(Value.Check(admin.SourceReviewDetailSchema, detail)).toBe(true);
+    expect(
+      Value.Check(admin.SourceReviewDetailSchema, {
+        ...detail,
+        canReviewAssembly: undefined,
+      }),
+    ).toBe(false);
+    expect(
+      Value.Check(admin.SourceReviewDetailSchema, {
+        ...detail,
+        canReviewAssembly: "true",
+      }),
+    ).toBe(false);
+  });
   const quantity = {
     decision: "assembly-reference-unspecified",
     sourceBindingSha256: sha,

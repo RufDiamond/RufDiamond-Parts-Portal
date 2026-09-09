@@ -16,15 +16,26 @@ export function SourceReviewEntry({
     );
   if (!client || !session)
     return <p>Authenticated source review access is required.</p>;
+  const publisher = [
+    "publish.execute",
+    "publish.draft.view",
+    "catalog.figure.view",
+  ].every((c) => session.capabilities.includes(c));
+  const canReviewAssembly =
+    initial.canReviewAssembly &&
+    publisher &&
+    session.capabilities.includes("parts.import");
   const canReview =
     initial.canReview &&
-    session.capabilities.includes("publish.execute") &&
-    session.capabilities.includes(
-      initial.target === "import" ? "parts.import" : "catalog.callout.map",
-    );
+    publisher &&
+    (initial.target === "import"
+      ? session.capabilities.includes("parts.import")
+      : ["catalog.callout.map", "catalog.callout.manage"].every((c) =>
+          session.capabilities.includes(c),
+        ));
   return (
     <SourceReview
-      initial={{ ...initial, canReview }}
+      initial={{ ...initial, canReview, canReviewAssembly }}
       api={{
         read: () => client.sourceReview(initial.target, initial.id),
         approve: (id, version, input, key) =>

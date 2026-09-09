@@ -26,7 +26,7 @@ export function SourceReview({
 }) {
   const [source, setSource] = useState(initial),
     [selected, setSelected] = useState<string[]>([]),
-    [mode, setMode] = useState<
+    [preferredMode, setMode] = useState<
       "table-only" | "not-depicted" | "assembly-reference-unspecified"
     >("not-depicted"),
     [evidence, setEvidence] = useState("");
@@ -39,6 +39,17 @@ export function SourceReview({
     [uncertain, setUncertain] = useState(false),
     [error, setError] = useState(""),
     [status, setStatus] = useState("");
+  const mode =
+    !source.canReview && source.canReviewAssembly
+      ? "assembly-reference-unspecified"
+      : preferredMode === "assembly-reference-unspecified" &&
+          !source.canReviewAssembly
+        ? "not-depicted"
+        : preferredMode;
+  const canReview =
+    source.target === "import"
+      ? source.canReviewAssembly
+      : source.canReview || source.canReviewAssembly;
   async function reload() {
     if (busy || uncertain) return;
     setBusy(true);
@@ -54,6 +65,7 @@ export function SourceReview({
     }
   }
   function prepare() {
+    if (!canReview) return;
     const common = {
       sourceBindingSha256: source.sourceBindingSha256,
       evidence: evidence.trim(),
@@ -189,7 +201,7 @@ export function SourceReview({
                       type="checkbox"
                       aria-label={`Select ${row.partNumber}`}
                       checked={selected.includes(id)}
-                      disabled={!source.canReview || busy || !!pending}
+                      disabled={!canReview || busy || !!pending}
                       onChange={(e) =>
                         setSelected(
                           e.target.checked
@@ -234,7 +246,7 @@ export function SourceReview({
           ))}
         </ul>
       )}
-      {source.canReview ? (
+      {canReview ? (
         <>
           <fieldset disabled={busy || !!pending}>
             {source.target === "figure" && (
@@ -244,13 +256,19 @@ export function SourceReview({
                   value={mode}
                   onChange={(e) => setMode(e.target.value as typeof mode)}
                 >
-                  <option value="not-depicted">
-                    Selected rows: not depicted
-                  </option>
-                  <option value="table-only">Complete table-only list</option>
-                  <option value="assembly-reference-unspecified">
-                    Re-review assembly reference
-                  </option>
+                  {source.canReview && (
+                    <option value="not-depicted">
+                      Selected rows: not depicted
+                    </option>
+                  )}
+                  {source.canReview && (
+                    <option value="table-only">Complete table-only list</option>
+                  )}
+                  {source.canReviewAssembly && (
+                    <option value="assembly-reference-unspecified">
+                      Re-review assembly reference
+                    </option>
+                  )}
                 </select>
               </label>
             )}

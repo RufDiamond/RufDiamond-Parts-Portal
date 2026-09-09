@@ -10,6 +10,36 @@ import {
 import type { SourceReviewDetail } from "@rufdiamond/contracts";
 import { SourceReview } from "@/features/catalog-review/SourceReview";
 import { MappingApiError } from "@/features/diagram-mapping/api-client";
+import { SourceReviewEntry } from "@/features/catalog-review/SourceReviewEntry";
+import type { MeResponse } from "@rufdiamond/contracts";
+const session = vi.hoisted(
+  () =>
+    ({
+      id: "synthetic-user",
+      companyId: "synthetic-company",
+      displayName: "Synthetic reviewer",
+      csrfToken: "synthetic",
+      capabilities: [] as string[],
+      company: {
+        id: "synthetic-company",
+        name: "Synthetic",
+        type: "internal",
+        defaultShippingAddress: null,
+      },
+      scopes: {
+        brandIds: "all",
+        accountIds: "all",
+        fleet: "all",
+        environment: "draft",
+        priceTier: "none",
+        scopeVersion: "1",
+        canViewPrices: false,
+      },
+    }) satisfies MeResponse,
+);
+vi.mock("@/state/SessionBoundary", () => ({
+  useCustomerSession: () => session,
+}));
 const id = "11111111-1111-4111-8111-111111111111",
   sha = "a".repeat(64);
 const initial: SourceReviewDetail = {
@@ -19,6 +49,7 @@ const initial: SourceReviewDetail = {
   sourceBindingSha256: sha,
   sourceConflict: false,
   canReview: true,
+  canReviewAssembly: true,
   rows: [
     {
       stagingRowId: id,
@@ -53,6 +84,43 @@ const initial: SourceReviewDetail = {
 };
 afterEach(cleanup);
 describe("source review confirmation and retries", () => {
+  it.each([
+    { capabilities: ["parts.import"], assembly: true, ordinary: false },
+    {
+      capabilities: ["catalog.callout.map", "catalog.callout.manage"],
+      assembly: false,
+      ordinary: true,
+    },
+    { capabilities: ["catalog.callout.map"], assembly: false, ordinary: false },
+  ])(
+    "keeps entry mode authority distinct for $capabilities",
+    ({ capabilities, assembly, ordinary }) => {
+      session.capabilities = [
+        "publish.execute",
+        "publish.draft.view",
+        "catalog.figure.view",
+        ...capabilities,
+      ];
+      render(<SourceReviewEntry initial={{ ...initial, target: "figure" }} />);
+      expect(
+        Boolean(
+          screen.queryByRole("option", {
+            name: "Re-review assembly reference",
+          }),
+        ),
+      ).toBe(assembly);
+      expect(
+        Boolean(
+          screen.queryByRole("option", { name: "Complete table-only list" }),
+        ),
+      ).toBe(ordinary);
+      expect(
+        Boolean(
+          screen.queryByRole("option", { name: "Selected rows: not depicted" }),
+        ),
+      ).toBe(ordinary);
+    },
+  );
   it("requires explicit combined source confirmation and retries the exact uncertain decision", async () => {
     const approve = vi
       .fn()
@@ -103,7 +171,12 @@ describe("source review confirmation and retries", () => {
   it("retains raw conflicts and hides confirmation without named review authority", () => {
     render(
       <SourceReview
-        initial={{ ...initial, canReview: false, sourceConflict: true }}
+        initial={{
+          ...initial,
+          canReview: false,
+          canReviewAssembly: false,
+          sourceConflict: true,
+        }}
         api={{ approve: vi.fn(), read: vi.fn() }}
       />,
     );
@@ -113,10 +186,12 @@ describe("source review confirmation and retries", () => {
       screen.queryByRole("button", { name: "Review source decision" }),
     ).toBeNull();
   });
-  it("explicitly re-confirms both assembly semantics and reloads after a stale rejection", async () => {
+  it("allows assembly-only authority to re-confirm both semantics without ordinary depiction options and reloads after rejection", async () => {
     const current: SourceReviewDetail = {
       ...initial,
       target: "figure",
+      canReview: false,
+      canReviewAssembly: true,
       sourceConflict: true,
       rows: initial.rows.map((r) => ({
         ...r,
@@ -143,6 +218,12 @@ describe("source review confirmation and retries", () => {
         .mockRejectedValue(new MappingApiError(412, "Stale")),
       read = vi.fn().mockResolvedValue({ ...current, version: 3 });
     render(<SourceReview initial={current} api={{ approve, read }} />);
+    expect(
+      screen.queryByRole("option", { name: "Selected rows: not depicted" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("option", { name: "Complete table-only list" }),
+    ).toBeNull();
     fireEvent.click(
       screen.getByRole("checkbox", { name: /Select ASSEMBLY-1/ }),
     );

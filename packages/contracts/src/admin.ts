@@ -47,7 +47,7 @@ export const ReviewSourceRowSchema = Type.Object({
 export type ReviewSourceRow = Static<typeof ReviewSourceRowSchema>;
 export const SourceReviewDetailSchema = Type.Object({
   id: importUuid(), version: Type.Integer({ minimum: 1 }), target: Type.Union([Type.Literal("import"), Type.Literal("figure")]),
-  sourceBindingSha256: importHash(), sourceConflict: Type.Boolean(), canReview: Type.Boolean(), rows: Type.Array(ReviewSourceRowSchema),
+  sourceBindingSha256: importHash(), sourceConflict: Type.Boolean(), canReview: Type.Boolean(), canReviewAssembly: Type.Boolean(), rows: Type.Array(ReviewSourceRowSchema),
   issues: Type.Array(Type.Object({ id: importUuid(), version: Type.Integer({ minimum: 1 }), stagingRowId: Type.Union([importUuid(), Type.Null()]), code: Type.String(), field: nullableString(), message: Type.String() }, { additionalProperties: false })),
   approvals: Type.Array(Type.Object({ ...SourceApprovalSchema.properties, mode: Type.Union([Type.Literal("table-only"), Type.Literal("not-depicted"), Type.Literal("assembly-reference-unspecified")]), rowIds: Type.Array(importUuid()), current: Type.Boolean(),quantityDecisionId:Type.Optional(Type.Union([importUuid(),Type.Null()])) }, { additionalProperties: false })),
 }, { additionalProperties: false });
