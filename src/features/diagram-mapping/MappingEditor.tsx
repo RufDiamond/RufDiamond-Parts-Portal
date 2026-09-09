@@ -70,6 +70,7 @@ export function MappingEditor({ initial, authority, drawing, api, drawingApi, co
     if (!drawingApi || !authority.canUploadDrawing || authenticationLost || requestedFigureChanged || incomingChanged || (!retry && !replacementFile)) return;
     const controller = begin(); if (!controller) return;
     let attached = false;
+    let finalizing = false;
     try {
       let intent = pendingUpload;
       if (!retry) {
@@ -79,7 +80,9 @@ export function MappingEditor({ initial, authority, drawing, api, drawingApi, co
         setPendingUpload(intent);
       }
       if (!intent || intent.figureId !== state.document.figureId) return;
+      finalizing = true;
       await drawingApi.finalize(intent.figureId, intent.uploadId, intent.figureVersion, controller.signal);
+      finalizing = false;
       attached = true;
       if (controller.signal.aborted) return;
       const envelope = await api.loadMapping(intent.figureId, controller.signal);
@@ -90,7 +93,12 @@ export function MappingEditor({ initial, authority, drawing, api, drawingApi, co
     } catch (error) {
       problem(error);
       if (attached) dispatch({ type: "saveFailed", message: "The PNG was attached, but its current source could not be verified. Select the current drawing version before editing.", conflict: true });
-      setUploadNotice("Upload or verification did not complete. Your local work remains in memory. A pending verification can be retried safely.");
+      // Content rejection attached nothing. Release the file controls without replacing local work.
+      // Network/5xx failures and errors after attachment still require pending reconciliation.
+      if (finalizing && error instanceof MappingApiError && [413, 422].includes(error.status)) {
+        setPendingUpload(null);
+        setUploadNotice("PNG rejected. Choose a corrected file. Your local work remains in memory.");
+      } else setUploadNotice("Upload or verification did not complete. Your local work remains in memory. A pending verification can be retried safely.");
     } finally { end(controller); }
   }
   async function selectCurrentDrawing() {
