@@ -7,6 +7,7 @@ import type { Currency, FigurePartRow } from "@/types/catalog";
 import styles from "./PartsTable.module.css";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 import { revealDelta } from "@/lib/diagram-viewport";
+import { ZeroPriceNotice } from "./ZeroPriceNotice";
 
 export interface PartsTableProps {
   rows: FigurePartRow[];
@@ -134,6 +135,7 @@ export function PartsTable({
 
   return (
     <div ref={scroller} className={styles.scroller}>
+      <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
       <table className={styles.table}>
         <thead>
           <tr className={styles.head}>

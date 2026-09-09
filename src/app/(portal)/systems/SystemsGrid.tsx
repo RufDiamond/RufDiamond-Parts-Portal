@@ -12,10 +12,10 @@ import frameAssy from "../../../../public/systems/frame-assy.png";
 import fuelSystem from "../../../../public/systems/fuel-system.png";
 import hydraulic from "../../../../public/systems/hydraulic.png";
 import tireWheel from "../../../../public/systems/tire-wheel.png";
-import { useCallback } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Trail } from "@/components";
-import { getFigures, getSystems } from "@/data/repository";
-import { useAsync } from "@/state/useAsync";
+import type { SystemsData } from "@/data/customer-navigation.server";
 import { useMachine } from "@/state/MachineContext";
 import styles from "./tiles.module.css";
 
@@ -49,41 +49,14 @@ const ICONS: Record<string, StaticImageData> = {
  * its figures' GROUPNO in the export, e.g. FIG- 11.3 puts Electric at 11.
  * Deriving it keeps the screen honest if the catalogue is renumbered.
  */
-function sectionNumber(groupNos: string[]): number | null {
-  const numbers = groupNos
-    .map((g) => Number.parseInt(g.split(".")[0] ?? "", 10))
-    .filter((n) => Number.isFinite(n));
-  return numbers.length ? Math.min(...numbers) : null;
-}
-
-async function load(variantId: string) {
-  const systems = await getSystems(variantId);
-  const perSystem = await Promise.all(
-    systems.map((system) => getFigures(variantId, system.id)),
-  );
-  return systems
-    .map((system, i) => ({
-      system,
-      figureCount: perSystem[i].length,
-      number: sectionNumber(perSystem[i].map((figure) => figure.groupNo)),
-    }))
-    .sort((a, b) => (a.number ?? 99) - (b.number ?? 99));
-}
-
 /** Systems for the selected machine — slide 12. */
-export function SystemsGrid() {
-  const { hydrated, selectedModel, selectedVariant } = useMachine();
-  const variantId = selectedVariant?.id ?? null;
-
-  const run = useCallback(
-    () => (variantId ? load(variantId) : Promise.resolve(null)),
-    [variantId],
-  );
-  const { data } = useAsync(run);
-
-  if (!hydrated) return null;
-
-  if (!selectedModel || !selectedVariant) {
+export function SystemsGrid({ data, requestedVariant }: { data: SystemsData; requestedVariant?: string }) {
+  const { selectedVariant } = useMachine();
+  const router = useRouter();
+  useEffect(() => {
+    if (!requestedVariant && selectedVariant) router.replace(`/systems?variantId=${encodeURIComponent(selectedVariant.id)}`);
+  }, [requestedVariant, selectedVariant, router]);
+  if (!data) {
     return (
       <div className={styles.screen}>
         <Trail steps={[{ label: "No machine selected" }]} />
@@ -95,13 +68,13 @@ export function SystemsGrid() {
     );
   }
 
-  const machine = `Fat Truck ${selectedModel.name}`;
+  const machine = data.model.name;
 
   return (
     <div className={styles.screen}>
       <Trail steps={[{ label: machine }]} />
       <div className={styles.grid}>
-        {(data ?? []).map(({ system, figureCount, number }) => {
+        {data.entries.map(({ system, figureCount, number }) => {
           const label = system.name;
           const icon = ICONS[system.id];
           const ready = figureCount > 0;
@@ -126,7 +99,7 @@ export function SystemsGrid() {
           return ready ? (
             <Link
               key={system.id}
-              href={`/systems/${system.id}`}
+              href={`/systems/${system.id}?variantId=${encodeURIComponent(data.variant.id)}`}
               className={styles.tile}
             >
               {body}

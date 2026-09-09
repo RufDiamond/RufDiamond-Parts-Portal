@@ -11,7 +11,7 @@ import styles from "./DrawingViewer.module.css";
 export interface DrawingMarker {
   id: string;
   figurePartId?: string;
-  number: number;
+  number: number | string;
   /** Percentages, 0-100. */
   x: number;
   y: number;

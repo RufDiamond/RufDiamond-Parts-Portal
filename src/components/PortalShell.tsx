@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useMachine } from "@/state/MachineContext";
 import type { ReactNode } from "react";
 import styles from "./PortalShell.module.css";
+import { SignOutButton } from "@/state/SessionBoundary";
 
 /**
  * The portal chrome from the V2 deck: an icon rail down the left and a header
@@ -222,6 +223,7 @@ export function PortalShell({ children, date }: PortalShellProps) {
               className={styles.calendar}
             />
             <span className={styles.date}>{date}</span>
+            <SignOutButton />
           </span>
         </header>
 

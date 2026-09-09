@@ -32,10 +32,10 @@ export function buildRequestCsv(
       line.partNumberSnapshot,
       line.descriptionSnapshot,
       line.qty,
-      line.unitPriceSnapshot.toFixed(2),
-      (line.unitPriceSnapshot * factor).toFixed(2),
-      line.lineTotal.toFixed(2),
-      (line.lineTotal * factor).toFixed(2),
+      line.unitPriceSnapshot === undefined ? "" : Number(line.unitPriceSnapshot).toFixed(2),
+      line.unitPriceSnapshot === undefined ? "" : (Number(line.unitPriceSnapshot) * factor).toFixed(2),
+      line.lineTotal === undefined ? "" : line.lineTotal.toFixed(2),
+      line.lineTotal === undefined ? "" : (line.lineTotal * factor).toFixed(2),
     ]),
   ];
 

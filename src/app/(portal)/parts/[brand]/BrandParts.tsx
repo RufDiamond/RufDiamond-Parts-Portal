@@ -39,7 +39,7 @@ export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
     const variant = entry.variants[0];
     if (!variant) return;
     setMachine(entry.model, variant);
-    router.push("/systems");
+    router.push(`/systems?variantId=${encodeURIComponent(variant.id)}`);
   };
 
   const search = (mode: "part" | "description", value: string) => {

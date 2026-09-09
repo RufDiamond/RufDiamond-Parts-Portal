@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { loadCalloutPreview } from "@/data/callout-preview.server";
-import { getFigureDetail, getFigures } from "@/data/repository";
+import { getFigureDetail, getFigures, isApiMode } from "@/data/repository";
 import { FigureWorkspace } from "../../../figures/[figureId]/FigureWorkspace";
 
 export const metadata: Metadata = {
@@ -18,6 +18,7 @@ export default async function MarkerReviewPage({
 }: {
   params: Promise<{ figureId: string }>;
 }) {
+  if (isApiMode()) notFound();
   const { figureId } = await params;
   const detail = await getFigureDetail(figureId);
   if (!detail) notFound();

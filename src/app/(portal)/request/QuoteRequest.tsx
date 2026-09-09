@@ -1,4 +1,5 @@
 "use client";
+import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -54,6 +55,8 @@ export function QuoteRequest({
     updateQty,
     submit,
     company,
+    submissionAvailable,
+    requestError,
   } = useRequest();
 
   const machineName = selectedModel?.name ?? "Catalogue";
@@ -137,6 +140,9 @@ export function QuoteRequest({
 
   return (
     <div className={styles.screen}>
+      {!submissionAvailable && <p role="status">Quote submission is unavailable while the request service is not connected. No request will be sent.</p>}
+      {requestError && <p role="alert">{requestError}</p>}
+      <ZeroPriceNotice prices={lines.map(line => line.unitPriceSnapshot)} />
       {embedded ? null : (
       <div className={styles.bar}>
         <span className={styles.title}>Request a quote</span>
@@ -400,7 +406,7 @@ export function QuoteRequest({
           type="button"
           className={styles.primary}
           onClick={onSubmit}
-          disabled={includedLines.length === 0}
+          disabled={!submissionAvailable || includedLines.length === 0}
           title={
             includedLines.length === 0
               ? "Tick at least one part"

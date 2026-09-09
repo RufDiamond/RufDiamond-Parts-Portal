@@ -26,6 +26,7 @@ import { useRequest } from "@/state/RequestContext";
 import { useSelection } from "@/state/useSelection";
 import { useDiagramSelection } from "@/state/useDiagramSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
+import { useReleasedDrawing } from "@/state/useReleasedDrawing";
 import type { FigureDetail, PartUsageSummary } from "@/types/catalog";
 import { QuoteRequest } from "../../request/QuoteRequest";
 import styles from "./figure.module.css";
@@ -80,6 +81,7 @@ export function FigureWorkspace({
 }: FigureWorkspaceProps) {
   const router = useRouter();
   const { figure, drawing, system, variant, rows, callouts } = detail;
+  const releasedDrawing = useReleasedDrawing(detail);
   const { selectedModel } = useMachine();
   const { addParts, lines } = useRequest();
 
@@ -97,16 +99,18 @@ export function FigureWorkspace({
   const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
 
   useEffect(() => {
-    if (reviewOnly) return;
+    if (reviewOnly || detail.release) return;
     recordRecentFigure({
       figureId: figure.id,
       groupNo: figure.groupNo,
       figureName: figure.name,
       systemName: system.name,
     });
-  }, [figure.id, figure.groupNo, figure.name, system.name, reviewOnly]);
+  }, [figure.id, figure.groupNo, figure.name, system.name, reviewOnly, detail.release]);
 
-  const machineName = selectedModel?.name ?? "FT3 Wagon";
+  const machineName = detail.release ? variant.label : selectedModel?.name ?? "FT3 Wagon";
+  const machineLabel = detail.release ? machineName : `Fat Truck ${machineName}`;
+  const variantQuery = `?variantId=${encodeURIComponent(variant.id)}`;
   const requestedPartIds = useMemo(
     () => new Set(lines.map((line) => line.partId)),
     [lines],
@@ -240,25 +244,26 @@ export function FigureWorkspace({
 
   return (
     <div className={styles.screen}>
+      {releasedDrawing.error && <p role="alert">{releasedDrawing.error}</p>}
       <Trail
         steps={[
-          { label: `Fat Truck ${machineName}`, href: "/systems" },
+          { label: machineLabel, href: `/systems${variantQuery}` },
           {
             label: `${systemNumber} ${system.name}`.trim(),
-            href: `/systems/${system.id}`,
+            href: `/systems/${system.id}${variantQuery}`,
           },
           { label: figure.name },
         ]}
       />
 
       <div className={styles.controls}>
-        <p className={styles.previewNotice}>
+        {!detail.release && <p className={styles.previewNotice}>
           {reviewOnly ? (
             <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
           ) : (
             <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
           )}
-        </p>
+        </p>}
         {previewNotice ? (
           <p role="status" className={styles.previewNotice}>
             {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
@@ -516,7 +521,7 @@ export function FigureWorkspace({
           >
             <DrawingViewer
               label={`Sheet ${sheet}`}
-              src={drawing?.storagePath}
+              src={releasedDrawing.src}
               width={drawing?.width}
               height={drawing?.height}
               note={`Assembly drawing not supplied — ${figure.name}`}
@@ -649,7 +654,7 @@ export function FigureWorkspace({
       {fullScreen ? (
         <FullIllustration
           label={`Sheet ${sheet}`}
-          src={drawing?.storagePath}
+          src={releasedDrawing.src}
           width={drawing?.width}
           height={drawing?.height}
           note={`Assembly drawing not supplied — ${figure.name}`}
@@ -662,7 +667,7 @@ export function FigureWorkspace({
           onSelectPart={selectPart}
           onClearSelection={clear}
           onHoverPart={setHoveredPartId}
-          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          trail={`Model image > ${machineLabel} > ${system.name} > ${figure.name}`}
           date={new Date().toLocaleDateString("en-CA", {
             year: "numeric",
             month: "long",
@@ -674,7 +679,7 @@ export function FigureWorkspace({
 
       {crop && drawing ? (
         <CroppedPart
-          src={drawing.storagePath}
+          src={releasedDrawing.src ?? ""}
           rect={crop}
           trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
           /*

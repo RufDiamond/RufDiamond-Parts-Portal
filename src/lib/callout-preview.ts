@@ -51,14 +51,14 @@ export function applyCalloutPreview(
     };
   }
 
-  const proposalCount = new Map<number, number>();
-  const proposalByNumber = new Map<number, PreviewMarker>();
+  const proposalCount = new Map<number | string, number>();
+  const proposalByNumber = new Map<number | string, PreviewMarker>();
   for (const marker of proposal.markers) {
     proposalCount.set(marker.number, (proposalCount.get(marker.number) ?? 0) + 1);
     proposalByNumber.set(marker.number, marker);
   }
 
-  const calloutCount = new Map<number, number>();
+  const calloutCount = new Map<number | string, number>();
   for (const callout of detail.callouts) {
     calloutCount.set(callout.number, (calloutCount.get(callout.number) ?? 0) + 1);
   }

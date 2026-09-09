@@ -100,8 +100,8 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
-            <button type="button" disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)}>Show selected part</button>
-            {onClearSelection ? <button type="button" onClick={onClearSelection}>Clear selection</button> : null}
+            <button type="button" className={`${styles.action} ${styles.textAction}`} disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)}>Show selected part</button>
+            {onClearSelection ? <button type="button" className={`${styles.action} ${styles.textAction}`} onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
               className={styles.action}

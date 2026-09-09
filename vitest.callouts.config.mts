@@ -15,6 +15,13 @@ export default defineConfig({
   },
   test: {
     include: [
+      "tests/customer-repository.test.ts",
+      "tests/customer-drawing.test.tsx",
+      "tests/customer-session.test.ts",
+      "tests/customer-money.test.tsx",
+      "tests/customer-request.test.tsx",
+      "tests/customer-privacy.test.ts",
+      "tests/customer-packaging.test.ts",
       "tests/backend-api.test.ts",
       "tests/api-repository.test.ts",
       "tests/catalog-adapter.test.ts",

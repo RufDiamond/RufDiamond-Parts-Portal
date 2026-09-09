@@ -1,4 +1,5 @@
 "use client";
+import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -142,6 +143,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
 
   return (
     <div className={styles.screen}>
+      <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
       <div className={styles.bar}>
         <form
           className={styles.search}

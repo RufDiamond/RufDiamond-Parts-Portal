@@ -1,12 +1,13 @@
-import { getModels, getProductLines, getVariants } from "@/data/repository";
+import { composeCustomerRead } from "@/data/repository";
 import { PageHeader } from "@/components";
 import screen from "@/styles/screen.module.css";
 import { MachinePicker } from "./MachinePicker";
 
 export default async function MachinePage() {
+  const { fatTruck, catalogued } = await composeCustomerRead(async repo => {
   const [models, productLines] = await Promise.all([
-    getModels(),
-    getProductLines(),
+    repo.getModels(),
+    repo.getProductLines(),
   ]);
 
   // The customer portal covers the Fat Truck line; the other lines the
@@ -17,9 +18,11 @@ export default async function MachinePage() {
       .filter((model) => model.productLineId === fatTruck?.id)
       .map(async (model) => ({
         model,
-        variants: await getVariants(model.id),
+        variants: await repo.getVariants(model.id),
       })),
   );
+  return { fatTruck, catalogued };
+  });
 
   const revision = catalogued.flatMap((entry) => entry.variants)[0]
     ?.catalogRevision;

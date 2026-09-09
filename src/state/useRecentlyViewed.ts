@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
+import { useCustomerSession } from "./SessionBoundary";
 
 export const RECENT_STORAGE_KEY = "rdpp:recent-figures:v1";
 const LIMIT = 6;
@@ -63,6 +64,7 @@ export function useRecentlyViewed(): {
   items: RecentFigure[];
   hydrated: boolean;
 } {
+  const session = useCustomerSession();
   const [state, dispatch] = useReducer(
     (
       _state: { items: RecentFigure[]; hydrated: boolean },
@@ -72,8 +74,8 @@ export function useRecentlyViewed(): {
   );
 
   useEffect(() => {
-    dispatch(readRecentFigures());
-  }, []);
+    dispatch(session ? [] : readRecentFigures());
+  }, [session]);
 
   return state;
 }

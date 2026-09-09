@@ -6,7 +6,7 @@
  * both satisfy these contracts.
  */
 
-import type { ComponentRegion } from "@rufdiamond/contracts";
+import type { ComponentRegion, ReleaseRef, FigureDetail as ReleasedDetail } from "@rufdiamond/contracts";
 
 export type Currency = "CAD" | "USD";
 
@@ -16,15 +16,15 @@ export type FigureStatus = "published" | "draft" | "superseded";
 
 export type PartStatus = "active" | "superseded" | "obsolete" | "special-order";
 
-export type CompanyType = "customer" | "dealer";
+export type CompanyType = "customer" | "dealer" | "internal";
 
 /** A machine family, e.g. Fat Truck. */
 export interface ProductLine {
   id: string;
   name: string;
-  manufacturer: string;
+  manufacturer: string | null;
   /** ISO 3166-1 alpha-2, e.g. "CA". */
-  country: string;
+  country: string | null;
   /** True when RufDiamond distributes the line rather than manufacturing it. */
   isDistributed: boolean;
 }
@@ -63,7 +63,7 @@ export interface Variant {
   serialFrom: string | null;
   /** Null means "and up" — the range is open-ended. */
   serialTo: string | null;
-  catalogRevision: string;
+  catalogRevision: string | null;
 }
 
 /** A top-level grouping of figures, e.g. Hydraulic. Shared across variants. */
@@ -111,7 +111,10 @@ export interface Part {
   partNumber: string;
   description: string;
   manufacturer: string | null;
-  listPrice: number;
+  listPrice?: number | string;
+  releasePartId?: string;
+  /** Contributors to the validated read, not a guessed per-part release owner. */
+  contributingReleases?: ReleaseRef[];
   currency: Currency;
   /** Points at the replacement when this part has been superseded. */
   supersededByPartId: string | null;
@@ -154,7 +157,7 @@ export interface Callout {
    * incomplete. Attaching a part is the editor's secondary path.
    */
   figurePartId: string | null;
-  number: number;
+  number: number | string;
   /**
    * Position on the plate, as percentages of drawing width and height, 0-100.
    * Never pixels — the drawing can be replaced at another resolution.
@@ -193,7 +196,7 @@ export interface Company {
   name: string;
   type: CompanyType;
   /** Fraction, e.g. 0.15 for 15% off list. */
-  discountRate: number;
+  discountRate?: number;
   /**
    * Where this account's parts normally ship. Offered on the quote request as
    * "Use my default shipping address" (slide 51); null when none is saved, and
@@ -208,11 +211,12 @@ export interface Company {
  */
 export interface OrderLine {
   partId: string;
+  releasePartId?: string;
   partNumberSnapshot: string;
   descriptionSnapshot: string;
   qty: number;
-  unitPriceSnapshot: number;
-  lineTotal: number;
+  unitPriceSnapshot?: number | string;
+  lineTotal?: number;
 }
 
 /* ------------------------------------------------------------------ *
@@ -227,11 +231,13 @@ export interface FigurePartRow {
   figurePart: FigurePart;
   part: Part;
   /** Ascending, de-duplicated. Empty when the item has no marker on the plate. */
-  calloutNumbers: number[];
+  calloutNumbers: (number | string)[];
 }
 
 /** Everything needed to render one figure screen. */
 export interface FigureDetail {
+  release?: ReleaseRef;
+  mapping?: ReleasedDetail["mapping"];
   figure: Figure;
   /** The resolved plate, or null while the figure has no drawing attached. */
   drawing: DrawingFile | null;

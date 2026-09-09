@@ -5,7 +5,7 @@ import styles from "./CalloutMarker.module.css";
 export type CalloutMarkerState = "default" | "active" | "muted";
 
 export interface CalloutMarkerProps {
-  number: number;
+  number: number | string;
   /** Stable drawing occurrence identity; omitted for inline table references. */
   occurrenceId?: string;
   /** Percentages, 0-100. Omit to render inline rather than on a drawing. */

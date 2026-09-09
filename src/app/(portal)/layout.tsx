@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { PortalShell } from "@/components";
+import { AppProviders } from "@/state";
+import { requireCustomerSession } from "@/lib/customer-session.server";
 
 /**
  * Everything after sign-in sits inside the portal chrome: the icon rail and
@@ -10,12 +12,13 @@ import { PortalShell } from "@/components";
 /** The header shows the date the portal was opened, so it cannot be prerendered. */
 export const dynamic = "force-dynamic";
 
-export default function PortalLayout({ children }: { children: ReactNode }) {
+export default async function PortalLayout({ children }: { children: ReactNode }) {
+  const session = await requireCustomerSession();
   const date = new Date().toLocaleDateString("en-CA", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
 
-  return <PortalShell date={date}>{children}</PortalShell>;
+  return <AppProviders session={session}><PortalShell date={date}>{children}</PortalShell></AppProviders>;
 }

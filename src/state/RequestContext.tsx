@@ -7,9 +7,13 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useState,
   type ReactNode,
 } from "react";
 import type { Company, Currency, OrderLine, Part } from "@/types/catalog";
+import type { MeResponse } from "@rufdiamond/contracts";
+import { scopeKey } from "./customer-session";
+import { readRequestIdentities, writeRequestIdentities, revalidateRequestIdentities } from "./customer-request";
 
 export const LINES_STORAGE_KEY = "rdpp:request:v1";
 export const CONFIRMATION_STORAGE_KEY = "rdpp:last-request:v1";
@@ -23,11 +27,11 @@ export interface RequestPartInput {
 
 export interface RequestTotals {
   /** Sum of the line totals at list price. */
-  listTotal: number;
+  listTotal?: number;
   /** Money taken off by the current company's rate. */
-  discountApplied: number;
+  discountApplied?: number;
   /** listTotal − discountApplied. */
-  netTotal: number;
+  netTotal?: number;
 }
 
 /** What the reader typed alongside the parts, carried into the documents. */
@@ -121,8 +125,8 @@ function toLine(part: Part, qty: number): OrderLine {
     partNumberSnapshot: part.partNumber,
     descriptionSnapshot: part.description,
     qty,
-    unitPriceSnapshot: part.listPrice,
-    lineTotal: round2(part.listPrice * qty),
+    ...(part.releasePartId ? { releasePartId: part.releasePartId } : {}),
+    ...(part.listPrice === undefined ? {} : { unitPriceSnapshot: part.listPrice, lineTotal: round2(Number(part.listPrice) * qty) }),
   };
 }
 
@@ -145,10 +149,12 @@ export function requestReducer(
         } else {
           const existing = lines[index];
           const nextQty = existing.qty + qty;
-          lines[index] = {
+          // API additions have just been revalidated. Do not preserve a stale
+          // release snapshot or an old price that is now omitted by scope.
+          lines[index] = part.releasePartId ? toLine(part, nextQty) : {
             ...existing,
             qty: nextQty,
-            lineTotal: round2(existing.unitPriceSnapshot * nextQty),
+            ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * nextQty) }),
           };
         }
       }
@@ -180,7 +186,7 @@ export function requestReducer(
       lines[index] = {
         ...existing,
         qty: action.qty,
-        lineTotal: round2(existing.unitPriceSnapshot * action.qty),
+        ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * action.qty) }),
       };
       return { ...state, lines };
     }
@@ -269,7 +275,8 @@ export function computeTotals(
   lines: OrderLine[],
   discountRate: number,
 ): RequestTotals {
-  const listTotal = round2(lines.reduce((sum, line) => sum + line.lineTotal, 0));
+  if (lines.some(line => line.lineTotal === undefined)) return {};
+  const listTotal = round2(lines.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0));
   const rate = Math.min(1, Math.max(0, discountRate));
   const discountApplied = round2(listTotal * rate);
 
@@ -381,6 +388,8 @@ function writeStoredConfirmation(value: RequestConfirmation | null): void {
 }
 
 export interface RequestContextValue extends RequestTotals {
+  submissionAvailable: boolean;
+  requestError: string;
   lines: OrderLine[];
   /**
    * The lines actually going on the request. Totals, the piece count and the
@@ -412,6 +421,7 @@ export interface RequestContextValue extends RequestTotals {
 const RequestContext = createContext<RequestContextValue | null>(null);
 
 export interface RequestProviderProps {
+  apiSession?: MeResponse | null;
   children: ReactNode;
   /**
    * The company the request is priced for. Passed in rather than read from a
@@ -422,46 +432,67 @@ export interface RequestProviderProps {
 }
 
 /** The parts request being assembled across figures. */
-export function RequestProvider({
+export function RequestProvider(props: RequestProviderProps) {
+  return <RequestProviderState key={props.apiSession ? scopeKey(props.apiSession) : "fixture"} {...props} />;
+}
+
+function RequestProviderState({
   children,
   company = null,
+  apiSession = null,
 }: RequestProviderProps) {
   const [state, dispatch] = useReducer(requestReducer, initialRequestState);
+  const [requestError, setRequestError] = useState("");
+  const apiKey = apiSession ? `rdpp:api-request:${scopeKey(apiSession)}` : null;
 
   // A twenty-line request built on a mine site must survive an accidental
   // refresh. Read after mount — the server cannot see sessionStorage.
   useEffect(() => {
-    dispatch({ type: "hydrateLines", stored: readStoredRequest() });
-  }, []);
+    if (!apiKey) { dispatch({ type: "hydrateLines", stored: readStoredRequest() }); return; }
+    let cancelled = false;
+    try { for (const key of [LINES_STORAGE_KEY, CONFIRMATION_STORAGE_KEY, "rdpp:machine:v1", "rdpp:recent-figures:v1"]) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
+    void revalidateRequestIdentities(readRequestIdentities(apiKey)).then(parts => {
+      if (cancelled) return;
+      dispatch({ type: "add", parts });
+      dispatch({ type: "hydrateLines", stored: null });
+    }).catch(() => { if (!cancelled) { setRequestError("Saved parts could not be revalidated. Add them again from the current catalogue."); dispatch({ type: "hydrateLines", stored: null }); } });
+    return () => { cancelled = true; };
+  }, [apiKey]);
 
   useEffect(() => {
     // Don't write before the read has happened, or the empty initial state
     // would wipe what is already stored.
     if (!state.linesHydrated) return;
+    if (apiKey) { writeRequestIdentities(apiKey, state.lines); return; }
     writeStoredRequest({
       lines: state.lines,
       currency: state.currency,
       excluded: state.excluded,
     });
-  }, [state.linesHydrated, state.lines, state.currency, state.excluded]);
+  }, [apiKey, state.linesHydrated, state.lines, state.currency, state.excluded]);
 
   // The confirmation outlives the request list so /request/confirmed survives
   // a refresh too.
   useEffect(() => {
     dispatch({
       type: "hydrateConfirmation",
-      confirmation: readStoredConfirmation(),
+      confirmation: apiKey ? null : readStoredConfirmation(),
     });
-  }, []);
+  }, [apiKey]);
 
   useEffect(() => {
-    if (!state.confirmationHydrated) return;
+    if (!state.confirmationHydrated || apiKey) return;
     writeStoredConfirmation(state.lastConfirmation);
-  }, [state.confirmationHydrated, state.lastConfirmation]);
+  }, [apiKey, state.confirmationHydrated, state.lastConfirmation]);
 
   const addParts = useCallback(
-    (parts: RequestPartInput[]) => dispatch({ type: "add", parts }),
-    [],
+    (parts: RequestPartInput[]) => {
+      if (!apiKey) { dispatch({ type: "add", parts }); return; }
+      void revalidateRequestIdentities(parts.map(({ part, qty = 1 }) => ({ partId: part.id, releasePartId: part.releasePartId ?? "", qty })))
+        .then(fresh => dispatch({ type: "add", parts: fresh }))
+        .catch(() => setRequestError("Parts could not be revalidated. Refresh the catalogue and try again."));
+    },
+    [apiKey],
   );
   const updateQty = useCallback(
     (partId: string, qty: number) =>
@@ -501,8 +532,8 @@ export function RequestProvider({
 
   // Cost follows the ticks, not the list.
   const totals = useMemo(
-    () => computeTotals(includedLines, discountRate),
-    [includedLines, discountRate],
+    () => apiSession && !apiSession.scopes.canViewPrices ? {} : computeTotals(includedLines, discountRate),
+    [apiSession, includedLines, discountRate],
   );
 
   const itemCount = useMemo(
@@ -512,6 +543,7 @@ export function RequestProvider({
 
   const submit = useCallback(
     (details: RequestDetails): RequestConfirmation | null => {
+    if (apiKey) return null;
     // Nothing ticked is nothing to send, even with parts on the list.
     if (includedLines.length === 0) return null;
 
@@ -531,11 +563,13 @@ export function RequestProvider({
     dispatch({ type: "submit", confirmation });
     return confirmation;
     },
-    [includedLines, state.currency, discountRate, company],
+    [apiKey, includedLines, state.currency, discountRate, company],
   );
 
   const value = useMemo<RequestContextValue>(
     () => ({
+      submissionAvailable: !apiKey,
+      requestError,
       lines: state.lines,
       includedLines,
       isIncluded,
@@ -556,6 +590,8 @@ export function RequestProvider({
       submit,
     }),
     [
+      apiKey,
+      requestError,
       state.lines,
       includedLines,
       isIncluded,

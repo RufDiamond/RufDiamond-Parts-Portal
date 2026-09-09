@@ -20,7 +20,8 @@ export interface ConfirmedProps {
  * simultaneously, which is a backend job once there is one.
  */
 export function Confirmed({ usage }: ConfirmedProps) {
-  const { lastConfirmation, confirmationHydrated } = useRequest();
+  const { lastConfirmation, confirmationHydrated, submissionAvailable } = useRequest();
+  if (!submissionAvailable) return <main><h1>Quote submission unavailable</h1><p>The request service is not connected. No request has been submitted.</p><Link href="/request">Return to saved parts</Link></main>;
 
   if (!confirmationHydrated) {
     return <p className={styles.loading}>Loading…</p>;

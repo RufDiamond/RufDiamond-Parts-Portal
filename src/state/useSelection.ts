@@ -124,7 +124,7 @@ export function useSelection({ rows, callouts }: UseSelectionOptions): Selection
     () =>
       [...selectedPartIds]
         .flatMap((partId) => calloutIndex.get(partId) ?? NO_CALLOUTS)
-        .sort((a, b) => a.number - b.number),
+        .sort((a, b) => String(a.number).localeCompare(String(b.number), undefined, { numeric: true })),
     [selectedPartIds, calloutIndex],
   );
 

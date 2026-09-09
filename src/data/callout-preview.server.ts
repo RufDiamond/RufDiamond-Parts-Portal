@@ -11,6 +11,7 @@ import {
 } from "@/lib/callout-preview";
 import type { FigureDetail } from "@/types/catalog";
 import { addPartHighlightReview } from "@/data/part-highlight-review.server";
+import { loadFrontendBackendConfig } from "@/lib/backend-config.server";
 
 // Root package scripts launch Next.js and the focused tests from the project
 // root. Avoid import.meta URL arithmetic here: Turbopack treats literal
@@ -106,6 +107,7 @@ export async function loadCalloutPreview(
   detail: FigureDetail,
   surface: "local" | "hosted-review" = "local",
 ): Promise<CalloutPreview> {
+  if (loadFrontendBackendConfig(process.env)) return { detail, notice: null };
   if (
     surface !== "hosted-review" &&
     (process.env.NODE_ENV !== "development" ||

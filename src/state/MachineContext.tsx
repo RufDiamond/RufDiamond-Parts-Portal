@@ -113,7 +113,7 @@ const MachineContext = createContext<MachineContextValue | null>(null);
  * Holds the machine the catalogue is scoped to, surviving a refresh through
  * sessionStorage — per-tab, so two tabs can sit on different serial ranges.
  */
-export function MachineProvider({ children }: { children: ReactNode }) {
+export function MachineProvider({ children, persist = true }: { children: ReactNode; persist?: boolean }) {
   const [state, dispatch] = useReducer(machineReducer, initialMachineState);
 
   // sessionStorage cannot be read while rendering: the server has no access to
@@ -121,24 +121,24 @@ export function MachineProvider({ children }: { children: ReactNode }) {
   // with the server HTML. Hydration therefore happens after mount, and
   // `hydrated` marks the moment the stored value has been applied.
   useEffect(() => {
-    const stored = readStoredMachine();
+    const stored = persist ? readStoredMachine() : null;
     dispatch({
       type: "hydrate",
       model: stored?.model ?? null,
       variant: stored?.variant ?? null,
     });
-  }, []);
+  }, [persist]);
 
   useEffect(() => {
     // Don't write before the read has happened, or an empty initial state
     // would overwrite what is already stored.
-    if (!state.hydrated) return;
+    if (!state.hydrated || !persist) return;
     writeStoredMachine(
       state.selectedModel && state.selectedVariant
         ? { model: state.selectedModel, variant: state.selectedVariant }
         : null,
     );
-  }, [state.hydrated, state.selectedModel, state.selectedVariant]);
+  }, [persist, state.hydrated, state.selectedModel, state.selectedVariant]);
 
   const setMachine = useCallback((model: Model, variant: Variant) => {
     if (variant.modelId !== model.id) {

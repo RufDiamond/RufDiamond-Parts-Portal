@@ -42,6 +42,7 @@ function isPreviewCoordinate(value: number): boolean {
  * Reject values that cannot be represented by the shared fixed-decimal format.
  */
 export function toPreviewDraftPart(part: LegacyPart): DraftPart {
+  if (typeof part.listPrice !== "number") throw new RangeError("Preview requires a numeric fixture price");
   const listPrice = toPreviewMoney(part.listPrice);
 
   return {

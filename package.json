@@ -7,6 +7,8 @@
     "packages/*"
   ],
   "scripts": {
+    "predev": "node tools/build-frontend-contracts.mjs",
+    "prebuild": "node tools/build-frontend-contracts.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

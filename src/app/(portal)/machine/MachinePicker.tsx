@@ -37,7 +37,7 @@ export function MachinePicker({
     if (!variant) return;
 
     setMachine(chosen.model, variant);
-    router.push("/");
+    router.push(`/systems?variantId=${encodeURIComponent(variant.id)}`);
   };
 
   return (

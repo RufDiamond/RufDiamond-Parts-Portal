@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { loadCalloutPreview } from "@/data/callout-preview.server";
 import {
-  getFigureDetail,
-  getFigures,
-  getPartUsageIndex,
+  composeCustomerRead,
+  isApiMode,
 } from "@/data/repository";
 import { FigureWorkspace } from "./FigureWorkspace";
+import { readFigureWorkspace } from "@/data/customer-figure.server";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -19,14 +19,10 @@ export default async function FigurePage({
   params: Promise<{ figureId: string }>;
 }) {
   const { figureId } = await params;
-  const detail = await getFigureDetail(figureId);
-  if (!detail) notFound();
-  const preview = await loadCalloutPreview(detail);
-
-  // The sheet pager walks the figures of this system, in catalogue order.
-  const siblings = await getFigures(detail.figure.variantId, detail.system.id);
-  // The quote view opens inside this screen, and its columns come from here.
-  const usage = await getPartUsageIndex();
+  const workspace = await composeCustomerRead(repo => readFigureWorkspace(repo, figureId));
+  if (!workspace) notFound();
+  const { detail, siblings, usage } = workspace;
+  const preview = isApiMode() ? { detail, notice: null } : await loadCalloutPreview(detail);
   const index = siblings.findIndex((figure) => figure.id === figureId);
   const total = siblings.length;
 

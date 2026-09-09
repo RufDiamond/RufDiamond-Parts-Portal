@@ -10,6 +10,25 @@ const cases = [
 const figure = (page:Page) => page.locator("figure").first();
 const stage = (scope:Locator) => scope.locator("img").locator("..");
 
+test("fullscreen text actions wrap and retain keyboard selection controls on a narrow viewport", async ({ page }) => {
+  await page.goto(base + "/figures/fig-cabin-6-1");
+  await figure(page).getByRole("button", { name: /^Callout 2:/ }).first().click();
+  await page.getByRole("button", { name: "Illustration full screen", exact: true }).click();
+  const desktopAction = page.getByRole("dialog").getByRole("button", { name: "Show selected part", exact: true });
+  expect(await desktopAction.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(36);
+  await page.setViewportSize({ width: 360, height: 760 });
+  const dialog = page.getByRole("dialog");
+  const show = dialog.getByRole("button", { name: "Show selected part", exact: true });
+  const clear = dialog.getByRole("button", { name: "Clear selection", exact: true });
+  const dimensions = await show.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, parentWidth: el.parentElement!.getBoundingClientRect().width, parentScroll: el.parentElement!.scrollWidth }));
+  expect(dimensions.height).toBeGreaterThanOrEqual(36);
+  expect(dimensions.width).toBeGreaterThan(70);
+  expect(dimensions.parentScroll).toBeLessThanOrEqual(dimensions.parentWidth + 1);
+  await show.focus(); await page.keyboard.press("Enter");
+  await clear.focus(); await page.keyboard.press("Enter");
+  await expect(show).toBeDisabled();
+});
+
 test("synthetic editor: native coordinates, drag, keyboard, zoom and image mismatch gate", async ({ page }, info) => {
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   await page.goto("http://localhost:3101");
