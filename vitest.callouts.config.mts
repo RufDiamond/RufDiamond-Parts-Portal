@@ -15,6 +15,8 @@ export default defineConfig({
   },
   test: {
     include: [
+      "tests/backend-api.test.ts",
+      "tests/api-repository.test.ts",
       "tests/catalog-adapter.test.ts",
       "tests/callout-preview.test.ts",
       "tests/drawing-viewer-pan.test.tsx",

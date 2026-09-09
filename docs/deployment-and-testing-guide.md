@@ -7,6 +7,60 @@ Full API/frontend integration, a connected public staging URL, tester accounts
 and OVH deployment have not yet been verified. This guide is the handoff
 checklist, not a claim that those steps have already happened.
 
+### PNG integration Task9a: dormant transport seam
+
+Task9a adds the server-only authenticated transport and contract repository plus
+the `/api/v1/*` Next route. It does **not** yet switch the fixture-backed customer
+pages/providers to the API. Keep this release private/local until Task9b connects
+the authenticated UI, identity-scoped state and private asset packaging, and Task9c
+verifies admin/upload/publish and native browser acceptance. Merely setting API
+mode on this intermediate release does not make its customer pages live.
+
+The placeholder-only settings are in [frontend-api.env.example](frontend-api.env.example).
+`RUF_REPOSITORY_MODE=fixture` (the current local default) makes the proxy return404,
+never seed data. Explicit `api` mode requires `RUF_API_UPSTREAM_URL` and
+`RUF_WEB_ORIGIN`, both exact origins without paths, queries, user information or
+wildcards. HTTPS is required except explicit HTTP loopback for local work. The
+API's `WEB_ORIGIN` must exactly equal the frontend `RUF_WEB_ORIGIN`. Set
+`RUF_DEPLOYMENT_ENV=staging|production` for connected hosted environments; both
+reject fixture mode and require HTTPS browser origins. No database/storage/session
+secret belongs in these frontend settings or a `NEXT_PUBLIC_*` variable.
+
+The proxy permits only implemented catalogue, identity, mapping, drawing-intent
+and publication paths/methods. Request bodies are JSON with route-specific bounds;
+PNG bytes go through the authorized storage intent. Every write checks the
+incoming Origin and any Referer; protected writes require CSRF. Only the two
+session cookie names and explicit API headers are forwarded. Set-Cookie values
+remain separate. Responses are contract-validated and private/no-store. Only
+release-pinned customer drawing delivery may redirect to HTTPS storage; the proxy
+never follows redirects or fetches arbitrary caller URLs. Private drawing storage
+URLs remain short-lived capabilities and must not be logged.
+
+`getBackendApiRepository()` creates a request-local server repository with the
+current cookie context. Its list/search methods consume up to100 pages of100 rows
+and return shared `{items,nextCursor:null,releases}` envelopes. The contributing
+release references are a union, **not** a per-part ownership mapping. In particular,
+search results preserve `releasePartId`; clients must not guess a singular
+`releaseId` from the first metadata entry. RFQ submission remains gated until its
+real service and exact ownership validation exist. `getPartUsageIndex()` returns
+`{items: Record<partId,summary>,releases}`. `getFigureDetail`/`getFigure` preserve the
+complete shared release/mapping envelope and reject inconsistent figure/row/
+callout/drawing identities. The unused `getDrawingFile(id)` seam explicitly throws
+`DRAWING_LOOKUP_UNAVAILABLE`; use the figure's release-pinned content URL instead.
+
+`CATALOG_CURSOR_STALE` restarts the entire aggregate at most once. Repeated
+cursors, duplicated items, contradictory same-model releases and oversized
+aggregates fail visibly; partial/stale data and fixture fallback are never returned.
+Task9b must also keep separately requested page fragments mutually consistent and
+adapt nullable/optional shared types without reconstructing prices or reference
+labels. The Task9a unit tests exercise injected Request/Response boundaries; they
+are not native authentication, storage, browser-upload or hosted-staging evidence.
+
+Isolated tests must use explicitly created disposable PostgreSQL, private versioned
+storage and scanner services. Never source `apps/api/.env.local`: its existing
+Supabase migration credentials are unrelated to disposable integration testing.
+Use a separate unused Next port and preserve the existing port3100 preview.
+
 ## What runs where
 
 - **Temporary testing:** Vercel frontend → same-origin API proxy → Fastify and
