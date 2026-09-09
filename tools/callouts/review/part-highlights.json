@@ -9982,6 +9982,140 @@
           "evidence": "Printed10 leader targets rear pushbutton handle17-00151. Actual bent strip/body contour, no filled centre envelope; fine end recesses remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
+          "calloutId": "co-6-7-0211",
+          "figurePartId": "fp-6-7-12",
+          "partNumber": "17-00126",
+          "number": 11,
+          "x": 9.5703,
+          "y": 70.7639,
+          "polygons": [
+            [
+              [
+                14.2188,
+                61.25
+              ],
+              [
+                14.4531,
+                60.9722
+              ],
+              [
+                14.7656,
+                61.1111
+              ],
+              [
+                14.8438,
+                62.3611
+              ],
+              [
+                15.0781,
+                65.9722
+              ],
+              [
+                14.9219,
+                66.6667
+              ],
+              [
+                14.375,
+                66.6667
+              ],
+              [
+                13.9844,
+                66.25
+              ],
+              [
+                13.9063,
+                64.8611
+              ],
+              [
+                13.9844,
+                63.75
+              ],
+              [
+                13.75,
+                63.3333
+              ],
+              [
+                13.6719,
+                62.6389
+              ],
+              [
+                13.9063,
+                62.2222
+              ],
+              [
+                14.1406,
+                62.3611
+              ]
+            ]
+          ],
+          "evidence": "Original11 detached RIGHT push-to-close latch at lower left: directly labelled case and projecting arm only. Opaque internal mechanism retained; tiny apertures/leader-obscured centre remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0212",
+          "figurePartId": "fp-6-7-13",
+          "partNumber": "17-00125",
+          "number": 12,
+          "x": 56.9141,
+          "y": 38.9583,
+          "polygons": [
+            [
+              [
+                52.5,
+                35.5556
+              ],
+              [
+                52.8906,
+                35.2778
+              ],
+              [
+                53.0469,
+                35.5556
+              ],
+              [
+                53.0469,
+                36.5278
+              ],
+              [
+                53.3594,
+                36.5278
+              ],
+              [
+                53.5937,
+                36.9444
+              ],
+              [
+                53.5156,
+                39.3056
+              ],
+              [
+                53.2813,
+                39.8611
+              ],
+              [
+                52.7344,
+                39.7222
+              ],
+              [
+                52.5,
+                39.1667
+              ],
+              [
+                52.8125,
+                38.8889
+              ],
+              [
+                52.7344,
+                38.3333
+              ],
+              [
+                52.4219,
+                37.6389
+              ]
+            ]
+          ],
+          "evidence": "Original12 directly labelled LEFT latch beside frame: distinct case and upper arm, with open concave gap left of lower arm. Nearby loose fitting/frame not included. Tiny apertures and internal mechanism detail remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
           "calloutId": "co-6-7-0213",
           "figurePartId": "fp-6-7-14",
           "partNumber": "17-00050",
@@ -10053,6 +10187,251 @@
             ]
           ],
           "evidence": "Printed reference 13 leader terminates on the left directly indicated gas spring, matching 17-00050 (Gas spring (lexan windshield)). Contour traced from the current source PNG; no label or leader is included."
+        },
+        {
+          "calloutId": "co-6-7-0214",
+          "figurePartId": "fp-6-7-15",
+          "partNumber": "62-00202",
+          "number": 14,
+          "x": 22.5391,
+          "y": 74.9306,
+          "polygons": [
+            [
+              [
+                19.2969,
+                59.8611
+              ],
+              [
+                19.5313,
+                59.4444
+              ],
+              [
+                19.7656,
+                59.5833
+              ],
+              [
+                19.9219,
+                60.1389
+              ],
+              [
+                19.9219,
+                60.9722
+              ],
+              [
+                19.6875,
+                61.3889
+              ],
+              [
+                19.375,
+                61.1111
+              ]
+            ]
+          ],
+          "evidence": "Original14 detached tailgate latch nut: visible narrow body only, with centre obscured by leader. Resolution-limited inner bore/edge, no enlarged generic circle. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0215",
+          "figurePartId": "fp-6-7-16",
+          "partNumber": "10-006030-120",
+          "number": 15,
+          "x": 15.9766,
+          "y": 74.3056,
+          "polygons": [
+            [
+              [
+                17.1875,
+                61.9444
+              ],
+              [
+                17.4219,
+                61.5278
+              ],
+              [
+                17.6563,
+                61.6667
+              ],
+              [
+                18.0469,
+                61.3889
+              ],
+              [
+                18.2813,
+                61.5278
+              ],
+              [
+                18.3594,
+                61.9444
+              ],
+              [
+                18.2031,
+                62.2222
+              ],
+              [
+                17.8125,
+                62.5
+              ],
+              [
+                17.5781,
+                62.9167
+              ],
+              [
+                17.3438,
+                62.7778
+              ],
+              [
+                17.1875,
+                62.5
+              ]
+            ]
+          ],
+          "evidence": "Original15 leader reaches LOWER of two detached M6 bolts. Lower head/shaft only; upper similar bolt not inferred from quantity. Leader/head merge and threads remain resolution-limited partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0216",
+          "figurePartId": "fp-6-7-17",
+          "partNumber": "17-00009",
+          "number": 16,
+          "x": 3.6328,
+          "y": 51.0417,
+          "polygons": [
+            [
+              [
+                8.6719,
+                46.25
+              ],
+              [
+                8.8281,
+                46.1111
+              ],
+              [
+                8.9844,
+                46.25
+              ],
+              [
+                9.0625,
+                46.6667
+              ],
+              [
+                8.9063,
+                46.9444
+              ],
+              [
+                8.75,
+                46.8056
+              ]
+            ]
+          ],
+          "evidence": "Original16 ball stud: only source-separable exposed right cap edge is traced. Remaining dark head/shaft merges with printed leader, so full extent is resolution-limited and no generic leader dot is outlined. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0217",
+          "figurePartId": "fp-6-7-18",
+          "partNumber": "18-00053",
+          "number": 17,
+          "x": 20.3516,
+          "y": 9.375,
+          "polygons": [
+            [
+              [
+                17.6563,
+                14.7222
+              ],
+              [
+                18.0469,
+                14.4444
+              ],
+              [
+                18.3594,
+                14.4444
+              ],
+              [
+                18.5938,
+                14.0278
+              ],
+              [
+                18.9063,
+                14.0278
+              ],
+              [
+                19.1406,
+                14.3056
+              ],
+              [
+                19.2969,
+                14.7222
+              ],
+              [
+                19.1406,
+                15.1389
+              ],
+              [
+                18.8281,
+                15.2778
+              ],
+              [
+                18.5156,
+                15.1389
+              ],
+              [
+                18.125,
+                15.5556
+              ],
+              [
+                17.7344,
+                15.5556
+              ],
+              [
+                17.5,
+                15.2778
+              ]
+            ]
+          ],
+          "evidence": "Original17 directly labelled shoulder screw at upper left: compact visible head and shaft only. Thin straight assembly guide toward nut18 is excluded, not treated as a screw extension. Fine thread/leader merge remains partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-7-0218",
+          "figurePartId": "fp-6-7-19",
+          "partNumber": "12-710000-120",
+          "number": 18,
+          "x": 15.5078,
+          "y": 9.5833,
+          "polygons": [
+            [
+              [
+                15.7813,
+                15.6944
+              ],
+              [
+                15.9375,
+                15.4167
+              ],
+              [
+                16.1719,
+                15.5556
+              ],
+              [
+                16.4063,
+                15.9722
+              ],
+              [
+                16.4063,
+                16.3889
+              ],
+              [
+                16.25,
+                16.8056
+              ],
+              [
+                15.9375,
+                16.6667
+              ],
+              [
+                15.7031,
+                16.25
+              ]
+            ]
+          ],
+          "evidence": "Original18 directly labelled thin hex nut: outer rim visible around leader endpoint at useful10x source zoom. Thin centre aperture cannot be separated confidently from leader; retain resolution-limited partial, not a fabricated clear hole or assembly guide. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
       "notes": "Task10c adds visible rear hinge6, support7 with real upper apertures/foreground rail split, and directly labelled shim8. Support7 is near top but pixel inspection proves y0/1 clear, so not clipped. Fine hardware, bores and unspecified similar copies remain separately unresolved; pane1 visible-only aperture refinement retained."

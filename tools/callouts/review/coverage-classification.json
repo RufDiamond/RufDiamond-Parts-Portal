@@ -2856,25 +2856,25 @@
         {
           "figurePartId": "fp-6-7-12",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original11 detached RIGHT push-to-close latch at lower left: directly labelled case and projecting arm only. Opaque internal mechanism retained; tiny apertures/leader-obscured centre remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Opaque internal mechanism retained; tiny apertures/leader-obscured centre remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-7-13",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original12 directly labelled LEFT latch beside frame: distinct case and upper arm, with open concave gap left of lower arm. Nearby loose fitting/frame not included. Tiny apertures and internal mechanism detail remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Tiny apertures and internal mechanism detail remain partial."
           ]
         },
         {
@@ -2892,61 +2892,61 @@
         {
           "figurePartId": "fp-6-7-15",
           "sourceRefNo": "14",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original14 detached tailgate latch nut: visible narrow body only, with centre obscured by leader. Resolution-limited inner bore/edge, no enlarged generic circle.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Resolution-limited inner bore/edge, no enlarged generic circle."
           ]
         },
         {
           "figurePartId": "fp-6-7-16",
           "sourceRefNo": "15",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original15 leader reaches LOWER of two detached M6 bolts. Lower head/shaft only; upper similar bolt not inferred from quantity. Leader/head merge and threads remain resolution-limited partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Leader/head merge and threads remain resolution-limited partial."
           ]
         },
         {
           "figurePartId": "fp-6-7-17",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original16 ball stud: only source-separable exposed right cap edge is traced. Remaining dark head/shaft merges with printed leader, so full extent is resolution-limited and no generic leader dot is outlined.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Remaining dark head/shaft merges with printed leader, so full extent is resolution-limited and no generic leader dot is outlined."
           ]
         },
         {
           "figurePartId": "fp-6-7-18",
           "sourceRefNo": "17",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original17 directly labelled shoulder screw at upper left: compact visible head and shaft only. Thin straight assembly guide toward nut18 is excluded, not treated as a screw extension. Fine thread/leader merge remains partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine thread/leader merge remains partial."
           ]
         },
         {
           "figurePartId": "fp-6-7-19",
           "sourceRefNo": "18",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "image-resolution-limited",
+          "evidence": "Original18 directly labelled thin hex nut: outer rim visible around leader endpoint at useful10x source zoom. Thin centre aperture cannot be separated confidently from leader; retain resolution-limited partial, not a fabricated clear hole or assembly guide.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Thin centre aperture cannot be separated confidently from leader; retain resolution-limited partial, not a fabricated clear hole or assembly guide."
           ]
         }
       ]

@@ -62,7 +62,7 @@ for (const entry of [
     {figure:"fig-cabin-6-6",refs:[7,14]},
     {figure:"fig-cabin-6-18",refs:[5,6,7,8]},
     {figure:"fig-cabin-6-12",refs:[8,9,11,12]},
-    {figure:"fig-cabin-6-7",refs:[1,2,3,4,5,6,7,8,10]},
+    {figure:"fig-cabin-6-7",refs:[1,2,3,4,5,6,7,8,10,11,12,14,15,16,17,18]},
     {figure:"fig-cabin-6-10",refs:[1,3,5,6,7,8,9]},
     {figure:"fig-electric-11-3",refs:[2,12,15]},
     {figure:"fig-cabin-6-2",refs:[1,8,16,20,21,24,26],crowdedFitLabels:true},
