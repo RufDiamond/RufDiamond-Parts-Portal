@@ -5,6 +5,8 @@ import type { Database } from "../../db/client.js";
 import { requireCsrf } from "../../plugins/csrf.js";
 import { AppError } from "../../plugins/error-handler.js";
 import { createMappingService } from "./service.js";
+import { DraftFigureMetadataSchema, DraftFigurePageSchema } from "@rufdiamond/contracts";
+import { discoverDraftFigures } from "./discovery.js";
 
 // Shared contracts inline repeated named sub-schemas. Remove annotation-only IDs
 // at the Fastify boundary so AJV/fast-json-stringify do not register them twice.
@@ -31,6 +33,15 @@ export function registerMappingRoutes(app: FastifyInstance, config: AppConfig, d
   const path = "/api/v1/admin/figures/:figureId/diagram-mapping";
   const params = { type: "object", required: ["figureId"], additionalProperties: false, properties: { figureId: { type: "string" } } };
   const onRequest = async (request: FastifyRequest) => { authenticated(request); if (request.method !== "GET") requireCsrf(request, config); };
+  const uuidSchema = { type: "string", pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" };
+  app.get<{ Querystring: { cursor?: string; limit?: string } }>("/api/v1/admin/figures", { onRequest, schema: { querystring: { type: "object", additionalProperties: false, properties: { cursor: uuidSchema, limit: { type: "string", pattern: "^(?:[1-9]|[1-9][0-9]|100)$" } } }, response: { 200: DraftFigurePageSchema } } }, async (request, reply) => {
+    reply.header("cache-control", "no-store");
+    return discoverDraftFigures(database, request.identitySession!.user.id, { ...request.query, limit: request.query.limit ? Number(request.query.limit) : undefined });
+  });
+  app.get<{ Params: { figureId: string } }>("/api/v1/admin/figures/:figureId", { onRequest, schema: { params: { ...params, properties: { figureId: uuidSchema } }, querystring: { type: "object", additionalProperties: false, properties: {} }, response: { 200: DraftFigureMetadataSchema } } }, async (request, reply) => {
+    reply.header("cache-control", "no-store");
+    return (await discoverDraftFigures(database, request.identitySession!.user.id, { id: request.params.figureId })).items[0];
+  });
   app.get<{ Params: { figureId: string }; Querystring: { before?: string } }>(`${path}/revisions`, { onRequest, schema: { params, querystring: { type: "object", additionalProperties: false, properties: { before: { type: "string", pattern: "^[1-9][0-9]*$" } } }, response: { 200: routeSchema(MappingHistorySchema) } } }, async (request, reply) => {
     const before = request.query.before === undefined ? undefined : Number(request.query.before);
     if (before !== undefined && (!Number.isSafeInteger(before) || before > 2147483647)) throw new AppError("INVALID_CURSOR", 400, "Supply a revision cursor from 1 to 2147483647.");

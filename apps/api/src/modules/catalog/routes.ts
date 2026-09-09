@@ -26,6 +26,10 @@ export function registerCatalogRoutes(app: FastifyInstance, database: Database, 
     const result = await repository.readPublishedFigure(actor(request), request.params.id); reply.header("cache-control", "no-store"); return result;
   });
   app.get<{ Params: { id: string }; Querystring: { releaseId: string } }>("/api/v1/catalog/figures/:id/drawing", { onRequest, schema: { querystring: Type.Object({ releaseId: Type.String() }, { additionalProperties: false }) } }, async (request, reply) => {
+    if (request.headers.accept === "image/png") {
+      const bytes = await repository.drawingContent(actor(request), request.params.id, request.query.releaseId);
+      return reply.header("cache-control", "private, no-store").header("vary", "Cookie, Accept").header("x-content-type-options", "nosniff").type("image/png").send(bytes);
+    }
     const url = await repository.drawing(actor(request), request.params.id, request.query.releaseId); return reply.header("cache-control", "no-store").redirect(url);
   });
 }

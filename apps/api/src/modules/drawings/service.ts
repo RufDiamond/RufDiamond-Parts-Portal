@@ -10,6 +10,7 @@ import { writeAuditLog } from "../audit/repository.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
 import { isPinnedVersion, MAX_DRAWING_BYTES, type DrawingScanner, type DrawingStorage } from "./storage.js";
 import { tooLarge, validatePng } from "./validation.js";
+import { readDrawingContent } from "./content.js";
 
 type Actor = { userId: string; requestId: string };
 const unavailable = () => new AppError("DRAWING_STORAGE_UNAVAILABLE", 503, "Private drawing storage is unavailable. Try again later.");
@@ -114,5 +115,18 @@ export function createDrawingService(database: Database, storage: DrawingStorage
     }, false);
     return { ...selected.metadata, url, expiresAt: new Date(now().getTime() + 300_000).toISOString() };
   }
-  return { intent, finalize, delivery };
+  async function content(actor: Actor, figureId: string, drawingFileId: string, figureVersion: number) {
+    const select = () => mappingTransaction(database, async tx => {
+      const scope = await authorize(tx, actor, false); const graph = await loadGraph(tx, scope, figureId, false);
+      precondition(graph.figure.version, figureVersion);
+      if (!graph.drawing || graph.drawing.id !== drawingFileId) throw new AppError("DRAWING_CHANGED", 409, "The drawing changed. Reload it.");
+      const metadata = attachment(graph.drawing, figureId, figureVersion);
+      return { objectKey: graph.drawing.objectKey, objectVersionId: graph.drawing.objectVersionId!, sha256: metadata.sha256, bytes: metadata.bytes };
+    }, false);
+    const source = await select();
+    const bytes = await readDrawingContent(storage, source);
+    await select();
+    return bytes;
+  }
+  return { intent, finalize, delivery, content };
 }

@@ -15,6 +15,7 @@ export default defineConfig({
   },
   test: {
     include: [
+      "tests/admin-workflow.test.tsx",
       "tests/customer-repository.test.ts",
       "tests/customer-drawing.test.tsx",
       "tests/customer-session.test.ts",

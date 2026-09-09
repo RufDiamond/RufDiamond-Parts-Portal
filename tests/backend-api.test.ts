@@ -9,6 +9,16 @@ const config = { upstream: "http://127.0.0.1:3201", webOrigin: "http://127.0.0.1
 const request = (path: string, init?: RequestInit) => new Request(`${config.webOrigin}/api/v1/${path}`, init);
 
 describe("authenticated upstream boundary", () => {
+  it("forwards only version-pinned private PNG bytes on image routes", async () => {
+    const png = new Uint8Array([137,80,78,71,13,10,26,10,1]);
+    const image = async () => new Response(png, { headers: { "content-type": "image/png" } });
+    const path = "admin/figures/00000000-0000-4000-8000-000000000001/drawing/content?drawingFileId=00000000-0000-4000-8000-000000000002&figureVersion=1";
+    const result = await proxyBackendRequest(request(path), config, image);
+    expect(result.status).toBe(200); expect(new Uint8Array(await result.arrayBuffer())).toEqual(png);
+    expect(result.headers.get("cache-control")).toBe("private, no-store");
+    expect((await proxyBackendRequest(request(path.split("?")[0]), config, image)).status).toBe(400);
+    expect((await proxyBackendRequest(request("me"), config, image)).status).toBe(502);
+  });
   it("keeps the actual route dormant in fixture mode and hides configuration failures", async () => {
     vi.stubEnv("RUF_REPOSITORY_MODE", "fixture"); vi.stubEnv("RUF_DEPLOYMENT_ENV", "local");
     const fetcher = vi.fn<typeof fetch>(); vi.stubGlobal("fetch", fetcher);

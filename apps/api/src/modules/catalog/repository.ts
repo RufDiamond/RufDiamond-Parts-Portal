@@ -6,6 +6,7 @@ import { drawingIdentity, readFigure } from "./figure-queries.js";
 import { navigationPage, partPage } from "./list-queries.js";
 import { pageState, type CatalogQuery } from "./pagination.js";
 import { captureScope, type CatalogContext } from "./scope.js";
+import { readDrawingContent } from "../drawings/content.js";
 
 export type { CatalogQuery } from "./pagination.js";
 const navigationKinds = new Set<CatalogQuery["kind"]>(["product-lines", "models", "variants", "systems", "figures"]);
@@ -36,5 +37,12 @@ export function createCatalogRepository(database: Database, storage: DrawingStor
     await select();
     return url;
   }
-  return { readPublishedFigure, list, drawing };
+  async function drawingContent(ctx: CatalogContext, figureId: string, releaseId: string) {
+    const select = () => mappingTransaction(database, async tx => drawingIdentity(tx, await captureScope(tx, ctx), figureId, releaseId), false);
+    const source = await select();
+    const bytes = await readDrawingContent(storage, source);
+    await select();
+    return bytes;
+  }
+  return { readPublishedFigure, list, drawing, drawingContent };
 }

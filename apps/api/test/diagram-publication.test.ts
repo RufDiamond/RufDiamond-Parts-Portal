@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import argon2 from "argon2";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, it } from "vitest";
 import { buildApp } from "../src/app.js";
@@ -12,6 +12,8 @@ let connection: ReturnType<typeof createDatabase>;
 let app: Awaited<ReturnType<typeof buildApp>>;
 let ids: Record<string, string>;
 let headers: Record<string, string>;
+let onContentRead: (() => Promise<void>) | undefined;
+const contentBytes = Buffer.from([137,80,78,71,13,10,26,10]);
 const publish = (version = 1, key = randomUUID()) => app.inject({ method: "POST", url: "/api/v1/admin/publication/releases", headers: { ...headers, "idempotency-key": key }, payload: { modelId: ids.model, expectedWorkingVersion: 1, expectedPublicationVersion: version, summary: "Synthetic reviewed release" } });
 const get = (path: string) => app.inject({ method: "GET", url: `/api/v1${path}`, headers });
 async function approve() {
@@ -32,6 +34,7 @@ async function approve() {
 }
 beforeAll(async () => { pg = await startPostgres(); await pg.migrate(); connection = createDatabase(pg.connectionString); }, 120000);
 beforeEach(async () => {
+  onContentRead = undefined;
   await pg.pool.query("truncate company,product_line,system,part,drawing_file,audit_log,outbox_event cascade");
   ids = Object.fromEntries(["line", "model", "variant", "system", "drawing", "figure", "part", "row", "callout", "second", "company", "actor"].map(k => [k, randomUUID()]));
   await pg.pool.query("insert into product_line(id,name,normalized_name) values($1,'Synthetic','synthetic')", [ids.line]);
@@ -39,7 +42,7 @@ beforeEach(async () => {
   await pg.pool.query("insert into variant(id,model_id,label) values($1,$2,'Synthetic variant')", [ids.variant, ids.model]);
   await pg.pool.query("insert into system(id,name,normalized_name) values($1,'Synthetic system','synthetic system')", [ids.system]);
   await pg.pool.query("insert into model_system(model_id,system_id) values($1,$2)", [ids.model, ids.system]);
-  await pg.pool.query("insert into drawing_file(id,object_key,filename,media_type,bytes,sha256,width,height,validation_status,object_version_id) values($1,'private-synthetic','fixture.png','image/png',100,repeat('a',64),640,480,'valid','pinned-v1')", [ids.drawing]);
+  await pg.pool.query("insert into drawing_file(id,object_key,filename,media_type,bytes,sha256,width,height,validation_status,object_version_id) values($1,'private-synthetic','fixture.png','image/png',$2,$3,640,480,'valid','pinned-v1')", [ids.drawing, contentBytes.length, createHash("sha256").update(contentBytes).digest("hex")]);
   await pg.pool.query("insert into figure(id,variant_id,system_id,drawing_file_id,name,source_key) values($1,$2,$3,$4,'Synthetic figure','figure-1')", [ids.figure, ids.variant, ids.system, ids.drawing]);
   await pg.pool.query("insert into diagram_mapping(figure_id) values($1)", [ids.figure]);
   await pg.pool.query("insert into part(id,part_number,normalized_part_number,description,list_price) values($1,'SYN1','SYN1','Synthetic part',99.99)", [ids.part]);
@@ -49,13 +52,25 @@ beforeEach(async () => {
   await pg.pool.query("insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,$2,'Named publisher','publisher@test.example','publisher@test.example',$3,id from role where key='catalog_admin'", [ids.actor, ids.company, await argon2.hash("test password", passwordOptions)]);
   await pg.pool.query("insert into user_capability(user_id,capability_key) select $1,key from capability where key in ('publish.execute','publish.rollback','publish.draft.view','catalog.model.view','catalog.figure.view','parts.record.view','catalog.callout.manage','catalog.callout.map') on conflict do nothing", [ids.actor]);
   await pg.pool.query("insert into user_scope(user_id,brand_mode,account_mode,fleet_mode,environment) values($1,'all','all','all','published_and_draft')", [ids.actor]);
-  app = await buildApp({ config: { nodeEnv: "test", port: 0, databaseUrl: pg.connectionString, sessionSecret: "publication-test-session-secret-long-enough", webOrigin: origin, allowInsecureLoopbackCookie: false, deliveryEncryption: { activeKeyId: "test", keys: { test: randomBytes(32).toString("base64") } }, s3: { endpoint: "http://localhost:9000", region: "test", bucket: "test", accessKeyId: "test", secretAccessKey: "test" } }, dependencies: { database: connection, passwordOptions } });
+  app = await buildApp({ config: { nodeEnv: "test", port: 0, databaseUrl: pg.connectionString, sessionSecret: "publication-test-session-secret-long-enough", webOrigin: origin, allowInsecureLoopbackCookie: false, deliveryEncryption: { activeKeyId: "test", keys: { test: randomBytes(32).toString("base64") } }, s3: { endpoint: "http://localhost:9000", region: "test", bucket: "test", accessKeyId: "test", secretAccessKey: "test" } }, dependencies: { database: connection, passwordOptions, drawingStorage: {
+    async createUpload() { throw new Error("not configured"); }, async inspect() { throw new Error("not configured"); }, async createDownload() { throw new Error("not configured"); }, async deleteQuarantine() { throw new Error("not configured"); },
+    async *read(key, version) { expect(key).toBe("private-synthetic"); expect(version).toBe("pinned-v1"); yield contentBytes; await onContentRead?.(); },
+  } } });
   const login = await app.inject({ method: "POST", url: "/api/v1/auth/sign-in", headers: { origin }, payload: { loginId: "publisher@test.example", password: "test password" } });
   expect(login.statusCode).toBe(200);
   headers = { origin, cookie: String(login.headers["set-cookie"]).split(";")[0], "x-csrf-token": login.json().csrfToken };
 });
 afterEach(async () => { await app?.close(); });
 afterAll(async () => { if (connection) await closePostgresPool(connection.pool); await pg?.stop(); }, 30000);
+
+it("serves pinned snapshot bytes and rechecks current scope after storage I/O", async () => {
+  await approve(); const release = (await publish()).json();
+  const url = `/api/v1/catalog/figures/${ids.figure}/drawing?releaseId=${release.releaseId}`;
+  const read = () => app.inject({ method: "GET", url, headers: { ...headers, accept: "image/png" } });
+  const result = await read(); expect(result.statusCode).toBe(200); expect(result.rawPayload).toEqual(contentBytes);
+  onContentRead = async () => { await pg.pool.query("update user_scope set fleet_mode='subset' where user_id=$1", [ids.actor]); };
+  expect((await read()).statusCode).toBe(404);
+});
 
 it("publishes a complete synthetic model and keeps customer geometry immutable after draft edits", async () => {
   await approve(); const result = await publish(); expect(result.statusCode, result.body).toBe(201);

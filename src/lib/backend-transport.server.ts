@@ -34,7 +34,7 @@ export function createBackendTransport(config: BackendConfig, fetcher: typeof fe
       if ((options.body?.byteLength ?? 0) > (rule.bytes ?? 4096)) throw new CatalogApiError(413, "API_BODY_TOO_LARGE");
       try { JSON.parse(new TextDecoder().decode(options.body)); } catch { throw new CatalogApiError(400, "INVALID_JSON"); }
     } else if (options.body) throw new CatalogApiError(400, "GET_BODY_DENIED");
-    const headers = new Headers({ accept: "application/json, application/problem+json" });
+    const headers = new Headers({ accept: rule.drawing || rule.image ? "image/png" : "application/json, application/problem+json" });
     const cookie = sessionCookies(incoming);
     if (cookie) headers.set("cookie", cookie);
     for (const name of ["origin", "referer", "x-csrf-token", "if-match", "idempotency-key", "content-type"]) {
@@ -75,6 +75,14 @@ export async function proxyBackendRequest(request: Request, config: BackendConfi
       if (/^(?:__Host-ruf-session|ruf-session-dev)=/.test(value)) headers.append("set-cookie", value);
     }
     const type = response.headers.get("content-type") ?? "";
+    if ((rule.image || rule.drawing) && response.status === 200 && /^image\/png(?:;|$)/i.test(type)) {
+      let bytes: Uint8Array;
+      try { bytes = await readBoundedBytes(response.body, 20 * 1024 * 1024, AbortSignal.any([request.signal, AbortSignal.timeout(60_000)])); }
+      catch { throw new CatalogApiError(502, "API_RESPONSE_UNAVAILABLE"); }
+      if (![137,80,78,71,13,10,26,10].every((value, index) => bytes[index] === value)) throw new CatalogApiError(502, "INVALID_UPSTREAM_RESPONSE");
+      headers.set("content-type", "image/png");
+      return new Response(bytes as BodyInit, { headers });
+    }
     if (!/^application\/(?:json|problem\+json)(?:;|$)/i.test(type)) throw new CatalogApiError(502, "INVALID_UPSTREAM_RESPONSE");
     headers.set("content-type", type || "application/json");
     let body: Uint8Array;

@@ -7,7 +7,7 @@ import { createDatabase } from "../src/db/client.js";
 import { closePostgresPool, startPostgres } from "./helpers/postgres.js";
 import { cleanupDrawingQuarantine } from "../src/modules/drawings/cleanup.js";
 import { GenericContainer, Wait } from "testcontainers";
-import { CreateBucketCommand, PutBucketVersioningCommand, S3Client } from "@aws-sdk/client-s3";
+import { CreateBucketCommand, PutBucketVersioningCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { createS3DrawingStorage } from "../src/modules/drawings/s3-storage.js";
 import { createClamdScanner } from "../src/modules/drawings/scanner.js";
 import type { DrawingScanner, DrawingStorage } from "../src/modules/drawings/storage.js";
@@ -69,6 +69,35 @@ describe("private PNG attachment API", () => {
   });
   afterEach(async () => { await app?.close(); });
   afterAll(async () => { if (connection) await closePostgresPool(connection.pool); await pg?.stop(); }, 30_000);
+  it("discovers only scoped draft figures and supplies a real drawingless version", async () => {
+    await pg.pool.query("update figure set drawing_file_id=null where id=$1", [ids.figure]);
+    const metadata = await app.inject({ method: "GET", url: path(), headers });
+    expect(metadata.statusCode).toBe(200);
+    expect(metadata.json()).toEqual({ id: ids.figure, name: "Frame", version: 1, hasDrawing: false });
+    const page = await app.inject({ method: "GET", url: "/api/v1/admin/figures?limit=1", headers });
+    expect(page.json()).toEqual({ items: [metadata.json()], nextCursor: null });
+    await pg.pool.query("update user_scope set fleet_mode='subset' where user_id=$1", [ids.actor]);
+    expect((await app.inject({ method: "GET", url: path(), headers })).statusCode).toBe(404);
+    expect((await app.inject({ method: "GET", url: "/api/v1/admin/figures", headers })).json()).toEqual({ items: [], nextCursor: null });
+    await pg.pool.query("delete from role_capability where capability_key='publish.draft.view' and role_id=(select role_id from app_user where id=$1)", [ids.actor]);
+    expect((await app.inject({ method: "GET", url: "/api/v1/admin/figures", headers })).statusCode).toBe(403);
+  });
+  it("delivers exact authenticated PNG bytes and denies stale identities or revoked authority during I/O", async () => {
+    const u = await upload(); const attached = (await finalize(u.uploadId)).json();
+    const url = `${path()}/drawing/content?drawingFileId=${attached.drawingFileId}&figureVersion=2`;
+    const read = await app.inject({ method: "GET", url, headers });
+    expect(read.statusCode).toBe(200); expect(read.rawPayload).toEqual(png);
+    expect(read.headers["content-type"]).toBe("image/png");
+    expect((await app.inject({ method: "GET", url })).statusCode).toBe(401);
+    expect((await app.inject({ method: "GET", url: url.replace("figureVersion=2", "figureVersion=1"), headers })).statusCode).toBe(412);
+    const original = storage.read;
+    storage.read = async function* (...args: Parameters<typeof original>) {
+      yield* original(...args);
+      await pg.pool.query("delete from role_capability where capability_key='publish.draft.view' and role_id=(select role_id from app_user where id=$1)", [ids.actor]);
+    };
+    try { expect((await app.inject({ method: "GET", url, headers })).statusCode).toBe(403); }
+    finally { storage.read = original; }
+  });
   it("requires authenticated CSRF protected intents and figure preconditions", async () => {
     expect((await app.inject({ method: "POST", url: `${path()}/drawing-uploads`, payload: {} })).statusCode).toBe(401);
     expect((await app.inject({ method: "POST", url: `${path()}/drawing-uploads`, headers: { cookie: headers.cookie, origin }, payload: {} })).statusCode).toBe(403);
@@ -171,6 +200,15 @@ describe("private PNG attachment API", () => {
     try {
       await client.send(new CreateBucketCommand({ Bucket: s3Config.bucket }));
       await client.send(new PutBucketVersioningCommand({ Bucket: s3Config.bucket, VersioningConfiguration: { Status: "Enabled" } }));
+      const legacyKey = "private/legacy/original.png";
+      const legacy = await client.send(new PutObjectCommand({ Bucket:s3Config.bucket,Key:legacyKey,Body:png,ContentType:"image/png" }));
+      await client.send(new PutObjectCommand({ Bucket:s3Config.bucket,Key:legacyKey,Body:Buffer.from("newer object"),ContentType:"image/png" }));
+      const readBytes = async (key:string,version?:string) => { const chunks:Buffer[]=[]; for await(const chunk of adapter.read(key,version)) chunks.push(Buffer.from(chunk)); return Buffer.concat(chunks); };
+      expect(await readBytes(legacyKey,legacy.VersionId)).toEqual(png);
+      await expect(readBytes(legacyKey)).rejects.toThrow("Immutable object version required");
+      await expect(readBytes("/invalid",legacy.VersionId)).rejects.toThrow("Invalid private object target");
+      await expect(adapter.inspect(legacyKey,legacy.VersionId)).rejects.toThrow("Invalid quarantine target");
+      await expect(adapter.deleteQuarantine(legacyKey)).rejects.toThrow("Invalid quarantine target");
       clamd = await new GenericContainer("clamav/clamav:1.4.3_base").withPlatform("linux/amd64").withEntrypoint(["clamd"]).withCommand(["--foreground=true", "--config-file=/tmp/task7-clamd.conf"])
         .withCopyContentToContainer([
           { content: "DatabaseDirectory /tmp/task7-signatures\nTCPSocket 3310\nTCPAddr 0.0.0.0\nForeground yes\nLogTime no\nScanPE no\nScanELF no\nStreamMaxLength 21M\nMaxFileSize 21M\nMaxScanSize 64M\nAlertExceedsMax yes\n", target: "/tmp/task7-clamd.conf" },

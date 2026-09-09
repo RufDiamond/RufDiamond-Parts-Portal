@@ -7,6 +7,10 @@ import { createBackendTransport, proxyBackendRequest } from "./backend-transport
 
 /** Request-local only. Do not hold this repository in module/global state or a Next cache. */
 export async function getBackendApiRepository() {
+  return createApiRepository(await getBackendApiRead());
+}
+
+export async function getBackendApiRead() {
   const config = loadFrontendBackendConfig(process.env);
   if (!config) throw new CatalogApiError(503, "API_MODE_REQUIRED");
   const store = await cookies();
@@ -14,7 +18,7 @@ export async function getBackendApiRepository() {
   const session = ["__Host-ruf-session", "ruf-session-dev"].flatMap(name => store.getAll(name));
   headers.set("cookie", session.map(({ name, value }) => `${name}=${value}`).join("; "));
   const transport = createBackendTransport(config);
-  return createApiRepository(path => transport(path, headers));
+  return (path: string) => transport(path, headers);
 }
 
 /** Fixture mode has no API data surface; it must never synthesize a successful response. */

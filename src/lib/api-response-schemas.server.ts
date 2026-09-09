@@ -7,6 +7,7 @@ import {
   MappingRevisionSchema, MappingHistorySchema, MappingHistoricalDocumentSchema,
   DrawingDeliverySchema, DrawingUploadIntentSchema, DrawingAttachmentSchema,
   PublicationQueuePageSchema, PublishResultSchema,
+  DraftFigurePageSchema, DraftFigureMetadataSchema,
 } from "@rufdiamond/contracts";
 import { CatalogApiError } from "./api-error";
 
@@ -23,6 +24,8 @@ export function apiResponseSchema(pathWithQuery: string, method: string, status:
   let schema: TSchema | undefined;
   let expectedStatus = 200;
   if (path === "me") schema = MeResponseSchema;
+  else if (path === "admin/figures") schema = DraftFigurePageSchema;
+  else if (/^admin\/figures\/[^/]+$/.test(path)) schema = DraftFigureMetadataSchema;
   else if (path === "auth/sign-in") schema = signedIn;
   else if (path === "auth/sign-out") schema = signedOut;
   else if (path === "auth/password-reset/request") { schema = resetRequested; expectedStatus = 202; }

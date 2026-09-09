@@ -23,6 +23,10 @@ export function registerDrawingRoutes(app: FastifyInstance, config: AppConfig, d
   const path = "/api/v1/admin/figures/:figureId";
   const params = { type: "object", additionalProperties: false, required: ["figureId"], properties: { figureId: { type: "string" } } };
   const empty = { type: "object", additionalProperties: false, properties: {} };
+  app.get<{ Params: { figureId: string }; Querystring: { drawingFileId: string; figureVersion: string } }>(`${path}/drawing/content`, { onRequest, schema: { params, querystring: { type: "object", required: ["drawingFileId", "figureVersion"], additionalProperties: false, properties: { drawingFileId: { type: "string", pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" }, figureVersion: { type: "string", pattern: "^[1-9][0-9]{0,9}$" } } } } }, async (request, reply) => {
+    const bytes = await service.content(actor(request), request.params.figureId, request.query.drawingFileId, Number(request.query.figureVersion));
+    return reply.header("cache-control", "private, no-store").header("x-content-type-options", "nosniff").type("image/png").send(bytes);
+  });
   app.post<{ Params: { figureId: string }; Body: DrawingUploadInput }>(`${path}/drawing-uploads`, { onRequest, bodyLimit: 4096, schema: { params, body: DrawingUploadInputSchema, querystring: empty, response: { 201: DrawingUploadIntentSchema } } }, async (request, reply) => {
     const result = await service.intent(actor(request), request.params.figureId, version(request), request.body);
     return reply.code(201).header("cache-control", "no-store").send(result);

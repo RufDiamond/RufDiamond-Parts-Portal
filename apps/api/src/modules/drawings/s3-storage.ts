@@ -10,6 +10,7 @@ export function createS3DrawingStorage(config: AppConfig["s3"]): DrawingStorage 
   const Bucket = config.bucket;
   const timeout = () => ({ abortSignal: AbortSignal.timeout(15_000) });
   function key(value: string) { if (!/^quarantine\/[0-9a-f-]{36}\/[0-9a-f-]{36}\.png$/.test(value)) throw new Error("Invalid quarantine target"); return value; }
+  function privateKey(value: string) { if (!value || value.startsWith("/")) throw new Error("Invalid private object target"); return value; }
   function pinned(value: string | undefined): string { if (!isPinnedVersion(value)) throw new Error("Immutable object version required"); return value; }
   function expiry(value: number, maximum: number) { if (!Number.isInteger(value) || value < 1 || value > maximum) throw new Error("Invalid signed URL lifetime"); return value; }
   async function privateVersionedBucket() {
@@ -43,7 +44,11 @@ export function createS3DrawingStorage(config: AppConfig["s3"]): DrawingStorage 
       return { bytes: response.ContentLength, versionId: version, contentType: response.ContentType };
     },
     async *read(objectKey, versionId) {
-      const response = await client.send(new GetObjectCommand({ Bucket, Key: key(objectKey), VersionId: pinned(versionId) }), { abortSignal: AbortSignal.timeout(30_000) });
+      const target = privateKey(objectKey), version = pinned(versionId);
+      // Delivery also supports legacy keys selected from authorized immutable metadata.
+      // Intent creation, inspection and cleanup retain quarantine-only targets.
+      await privateVersionedBucket();
+      const response = await client.send(new GetObjectCommand({ Bucket, Key: target, VersionId: version }), { abortSignal: AbortSignal.timeout(30_000) });
       const body = response.Body as Readable | undefined;
       if (!body) throw new Error("Missing object body");
       try {
@@ -55,8 +60,7 @@ export function createS3DrawingStorage(config: AppConfig["s3"]): DrawingStorage 
     async createDownload(objectKey, versionId, seconds) {
       await privateVersionedBucket();
       // Legacy private objects may have other keys, but callers only pass keys loaded from scoped immutable metadata.
-      if (!objectKey || objectKey.startsWith("/")) throw new Error("Invalid private object target");
-      return getSignedUrl(client, new GetObjectCommand({ Bucket, Key: objectKey, VersionId: pinned(versionId), ResponseContentType: "image/png", ResponseCacheControl: "private, no-store", ResponseContentDisposition: "inline" }), { expiresIn: expiry(seconds, 300) });
+      return getSignedUrl(client, new GetObjectCommand({ Bucket, Key: privateKey(objectKey), VersionId: pinned(versionId), ResponseContentType: "image/png", ResponseCacheControl: "private, no-store", ResponseContentDisposition: "inline" }), { expiresIn: expiry(seconds, 300) });
     },
     async deleteQuarantine(objectKey) {
       const target = key(objectKey);

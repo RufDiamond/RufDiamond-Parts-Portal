@@ -27,11 +27,11 @@ export async function readFigure(tx: Transaction, scope: CatalogScope, figureId:
   return projectFigure(scope, metadata, rows, calls, mapping);
 }
 
-type DrawingIdentity = { release_id: string; object_key: string; object_version_id: string | null };
+type DrawingIdentity = { release_id: string; object_key: string; object_version_id: string | null; sha256: string; bytes: string };
 export async function drawingIdentity(tx: Transaction, scope: CatalogScope, figureId: string, releaseId: string) {
   const result = await tx.execute<DrawingIdentity>(sql`
     WITH ${permittedVariants(scope)}
-    SELECT f.release_id,d.object_key,d.object_version_id
+    SELECT f.release_id,d.object_key,d.object_version_id,d.sha256,d.bytes
     FROM release_figure f JOIN permitted_variants pv ON pv.release_id=f.release_id AND pv.id=f.variant_id
     JOIN release_drawing d ON d.release_id=f.release_id AND d.id=f.drawing_id
     WHERE f.working_id=${requiredId(figureId)}::uuid LIMIT 1
@@ -48,5 +48,5 @@ export async function drawingIdentity(tx: Transaction, scope: CatalogScope, figu
     unavailable();
   }
   if (!isPinnedVersion(current.object_version_id ?? undefined)) throw new AppError("DRAWING_VERSION_UNAVAILABLE", 503, "Historical immutable object identity requires restoration.");
-  return { objectKey: current.object_key, objectVersionId: current.object_version_id! };
+  return { objectKey: current.object_key, objectVersionId: current.object_version_id!, sha256: current.sha256, bytes: Number(current.bytes) };
 }

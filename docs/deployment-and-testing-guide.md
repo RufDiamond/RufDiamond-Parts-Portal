@@ -7,14 +7,15 @@ Full API/frontend integration, a connected public staging URL, tester accounts
 and OVH deployment have not yet been verified. This guide is the handoff
 checklist, not a claim that those steps have already happened.
 
-### PNG integration Task9a: dormant transport seam
+### PNG integration: current local implementation
 
-Task9a adds the server-only authenticated transport and contract repository plus
-the `/api/v1/*` Next route. It does **not** yet switch the fixture-backed customer
-pages/providers to the API. Keep this release private/local until Task9b connects
-the authenticated UI, identity-scoped state and private asset packaging, and Task9c
-verifies admin/upload/publish and native browser acceptance. Merely setting API
-mode on this intermediate release does not make its customer pages live.
+The Next customer pages now use the authenticated Fastify contracts in explicit
+API mode, with identity-scoped state and private asset packaging. Protected admin
+discovery, mapping, upload and publication are connected locally. See
+[the native integration guide](admin-native-integration.md) for isolated commands,
+runtime/setup separation and evidence limits. Task9c acceptance remains subject
+to its final report and independent review; none of this establishes remote
+staging or production acceptance.
 
 The placeholder-only settings are in [frontend-api.env.example](frontend-api.env.example).
 `RUF_REPOSITORY_MODE=fixture` (the current local default) makes the proxy return404,
@@ -32,8 +33,10 @@ PNG bytes go through the authorized storage intent. Every write checks the
 incoming Origin and any Referer; protected writes require CSRF. Only the two
 session cookie names and explicit API headers are forwarded. Set-Cookie values
 remain separate. Responses are contract-validated and private/no-store. Only
-release-pinned customer drawing delivery may redirect to HTTPS storage; the proxy
-never follows redirects or fetches arbitrary caller URLs. Private drawing storage
+release-pinned customer drawing delivery may redirect to HTTPS storage for legacy
+clients. The Next proxy requests authenticated, version-pinned PNG bytes instead,
+with bounded reads and fresh authorization after storage I/O. It never follows
+redirects or fetches arbitrary caller URLs. Private drawing storage
 URLs remain short-lived capabilities and must not be logged.
 
 `getBackendApiRepository()` creates a request-local server repository with the
@@ -55,9 +58,9 @@ Usage rows preserve multiplicity: distinct figure-part records can share a part
 and figure, while their DTO omits the source row identity. The client cannot
 distinguish those legitimate identical projections from duplicate backend rows;
 cursor/release/page limits remain enforced without inventing usage IDs.
-Task9b must also keep separately requested page fragments mutually consistent and
-adapt nullable/optional shared types without reconstructing prices or reference
-labels. The Task9a unit tests exercise injected Request/Response boundaries; they
+The customer boundary keeps separately requested page fragments mutually consistent
+and handles nullable shared types without reconstructing prices or reference
+labels. Transport unit tests exercise injected Request/Response boundaries; they
 are not native authentication, storage, browser-upload or hosted-staging evidence.
 
 Isolated tests must use explicitly created disposable PostgreSQL, private versioned
@@ -122,8 +125,9 @@ in `VITE_*`, `NEXT_PUBLIC_*`, screenshots, email or Git. The browser uses relati
 The executable deployment scripts and final build commands are deliverables of
 the [OVH deployment plan](superpowers/plans/2026-09-07-ovh-staging-production.md).
 They must be verified before being presented as copy-and-run production steps.
-The repository currently still builds Next.js at its root; do not change Vercel
-to `apps/web/dist` until the planned Vite cutover has passed its review and tests.
+The approved PNG integration retains the root Next.js application. Use its private
+API-mode standalone package; a Vite/framework migration is outside this task.
+Backend placeholder settings are in [backend-api.env.example](backend-api.env.example).
 
 ## Test access
 

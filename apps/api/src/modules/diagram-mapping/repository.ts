@@ -28,7 +28,9 @@ export async function loadGraph(tx: Transaction, ctx: AuthorizationContext, figu
   // New figure creation must create its coordination head atomically.
   if (!head) throw new AppError("MAPPING_UNAVAILABLE", 409, "Mapping is not initialized for this figure.");
   const drawingQuery = tx.select().from(drawingFile).where(eq(drawingFile.id, scope.figure.drawingFileId ?? "00000000-0000-0000-0000-000000000000"));
-  const [drawing] = await (lock ? drawingQuery.for("share") : drawingQuery);
+  // drawing_file is append-only. Locking it would require granting UPDATE on
+  // immutable history; mutable model/figure/head locks coordinate attachment.
+  const [drawing] = await drawingQuery;
   const rowQuery = tx.select({ row: figurePart, part }).from(figurePart).innerJoin(part, eq(figurePart.partId, part.id)).where(eq(figurePart.figureId, figureId)).orderBy(figurePart.id);
   const rows = await (lock ? rowQuery.for("share") : rowQuery);
   const occurrenceQuery = tx.select().from(callout).where(eq(callout.figureId, figureId)).orderBy(callout.id);

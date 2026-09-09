@@ -1,7 +1,7 @@
 import { CatalogApiError } from "./api-error";
 
 const uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
-const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; publicWrite?: boolean; drawing?: boolean }[] = [
+const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; publicWrite?: boolean; drawing?: boolean; image?: boolean }[] = [
   { path: /^me$/, method: "GET" },
   { path: /^auth\/(sign-in|password-reset\/(request|complete))$/, method: "POST", bytes: 16384, publicWrite: true },
   { path: /^auth\/sign-out$/, method: "POST", bytes: 4096 },
@@ -11,6 +11,9 @@ const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; p
   { path: new RegExp(`^catalog/figures/${uuid}$`), method: "GET" },
   { path: new RegExp(`^catalog/figures/${uuid}/drawing$`), method: "GET", query: ["releaseId"], drawing: true },
   { path: /^admin\/publication\/queue$/, method: "GET", query: ["cursor", "limit"] },
+  { path: /^admin\/figures$/, method: "GET", query: ["cursor", "limit"] },
+  { path: new RegExp(`^admin/figures/${uuid}$`), method: "GET" },
+  { path: new RegExp(`^admin/figures/${uuid}/drawing/content$`), method: "GET", query: ["drawingFileId", "figureVersion"], image: true },
   { path: /^admin\/publication\/releases$/, method: "POST", bytes: 16384 },
   { path: new RegExp(`^admin/publication/releases/${uuid}/(activate|rollback)$`), method: "POST", bytes: 4096 },
   { path: new RegExp(`^admin/figures/${uuid}/diagram-mapping$`), method: "GET" },
@@ -36,8 +39,10 @@ export function allowedApiRoute(path: string, method: string) {
     if (key === "limit" && !/^(?:[1-9]|[1-9][0-9]|100)$/.test(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (key === "before" && (!/^[1-9][0-9]*$/.test(value) || Number(value) > 2147483647)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (key === "mode" && !["any", "part", "description"].includes(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
-    if (key === "releaseId" && !new RegExp(`^${uuid}$`).test(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
+    if (["releaseId", "drawingFileId"].includes(key) && !new RegExp(`^${uuid}$`).test(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
+    if (key === "figureVersion" && (!/^[1-9][0-9]*$/.test(value) || Number(value) > 2147483647)) throw new CatalogApiError(400, "INVALID_API_QUERY");
   }
   if (rule.drawing && !query.has("releaseId")) throw new CatalogApiError(400, "RELEASE_REQUIRED");
+  if (rule.image && (!query.has("drawingFileId") || !query.has("figureVersion"))) throw new CatalogApiError(400, "DRAWING_VERSION_REQUIRED");
   return rule;
 }

@@ -15,6 +15,14 @@ import { OrderStatusSchema } from "./orders.js";
 const nullableString = () => Type.Union([Type.String(), Type.Null()]);
 const count = () => Type.Integer({ minimum: 0 });
 
+export const DraftFigureMetadataSchema = Type.Object({
+  id: Type.String({ pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" }),
+  name: Type.String(), version: Type.Integer({ minimum: 1 }), hasDrawing: Type.Boolean(),
+}, { additionalProperties: false });
+export type DraftFigureMetadata = Static<typeof DraftFigureMetadataSchema>;
+export const DraftFigurePageSchema = Type.Object({ items: Type.Array(DraftFigureMetadataSchema), nextCursor: Type.Union([Type.String(), Type.Null()]) }, { additionalProperties: false });
+export type DraftFigurePage = Static<typeof DraftFigurePageSchema>;
+
 export const CatalogStatsSchema = Type.Object(
   {
     modelsWithData: count(),
