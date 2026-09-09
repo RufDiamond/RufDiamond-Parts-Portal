@@ -5,6 +5,7 @@ import type { AppConfig } from "./config.js";
 import { createDatabase } from "./db/client.js";
 import { createDatabaseAuthorizationResolver } from "./modules/authorization/policy.js";
 import { registerIdentityRoutes } from "./modules/identity/routes.js";
+import { registerMappingRoutes } from "./modules/diagram-mapping/routes.js";
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
 import { registerAuth } from "./plugins/auth.js";
 import { registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
@@ -25,7 +26,7 @@ export interface BuildAppOptions {
 export async function buildApp({ config, dependencies = {} }: BuildAppOptions): Promise<FastifyInstance> {
   const ownedDatabase = dependencies.database ? null : createDatabase(config.databaseUrl);
   const database = dependencies.database ?? ownedDatabase!;
-  const app = Fastify({ logger: false, ajv: { customOptions: { removeAdditional: false } } });
+  const app = Fastify({ logger: false, ajv: { customOptions: { removeAdditional: false, coerceTypes: false } } });
   if (ownedDatabase) app.addHook("onClose", async () => ownedDatabase.close());
   registerRequestContext(app);
   const now = dependencies.now ?? (() => new Date());
@@ -39,6 +40,7 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   });
   registerAuth(app, config, identity);
   registerIdentityRoutes(app, config, identity, now);
+  registerMappingRoutes(app, config, database.db, now);
   registerErrorHandler(app);
   registerNotFoundHandler(app);
 

@@ -120,6 +120,22 @@ export const MappingWriteContextSchema = Type.Object(
 );
 export type MappingWriteContext = Static<typeof MappingWriteContextSchema>;
 
+export const MappingSourceSchema = Type.Object({
+  figure: Type.Object({ id: Type.String(), name: Type.String(), version: Type.Integer({ minimum: 1 }), variantId: Type.String(), modelId: Type.String() }, { additionalProperties: false }),
+  drawing: Type.Union([Type.Null(), Type.Object({
+    id: Type.String(), filename: Type.String(), sha256: Sha256Schema,
+    width: Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]), height: Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]),
+    fileVersion: Type.Integer({ minimum: 1 }), mediaType: Type.String(), validationStatus: Type.Union([Type.Literal("pending"), Type.Literal("valid"), Type.Literal("rejected")]),
+  }, { additionalProperties: false })]),
+  catalogueBindingSha256: Sha256Schema,
+  rows: Type.Array(Type.Object({
+    id: Type.String(), partId: Type.String(), partNumber: Type.String(), description: Type.String(), qty: Type.Integer({ minimum: 1 }),
+    refLabels: Type.Array(Type.String()), version: Type.Integer({ minimum: 1 }),
+  }, { additionalProperties: false })),
+  occurrences: Type.Array(Type.Object({ id: Type.String(), figurePartId: Type.Union([Type.String(), Type.Null()]), refNo: Type.String(), version: Type.Integer({ minimum: 1 }) }, { additionalProperties: false })),
+}, { $id: "MappingSource", additionalProperties: false });
+export type MappingSource = Static<typeof MappingSourceSchema>;
+
 export const MappingEditorDocumentSchema = Type.Union(
   [
     Type.Object(
@@ -127,6 +143,8 @@ export const MappingEditorDocumentSchema = Type.Union(
         version: Type.Literal(1),
         revision: Type.Null(),
         document: DiagramMappingDocumentSchema,
+        source: MappingSourceSchema,
+        sourceConflict: Type.Boolean(),
       },
       { additionalProperties: false },
     ),
@@ -135,6 +153,8 @@ export const MappingEditorDocumentSchema = Type.Union(
         version: Type.Integer({ minimum: 2 }),
         revision: MappingRevisionSchema,
         document: DiagramMappingDocumentSchema,
+        source: MappingSourceSchema,
+        sourceConflict: Type.Boolean(),
       },
       { additionalProperties: false },
     ),

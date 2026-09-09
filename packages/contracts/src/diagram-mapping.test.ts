@@ -40,6 +40,14 @@ const validDocument = {
   ],
 } as const;
 
+const source = {
+  figure: { id: "figure-1", name: "Frame", version: 1, variantId: "variant-1", modelId: "model-1" },
+  drawing: { id: "drawing-1", filename: "frame.png", sha256: "a".repeat(64), width: 1200, height: 800, fileVersion: 1, mediaType: "image/png", validationStatus: "valid" },
+  catalogueBindingSha256: "b".repeat(64),
+  rows: [{ id: "figure-part-1", partId: "part-1", partNumber: "P1", description: "Bracket", qty: 1, refLabels: ["7"], version: 1 }],
+  occurrences: [{ id: "callout-1", figurePartId: "figure-part-1", refNo: "7", version: 1 }],
+};
+
 describe("diagram mapping schemas", () => {
   it("accepts the serializable document and shared response envelopes", () => {
     const document = structuredClone(validDocument);
@@ -79,12 +87,23 @@ describe("diagram mapping schemas", () => {
       version: 2,
       revision,
       document,
+      source, sourceConflict: false,
     })).toBe(true);
     expect(Value.Check(MappingEditorDocumentSchema, {
       version: 1,
       revision: null,
       document,
+      source, sourceConflict: false,
     })).toBe(true);
+  });
+
+  it("requires safe reconciliation source context and rejects private fields", () => {
+    const envelope = { version: 1, revision: null, document: validDocument, source, sourceConflict: false };
+    expect(Value.Check(MappingEditorDocumentSchema, envelope)).toBe(true);
+    expect(Value.Check(MappingEditorDocumentSchema, { ...envelope, source: { ...source, drawing: null }, sourceConflict: true })).toBe(true);
+    expect(Value.Check(MappingEditorDocumentSchema, { ...envelope, source: { ...source, drawing: { ...source.drawing, objectKey: "private" } } })).toBe(false);
+    const missing = { version: envelope.version, revision: envelope.revision, document: envelope.document, sourceConflict: false };
+    expect(Value.Check(MappingEditorDocumentSchema, missing)).toBe(false);
   });
 
   it("allows incomplete draft associations, labels and regions", () => {

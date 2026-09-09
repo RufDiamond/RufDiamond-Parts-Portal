@@ -46,6 +46,12 @@ function titleForStatus(status: number): string {
       return "Not Found";
     case 409:
       return "Conflict";
+    case 412:
+      return "Precondition Failed";
+    case 413:
+      return "Payload Too Large";
+    case 428:
+      return "Precondition Required";
     case 422:
       return "Validation failed";
     case 429:
@@ -71,12 +77,14 @@ function isValidationError(error: unknown): error is FastifyError {
 
 export function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
+    if (error instanceof Error && "code" in error && error.code === "FST_ERR_CTP_BODY_TOO_LARGE") {
+      return reply.type("application/problem+json").code(413).send(problem(request, "PAYLOAD_TOO_LARGE", 413, "Payload Too Large", "The request body exceeds the size limit."));
+    }
     if (error instanceof Error && "code" in error && [
       "FST_ERR_CTP_INVALID_JSON_BODY",
       "FST_ERR_CTP_EMPTY_JSON_BODY",
       "FST_ERR_CTP_INVALID_MEDIA_TYPE",
       "FST_ERR_CTP_INVALID_CONTENT_LENGTH",
-      "FST_ERR_CTP_BODY_TOO_LARGE",
     ].includes(String(error.code))) {
       return reply
         .type("application/problem+json")
