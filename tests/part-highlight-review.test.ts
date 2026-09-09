@@ -127,6 +127,19 @@ test("Windshield frame keeps its narrow right rail separate from the attached br
     expect(frame.regions.some(r => pointInRegion(point,r))).toBe(false);
 });
 
+test("Engine 8.3 removes established support voids but retains visible rear material", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-engine-8-3"))!, "hosted-review");
+  const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point,r));
+  for (const point of [[319,269],[340,287],[312,237],[322,322],[333,364]] as [number,number][])
+    expect(contains(1,point)).toBe(false);
+  expect(contains(1,[329,281])).toBe(true);
+  expect(contains(1,[335,375])).toBe(true);
+  expect(contains(2,[953,271])).toBe(false);
+  expect(contains(3,[684,644])).toBe(false);
+  expect(contains(3,[684,695])).toBe(true);
+  expect(contains(3,[684,715])).toBe(false);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},

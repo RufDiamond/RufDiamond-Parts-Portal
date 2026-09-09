@@ -5597,36 +5597,36 @@
           "figurePartId": "fp-8-3-01",
           "sourceRefNo": "1",
           "category": "partial",
-          "evidence": "Original-source audit identifies support1 large central and upper circular holes, smaller bores and lower slots filled by existing exterior polygon.",
+          "evidence": "Original source at useful zoom: accessory support now excludes twelve established void subregions while retaining same-component rear curved bands and lower rear plate visible through front apertures. No opaque rear face is subtracted merely because a front circle surrounds it.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Cut source-visible openings while preserving C-shaped edge and actual plate material"
+            "Lower flange slots and fine side bores remain specifically untraced material/void work; thin curved wall edges remain partial."
           ]
         },
         {
           "figurePartId": "fp-8-3-02",
           "sourceRefNo": "2",
           "category": "partial",
-          "evidence": "Original-source audit identifies folded support2 upright aperture and negative space at bent flange filled by current exterior.",
+          "evidence": "Original folded support retains solid upright/base faces and excludes the established small triangular empty bend region.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace upright aperture and folded plate negative space"
+            "Fine upright mounting bores and folded wall edges still require source-scale material contour work."
           ]
         },
         {
           "figurePartId": "fp-8-3-03",
           "sourceRefNo": "3",
-          "category": "clipped",
-          "evidence": "Source-audit-engine8.2/8.3: labelled hydraulic support3 extends below current polygon to PNG bottom y719 and continues off-image.",
+          "category": "partial",
+          "evidence": "Directly labelled right mount exterior closes at original y702; rows703–719 are clear at x665–704. Prior crop claim confused another unlabelled mount and is withdrawn. Three visible bores are now excluded without extending the exterior or inferring quantity-five copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Extend only visible lower cylinder to raster edge; no off-image contour or qty5 repeats"
+            "Fine bore-wall edges remain partial at the original raster resolution; no clipped-source or missing-bottom blocker exists."
           ]
         },
         {
