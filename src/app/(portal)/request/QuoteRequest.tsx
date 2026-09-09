@@ -59,6 +59,7 @@ export function QuoteRequest({
     requestError,
     hydrationError,
     retryHydration,
+    discardSavedRequest,
   } = useRequest();
 
   const machineName = selectedModel?.name ?? "Catalogue";
@@ -113,7 +114,12 @@ export function QuoteRequest({
   };
 
   if (!linesHydrated) {
-    if (hydrationError) return <div><p role="alert">{hydrationError}</p><button type="button" onClick={retryHydration}>Retry saved request</button></div>;
+    if (hydrationError) return <div>
+      <p role="alert">{hydrationError}</p>
+      <button type="button" onClick={retryHydration}>Retry saved request</button>
+      <p>To start over, discard all saved parts in this request. They will not be restored.</p>
+      <button type="button" onClick={discardSavedRequest}>Discard saved request</button>
+    </div>;
     return <p className={styles.loading}>Loading…</p>;
   }
 

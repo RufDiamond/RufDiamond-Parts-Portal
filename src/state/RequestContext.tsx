@@ -393,6 +393,7 @@ export interface RequestContextValue extends RequestTotals {
   requestError: string;
   hydrationError: string;
   retryHydration: () => void;
+  discardSavedRequest: () => void;
   lines: OrderLine[];
   /**
    * The lines actually going on the request. Totals, the piece count and the
@@ -449,6 +450,7 @@ function RequestProviderState({
   const [requestError, setRequestError] = useState("");
   const [hydrationError, setHydrationError] = useState("");
   const [hydrationAttempt, retryHydration] = useReducer((attempt: number) => attempt + 1, 0);
+  const hydrationGeneration = useRef(0);
   const apiKey = apiSession ? `rdpp:api-request:${scopeKey(apiSession)}` : null;
   const lifetime = useRef(0);
   const commits = useRef<((committed: boolean) => void)[]>([]);
@@ -463,15 +465,25 @@ function RequestProviderState({
   useEffect(() => {
     if (!apiKey) { dispatch({ type: "hydrateLines", stored: readStoredRequest() }); return; }
     let cancelled = false;
+    const generation = ++hydrationGeneration.current;
     try { for (const key of [LINES_STORAGE_KEY, CONFIRMATION_STORAGE_KEY, "rdpp:machine:v1", "rdpp:recent-figures:v1"]) sessionStorage.removeItem(key); } catch { /* Storage is optional. */ }
     void revalidateRequestIdentities(readRequestIdentities(apiKey)).then(parts => {
-      if (cancelled) return;
+      if (cancelled || generation !== hydrationGeneration.current) return;
       dispatch({ type: "add", parts });
       dispatch({ type: "hydrateLines", stored: null });
       setHydrationError("");
-    }).catch(() => { if (!cancelled) setHydrationError("Saved parts could not be revalidated. Your saved identities are retained; retry when catalogue access is available."); });
+    }).catch(() => { if (!cancelled && generation === hydrationGeneration.current) setHydrationError("Saved parts could not be revalidated. Your saved identities are retained; retry when catalogue access is available."); });
     return () => { cancelled = true; };
   }, [apiKey, hydrationAttempt]);
+
+  const discardSavedRequest = useCallback(() => {
+    if (!apiKey || state.linesHydrated || !hydrationError) return;
+    // An explicit discard must win over an already-running hydration retry.
+    hydrationGeneration.current++;
+    dispatch({ type: "hydrateLines", stored: null });
+    setHydrationError("");
+    setRequestError("");
+  }, [apiKey, state.linesHydrated, hydrationError]);
 
   useEffect(() => {
     // Don't write before the read has happened, or the empty initial state
@@ -601,6 +613,7 @@ function RequestProviderState({
       requestError,
       hydrationError,
       retryHydration,
+      discardSavedRequest,
       lines: state.lines,
       includedLines,
       isIncluded,
@@ -624,6 +637,7 @@ function RequestProviderState({
       apiKey,
       requestError,
       hydrationError,
+      discardSavedRequest,
       state.lines,
       includedLines,
       isIncluded,

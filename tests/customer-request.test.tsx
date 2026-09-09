@@ -15,6 +15,13 @@ function ReadRequest() {
   const state = useRequest();
   return <div>{state.linesHydrated ? `Ready: ${state.lines.map(line => line.descriptionSnapshot).join(",")}` : "Loading"}<span>{state.lastConfirmation?.reference}</span></div>;
 }
+const currentPart = { id: "10000000-0000-4000-8000-000000000002", releasePartId: "rp-current", partNumber: "CURRENT", description: "Current authorized addition", manufacturer: null, currency: "CAD" as const, status: "active" as const, supersededByPartId: null, requires: [] };
+function AddCurrentPart() {
+  const { addParts } = useRequest();
+  return <button onClick={() => { void addParts([{ part: currentPart }]); }}>Add current part</button>;
+}
+const usageResponse = (part = currentPart) => Response.json({ items: [{ part, figureId: "figure", groupNo: "A.1", assemblyName: "Assembly", systemName: "System", modelName: "Model", serial: "Range" }], nextCursor: null, releases: [{ modelId: "model", releaseId: "release", revision: 1 }] });
+const recoveryTree = () => <MachineProvider persist={false}><RequestProvider apiSession={session}><AddCurrentPart /><QuoteRequest usage={{}} /></RequestProvider></MachineProvider>;
 it("never hydrates old unscoped price-bearing requests or fake confirmations in API mode", async () => {
   sessionStorage.setItem("rdpp:request:v1", JSON.stringify({ lines: [{ partId: "old", partNumberSnapshot: "P", descriptionSnapshot: "OLD PRIVATE PART", qty: 1, unitPriceSnapshot: 120, lineTotal: 120 }], currency: "CAD" }));
   sessionStorage.setItem("rdpp:last-request:v1", JSON.stringify({ reference: "FAKE CONFIRMED", lines: [] }));
@@ -45,6 +52,45 @@ it("retains saved identities after transient failure and retries into current au
   await waitFor(() => expect(screen.getByText("Current authorized part")).toBeTruthy());
   expect(screen.queryByRole("alert")).toBeNull();
   expect(sessionStorage.getItem(key)).toBe(saved);
+});
+
+it("requires explicit discard of an unavailable saved release before current additions can proceed", async () => {
+  const key = `rdpp:api-request:${scopeKey(session)}`;
+  const saved = JSON.stringify([{ partId: "10000000-0000-4000-8000-000000000001", releasePartId: "rp-unavailable", qty: 2 }]);
+  sessionStorage.setItem(key, saved);
+  vi.stubGlobal("fetch", async () => Response.json({ items: [], nextCursor: null, releases: [] }));
+  render(recoveryTree());
+  await screen.findByRole("alert");
+  fireEvent.click(screen.getByRole("button", { name: "Add current part" }));
+  expect(sessionStorage.getItem(key)).toBe(saved);
+  expect(screen.queryByText("Current authorized addition")).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Discard saved request" }));
+  await screen.findByText("Nothing in the request list");
+  expect(sessionStorage.getItem(key)).toBe("[]");
+  vi.stubGlobal("fetch", async () => usageResponse());
+  fireEvent.click(screen.getByRole("button", { name: "Add current part" }));
+  await screen.findByText("Current authorized addition");
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual([{ partId: currentPart.id, releasePartId: "rp-current", qty: 1 }]);
+});
+
+it.each(["success", "failure"])("ignores late hydration %s after explicit discard and a current addition", async outcome => {
+  const oldId = "10000000-0000-4000-8000-000000000001";
+  const key = `rdpp:api-request:${scopeKey(session)}`;
+  sessionStorage.setItem(key, JSON.stringify([{ partId: oldId, releasePartId: "rp-old", qty: 2 }]));
+  vi.stubGlobal("fetch", async () => new Response(null, { status: 503 }));
+  render(recoveryTree()); await screen.findByRole("alert");
+  let complete!: (response: Response) => void;
+  vi.stubGlobal("fetch", (url: string) => url.includes(oldId) ? new Promise<Response>(resolve => { complete = resolve; }) : Promise.resolve(usageResponse()));
+  fireEvent.click(screen.getByRole("button", { name: "Retry saved request" }));
+  fireEvent.click(screen.getByRole("button", { name: "Discard saved request" }));
+  await screen.findByText("Nothing in the request list");
+  fireEvent.click(screen.getByRole("button", { name: "Add current part" }));
+  await screen.findByText("Current authorized addition");
+  await act(async () => complete(outcome === "success" ? usageResponse({ ...currentPart, id: oldId, releasePartId: "rp-old", description: "Discarded old snapshot" }) : new Response(null, { status: 503 })));
+  expect(screen.queryByText("Discarded old snapshot")).toBeNull();
+  expect(screen.getByText("Current authorized addition")).toBeTruthy();
+  expect(JSON.parse(sessionStorage.getItem(key)!)).toEqual([{ partId: currentPart.id, releasePartId: "rp-current", qty: 1 }]);
 });
 
 it("settles an addition only after current authorized lines and identity storage commit", async () => {

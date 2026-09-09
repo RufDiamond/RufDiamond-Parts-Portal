@@ -81,6 +81,26 @@ it("does not navigate for an old query when Next retains the search component", 
   expect(navigation.push).not.toHaveBeenCalled();
   expect(screen.queryByText(/added to the cart/)).toBeNull();
 });
+it("permits A to B to A query round trips without an old completion settling the new addition", async () => {
+  const completions: ((response: Response) => void)[] = [];
+  vi.stubGlobal("fetch", () => new Promise<Response>(resolve => { completions.push(resolve); }));
+  const search = (query: string) => <RequestProvider apiSession={session}><Status /><SearchResults query={query} mode="part" brand="" rows={[row]} /></RequestProvider>;
+  const view = render(search("A")); await screen.findByText("Committed 0");
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select P" }));
+  fireEvent.click(screen.getByRole("button", { name: "Request a quote" }));
+  view.rerender(search("B"));
+  view.rerender(search("A"));
+  expect((screen.getByRole("button", { name: "Request a quote" }) as HTMLButtonElement).disabled).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: "Request a quote" }));
+  await act(async () => completions[0](response()));
+  expect((screen.getByRole("button", { name: "Request a quote" }) as HTMLButtonElement).disabled).toBe(true);
+  expect(navigation.push).not.toHaveBeenCalled();
+  expect(screen.queryByText(/added to the cart/)).toBeNull();
+  await act(async () => completions[1](response()));
+  expect((screen.getByRole("button", { name: "Request a quote" }) as HTMLButtonElement).disabled).toBe(false);
+  expect(navigation.push).toHaveBeenCalledOnce();
+  expect(screen.getByText(/added to the cart/)).toBeTruthy();
+});
 it("keeps a figure on its selected parts until quote additions succeed, and exposes rejection", async () => {
   const detail: FigureDetail = { release: { modelId: "model", releaseId: "release", revision: 1 }, mapping: null, figure: { id: "figure", variantId: "variant", systemId: "system", name: "Assembly", groupNo: "A.1", drawingFileId: null, status: "published" }, system: { id: "system", name: "System", sortOrder: 1 }, variant: { id: "variant", modelId: "model", label: "Range", serialFrom: null, serialTo: null, catalogRevision: null }, drawing: null, rows: [{ part, figurePart: { id: "row", figureId: "figure", partId: part.id, qty: 1, remarks: null, serviceable: true }, calloutNumbers: ["A*"] }], callouts: [] };
   let complete!: (response: Response) => void;
