@@ -181,7 +181,7 @@ describe("applyCalloutPreview", () => {
       { number: 3, x: null, y: null },
       { number: 4, x: null, y: null },
     ]);
-    expect(result.notice).toContain("4 unresolved");
+    expect(result.notice).toContain("4 existing-row markers unpositioned");
   });
 
   test("excludes null, missing, cross-figure, and part-mismatched associations", () => {
@@ -216,7 +216,7 @@ describe("applyCalloutPreview", () => {
     const result = applyCalloutPreview(detail, proposal);
 
     expect(result.detail.callouts).toEqual(detail.callouts);
-    expect(result.notice).toContain("4 unresolved");
+    expect(result.notice).toContain("4 existing-row markers unpositioned");
   });
 
   test.each([

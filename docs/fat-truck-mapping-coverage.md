@@ -1,67 +1,89 @@
 # Fat Truck mapping coverage
 
-Measured 9 September 2026. This is the exact legacy/proposal inventory, not a canonical database import or source approval. Reproduce with `npx tsx tools/callouts/mapping-coverage.ts` from the repository root. The command verifies the full legacy source hash and each manifest drawing hash/dimensions and emits every missing occurrence ID/reference.
+Measured 9 September 2026 at the Task 10c coverage checkpoint (57 new component proposals across six geometry batches). This is a read-only legacy/proposal inventory, not a canonical database import, named source approval or release-readiness claim. Remaining clear tracing is implementation work, not a source blocker.
 
-The source domains are deliberately separate:
+## Reproduce and inspect
 
-- Original workbook: `Database FT3 Wagon - 14-JUL-2026.xlsx`, 70,881 bytes, SHA-256 `3a6a66571058ac238f707fed4421755f9a678e4baff708b452382f439d876599`. Read-only parser dry run: 635 retained rows, 633 valid normalized rows, 45 figure identities, 536 parts; two literal quantity-zero rows remain invalid. It has 44 distinct GROUPNO values: `FT3 WAGON FIG-11.3` names both OVERHEAD CONTROLS and FUSE BOX & FIREWALL. No source rename is inferred.
-- Extracted legacy TypeScript: `src/data/ft3-wagon.ts`, SHA-256 `df26ac87cbba1b0a88800d78459c225e93ce37a09e1d693196b1f92a507887c2`. The three review manifests bind to these bytes, not the XLSX hash.
-- Current database mapping binding: `catalogueBindingSha256` binds UUIDs and exact model/variant/figure/row/part/occurrence versions plus the PNG. It is neither file hash above.
+- JSON: `npx tsx tools/callouts/mapping-coverage.ts`.
+- Per-part Markdown checklist: `npx tsx tools/callouts/mapping-coverage.ts --markdown`.
+- Local checkpoint artifacts: `output/task10c-coverage-checkpoint/coverage.json` and `output/task10c-coverage-checkpoint/checklist.md`. These generated artifacts are not committed; regenerate from the checked-in sources.
+- Source-bound classifications: `tools/callouts/review/coverage-classification.json`. Each exact row records its inspected source category, evidence, unresolved details and independently declared region/hole requirements. `null` requirements mean unknown; requirements must never be derived from available polygons. Source-only observations retain their own PNG/PDF domain and hash.
 
-Totals: 45 figures, 572 legacy callout occurrences, 635 legacy rows, 536 parts, 44 original drawing records. Baseline: 15 positioned labels and 7 Windows legacy masks. The three manifests contain 272 component-linked callout proposals across 40 figures. A proposal may cover only one visible region of a multipart assembly. These counts establish neither full physical coverage nor identity/source approval.
+The exporter freshly verifies the legacy catalogue, proposal PNG hashes/dimensions and classification identity/hash bindings. It reports all 635 rows, all 572 existing occurrences, exact part/row/occurrence IDs, label origin, numeric topology, regions/holes, missing declared regions and source-only observations. Audited private workbook/PDF hashes are explicitly recorded audit provenance, not freshly rehashed or imported by this command.
 
-| Figure | Rows | Callouts | Baseline labels | Legacy masks | Component proposals | Missing component references |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| 1.1 (fig-filters-1-1) | 6 | 6 | 6 | 0 | 0 | 1, 2, 3, 4, 5, 6 |
-| 2.1 (fig-frame-assy-2-1) | 9 | 7 | 0 | 0 | 7 | none by presence only |
-| 2.2 (fig-frame-assy-2-2) | 17 | 13 | 0 | 0 | 12 | 17 |
-| 3.1 (fig-drive-system-3-1) | 7 | 4 | 0 | 0 | 4 | none by presence only |
-| 4.1 (fig-hydraulic-4-1) | 26 | 26 | 0 | 0 | 7 | 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 |
-| 4.2 (fig-hydraulic-4-2) | 33 | 33 | 0 | 0 | 7 | 1, 2, 3, 4, 10, 11, 12, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33 |
-| 4.3 (fig-hydraulic-4-3) | 10 | 10 | 0 | 0 | 9 | 2 |
-| 4.4 (fig-hydraulic-4-4) | 5 | 3 | 0 | 0 | 3 | none by presence only |
-| 5.1 (fig-tire-wheel-5-1) | 12 | 7 | 0 | 0 | 7 | none by presence only |
-| 5.2 (fig-tire-wheel-5-2) | 10 | 10 | 0 | 0 | 4 | 1, 3, 5, 8, 9, 10 |
-| 6.1 (fig-cabin-6-1) | 9 | 9 | 9 | 7 | 0 | 1, 3 |
-| 6.2 (fig-cabin-6-2) | 28 | 26 | 0 | 0 | 5 | 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 20, 21, 24, 25, 26 |
-| 6.3 (fig-cabin-6-3) | 4 | 4 | 0 | 0 | 4 | none by presence only |
-| 6.4 (fig-cabin-6-4) | 10 | 10 | 0 | 0 | 9 | 7 |
-| 6.5 (fig-cabin-6-5) | 10 | 10 | 0 | 0 | 9 | 7 |
-| 6.6 (fig-cabin-6-6) | 24 | 22 | 0 | 0 | 5 | 1, 3, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22 |
-| 6.7 (fig-cabin-6-7) | 19 | 18 | 0 | 0 | 3 | 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, 16, 17, 18 |
-| 6.8 (fig-cabin-6-8) | 18 | 17 | 0 | 0 | 5 | 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 |
-| 6.9 (fig-cabin-6-9) | 28 | 18 | 0 | 0 | 6 | 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16 |
-| 6.10 (fig-cabin-6-10) | 9 | 9 | 0 | 0 | 5 | 5, 6, 7, 9 |
-| 6.11 (fig-cabin-6-11) | 13 | 10 | 0 | 0 | 3 | 2, 4, 6, 7, 8, 9, 10 |
-| 6.12 (fig-cabin-6-12) | 12 | 12 | 0 | 0 | 5 | 6, 7, 8, 9, 10, 11, 12 |
-| 6.13 (fig-cabin-6-13) | 11 | 9 | 0 | 0 | 0 | 1, 2, 3, 4, 5, 6, 7, 8, 9 |
-| 6.14 (fig-cabin-6-14) | 12 | 11 | 0 | 0 | 5 | 6, 7, 8, 9, 10, 11 |
-| 6.15 (fig-cabin-6-15) | 9 | 0 | 0 | 0 | 0 | NO DRAWING / NO OCCURRENCES |
-| 6.16 (fig-cabin-6-16) | 6 | 5 | 0 | 0 | 5 | none by presence only |
-| 6.17 (fig-cabin-6-17) | 19 | 18 | 0 | 0 | 8 | 1, 7, 8, 9, 10, 11, 12, 15, 16, 17 |
-| 6.18 (fig-cabin-6-18) | 15 | 15 | 0 | 0 | 4 | 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 |
-| 7.1 (fig-cowling-fender-7-1) | 34 | 34 | 0 | 0 | 8 | 1, 2, 3, 4, 5, 7, 8, 9, 10, 14, 15, 16, 18, 19, 20, 21, 22, 25, 26, 27, 28, 29, 31, 32, 33, 34 |
-| 7.2 (fig-cowling-fender-7-2) | 6 | 6 | 0 | 0 | 3 | 4, 5, 6 |
-| 8.1 (fig-engine-8-1) | 14 | 11 | 0 | 0 | 9 | 1, 2 |
-| 8.2 (fig-engine-8-2) | 7 | 7 | 0 | 0 | 7 | none by presence only |
-| 8.3 (fig-engine-8-3) | 7 | 7 | 0 | 0 | 7 | none by presence only |
-| 8.4 (fig-engine-8-4) | 16 | 16 | 0 | 0 | 8 | 1, 7, 10, 11, 12, 13, 15, 16 |
-| 8.5 (fig-engine-8-5) | 19 | 18 | 0 | 0 | 7 | 1, 2, 3, 4, 5, 8, 14, 15, 16, 17, 18 |
-| 8.6 (fig-engine-8-6) | 25 | 24 | 0 | 0 | 6 | 2, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 |
-| 9.1 (fig-fuel-system-9-1) | 23 | 22 | 0 | 0 | 5 | 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22 |
-| 10.1 (fig-tire-inflation-10-1) | 14 | 14 | 0 | 0 | 14 | none by presence only |
-| 10.2 (fig-tire-inflation-10-2) | 9 | 9 | 0 | 0 | 8 | 2 |
-| 11.1 (fig-electric-11-1) | 10 | 9 | 0 | 0 | 9 | none by presence only |
-| 11.2 (fig-electric-11-2) | 11 | 8 | 0 | 0 | 7 | 10 |
-| 11.3 (fig-electric-11-3) | 18 | 18 | 0 | 0 | 13 | 12, 13, 14, 16, 18 |
-| 11.4 (fig-electric-11-4) | 14 | 13 | 0 | 0 | 10 | 3, 4, 8 |
-| 11.5 (fig-electric-11-5) | 14 | 11 | 0 | 0 | 10 | 6 |
-| 12.1 (fig-accessories-12-1) | 3 | 3 | 0 | 0 | 0 | 1, 2, 4 |
+## Exact current measurements
 
-`buildMappingCoverage(figures, callouts, revisions)` uses explicit canonical identities, source hashes, current revision bindings, per-occurrence expected region IDs and unresolved rows. Unknown expected regions remain unknown. A missing region, source conflict, missing drawing, zero-occurrence figure or unresolved table row cannot become complete from a nonempty polygon array. Mapping approval is separate from source approval. Task 10b now accepts explicitly qualified canonical `CoverageFigure.sourceReviews`; its `approvedTableOnly` category is never counted as complete physical tracing. The real legacy inventory still supplies no approvals and reports zero source-approved figures. See [source review](catalog-source-review.md#task-10c-coverage-seam) for exact integration inputs and authority limits.
+45 figures; 635 rows; 572 existing callouts; 536 parts; 44 original drawing records. Baseline: 15 positioned labels and 7 Windows legacy masks. Current: **329 valid numeric component proposals, 345 regions and 56 holes**. All 635 rows have source classifications; no uninspected fallback rows are silently treated as complete.
 
-Safety 6.15 is not vacuous success. Filters 1.1 has labels but no physical masks. Windows 6.1 retains seven existing masks with references 7/9 still unresolved. Existing invalid rings and arbitrary legacy mask paths remain immutable source fallback with explicit import issues; hole conversion and tracing are Task 10c. Task 10b implements attributable table-only/nondepiction/assembly-row interpretation, but does not perform real manufacturer signoff.
+There are **160 clear untraced targets**, 49 untraced resolution-limited targets, 239 existing partial-geometry occurrences and 23 source-question occurrences. These are workflow subsets, not mutually exclusive totals of the entire catalogue. Other inspected clipped/limited contours and existing clear contours still awaiting independent requirements remain visible in the full checklist.
 
-No real canonical import or real persisted mapping revision is claimed here. The disposable PostgreSQL test imports a one-row synthetic CSV and proves exactly one unapproved mapping revision after two identical apply requests. The real HTTP/MinIO/clamd test uses another synthetic source and creates null-coordinate draft callouts. These fixtures prove software behavior, never catalogue readiness or customer publication. Original workbook source approval, supported reviewed quantity-zero assembly interpretations, group-number reconciliation, complete physical tracing and actual target catalogue persistence remain gates.
+Only 12 visible shapes have independently satisfied declared requirements: Filters 1.1 refs 1–6, Engine 8.1 belts 1/2, Cabin 6.12 seals 8/9/11/12. This is shape measurement, not source approval. No entire figure is asserted approved or customer-ready. 17 source-only observations are outside the existing-row marker denominator.
 
-Operator transport and reproducible commands are documented in [catalog import](catalog-import.md). Existing customer releases remain immutable. The actual-backend headed tab-return acceptance and remote deployment gates from Task 9c remain open.
+| Figure | Numeric proposals | Clear untraced refs | Limited untraced refs |
+| --- | ---: | --- | --- |
+| 1.1 (fig-filters-1-1) | 6 | — | — |
+| 2.1 (fig-frame-assy-2-1) | 7 | — | — |
+| 2.2 (fig-frame-assy-2-2) | 12 | — | — |
+| 3.1 (fig-drive-system-3-1) | 4 | — | — |
+| 4.1 (fig-hydraulic-4-1) | 15 | 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 | — |
+| 4.2 (fig-hydraulic-4-2) | 11 | 10, 11, 12, 13, 16, 20, 21, 22, 23, 24, 25, 26, 27, 28 | 18, 19, 29, 30, 31, 32, 33 |
+| 4.3 (fig-hydraulic-4-3) | 10 | — | — |
+| 4.4 (fig-hydraulic-4-4) | 3 | — | — |
+| 5.1 (fig-tire-wheel-5-1) | 7 | — | — |
+| 5.2 (fig-tire-wheel-5-2) | 4 | 3 | 5 |
+| 6.1 (fig-cabin-6-1) | 0 | 1, 3 | — |
+| 6.2 (fig-cabin-6-2) | 5 | 1, 8, 16, 20, 21, 24, 26 | 2, 3, 4, 5, 6, 7, 9, 10, 13, 14, 15, 17, 18, 25 |
+| 6.3 (fig-cabin-6-3) | 4 | — | — |
+| 6.4 (fig-cabin-6-4) | 10 | — | — |
+| 6.5 (fig-cabin-6-5) | 10 | — | — |
+| 6.6 (fig-cabin-6-6) | 6 | 8, 9, 12, 13, 15, 20, 21, 22 | 10, 11, 16, 17, 18, 19 |
+| 6.7 (fig-cabin-6-7) | 11 | 11, 12, 14, 15, 16, 17, 18 | — |
+| 6.8 (fig-cabin-6-8) | 5 | 2, 3, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 | — |
+| 6.9 (fig-cabin-6-9) | 6 | 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 16 | 15 |
+| 6.10 (fig-cabin-6-10) | 9 | — | — |
+| 6.11 (fig-cabin-6-11) | 7 | 6, 7, 8 | — |
+| 6.12 (fig-cabin-6-12) | 9 | — | — |
+| 6.13 (fig-cabin-6-13) | 0 | 1, 5, 6, 7, 8 | — |
+| 6.14 (fig-cabin-6-14) | 5 | 6, 7, 8, 9, 10, 11 | — |
+| 6.15 (fig-cabin-6-15) | 0 | — | — |
+| 6.16 (fig-cabin-6-16) | 5 | — | — |
+| 6.17 (fig-cabin-6-17) | 8 | 1, 7, 8, 9, 10, 11, 12, 15, 17 | — |
+| 6.18 (fig-cabin-6-18) | 8 | — | 9, 10, 11, 12, 13, 14, 15 |
+| 7.1 (fig-cowling-fender-7-1) | 17 | 1, 2, 3, 4, 5, 7, 8, 9, 10, 20, 21, 22, 25, 26, 27, 28 | — |
+| 7.2 (fig-cowling-fender-7-2) | 3 | — | 4, 5 |
+| 8.1 (fig-engine-8-1) | 11 | — | — |
+| 8.2 (fig-engine-8-2) | 7 | — | — |
+| 8.3 (fig-engine-8-3) | 7 | — | — |
+| 8.4 (fig-engine-8-4) | 8 | 7, 15, 16 | 10, 11, 12, 13 |
+| 8.5 (fig-engine-8-5) | 7 | 1, 2, 3, 4, 5, 8, 15, 16, 17, 18 | — |
+| 8.6 (fig-engine-8-6) | 6 | 2, 5, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23 | 21, 24 |
+| 9.1 (fig-fuel-system-9-1) | 5 | 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 16, 18, 19, 21, 22 | 15, 20 |
+| 10.1 (fig-tire-inflation-10-1) | 14 | — | — |
+| 10.2 (fig-tire-inflation-10-2) | 8 | — | — |
+| 11.1 (fig-electric-11-1) | 9 | — | — |
+| 11.2 (fig-electric-11-2) | 7 | — | — |
+| 11.3 (fig-electric-11-3) | 13 | 12, 13, 14, 16 | — |
+| 11.4 (fig-electric-11-4) | 10 | — | 3, 4, 8 |
+| 11.5 (fig-electric-11-5) | 10 | — | — |
+| 12.1 (fig-accessories-12-1) | 0 | — | — |
+
+Source-row categories (not approvals): clear-tracing: 228; not-depicted-awaiting-review: 61; partial: 239; source-conflicted: 10; unknown-no-label: 11; clipped: 8; image-resolution-limited: 73; assembly-awaiting-review: 3; unknown: 2.
+
+Windows 6.1 has seven legacy path masks; the actual missing component references are **1 and 3**. References 7/9 are not current source-association blockers. Filters now have six physical proposals. Safety 6.15 has nine inspected table-only/nondepicted rows and no drawing/callouts; that is not vacuous physical completeness. Marker UI counts now explicitly refer to existing-row marker positions, not every printed reference or complete contours.
+
+Source-edge correction: Cabin 6.7 support7 has empty rows0/1 before its visible loop; pane1 closes at y717 with clear rows718/719 in the inspected window. Cabin 6.8 gate1 closes before the image bottom. Broad source-search windows did not establish clipping. Their concrete hole/occlusion debt remains partial; no crop blocker is inferred from a window boundary.
+
+## Separate source domains and persistence gates
+
+- Original workbook: `Database FT3 Wagon - 14-JUL-2026.xlsx`, 70,881 bytes, SHA256 `3a6a66571058ac238f707fed4421755f9a678e4baff708b452382f439d876599`. Read-only parser audit: 635 retained rows, 633 valid normalized rows, 45 figure identities, 536 parts. Literal quantity-zero assembly rows222/241 remain gated. The 44 distinct GROUPNO values include two different figures named11.3; no source rename is inferred.
+- Extracted legacy TypeScript: `src/data/ft3-wagon.ts`, SHA256 `df26ac87cbba1b0a88800d78459c225e93ce37a09e1d693196b1f92a507887c2`. Review manifests bind to these bytes, not XLSX bytes.
+- Manufacturer PDF audit SHA256: `00698197a467c6ae4a1a809a108c8f225854f25897ea3ff4372f209948273bca`. Source-version/table-only observations remain separate from PNG identity.
+- Current database `catalogueBindingSha256` binds exact UUID/model/variant/figure/row/part/occurrence versions plus PNG. No file hash above is presented as that canonical binding.
+
+**Task10c actual real-workbook applies: 0; persisted revisions created: 0; named source approvals created: 0. No target database was inspected by the legacy inventory.** Original source decisions, supported quantity-zero interpretation, duplicate group reconciliation and actual target persistence remain gates. Existing releases remain immutable.
+
+Concrete source questions include Bumper2.1 M4/M10, corrected/original Drive3.1 provenance, Cabin6.12 refs6/7/10, Cabin6.13 repeated2/3 and absent4/9, Cabin6.17 ref16 grille/air-conditioner duplicate PN, Electrical11.3 ref18 wrong source-version depiction, and unlabelled Accessories. Camera11.5 ref6 and seat6.14 refs1/4 shared-PN semantics are review questions, not proven swapped-part corrections. Inflation10.2 ref2 is applied RTV sealant, not a discrete gasket. The per-part checklist records exact distinctions; no manufacturer approval is inferred.
+
+`buildMappingCoverage(figures, callouts, revisions)` retains the canonical source-bound workflow. Qualified `CoverageFigure.sourceReviews` may establish `approvedTableOnly`, never complete physical tracing. Missing declared regions, unknown requirements, stale hashes, missing drawings, zero occurrences and unresolved rows cannot pass from polygon presence. See [source review](catalog-source-review.md#task-10c-coverage-seam). Synthetic PostgreSQL/HTTP fixtures prove software behavior only, never real catalogue persistence or approval.
+
+Operator transport is documented in [catalog import](catalog-import.md). Actual-backend headed tab-return acceptance and remote deployment remain outside this checkpoint and are not claimed complete.

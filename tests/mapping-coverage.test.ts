@@ -1,13 +1,54 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildMappingCoverage,
-  type CoverageFigure,
-  type CoverageOccurrence,
-  type CoverageRevision,
-} from "../tools/callouts/mapping-coverage";
-const sha = "a".repeat(64),
-  drawing = "b".repeat(64),
-  binding = "c".repeat(64);
+import { buildMappingCoverage, measureLegacyShape, measureLegacyInventory, legacyCoverageMarkdown, type CoverageFigure, type CoverageOccurrence, type CoverageRevision, } from "../tools/callouts/mapping-coverage";
+const sha = "a".repeat(64), drawing = "b".repeat(64), binding = "c".repeat(64);
+describe("source-bound legacy shape requirements", () => {
+    const source = { catalogueSha256: sha, drawingSha256: drawing, figurePartId: "row-1" };
+    const evidence = { ...source, category: "clear-tracing" as const, evidence: "One visible flange and one aperture independently inspected", requiredRegionIds: ["flange", "return"], requiredHoleIds: ["flange-hole-0"], requirementsComplete: true, unresolvedDetails: [] };
+    it("reports absent declared regions and holes without deriving requirements from proposal presence", () => {
+        expect(measureLegacyShape(source, evidence, ["flange"], [], true)).toMatchObject({ complete: false, missingRegionIds: ["return"], missingHoleIds: ["flange-hole-0"] });
+    });
+    it("retains unknown and partial assembly extent even when all existing polygons are valid", () => {
+        expect(measureLegacyShape(source, null, ["flange"], [], true)).toMatchObject({ category: "unknown", complete: false, requirementsKnown: false });
+        expect(measureLegacyShape(source, { ...evidence, requirementsComplete: false, unresolvedDetails: ["Hidden return remains unestablished"] }, ["flange", "return"], ["flange-hole-0"], true).complete).toBe(false);
+    });
+    it("rejects stale catalogue, stale drawing and foreign row classification evidence", () => {
+        for (const wrong of [{ catalogueSha256: "f".repeat(64) }, { drawingSha256: "e".repeat(64) }, { figurePartId: "other-row" }])
+            expect(() => measureLegacyShape(source, { ...evidence, ...wrong }, [], [], true)).toThrow(/classification.*source|classification.*identity/i);
+    });
+    it("does not promote shape satisfaction to source or persisted approval", () => {
+        const result = measureLegacyShape(source, evidence, ["flange", "return"], ["flange-hole-0"], true);
+        expect(result.complete).toBe(true);
+        expect(result).not.toHaveProperty("approved");
+        expect(measureLegacyShape(source, evidence, ["flange", "return"], ["flange-hole-0"], false).complete).toBe(false);
+    });
+    it("rejects malformed or duplicate classification requirements", () => {
+        for (const wrong of [{ requirementsComplete: "true" }, { requiredRegionIds: ["flange", "flange"] }, { requiredHoleIds: [""] }, { evidence: "" }, { category: "approved" }])
+            expect(() => measureLegacyShape(source, { ...evidence, ...wrong } as typeof evidence, [], [], true)).toThrow(/classification/i);
+    });
+});
+it("exports every real legacy row, source-only observations and proposal topology without claiming persistence", async () => {
+    const report = await measureLegacyInventory(process.cwd());
+    expect(report.figures).toHaveLength(45);
+    expect(report.figures.flatMap(f => f.rowDetails)).toHaveLength(635);
+    expect(report.figures.flatMap(f => f.rowDetails.flatMap(r => r.occurrences))).toHaveLength(572);
+    expect(report.totals.classifiedSourceRows).toBe(635);
+    expect(report.totals.unclassifiedSourceRows).toBe(0);
+    const windows = report.figures.find(f => f.id === "fig-cabin-6-1")!;
+    expect(windows.coverage.clearUntracedRefs).toEqual(["1", "3"]);
+    expect(windows.coverage.sourceQuestionRefs).toEqual([]);
+    expect(report.figures.find(f => f.id === "fig-electric-11-3")!.coverage.sourceQuestionRefs).toContain("18");
+    const hydraulic = report.figures.find(f => f.id === "fig-hydraulic-4-1")!;
+    expect(hydraulic.sourceOnlyObservations.map(o => o.refNo)).toEqual(expect.arrayContaining(["27", "28", "29"]));
+    expect(report.persistence).toMatchObject({ targetInspected: false, realWorkbookApplied: false, revisionsCreatedByTask: 0 });
+    const wheel = report.figures.find(f => f.id === "fig-tire-wheel-5-1")!.rowDetails.flatMap(r => r.occurrences).find(c => c.refNo === "1")!;
+    expect(wheel.proposal).toMatchObject({ numericValid: true, regionCount: 3, holeCount: 1 });
+    expect(wheel.shape.complete).toBe(false);
+    const safety = report.figures.find(f => f.id === "fig-cabin-6-15")!;
+    expect(safety.rowDetails).toHaveLength(9);
+    expect(safety.proposalComplete).toBe(false);
+    expect(legacyCoverageMarkdown(report)).toContain("fp-6-15-09");
+    expect(legacyCoverageMarkdown(report)).toContain("Untraced clear source targets");
+});
 const figure: CoverageFigure = {
   id: "figure-1",
   identityKind: "canonical",

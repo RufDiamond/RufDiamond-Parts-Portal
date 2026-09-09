@@ -95,6 +95,6 @@ export function applyCalloutPreview(
 
   return {
     detail: { ...detail, callouts },
-    notice: `${NOTICE} Applied ${applied} marker position${applied === 1 ? "" : "s"}; ${unresolved} unresolved.`,
+    notice: `${NOTICE} Applied ${applied} marker position${applied === 1 ? "" : "s"}; ${unresolved} existing-row markers unpositioned. Source-only references and incomplete contours are separate review questions.`,
   };
 }
