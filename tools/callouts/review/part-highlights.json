@@ -5,6 +5,656 @@
   "catalogueSha256": "df26ac87cbba1b0a88800d78459c225e93ce37a09e1d693196b1f92a507887c2",
   "figures": [
     {
+      "figureId": "fig-filters-1-1",
+      "original": {
+        "path": "public/drawings/ft3w/ft3w-filters-1-1.png",
+        "sha256": "5a47aaf6d53c34c4d3aeb87adca95029c6bfb0f7be72a2288b85e46d9197752c",
+        "width": 1280,
+        "height": 720
+      },
+      "annotations": [
+        {
+          "calloutId": "co-1-1-0001",
+          "figurePartId": "fp-1-1-01",
+          "partNumber": "36-00304",
+          "number": 1,
+          "x": 33.5938,
+          "y": 5.1389,
+          "polygons": [
+            [
+              [
+                16.0938,
+                28.8889
+              ],
+              [
+                16.3281,
+                24.8611
+              ],
+              [
+                16.5625,
+                21.5278
+              ],
+              [
+                17.1875,
+                18.75
+              ],
+              [
+                18.2813,
+                16.6667
+              ],
+              [
+                19.7656,
+                15.5556
+              ],
+              [
+                22.3438,
+                14.7222
+              ],
+              [
+                24.6094,
+                13.6111
+              ],
+              [
+                26.0938,
+                13.1944
+              ],
+              [
+                27.3438,
+                13.4722
+              ],
+              [
+                28.6719,
+                14.7222
+              ],
+              [
+                30,
+                17.0833
+              ],
+              [
+                31.1719,
+                20.1389
+              ],
+              [
+                32.1094,
+                23.4722
+              ],
+              [
+                32.6563,
+                26.8056
+              ],
+              [
+                32.7344,
+                29.8611
+              ],
+              [
+                32.3438,
+                32.5
+              ],
+              [
+                31.4063,
+                34.5833
+              ],
+              [
+                30.1563,
+                35.6944
+              ],
+              [
+                28.9063,
+                38.0556
+              ],
+              [
+                27.3438,
+                40.4167
+              ],
+              [
+                25.8594,
+                41.6667
+              ],
+              [
+                24.2188,
+                42.0833
+              ],
+              [
+                22.4219,
+                41.5278
+              ],
+              [
+                20.8594,
+                40.2778
+              ],
+              [
+                19.2188,
+                38.75
+              ],
+              [
+                17.8906,
+                36.8056
+              ],
+              [
+                17.0313,
+                34.7222
+              ],
+              [
+                16.3281,
+                32.0833
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 1 has a distinct leader to this same-figure 36-00304 component. Cone pleated filter including rear rim outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        },
+        {
+          "calloutId": "co-1-1-0002",
+          "figurePartId": "fp-1-1-02",
+          "partNumber": "31-00469",
+          "number": 2,
+          "x": 32.5781,
+          "y": 51.5278,
+          "polygons": [
+            [
+              [
+                18.3594,
+                62.2222
+              ],
+              [
+                18.5938,
+                60.5556
+              ],
+              [
+                19.375,
+                58.8889
+              ],
+              [
+                20.625,
+                57.7778
+              ],
+              [
+                22.1875,
+                57.0833
+              ],
+              [
+                23.8281,
+                57.0833
+              ],
+              [
+                25.625,
+                57.7778
+              ],
+              [
+                26.9531,
+                58.8889
+              ],
+              [
+                27.8906,
+                60.5556
+              ],
+              [
+                28.2813,
+                62.2222
+              ],
+              [
+                28.2031,
+                80.5556
+              ],
+              [
+                27.9688,
+                82.2222
+              ],
+              [
+                27.3438,
+                83.75
+              ],
+              [
+                26.0938,
+                85.1389
+              ],
+              [
+                24.6094,
+                85.9722
+              ],
+              [
+                22.9688,
+                86.25
+              ],
+              [
+                21.1719,
+                85.6944
+              ],
+              [
+                19.8438,
+                84.7222
+              ],
+              [
+                18.9063,
+                83.0556
+              ],
+              [
+                18.5156,
+                81.1111
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 2 has a distinct leader to this same-figure 31-00469 component. White/black fuel-filter canister outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        },
+        {
+          "calloutId": "co-1-1-0003",
+          "figurePartId": "fp-1-1-03",
+          "partNumber": "56-00007",
+          "number": 3,
+          "x": 58.5938,
+          "y": 3.8889,
+          "polygons": [
+            [
+              [
+                46.6406,
+                13.6111
+              ],
+              [
+                46.9531,
+                12.6389
+              ],
+              [
+                48.0469,
+                12.0833
+              ],
+              [
+                49.6094,
+                11.6667
+              ],
+              [
+                51.3281,
+                11.6667
+              ],
+              [
+                52.8906,
+                12.0833
+              ],
+              [
+                53.9844,
+                12.7778
+              ],
+              [
+                54.2969,
+                13.6111
+              ],
+              [
+                53.9844,
+                15.8333
+              ],
+              [
+                53.5156,
+                45.6944
+              ],
+              [
+                53.2031,
+                47.2222
+              ],
+              [
+                52.5,
+                48.4722
+              ],
+              [
+                51.4844,
+                49.1667
+              ],
+              [
+                50.1563,
+                49.4444
+              ],
+              [
+                48.9844,
+                49.0278
+              ],
+              [
+                48.0469,
+                48.3333
+              ],
+              [
+                47.5,
+                47.2222
+              ],
+              [
+                47.2656,
+                45.6944
+              ],
+              [
+                46.9531,
+                17.2222
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 3 has a distinct leader to this same-figure 56-00007 component. Orange hydraulic-filter cylinder outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        },
+        {
+          "calloutId": "co-1-1-0004",
+          "figurePartId": "fp-1-1-04",
+          "partNumber": "35-00068",
+          "number": 4,
+          "x": 60.5469,
+          "y": 55.1389,
+          "polygons": [
+            [
+              [
+                46.0938,
+                63.4722
+              ],
+              [
+                46.5625,
+                62.3611
+              ],
+              [
+                47.7344,
+                61.6667
+              ],
+              [
+                49.375,
+                61.3889
+              ],
+              [
+                51.0938,
+                61.3889
+              ],
+              [
+                52.8906,
+                61.8056
+              ],
+              [
+                54.2969,
+                62.5
+              ],
+              [
+                54.9219,
+                63.75
+              ],
+              [
+                55,
+                65.9722
+              ],
+              [
+                54.7656,
+                67.6389
+              ],
+              [
+                54.1406,
+                93.75
+              ],
+              [
+                53.9063,
+                95.4167
+              ],
+              [
+                53.2031,
+                96.6667
+              ],
+              [
+                51.9531,
+                97.5
+              ],
+              [
+                50.5469,
+                97.7778
+              ],
+              [
+                49.0625,
+                97.3611
+              ],
+              [
+                47.8125,
+                96.5278
+              ],
+              [
+                47.0313,
+                95.5556
+              ],
+              [
+                46.7188,
+                94.0278
+              ],
+              [
+                46.3281,
+                67.3611
+              ],
+              [
+                46.0938,
+                66.5278
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 4 has a distinct leader to this same-figure 35-00068 component. Pale pleated air-filter cylinder including both caps outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        },
+        {
+          "calloutId": "co-1-1-0005",
+          "figurePartId": "fp-1-1-05",
+          "partNumber": "30-00040",
+          "number": 5,
+          "x": 81.25,
+          "y": 6.25,
+          "polygons": [
+            [
+              [
+                67.1094,
+                15.6944
+              ],
+              [
+                67.4219,
+                14.1667
+              ],
+              [
+                68.3594,
+                12.9167
+              ],
+              [
+                69.6094,
+                12.0833
+              ],
+              [
+                71.0156,
+                11.6667
+              ],
+              [
+                72.5781,
+                11.6667
+              ],
+              [
+                73.9844,
+                12.3611
+              ],
+              [
+                75.1563,
+                13.6111
+              ],
+              [
+                75.9375,
+                15.2778
+              ],
+              [
+                76.1719,
+                17.5
+              ],
+              [
+                76.0938,
+                23.6111
+              ],
+              [
+                76.5625,
+                25.5556
+              ],
+              [
+                76.5625,
+                27.2222
+              ],
+              [
+                76.1719,
+                29.0278
+              ],
+              [
+                75.3906,
+                30.5556
+              ],
+              [
+                74.1406,
+                31.5278
+              ],
+              [
+                72.6563,
+                32.0833
+              ],
+              [
+                70.8594,
+                32.0833
+              ],
+              [
+                69.375,
+                31.5278
+              ],
+              [
+                68.0469,
+                30.4167
+              ],
+              [
+                67.1094,
+                28.8889
+              ],
+              [
+                66.6406,
+                27.2222
+              ],
+              [
+                66.6406,
+                25.5556
+              ],
+              [
+                67.0313,
+                23.75
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 5 has a distinct leader to this same-figure 30-00040 component. Short white/black canister outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        },
+        {
+          "calloutId": "co-1-1-0006",
+          "figurePartId": "fp-1-1-06",
+          "partNumber": "31-00471",
+          "number": 6,
+          "x": 82.7344,
+          "y": 60.5556,
+          "polygons": [
+            [
+              [
+                67.0313,
+                79.0278
+              ],
+              [
+                68.2813,
+                77.6389
+              ],
+              [
+                69.0625,
+                76.5278
+              ],
+              [
+                69.2188,
+                74.4444
+              ],
+              [
+                69.8438,
+                72.5
+              ],
+              [
+                70.9375,
+                71.1111
+              ],
+              [
+                72.0313,
+                69.7222
+              ],
+              [
+                73.2031,
+                68.0556
+              ],
+              [
+                73.9844,
+                67.5
+              ],
+              [
+                74.6875,
+                68.3333
+              ],
+              [
+                75.1563,
+                69.0278
+              ],
+              [
+                76.5625,
+                67.6389
+              ],
+              [
+                77.2656,
+                67.7778
+              ],
+              [
+                77.6563,
+                69.1667
+              ],
+              [
+                77.0313,
+                70.4167
+              ],
+              [
+                76.4063,
+                71.1111
+              ],
+              [
+                76.7188,
+                72.9167
+              ],
+              [
+                76.4063,
+                75
+              ],
+              [
+                75.7813,
+                76.5278
+              ],
+              [
+                74.375,
+                77.5
+              ],
+              [
+                73.2813,
+                78.8889
+              ],
+              [
+                72.1094,
+                79.7222
+              ],
+              [
+                70.8594,
+                79.7222
+              ],
+              [
+                69.8438,
+                79.0278
+              ],
+              [
+                69.0625,
+                79.7222
+              ],
+              [
+                67.8125,
+                81.1111
+              ],
+              [
+                67.1875,
+                80.6944
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 6 has a distinct leader to this same-figure 31-00471 component. Translucent inline filter including both nozzles outer contour manually traced from original source pixels on 2026-09-09, excluding label and leader. Recessed shaded ports remain material, not invented background holes. One depicted occurrence only; quantity does not create more. Unapproved proposal."
+        }
+      ],
+      "notes": "Six distinct leader-established physical exterior contours, original label positions preserved by loader. Actual source pixels inspected; outer silhouette proposals unapproved. Translucent filter boundary is lower contrast and needs publisher review."
+    },
+    {
       "figureId": "fig-hydraulic-4-4",
       "original": {
         "path": "public/drawings/ft3w/ft3w-hydraulic-4-4.png",
@@ -8972,24 +9622,24 @@
                 22.5
               ],
               [
-                16.1719,
-                27.2222
+                14.6875,
+                23.3333
               ],
               [
-                16.7188,
-                23.6111
+                16.1719,
+                22.6389
               ],
               [
                 16.4844,
                 22.9167
               ],
               [
-                16.9531,
-                24.8611
+                16.7188,
+                24.3056
               ],
               [
-                16.9531,
-                27.7778
+                16.7969,
+                26.9444
               ],
               [
                 26.1719,
@@ -9085,7 +9735,7 @@
               ]
             ]
           ],
-          "evidence": "Printed reference 1 leader terminates on the charge-air-cooler shroud and fan assembly at left; detached pipes and clamps excluded, matching 34-00631 (Cac, shroud & fans assembly). Manually traced from the current source PNG; no numeral or leader included."
+          "evidence": "Printed reference 1 leader terminates on the charge-air-cooler shroud and fan assembly at left; detached pipes and clamps excluded, matching 34-00631 (Cac, shroud & fans assembly). Top-right return flange retraced against the original PNG on 2026-09-09 to remove the proper crossing; ref2 coupling remains separate. Visible assembly exterior only; small mounting holes and crowded underside details remain partial and require review. No source approval."
         },
         {
           "calloutId": "co-8-6-0444",

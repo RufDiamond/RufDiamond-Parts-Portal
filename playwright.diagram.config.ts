@@ -9,8 +9,8 @@ export default defineConfig({
   testMatch: "diagram.spec.ts",
   timeout: 60000,
   workers: 1,
-  outputDir: "output/diagram-browser",
-  reporter:[["list"], ["json", { outputFile:"output/diagram-browser/results.json" }]],
+  outputDir: process.env.DIAGRAM_OUTPUT_DIR ?? "output/diagram-browser",
+  reporter:[["list"], ["json", { outputFile:`${process.env.DIAGRAM_OUTPUT_DIR ?? "output/diagram-browser"}/results.json` }]],
   use: { channel:"chrome", headless:true, viewport:{ width:1440, height:1000 }, screenshot:"only-on-failure", trace:"retain-on-failure" },
   webServer: { command:"npx vite --config tests/browser/vite.config.ts --port 3101", url:"http://localhost:3101", reuseExistingServer:false },
 });

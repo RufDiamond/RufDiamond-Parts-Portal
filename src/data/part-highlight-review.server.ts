@@ -4,7 +4,8 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { FigureDetail } from "@/types/catalog";
 import type { CalloutPreview } from "@/lib/callout-preview";
-import { percentagePoint, validateMappingGeometry } from "@rufdiamond/contracts/diagram-geometry";
+import { validateMappingGeometry } from "@rufdiamond/contracts/diagram-geometry";
+import { proposalRegions } from "@/lib/proposal-geometry";
 import type { DiagramMappingDocument } from "@rufdiamond/contracts";
 
 type Point = [number, number];
@@ -22,6 +23,7 @@ interface Annotation {
   x: number;
   y: number;
   polygons: Point[][];
+  holes?: Point[][][];
   evidence: string;
 }
 interface FigureReview {
@@ -60,6 +62,8 @@ function annotation(value: unknown): value is Annotation {
     typeof value.figurePartId === "string" && typeof value.partNumber === "string" &&
     Number.isInteger(value.number) && percent(value.x) && percent(value.y) &&
     Array.isArray(value.polygons) && value.polygons.length <= 100 && value.polygons.every(polygon) &&
+    (value.holes === undefined || (Array.isArray(value.holes) && value.holes.length === value.polygons.length &&
+      value.holes.every((holes) => Array.isArray(holes) && holes.length <= 16 && holes.every(polygon)))) &&
     typeof value.evidence === "string" && value.evidence.trim().length > 0;
 }
 
@@ -159,13 +163,12 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
       const callouts = sourceDetail.callouts.map((callout) => {
         const item = byId.get(callout.id);
         if (!item) return callout;
-        const legacy = { ...callout, x: callout.x ?? item.x, y: callout.y ?? item.y, maskPath: callout.maskPath ?? pathFor(item.polygons) };
+        const rings = item.polygons.flatMap((outer, index) => [outer, ...(item.holes?.[index] ?? [])]);
+        const legacy = { ...callout, x: callout.x ?? item.x, y: callout.y ?? item.y, maskPath: callout.maskPath ?? pathFor(rings) };
         // Supplied legacy outlines are read-only; no competing proposal can
         // replace their geometry or turn arbitrary SVG into an activation path.
         if (original.callouts.find((source) => source.id === callout.id)?.maskPath || !item.polygons.length) return legacy;
-        const regions = item.polygons.map((points, index) => ({ id: `${item.calloutId}-region-${index}`,
-          outer: points.map((point) => percentagePoint(point, sourceArtwork.width, sourceArtwork.height)), holes: [],
-        }));
+        const regions = proposalRegions(item, sourceArtwork.width, sourceArtwork.height);
         const document: DiagramMappingDocument = {
           schemaVersion: 1, figureId: original.figure.id,
           drawingFileId: review.replacement ? `${original.drawing!.id}-source-review` : original.drawing!.id,

@@ -15,6 +15,7 @@ export default defineConfig({
   },
   test: {
     include: [
+      "tests/proposal-geometry.test.ts",
       "tests/catalog-source-review.test.tsx",
       "tests/mapping-coverage.test.ts",
       "tests/admin-workflow.test.tsx",

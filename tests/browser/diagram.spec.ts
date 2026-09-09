@@ -6,7 +6,41 @@ const cases = [
   { name:"Filters", route:"/figures/fig-filters-1-1", ref:1 },
   { name:"corrected bumper", route:"/review/figures/fig-frame-assy-2-1", ref:1 },
   { name:"Hydraulic 4.4", route:"/review/figures/fig-hydraulic-4-4", ref:1 },
+  { name:"task10c Filters contours", route:"/review/figures/fig-filters-1-1", ref:1 },
+  { name:"task10c Engine 8.6 corrected contour", route:"/review/figures/fig-engine-8-6", ref:1 },
+  { name:"task10c Wheel 5.1 hole", route:"/review/figures/fig-tire-wheel-5-1", ref:1 },
+  { name:"task10c Electrical 11.5 hole", route:"/review/figures/fig-electric-11-5", ref:8 },
+  { name:"task10c Inflation 10.1 hole", route:"/review/figures/fig-tire-inflation-10-1", ref:12 },
 ];
+
+test("task10c source openings exclude clicks in both Bumper plates and the four converted rings", async ({page},info) => {
+  const checks = [
+    {figure:"fig-frame-assy-2-1",ref:5,hole:[397,359]},
+    {figure:"fig-frame-assy-2-2",ref:3,hole:[674,447]},
+    {figure:"fig-frame-assy-2-2",ref:5,hole:[481,400]},
+    {figure:"fig-tire-wheel-5-1",ref:1,hole:[630,450]},
+    {figure:"fig-tire-wheel-5-1",ref:6,hole:[137,580]},
+    {figure:"fig-electric-11-5",ref:8,hole:[1008,666]},
+    {figure:"fig-tire-inflation-10-1",ref:12,hole:[571,65]},
+  ];
+  for (const check of checks) {
+    await page.goto(`${base}/review/figures/${check.figure}`);
+    await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
+    const dialog=page.getByRole("dialog"), scope=dialog.locator("figure");
+    await scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)}).click();
+    await page.mouse.move(0,0);
+    await expect(dialog.getByText(/unapproved.*not for ordering/i)).toBeVisible();
+    await page.screenshot({path:info.outputPath(`${check.figure}-ref${check.ref}-overlay.png`)});
+    await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
+    const p=await scope.locator("svg[data-diagram-regions]").evaluate((el,hole)=>{
+      const p=new DOMPoint(hole[0],hole[1]).matrixTransform((el as SVGSVGElement).getScreenCTM()!);
+      return {x:Math.round(p.x),y:Math.round(p.y)};
+    },check.hole);
+    await page.mouse.click(p.x,p.y);await page.mouse.move(0,0);
+    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)})).toHaveAttribute("aria-pressed","false");
+    await page.getByRole("button",{name:"Close the illustration"}).click();
+  }
+});
 const figure = (page:Page) => page.locator("figure").first();
 const stage = (scope:Locator) => scope.locator("img").locator("..");
 
@@ -128,16 +162,21 @@ async function geometry(scope:Locator) {
   return result;
 }
 
-async function componentPoint(scope:Locator) {
-  return scope.locator("svg[data-diagram-regions] path").evaluateAll((paths) => {
+async function componentPoint(scope:Locator, ref?:number) {
+  return scope.locator(ref === undefined ? "svg[data-diagram-regions] path" : `svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).evaluateAll((paths) => {
     for (const element of paths) {
       const path = element as SVGGeometryElement;
       const b = path.getBBox();
       for (let i=1;i<10;i++) for (let j=1;j<10;j++) {
         const point = new DOMPoint(b.x+b.width*i/10, b.y+b.height*j/10);
         if (!path.isPointInFill(point)) continue;
-        const screen = point.matrixTransform(path.getScreenCTM()!);
-        if (document.elementFromPoint(screen.x, screen.y) === path) return { x:screen.x, y:screen.y, label:path.getAttribute("aria-label")! };
+        const matrix = path.getScreenCTM()!;
+        const screen = point.matrixTransform(matrix);
+        // Trusted mouse click coordinates are integer CSS pixels. Recheck the
+        // actual delivered point, especially for thin physical ring bands.
+        const x = Math.round(screen.x), y = Math.round(screen.y);
+        const delivered = new DOMPoint(x,y).matrixTransform(matrix.inverse());
+        if (path.isPointInFill(delivered) && document.elementFromPoint(x, y) === path) return { x, y, label:path.getAttribute("aria-label")! };
       }
     }
     return null;
@@ -173,6 +212,28 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   await label.click();
   await page.mouse.move(0,0);
   await expect(label).toHaveAttribute("aria-pressed","true");
+  if (fixture.name.startsWith("task10c")) {
+    await figure(page).screenshot({ path:info.outputPath("source-overlay.png") });
+    await label.click(); await page.mouse.move(0,0);
+    await expect(label).toHaveAttribute("aria-pressed","true");
+    for (let i=0;i<4;i++) await page.getByRole("button", {name:"Zoom in",exact:true}).click();
+    await page.getByRole("button", {name:"Show selected part",exact:true}).click();
+    await settled(page);
+    await page.getByRole("button", { name:"Clear selection", exact:true }).click();
+    await expect(label).toHaveAttribute("aria-pressed","false");
+    await figure(page).locator(`svg[data-diagram-regions] path[aria-label^="Component ${fixture.ref}:"]`).first().scrollIntoViewIfNeeded();
+    const point = await componentPoint(figure(page), fixture.ref);
+    expect(point).not.toBeNull();
+    await info.attach("native-component-point.json", {body:JSON.stringify(point),contentType:"application/json"});
+    await page.mouse.click(point!.x,point!.y); await page.mouse.move(0,0);
+    const chooser = page.getByRole("group", {name:"Choose overlapping component"});
+    if (await chooser.count()) await chooser.getByRole("button").first().click();
+    for (const selected of await figure(page).getByRole("button", {name:point!.label,exact:true}).all()) await expect(selected).toHaveAttribute("aria-pressed","true");
+    await label.click(); await page.mouse.move(0,0);
+    const zoomOut = page.getByRole("button", {name:"Zoom out",exact:true});
+    for (let i=0;i<4 && await zoomOut.isEnabled();i++) await zoomOut.click();
+    await settled(page);
+  }
   const measurements = [{ state:"fit", ...await geometry(figure(page)) }];
   await wheels(page,figure(page));
   await page.getByRole("button", { name:"Zoom in", exact:true }).click();

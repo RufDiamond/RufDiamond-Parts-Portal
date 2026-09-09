@@ -7,6 +7,7 @@ import { buildDrawingMarkers } from "@/lib/drawing";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DrawingViewer } from "@/components/DrawingViewer";
+import { pointInRegion } from "@rufdiamond/contracts/diagram-geometry";
 
 const hash = (bytes: Buffer) => createHash("sha256").update(bytes).digest("hex");
 
@@ -46,6 +47,48 @@ function serveManifest(manifest: unknown) {
 
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
+test("Engine 8.6 shroud has valid source-bound activation and excludes the detached coupling", async () => {
+  const original = (await getFigureDetail("fig-engine-8-6"))!;
+  const result = await loadCalloutPreview(original, "hosted-review");
+  const shroud = result.detail.callouts.find((c) => c.number === 1)!;
+  expect(shroud.componentGeometry?.regions).toHaveLength(1);
+  expect(pointInRegion([158, 290], shroud.componentGeometry!.regions[0])).toBe(true);
+  expect(pointInRegion([260, 170], shroud.componentGeometry!.regions[0])).toBe(false);
+  expect(result.notice).not.toContain("display-only");
+  expect(original.callouts.find((c) => c.number === 1)?.maskPath).toBeNull();
+});
+
+test("Filters review supplies six physical contours while preserving the six original labels", async () => {
+  const original = (await getFigureDetail("fig-filters-1-1"))!;
+  const result = await loadCalloutPreview(original, "hosted-review");
+  const interior = [[310, 192], [296, 523], [645, 210], [648, 583], [915, 160], [938, 535]];
+  for (const [index, point] of interior.entries()) {
+    const occurrence = result.detail.callouts.find((c) => c.number === index + 1)!;
+    expect(occurrence.componentGeometry?.regions).toHaveLength(1);
+    expect(pointInRegion(point as [number, number], occurrence.componentGeometry!.regions[0])).toBe(true);
+    expect(occurrence.x).toBe(original.callouts[index].x);
+    expect(occurrence.y).toBe(original.callouts[index].y);
+    expect(pointInRegion([430, 40], occurrence.componentGeometry!.regions[0])).toBe(false);
+  }
+  expect(original.callouts.every((c) => c.maskPath === null)).toBe(true);
+});
+
+test.each([
+  {figure:"fig-tire-wheel-5-1",ref:1,regions:3,hole:[630,450]},
+  {figure:"fig-tire-wheel-5-1",ref:6,regions:1,hole:[137,580]},
+  {figure:"fig-electric-11-5",ref:8,regions:1,hole:[1008,666]},
+  {figure:"fig-tire-inflation-10-1",ref:12,regions:1,hole:[571,65]},
+])("audited $figure ref$ref has active numeric holes and preserves disjoint regions", async ({figure,ref,regions,hole}) => {
+  const original = (await getFigureDetail(figure))!;
+  const result = await loadCalloutPreview(original,"hosted-review");
+  const geometry = result.detail.callouts.find((c) => c.number === ref)!.componentGeometry!;
+  expect(geometry.regions).toHaveLength(regions);
+  expect(geometry.regions[0].holes).toHaveLength(1);
+  expect(pointInRegion(hole as [number,number],geometry.regions[0])).toBe(false);
+  expect(pointInRegion(geometry.regions[0].holes[0][0],geometry.regions[0])).toBe(false);
+  expect(result.notice).not.toContain("display-only");
+});
+
 test("source-bound outlines reach drawing markers only on review, without changing original data", async () => {
   const { detail, manifest } = await fixture();
   const before = structuredClone(detail);
@@ -75,6 +118,25 @@ test("invalid intersecting numeric regions remain display-only while valid sibli
   expect(result.detail.callouts.find((item) => item.id === first.id)?.componentGeometry).toBeUndefined();
   expect(result.detail.callouts.find((item) => item.id === "valid-sibling")?.componentGeometry?.regions).toHaveLength(1);
   expect(result.notice).toMatch(/1.*display-only.*invalid/i);
+});
+
+test("explicit holes exclude fill and component clicks in review", async () => {
+  const { detail, manifest } = await fixture();
+  Object.assign(manifest.figures[0].annotations[0], { holes: [[[[31,41],[34,41],[34,44],[31,44]]]] });
+  serveManifest(manifest);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  const c = result.detail.callouts.find((c) => c.number === 1)!;
+  expect(c.componentGeometry!.regions[0].holes).toHaveLength(1);
+  expect(pointInRegion([416,306], c.componentGeometry!.regions[0])).toBe(false);
+  expect(c.maskPath).toContain("M 31 41");
+});
+
+test.each([[], [[], []], [[[[31,41],[101,41],[34,44]]]], [[[[31,41],[34,41]]]]].map((holes) => ({holes})))("rejects malformed hole ownership or coordinates: $holes", async ({holes}) => {
+  const { detail, manifest } = await fixture();
+  Object.assign(manifest.figures[0].annotations[0], { holes });
+  serveManifest(manifest);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.notice).toContain("unavailable");
 });
 
 test.each(["part", "occurrence", "figure-part", "catalogue", "artwork", "bounds", "degenerate", "duplicate", "status"])(
@@ -181,6 +243,7 @@ test("selecting one part paints both legitimate occurrence outlines, and clearin
     markers, selectedPartIds, zoom: 2,
   }));
   const selected = render(new Set([partId]));
+  expect(selected).toContain('fill-rule="evenodd"');
   expect(selected).toContain('d="M 30 40 L 35 40 L 35 45 L 30 45 Z"');
   expect(selected).toContain('d="M 60 70 L 65 70 L 65 75 Z"');
   const cleared = render(new Set());
@@ -200,7 +263,10 @@ test.each(["part-highlights.json", "part-highlights-chassis.json", "source-corre
       for (const item of figure.annotations) {
         const occurrence = result.detail.callouts.find((callout) => callout.id === item.calloutId);
         expect(occurrence, `${figure.figureId}/${item.calloutId}`).toBeDefined();
-        if (item.polygons.length) expect(occurrence!.maskPath, item.calloutId).toMatch(/^M /);
+        if (item.polygons.length) {
+          expect(occurrence!.maskPath, item.calloutId).toMatch(/^M /);
+          expect(occurrence!.componentGeometry, `${figure.figureId}/${item.calloutId} valid numeric activation`).toBeDefined();
+        }
       }
       expect((await getFigureDetail(figure.figureId))!).toEqual(original);
     }

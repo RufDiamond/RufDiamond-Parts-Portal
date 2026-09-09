@@ -358,7 +358,7 @@ export function DrawingViewer({
             aria-hidden="true"
           >
             {highlighted.map((marker) => (
-              <path key={marker.id} d={marker.maskPath} data-callout-id={marker.id} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
+              <path key={marker.id} d={marker.maskPath} fillRule="evenodd" data-callout-id={marker.id} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
             ))}
           </svg>
         ) : null}

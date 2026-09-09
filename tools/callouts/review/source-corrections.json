@@ -479,7 +479,77 @@
               ]
             ]
           ],
-          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 5: 70-02270, RECEIVER HITCH BUMPER. Printed 5 leader terminates on the left end of the long receiver-hitch bumper. Exterior contour includes the attached center receiver and visible mounting tabs; internal openings are not subtracted. Manually traced from the exact replacement PNG; unapproved."
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 5: 70-02270, RECEIVER HITCH BUMPER. Printed 5 leader terminates on the left end of the long receiver-hitch bumper. Exterior contour includes the attached center receiver and visible mounting tabs; opening corrections follow below. Manually traced from the exact replacement PNG; unapproved. On 2026-09-09, manually inspected source-bound holes added: Center triangular opening and two visible portions of the square receiver opening traced; diagonal internal material band retained. Remaining small mounting holes and obscured internal surfaces are partial. Unapproved.",
+          "holes": [
+            [
+              [
+                [
+                  38.1188,
+                  60.678
+                ],
+                [
+                  39.505,
+                  59.661
+                ],
+                [
+                  40.5941,
+                  60.1695
+                ],
+                [
+                  41.9802,
+                  61.5254
+                ],
+                [
+                  39.604,
+                  61.8644
+                ],
+                [
+                  38.4158,
+                  61.5254
+                ]
+              ],
+              [
+                [
+                  45.3465,
+                  54.5763
+                ],
+                [
+                  45.6436,
+                  53.8983
+                ],
+                [
+                  48.1188,
+                  52.3729
+                ],
+                [
+                  48.6139,
+                  53.2203
+                ],
+                [
+                  48.6139,
+                  56.7797
+                ]
+              ],
+              [
+                [
+                  45.4455,
+                  56.4407
+                ],
+                [
+                  48.3168,
+                  58.4746
+                ],
+                [
+                  48.3168,
+                  58.9831
+                ],
+                [
+                  45.5446,
+                  60.8475
+                ]
+              ]
+            ]
+          ]
         },
         {
           "calloutId": "co-2-1-0012",
