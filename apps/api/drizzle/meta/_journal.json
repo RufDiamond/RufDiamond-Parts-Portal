@@ -71,6 +71,7 @@
       "when": 1788923741369,
       "tag": "0010_publication_coordination",
       "breakpoints": true
-    }
+    },
+    { "idx": 10, "version": "7", "when": 1788940000000, "tag": "0011_canonical_import_lineage", "breakpoints": true }
   ]
 }

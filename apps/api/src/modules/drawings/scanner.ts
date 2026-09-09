@@ -4,8 +4,15 @@ import { MAX_DRAWING_BYTES, type DrawingScanner } from "./storage.js";
 
 /** clamd TCP INSTREAM: NUL command, network-order chunk lengths, zero-length terminator, NUL response. */
 export function createClamdScanner(config: AppConfig["drawingScanner"]): DrawingScanner {
+  return boundedClamdScanner(config, MAX_DRAWING_BYTES);
+}
+/** Separate catalogue-source entry point; PNG callers retain their 20 MiB limit. */
+export function createClamdImportScanner(config: AppConfig["drawingScanner"]): DrawingScanner {
+  return boundedClamdScanner(config, 25 * 1024 * 1024);
+}
+function boundedClamdScanner(config: AppConfig["drawingScanner"], maximum: number): DrawingScanner {
   return { async scan(bytes) {
-    if (!config || !bytes.length || bytes.length > MAX_DRAWING_BYTES) return "unavailable";
+    if (!config || !bytes.length || bytes.length > maximum) return "unavailable";
     return new Promise(resolve => {
       const socket = createConnection({ host: config.host, port: config.port });
       let finished = false, response = Buffer.alloc(0);

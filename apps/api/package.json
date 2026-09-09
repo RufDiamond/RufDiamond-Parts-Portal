@@ -21,12 +21,15 @@
     "drizzle-orm": "^0.45.2",
     "fastify": "^5.0.0",
     "pg": "^8.23.0",
-    "sharp": "0.35.4"
+    "sharp": "0.35.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yauzl": "3.4.0"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^12.1.0",
     "@types/node": "^20",
     "@types/pg": "^8.23.1",
+    "@types/yauzl": "3.4.0",
     "drizzle-kit": "^0.31.10",
     "testcontainers": "12.1.0",
     "tsx": "^4.19.2",

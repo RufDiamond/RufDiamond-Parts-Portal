@@ -11,9 +11,50 @@ import {
 } from "./catalog.js";
 import { MoneySchema, ReleaseRefSchema } from "./common.js";
 import { OrderStatusSchema } from "./orders.js";
+import { ComponentRegionSchema, LabelRegionSchema } from "./diagram-mapping.js";
 
 const nullableString = () => Type.Union([Type.String(), Type.Null()]);
 const count = () => Type.Integer({ minimum: 0 });
+
+const importUuid = () => Type.String({ pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" });
+const importHash = () => Type.String({ pattern: "^[a-f0-9]{64}$" });
+export const NormalizedImportFieldsSchema = Type.Object({
+  partNumber: Type.String(), description: Type.String(), model: Type.String(), variant: Type.String(), system: Type.String(), groupNo: nullableString(), figureName: Type.String(),
+  effectiveFrom: nullableString(), effectiveTo: nullableString(), qty: Type.Integer({ minimum: 1, maximum: 2147483647 }), pnc: nullableString(),
+  listPrice: Type.Union([MoneySchema, Type.Null()]), currency: Type.Literal("CAD"), manufacturer: nullableString(), serviceable: Type.Boolean(), remarks: nullableString(),
+}, { additionalProperties: false });
+export type NormalizedImportFields = Static<typeof NormalizedImportFieldsSchema>;
+export const NormalizedImportRowSchema = Type.Object({sourceRowKey:Type.String({minLength:1}),rowNumber:Type.Integer({minimum:1}),fields:NormalizedImportFieldsSchema},{additionalProperties:false});
+export const StagedImportNormalizationSchema = Type.Union([
+  Type.Object({normalizationState:Type.Literal("valid"),fields:NormalizedImportFieldsSchema},{additionalProperties:false}),
+  Type.Object({normalizationState:Type.Literal("invalid"),fields:Type.Null()},{additionalProperties:false}),
+]);
+export const ImportUploadMetadataSchema = Type.Object({
+  modelId: importUuid(), variantId: importUuid(), filename: Type.String({ minLength: 1, maxLength: 180, pattern: "^[^/\\\\\u0000-\u001f]+\\.(csv|xlsx)$" }),
+  format: Type.Union([Type.Literal("csv"), Type.Literal("xlsx")]), sourceKind: Type.Union([Type.Literal("workbook"), Type.Literal("legacy-draft"), Type.Literal("synthetic")]),
+  lineageKey: Type.String({ minLength: 1, maxLength: 120, pattern: "^[a-zA-Z0-9][a-zA-Z0-9._-]*$" }), sha256: importHash(),
+}, { additionalProperties: false });
+export type ImportUploadMetadata = Static<typeof ImportUploadMetadataSchema>;
+export const ImportIssueReviewInputSchema = Type.Object({ decision: Type.Union([Type.Literal("acknowledged"), Type.Literal("source-correction-required")]), evidence: Type.String({ minLength: 10, maxLength: 4000 }) }, { additionalProperties: false });
+export type ImportIssueReviewInput = Static<typeof ImportIssueReviewInputSchema>;
+export const ImportIssueSchema = Type.Object({ id: importUuid(), version: Type.Integer({ minimum: 1 }), sourceRowKey: nullableString(), severity: Type.Union([Type.Literal("warning"),Type.Literal("error")]), code: Type.String(), field: nullableString(), message: Type.String(), reviewedBy: Type.Union([importUuid(),Type.Null()]), reviewedAt: nullableString() }, { additionalProperties: false });
+export const ImportAliasSchema = Type.Object({ sourceRowKey: Type.String(), identityKey: importHash(), figureKey: importHash(), figureId: importUuid(), figurePartId: importUuid(), partNumber:Type.String(), calloutId: Type.Union([importUuid(),Type.Null()]), refNo: nullableString() }, { additionalProperties: false });
+export type ImportAlias = Static<typeof ImportAliasSchema>;
+export const ImportResultSchema = Type.Object({
+  id: importUuid(), state: Type.Union((["uploaded","staged","validated","applying","applied","failed"] as const).map(value=>Type.Literal(value))), blockingIssueCount: count(),
+}, { additionalProperties: false });
+export type ImportResult = Static<typeof ImportResultSchema>;
+export function canApplyImport(state: ImportResult): boolean { return state.state === "validated" && state.blockingIssueCount === 0; }
+export const ImportDetailSchema = Type.Object({
+  ...ImportResultSchema.properties, version: Type.Integer({minimum:1}), modelId: importUuid(), variantId: importUuid(), sourceChecksum: importHash(), sourceKind: ImportUploadMetadataSchema.properties.sourceKind, format: ImportUploadMetadataSchema.properties.format, lineageKey: Type.String(), rowCount: count(), validRowCount: count(), issues: Type.Array(ImportIssueSchema), aliases: Type.Array(ImportAliasSchema),
+}, { additionalProperties: false });
+export type ImportDetail = Static<typeof ImportDetailSchema>;
+export const MappingDraftManifestSchema = Type.Object({
+  schemaVersion:Type.Literal(1),status:Type.Literal("NOT_FOR_CUSTOMER_USE"),operatorId:importUuid(),jobId:importUuid(),modelId:importUuid(),variantId:importUuid(),figureId:importUuid(),legacyFigureId:Type.String({minLength:1,maxLength:200}),
+  sourceChecksum:importHash(),legacySourceChecksum:importHash(),catalogueBindingSha256:importHash(),drawingSha256:importHash(),imageWidth:Type.Integer({minimum:1,maximum:16384}),imageHeight:Type.Integer({minimum:1,maximum:16384}),expectedMappingVersion:Type.Integer({minimum:1}),idempotencyKey:Type.String({minLength:1,maxLength:255}),
+  proposals:Type.Array(Type.Object({sourceRowKey:Type.String({minLength:1,maxLength:200}),legacyCalloutId:Type.String({minLength:1,maxLength:200}),legacyFigurePartId:Type.String({minLength:1,maxLength:200}),refNo:Type.String({minLength:1,maxLength:100}),labelRegion:Type.Union([LabelRegionSchema,Type.Null()]),regions:Type.Array(ComponentRegionSchema,{maxItems:32}),legacyMaskPath:Type.Union([Type.String({maxLength:64000}),Type.Null()]),evidence:Type.String({minLength:1,maxLength:4000})},{additionalProperties:false}),{maxItems:1000}),
+},{additionalProperties:false});
+export type MappingDraftManifest = Static<typeof MappingDraftManifestSchema>;
 
 export const DraftFigureMetadataSchema = Type.Object({
   id: Type.String({ pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" }),

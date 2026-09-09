@@ -74,6 +74,6 @@ export async function startNativeFixture(origin: string, port: number) {
     await app.listen({ port, host: "127.0.0.1" });
     const png = await sharp({ create: { width: 640, height: 480, channels: 3, background: "#eeeeee" } }).composite([{ input: Buffer.from('<svg width="640" height="480"><rect x="180" y="130" width="260" height="190" fill="#778899"/><text x="60" y="60" font-size="30">A*</text></svg>') }]).png().toBuffer();
     const replacement = await sharp(png).tint("#bbccdd").png().toBuffer();
-    return { ids, password, png, replacement, runtime, setup: pg.pool, storageEndpoint: s3.endpoint, failures, stop };
+    return { ids, password, png, replacement, runtime, setup: pg.pool, storageEndpoint: s3.endpoint, apiOrigin: `http://127.0.0.1:${(app.server.address() as { port: number }).port}`, failures, stop };
   } catch (error) { await stop(); throw error; }
 }

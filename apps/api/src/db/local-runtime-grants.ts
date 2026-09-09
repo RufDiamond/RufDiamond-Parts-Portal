@@ -20,4 +20,10 @@ export async function grantLocalRuntime(setup: Pool, role: string) {
   for (const [table, columns] of Object.entries(updates)) await setup.query(`GRANT UPDATE (${columns}) ON TABLE ${table} TO ${target}`);
   // INSERT ... RETURNING requires SELECT on precisely the returned audit/outbox columns.
   await setup.query(`GRANT SELECT (id) ON TABLE audit_log,outbox_event TO ${target}`);
+  await setup.query(`GRANT SELECT ON TABLE import_job,import_staging_row,import_issue,import_source_alias,import_issue_review TO ${target}`);
+  await setup.query(`GRANT INSERT ON TABLE import_job,import_staging_row,import_issue,import_source_alias,import_issue_review,system,model_system,figure,part,figure_part,callout,diagram_mapping,part_requires TO ${target}`);
+  await setup.query(`GRANT UPDATE (version,updated_at) ON TABLE model TO ${target}`);
+  await setup.query(`GRANT UPDATE (qty,remarks,serviceable,effective_from,effective_to,version,updated_at) ON TABLE figure_part TO ${target}`);
+  await setup.query(`GRANT UPDATE (state,summary,applied_at,version,updated_at) ON TABLE import_job TO ${target}`);
+  await setup.query(`GRANT UPDATE (resolution,resolved_by_user_id,resolved_at,version,updated_at) ON TABLE import_issue TO ${target}`);
 }
