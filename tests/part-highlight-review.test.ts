@@ -80,6 +80,14 @@ test("Hydraulic 4.2 shroud retains its solid left side face outside the circular
   expect(geometry.regions.some((r) => pointInRegion([248,320],r))).toBe(false);
 });
 
+test("Console 6.10 retains neck arms and interior metal without filling its T-shaped opening", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-10"))!,"hosted-review");
+  const geometry = result.detail.callouts.find((c) => c.number === 9)!.componentGeometry!;
+  expect(geometry.regions.some((r) => pointInRegion([778,425],r))).toBe(false);
+  expect(geometry.regions.some((r) => pointInRegion([753,462],r))).toBe(true);
+  expect(geometry.regions.some((r) => pointInRegion([609,659],r))).toBe(true);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},
