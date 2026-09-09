@@ -57,6 +57,13 @@
       "when": 1788918054653,
       "tag": "0008_diagram_mapping_revisions",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788921795820,
+      "tag": "0009_private_drawing_uploads",
+      "breakpoints": true
     }
   ]
 }

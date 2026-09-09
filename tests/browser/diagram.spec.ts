@@ -215,7 +215,7 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await settled(page);
   await scope.locator("img").hover({ position:{ x:1, y:1 } });
   await page.mouse.wheel(0,-120);
-  expect(await zoom(scope)).toBe(4);
+  await expect.poll(() => zoom(scope)).toBe(4);
   const sheet = stage(scope).locator("..");
   await sheet.evaluate((el) => { el.scrollTop=0;el.scrollLeft=0; });
   await row.click();
@@ -247,7 +247,7 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await page.getByRole("button", { name:"Clear selection", exact:true }).click();
   await scope.locator("img").hover({ position:{ x:1, y:1 } });
   await page.mouse.wheel(0,120);
-  expect(await zoom(scope)).toBe(1);
+  await expect.poll(() => zoom(scope)).toBe(1);
   // Browser input protocol generates trusted touch/pointer cancellation;
   // no dispatchEvent or synthetic DOM PointerEvent is used for this gate.
   const cancellationPoint = await componentPoint(scope);

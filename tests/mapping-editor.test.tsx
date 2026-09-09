@@ -21,6 +21,60 @@ function point(x: number, y: number) {
   fireEvent.click(canvas, { clientX: x, clientY: y });
 }
 describe("mapping editor", () => {
+  it("keeps the old overlay blocked while an attached drawing's source reload is pending", async () => {
+    const initial = fixture(), client = api(initial);
+    let finish!: (value: MappingEditorDocument) => void;
+    client.loadMapping = async () => new Promise(resolve => { finish = resolve; });
+    const drawingApi = {
+      createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
+      uploadFile: async () => {}, finalize: async () => ({ figureId: "figure", figureVersion: 2, drawingFileId: "new", fileVersion: 2, sha256: "e".repeat(64), width: 640, height: 480, bytes: 20, filename: "new.png" }),
+      loadDrawing: async () => { throw new Error("Not requested"); },
+    };
+    render(<MappingEditor initial={initial} drawing={drawing} authority={{ ...authority, canUploadDrawing: true }} api={client} drawingApi={drawingApi} />); loadImage();
+    fireEvent.change(screen.getByLabelText("Replacement PNG"), { target: { files: [new File(["png"], "new.png", { type: "image/png" })] } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Upload replacement PNG" })));
+    expect(screen.queryByTestId("mapping-canvas")).toBeNull();
+    await act(async () => finish({ ...initial, sourceConflict: true }));
+  });
+  it("blocks the old overlay after an uncertain finalization and retains a safe retry", async () => {
+    const initial = fixture(), client = api(initial);
+    const drawingApi = {
+      createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
+      uploadFile: async () => {}, finalize: async () => { throw new TypeError("Network response lost"); },
+      loadDrawing: async () => { throw new Error("Not requested"); },
+    };
+    render(<MappingEditor initial={initial} drawing={drawing} authority={{ ...authority, canUploadDrawing: true }} api={client} drawingApi={drawingApi} />); loadImage();
+    fireEvent.change(screen.getByLabelText("Source evidence"), { target: { value: "Retain" } });
+    fireEvent.change(screen.getByLabelText("Replacement PNG"), { target: { files: [new File(["png"], "new.png", { type: "image/png" })] } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Upload replacement PNG" })));
+    expect(screen.queryByTestId("mapping-canvas")).toBeNull();
+    expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Retain");
+    expect((screen.getByRole("button", { name: "Retry PNG verification" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+  it("uploads a replacement and requires confirmation before selecting its current version", async () => {
+    const initial = fixture(), client = api(initial), confirmDiscard = vi.fn(() => false);
+    let replaced = false;
+    const replacement = structuredClone(initial); replacement.sourceConflict = true; replacement.source.figure.version = 2; replacement.source.drawing = { ...initial.source.drawing!, id: "new-drawing", sha256: "e".repeat(64), fileVersion: 2 };
+    client.loadMapping = async () => replaced ? replacement : initial;
+    const drawingApi = {
+      createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
+      uploadFile: async () => {},
+      finalize: async () => { replaced = true; return { figureId: "figure", figureVersion: 2, drawingFileId: "new-drawing", fileVersion: 2, sha256: "e".repeat(64), width: 640, height: 480, bytes: 20, filename: "new.png" }; },
+      loadDrawing: async () => ({ figureId: "figure", figureVersion: 2, drawingFileId: "new-drawing", fileVersion: 2, sha256: "e".repeat(64), width: 640, height: 480, bytes: 20, filename: "new.png", url: "https://storage.test/new.png", expiresAt: "2026-09-08T23:00:00Z" }),
+    };
+    render(<MappingEditor initial={initial} drawing={drawing} authority={{ ...authority, canUploadDrawing: true }} api={client} drawingApi={drawingApi} confirmDiscard={confirmDiscard} />); loadImage();
+    fireEvent.change(screen.getByLabelText("Source evidence"), { target: { value: "Keep local evidence" } });
+    fireEvent.change(screen.getByLabelText("Replacement PNG"), { target: { files: [new File(["png"], "new.png", { type: "image/png" })] } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Upload replacement PNG" })));
+    expect(screen.queryByTestId("mapping-canvas")).toBeNull();
+    expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Keep local evidence");
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Select current drawing version" })));
+    expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Keep local evidence");
+    confirmDiscard.mockReturnValue(true);
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Select current drawing version" })));
+    expect(screen.getByRole("img").getAttribute("src")).toBe("https://storage.test/new.png");
+    expect(screen.getByRole("status").textContent).toContain("Unsaved"); expect(screen.getByRole("status").textContent).not.toContain("Approved");
+  });
   it("fails closed without a matching authoritative image and after image failure", () => {
     const initial = fixture(); const props = { initial, authority, api: api(initial) };
     const view = render(<MappingEditor {...props} drawing={null} />);

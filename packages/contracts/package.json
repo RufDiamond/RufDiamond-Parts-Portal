@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./diagram-geometry": "./src/diagram-geometry.ts",
-    "./diagram-mapping": "./src/diagram-mapping.ts"
+    "./diagram-mapping": "./src/diagram-mapping.ts",
+    "./drawing-upload": "./src/drawing-upload.ts"
   },
   "types": "./src/index.ts",
   "scripts": {

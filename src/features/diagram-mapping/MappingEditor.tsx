@@ -1,22 +1,24 @@
 "use client";
 
 import { useEffect, useReducer, useRef, useState, type KeyboardEvent } from "react";
-import type { MappingEditorDocument, MappingHistory } from "@rufdiamond/contracts";
+import type { DrawingUploadIntent, MappingEditorDocument, MappingHistory } from "@rufdiamond/contracts";
+import type { DrawingApiClient } from "./drawing-api-client";
 import { MappingApiError, type MappingApiClient } from "./api-client";
 import { createEditorState, editorReducer, hasUnsavedChanges, matchesSource, usableSource, type Tool } from "./editor-state";
 import { drawingMatches, MappingCanvas, type MappingDrawing } from "./MappingCanvas";
 import { MappingInspector, occurrenceReadiness } from "./MappingInspector";
 import styles from "./mapping-editor.module.css";
 
-export type MappingAuthority = { canEdit: boolean; canMap: boolean; canApprove: boolean };
+export type MappingAuthority = { canEdit: boolean; canMap: boolean; canApprove: boolean; canUploadDrawing?: boolean };
 export type MappingEditorProps = {
   initial: MappingEditorDocument; authority: MappingAuthority; drawing: MappingDrawing | null; api: MappingApiClient;
+  drawingApi?: DrawingApiClient;
   confirmDiscard?: (message: string) => boolean;
 };
 const tools: { tool: Tool; label: string; key: string }[] = [
   { tool: "select", label: "Select (V)", key: "v" }, { tool: "label", label: "Label (L)", key: "l" }, { tool: "polygon", label: "Polygon (G)", key: "g" }, { tool: "hole", label: "Hole (H)", key: "h" }, { tool: "pan", label: "Pan (P)", key: "p" },
 ];
-export function MappingEditor({ initial, authority, drawing, api, confirmDiscard = message => window.confirm(message) }: MappingEditorProps) {
+export function MappingEditor({ initial, authority, drawing, api, drawingApi, confirmDiscard = message => window.confirm(message) }: MappingEditorProps) {
   const [state, dispatch] = useReducer(editorReducer, initial, createEditorState);
   const current = useRef(state);
   const [readyImage, setReadyImage] = useState<string | null>(null);
@@ -25,16 +27,21 @@ export function MappingEditor({ initial, authority, drawing, api, confirmDiscard
   const active = useRef<AbortController | null>(null);
   const [history, setHistory] = useState<MappingHistory | null>(null);
   const [historyNotice, setHistoryNotice] = useState("");
+  const [replacementFile, setReplacementFile] = useState<File | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<DrawingUploadIntent | null>(null);
+  const [selectedDrawing, setSelectedDrawing] = useState<MappingDrawing | null>(null);
+  const [uploadNotice, setUploadNotice] = useState("");
   const [acceptedInput, setAcceptedInput] = useState(() => JSON.stringify(initial));
   const incomingChanged = JSON.stringify(initial) !== acceptedInput;
-  const sourceImage = drawingMatches(state, drawing) && !state.sourceConflict && !incomingChanged ? drawing : null;
+  const currentDrawing = selectedDrawing ?? drawing;
+  const sourceImage = drawingMatches(state, currentDrawing) && !state.sourceConflict && !incomingChanged && !pendingUpload ? currentDrawing : null;
   const imageKey = sourceImage ? JSON.stringify(sourceImage) : null;
   const requestedFigureChanged = initial.document.figureId !== state.document.figureId;
   const enabled = authority.canEdit && !authenticationLost && !!sourceImage && readyImage === imageKey && !state.sourceConflict && state.saveStatus !== "conflict" && !requestedFigureChanged;
   const unsaved = hasUnsavedChanges(state);
   const complete = state.document.occurrences.length > 0 && state.document.occurrences.every(o => !occurrenceReadiness(o).length) && state.source.occurrences.every(o => state.document.occurrences.some(d => d.calloutId === o.id));
   const approveEnabled = enabled && authority.canMap && authority.canApprove && complete && !unsaved && !!state.revision && !busy;
-  const approved = !incomingChanged && !state.sourceConflict && !unsaved && matchesSource(state.document, state.source) && state.revision?.approval;
+  const approved = !incomingChanged && !pendingUpload && !state.sourceConflict && !unsaved && matchesSource(state.document, state.source) && state.revision?.approval;
   useEffect(() => { current.current = state; }, [state]);
   useEffect(() => () => { active.current?.abort(); }, []);
   useEffect(() => {
@@ -58,6 +65,50 @@ export function MappingEditor({ initial, authority, drawing, api, confirmDiscard
   }
   function end(controller: AbortController) {
     if (active.current === controller) { active.current = null; setBusy(false); }
+  }
+  async function uploadReplacement(retry = false) {
+    if (!drawingApi || !authority.canUploadDrawing || authenticationLost || requestedFigureChanged || incomingChanged || (!retry && !replacementFile)) return;
+    const controller = begin(); if (!controller) return;
+    let attached = false;
+    try {
+      let intent = pendingUpload;
+      if (!retry) {
+        intent = await drawingApi.createIntent(state.document.figureId, state.source.figure.version, replacementFile!, controller.signal);
+        await drawingApi.uploadFile(intent, replacementFile!, controller.signal);
+        if (controller.signal.aborted) return;
+        setPendingUpload(intent);
+      }
+      if (!intent || intent.figureId !== state.document.figureId) return;
+      await drawingApi.finalize(intent.figureId, intent.uploadId, intent.figureVersion, controller.signal);
+      attached = true;
+      if (controller.signal.aborted) return;
+      const envelope = await api.loadMapping(intent.figureId, controller.signal);
+      if (controller.signal.aborted) return;
+      dispatch({ type: "serverChecked", envelope });
+      setPendingUpload(null); setReplacementFile(null);
+      setUploadNotice("PNG attached. Select the current drawing version to reconcile your draft. Saved history remains available.");
+    } catch (error) {
+      problem(error);
+      if (attached) dispatch({ type: "saveFailed", message: "The PNG was attached, but its current source could not be verified. Select the current drawing version before editing.", conflict: true });
+      setUploadNotice("Upload or verification did not complete. Your local work remains in memory. A pending verification can be retried safely.");
+    } finally { end(controller); }
+  }
+  async function selectCurrentDrawing() {
+    if (!drawingApi || requestedFigureChanged || incomingChanged) return;
+    const controller = begin(); if (!controller) return;
+    try {
+      const envelope = await api.loadMapping(state.document.figureId, controller.signal);
+      if (controller.signal.aborted) return;
+      dispatch({ type: "serverChecked", envelope });
+      const delivered = await drawingApi.loadDrawing(state.document.figureId, controller.signal);
+      if (controller.signal.aborted) return;
+      const source = envelope.source.drawing;
+      if (!source || delivered.figureId !== envelope.source.figure.id || delivered.figureVersion !== envelope.source.figure.version || delivered.drawingFileId !== source.id || delivered.sha256 !== source.sha256 || delivered.width !== source.width || delivered.height !== source.height) throw new MappingApiError(409, "The drawing changed while loading. Select its current version again.");
+      if ((hasUnsavedChanges(current.current) || envelope.sourceConflict) && !confirmDiscard("Select the current drawing and replace local work? A changed source starts a new empty draft. Saved history remains unchanged.")) return;
+      dispatch({ type: "replaceEnvelope", envelope });
+      if (envelope.sourceConflict) dispatch({ type: "resetToSource" });
+      setSelectedDrawing(delivered); setReadyImage(null); setPendingUpload(null); setReplacementFile(null); setUploadNotice(""); setAuthenticationLost(false);
+    } catch (error) { problem(error); } finally { end(controller); }
   }
   async function save() {
     if (!enabled || state.openRing || state.labelInput || !state.dirty) return;
@@ -139,8 +190,16 @@ export function MappingEditor({ initial, authority, drawing, api, confirmDiscard
   }
   return <main className={styles.editor} data-testid="mapping-editor" onKeyDown={keyboard}>
     <h1>Map {state.source.figure.name}</h1>
+    {drawingApi && <section aria-label="Private PNG source">
+      <p>Current drawing version: {state.source.drawing?.fileVersion ?? "none"}. PNG limit: 20 MiB, 40 million pixels, 16,384 pixels per side.</p>
+      <label>Replacement PNG <input type="file" accept="image/png,.png" disabled={!authority.canUploadDrawing || authenticationLost || busy || incomingChanged || !!pendingUpload} onChange={event => setReplacementFile(event.target.files?.[0] ?? null)} /></label>
+      <button disabled={!authority.canUploadDrawing || authenticationLost || busy || incomingChanged || !replacementFile || !!pendingUpload} onClick={() => void uploadReplacement()}>Upload replacement PNG</button>
+      {pendingUpload && <button disabled={!authority.canUploadDrawing || authenticationLost || busy || incomingChanged} onClick={() => void uploadReplacement(true)}>Retry PNG verification</button>}
+      <button disabled={busy || incomingChanged} onClick={() => void selectCurrentDrawing()}>Select current drawing version</button>
+      {uploadNotice && <p>{uploadNotice}</p>}
+    </section>}
     <p role="status" aria-live="polite">{state.sourceConflict || state.saveStatus === "conflict" ? "Conflict" : state.saveStatus === "saving" ? "Saving" : state.saveStatus === "error" ? `Save failed${unsaved ? " · Unsaved" : ""}` : unsaved ? "Unsaved" : state.revision ? "Saved" : "New draft"}{approved ? " · Approved revision" : ""}</p>
-    {incomingChanged && <div className={styles.warning}>A new authoritative document was received. Local work is retained.<button disabled={busy} onClick={() => { if (!unsaved || confirmDiscard("Replace unsaved work with the requested document?")) { dispatch({ type: "replaceEnvelope", envelope: initial }); setAcceptedInput(JSON.stringify(initial)); setHistory(null); setHistoryNotice(""); setReadyImage(null); } }}>{requestedFigureChanged ? "Switch to requested figure" : "Load requested document"}</button></div>}
+    {incomingChanged && <div className={styles.warning}>A new authoritative document was received. Local work is retained.<button disabled={busy} onClick={() => { if (!unsaved || confirmDiscard("Replace unsaved work with the requested document?")) { dispatch({ type: "replaceEnvelope", envelope: initial }); setAcceptedInput(JSON.stringify(initial)); setHistory(null); setHistoryNotice(""); setReadyImage(null); setSelectedDrawing(null); setPendingUpload(null); setReplacementFile(null); setUploadNotice(""); } }}>{requestedFigureChanged ? "Switch to requested figure" : "Load requested document"}</button></div>}
     {(!sourceImage || readyImage !== imageKey || authenticationLost) && <p className={styles.warning}>{authenticationLost ? "Session or permission unavailable. Editing is disabled; sign in again and reload to verify access." : "Editing requires a successfully loaded authoritative PNG matching this document's identity, hash and dimensions."}</p>}
     {state.sourceConflict && <p className={styles.warning}>Source conflict. Historical geometry and approval are retained in saved history but cannot be used on the current drawing.</p>}
     <div className={styles.toolbar} role="toolbar" aria-label="Mapping tools">{tools.map(t => <button key={t.tool} disabled={!enabled} aria-pressed={state.tool === t.tool} onClick={() => setTool(t.tool)}>{t.label}</button>)}</div>

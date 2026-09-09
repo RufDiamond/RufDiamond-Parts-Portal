@@ -6,6 +6,10 @@ import { createDatabase } from "./db/client.js";
 import { createDatabaseAuthorizationResolver } from "./modules/authorization/policy.js";
 import { registerIdentityRoutes } from "./modules/identity/routes.js";
 import { registerMappingRoutes } from "./modules/diagram-mapping/routes.js";
+import { registerDrawingRoutes } from "./modules/drawings/routes.js";
+import { createS3DrawingStorage } from "./modules/drawings/s3-storage.js";
+import { createClamdScanner } from "./modules/drawings/scanner.js";
+import type { DrawingScanner, DrawingStorage } from "./modules/drawings/storage.js";
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
 import { registerAuth } from "./plugins/auth.js";
 import { registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
@@ -16,6 +20,8 @@ export interface AppDependencies {
   authorizationResolver: AuthorizationResolver;
   passwordOptions: HashOptions;
   now: () => Date;
+  drawingStorage: DrawingStorage;
+  drawingScanner: DrawingScanner;
 }
 
 export interface BuildAppOptions {
@@ -41,6 +47,9 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   registerAuth(app, config, identity);
   registerIdentityRoutes(app, config, identity, now);
   registerMappingRoutes(app, config, database.db, now);
+  const ownedStorage = dependencies.drawingStorage ? null : createS3DrawingStorage(config.s3);
+  if (ownedStorage) app.addHook("onClose", async () => ownedStorage.close());
+  registerDrawingRoutes(app, config, database.db, dependencies.drawingStorage ?? ownedStorage!, dependencies.drawingScanner ?? createClamdScanner(config.drawingScanner), now);
   registerErrorHandler(app);
   registerNotFoundHandler(app);
 

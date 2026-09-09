@@ -147,7 +147,7 @@ describe("diagram mapping schema migration", () => {
       expect((await database.pool.query("select count(*)::int count from release_diagram_mapping")).rows[0].count).toBe(0);
       expect((await database.pool.query("select * from publication_release where id=$1", [ids.release])).rows[0]).toEqual(oldRelease);
       expect((await database.pool.query("select * from release_callout where release_id=$1 and id=$2", [ids.release, ids.releaseCallout])).rows[0]).toEqual(oldCallout);
-      expect((await database.pool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(8);
+      expect((await database.pool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(9);
       expect((await database.pool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 7)).toEqual(oldHistory);
     } finally {
       await database.stop();
