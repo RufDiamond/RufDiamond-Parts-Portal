@@ -77,6 +77,7 @@ const releasedCallout = {
 } as const;
 
 const releasedFigureDetail = {
+  mapping: null,
   release: { modelId: "model", releaseId: "release", revision: 3 },
   figure: {
     id: "figure",
@@ -524,6 +525,7 @@ describe("admin mutation and summary contracts", () => {
     expect(Value.Check(PublishInputSchema, {
       modelId: "model",
       expectedWorkingVersion: 4,
+      expectedPublicationVersion: 1,
       summary: "Complete filters",
     })).toBe(true);
     expect(Value.Check(PublishResultSchema, {

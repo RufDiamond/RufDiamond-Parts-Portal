@@ -210,6 +210,7 @@ export const PublishInputSchema = Type.Object(
   {
     modelId: Type.String(),
     expectedWorkingVersion: Type.Integer({ minimum: 1 }),
+    expectedPublicationVersion: Type.Integer({ minimum: 1 }),
     summary: Type.String(),
   },
   { $id: "PublishInput", additionalProperties: false },
@@ -227,3 +228,16 @@ export const PublishResultSchema = Type.Composite(
   { $id: "PublishResult", additionalProperties: false },
 );
 export type PublishResult = Static<typeof PublishResultSchema>;
+
+export const ActivateReleaseInputSchema = Type.Object({
+  expectedPublicationVersion: Type.Integer({ minimum: 1 }),
+  expectedActiveReleaseId: Type.Union([Type.String(), Type.Null()]),
+}, { additionalProperties: false });
+export type ActivateReleaseInput = Static<typeof ActivateReleaseInputSchema>;
+
+export const PublicationModelStateSchema = Type.Object({
+  modelId: Type.String(), name: Type.String(), workingVersion: Type.Integer({ minimum: 1 }),
+  publicationVersion: Type.Integer({ minimum: 1 }), activeReleaseId: Type.Union([Type.String(), Type.Null()]),
+  blockers: Type.Array(Type.Object({ code: Type.String(), message: Type.String(), path: Type.Optional(Type.String()) }, { additionalProperties: false })),
+}, { additionalProperties: false });
+export const PublicationQueuePageSchema = Type.Object({ items: Type.Array(PublicationModelStateSchema), nextCursor: Type.Union([Type.String(), Type.Null()]) }, { additionalProperties: false });

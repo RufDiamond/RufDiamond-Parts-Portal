@@ -254,6 +254,15 @@ Use TypeBox request and response schemas to emit OpenAPI.
 
 ### Task 7: Working catalogue, mapping and publication
 
+PNG plan Task 8 implements the immutable publication and scoped customer-read
+prerequisites above using `modules/catalog/repository.ts`, private pinned drawing
+redirects, and `modules/publication/{validation,service,routes}.ts`. Its shared
+publication input adds `expectedPublicationVersion`; activation changes this
+coordination counter only, preserving source `model.version` and approval
+bindings. The working CRUD/import tasks below remain separate prerequisites.
+Customer pages bind their cursors to the permitted active release set and current
+scope; `409 CATALOG_CURSOR_STALE` requires restarting the entire aggregation.
+
 **Files:** Create `apps/api/src/modules/catalog/{working-repository,admin-service,admin-routes,publish-validation}.ts`, `apps/api/src/modules/publication/{service,routes,checksum}.ts`; tests `apps/api/test/integration/{admin-catalog,publication}.test.ts`, `apps/api/test/unit/publish-validation.test.ts`.
 
 **Interfaces:** `patchCallout(ctx,input:CalloutPatch,id:string):Promise<Callout>`; `publish(ctx,input:PublishInput,key:string):Promise<PublishResult>`; `activateRelease(ctx,releaseId:string,expectedActiveReleaseId:string,key:string):Promise<ReleaseRef>`; `PublishBlocker {code:string;modelId:string;figureId?:string;entityId?:string;message:string}`.

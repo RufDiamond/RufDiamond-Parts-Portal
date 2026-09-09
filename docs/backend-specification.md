@@ -169,12 +169,16 @@ come from that release. No endpoint may blend release and working rows.
 
 `publish.execute` runs in a serializable transaction:
 
-1. Lock the model publication state and verify the expected working version.
+1. Lock the model publication state and verify both `expectedWorkingVersion`
+   (the unchanged source `model.version`) and `expectedPublicationVersion`
+   (the separate `model.publication_version` coordination counter).
 2. Re-evaluate authorization and all blockers against current working data.
 3. Copy the complete customer-visible graph into a new release.
 4. Store a deterministic release checksum.
 5. Atomically deactivate the previous release and activate the new one.
-6. Append audit and outbox events.
+6. Increment only the publication coordination counter and append audit and
+   outbox events. Publication and activation do not change source versions or
+   mapping approval bindings.
 7. Commit, after which the new release becomes visible.
 
 The server never trusts a disabled UI control or previous validation result.
@@ -182,6 +186,13 @@ Concurrent attempts yield one success and one `409`. Failure leaves the
 previous release active. Rollback requires `publish.rollback` and activates a
 prior snapshot without rewriting history. `publish.block.override` is granted
 to nobody in the pilot.
+
+Publish input requires both version preconditions. Activate/rollback input
+requires `expectedPublicationVersion` and `expectedActiveReleaseId`; each
+successful action increments only the coordination counter. This separates
+concurrent release operations from source edits: geometry-only saves can be
+reviewed and published again without artificially invalidating all other
+figure approvals. The scoped publication queue exposes both current versions.
 
 Blockers are derived, never manually cleared. Publication fails for:
 

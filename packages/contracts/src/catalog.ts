@@ -1,4 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
+import { DiagramMappingDocumentSchema } from "./diagram-mapping.js";
 import {
   AddressSchema,
   MoneySchema,
@@ -325,6 +326,12 @@ export const DrawingAssetSchema = Type.Object(
 export type DrawingAsset = Static<typeof DrawingAssetSchema>;
 
 const figureDetailFields = {
+  mapping: Type.Union([Type.Object({
+    document: DiagramMappingDocumentSchema,
+    sourceRevisionId: Type.String(), sourceDocumentChecksum: Type.String(),
+    storedDocumentChecksum: Type.String(), documentChecksum: Type.String(),
+    reviewerId: Type.String(), reviewedAt: Type.String(),
+  }, { additionalProperties: false }), Type.Null()]),
   release: ReleaseRefSchema,
   figure: ReleasedFigureSchema,
   drawing: DrawingAssetSchema,
@@ -416,3 +423,5 @@ export const PartUsageSummarySchema = Type.Object(
   { $id: "PartUsageSummary", additionalProperties: false },
 );
 export type PartUsageSummary = Static<typeof PartUsageSummarySchema>;
+
+export const PartUsageIndexEntrySchema = Type.Object({ partId: Type.String(), summary: PartUsageSummarySchema }, { additionalProperties: false });

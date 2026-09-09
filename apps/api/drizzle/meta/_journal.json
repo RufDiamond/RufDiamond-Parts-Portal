@@ -64,6 +64,13 @@
       "when": 1788921795820,
       "tag": "0009_private_drawing_uploads",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788923741369,
+      "tag": "0010_publication_coordination",
+      "breakpoints": true
     }
   ]
 }

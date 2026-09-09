@@ -24,10 +24,11 @@ export const drawingFile = pgTable("drawing_file", {
 ]);
 
 export const model = pgTable("model", {
+  publicationVersion: integer("publication_version").notNull().default(1),
   id: id(), productLineId: uuid("product_line_id").notNull().references(() => productLine.id), name: text("name").notNull(),
   photoFileId: uuid("photo_file_id").references(() => drawingFile.id), sortOrder: integer("sort_order").notNull().default(0),
   status: text("status", { enum: ["active", "legacy", "discontinued"] }).notNull().default("active"), ...mutable(),
-}, t => [unique("model_line_name").on(t.productLineId, t.name), versionCheck(t), check("model_lifecycle", sql`${t.status} IN ('active','legacy','discontinued')`)]);
+}, t => [unique("model_line_name").on(t.productLineId, t.name), versionCheck(t), check("model_publication_version_positive", sql`${t.publicationVersion} > 0`), check("model_lifecycle", sql`${t.status} IN ('active','legacy','discontinued')`)]);
 
 export const variant = pgTable("variant", {
   id: id(), modelId: uuid("model_id").notNull().references(() => model.id), label: text("label").notNull(), serialFrom: text("serial_from"), serialTo: text("serial_to"), catalogRevision: text("catalog_revision"), ...mutable(),
