@@ -101,6 +101,28 @@ describe("diagram mapping schemas", () => {
     expect(Value.Check(DiagramMappingDocumentSchema, document)).toBe(true);
   });
 
+  it("rejects impossible editor revision lifecycle envelopes", () => {
+    const document = structuredClone(validDocument);
+    const revision = {
+      revisionId: "revision-1",
+      version: 2,
+      checksum: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      document,
+      approval: null,
+    };
+
+    expect(Value.Check(MappingEditorDocumentSchema, {
+      version: 2,
+      revision: null,
+      document,
+    })).toBe(false);
+    expect(Value.Check(MappingEditorDocumentSchema, {
+      version: 1,
+      revision,
+      document,
+    })).toBe(false);
+  });
+
   it("rejects unknown and markup-bearing properties at every geometry object", () => {
     const document = structuredClone(validDocument);
 

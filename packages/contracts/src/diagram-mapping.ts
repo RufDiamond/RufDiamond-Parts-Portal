@@ -120,12 +120,25 @@ export const MappingWriteContextSchema = Type.Object(
 );
 export type MappingWriteContext = Static<typeof MappingWriteContextSchema>;
 
-export const MappingEditorDocumentSchema = Type.Object(
-  {
-    version: Type.Integer({ minimum: 1 }),
-    revision: Type.Union([MappingRevisionSchema, Type.Null()]),
-    document: DiagramMappingDocumentSchema,
-  },
-  { $id: "MappingEditorDocument", additionalProperties: false },
+export const MappingEditorDocumentSchema = Type.Union(
+  [
+    Type.Object(
+      {
+        version: Type.Literal(1),
+        revision: Type.Null(),
+        document: DiagramMappingDocumentSchema,
+      },
+      { additionalProperties: false },
+    ),
+    Type.Object(
+      {
+        version: Type.Integer({ minimum: 2 }),
+        revision: MappingRevisionSchema,
+        document: DiagramMappingDocumentSchema,
+      },
+      { additionalProperties: false },
+    ),
+  ],
+  { $id: "MappingEditorDocument" },
 );
 export type MappingEditorDocument = Static<typeof MappingEditorDocumentSchema>;
