@@ -88,6 +88,16 @@ test("Console 6.10 retains neck arms and interior metal without filling its T-sh
   expect(geometry.regions.some((r) => pointInRegion([609,659],r))).toBe(true);
 });
 
+test("Electrical 11.3 scopes the directly labelled fuse holder and excludes panel windows", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-electric-11-3"))!, "hosted-review");
+  const contains = (ref: number, point: [number, number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point, r));
+  expect(contains(2, [296, 210])).toBe(true);
+  expect(contains(2, [345, 198])).toBe(false);
+  expect(contains(15, [765, 157])).toBe(false);
+  expect(contains(15, [790, 120])).toBe(false);
+  expect(contains(15, [747, 170])).toBe(true);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},

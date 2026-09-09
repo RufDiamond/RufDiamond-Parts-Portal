@@ -7004,12 +7004,12 @@
           "figurePartId": "fp-11-1-02",
           "sourceRefNo": "2",
           "category": "partial",
-          "evidence": "Original-source audit11.1 finds joystick2 current polygon bridges white separation to loose lower-left block. Block ownership not established.",
+          "evidence": "Reinspected original PNG at4x after broad audit suspicion: small lower connector is visibly contiguous with the joystick body; existing contour does not bridge to another detached item. No removal or inferred source conflict. Direct ref2 stick/collar/base retained.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Restrict to connected joystick material; no unassociated loose block or background bridge"
+            "Tiny base holes and connector contour still require fine material measurement; no blanket completion"
           ]
         },
         {
@@ -7264,12 +7264,12 @@
           "figurePartId": "fp-11-3-02",
           "sourceRefNo": "2",
           "category": "partial",
-          "evidence": "Original-source audit11.3: printed2 leader reaches left fuseholder, existing contour spans four neighboring holders x277–375. PDFqty4 is not authority for one bank assembly.",
+          "evidence": "Original ref2 leader targets leftmost holder; former four-unit envelope replaced with source-targeted one-body contour. Adjacent units are not associated from quantity4.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Re-trace only directly established holder; exclude adjacent unlabelled units and background"
+            "Shared upper terminals and tiny tabs need independent ownership/material inspection"
           ]
         },
         {
@@ -7383,13 +7383,13 @@
         {
           "figurePartId": "fp-11-3-12",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "ManufacturerPDFphysical50 confirms same branching terminal item12 and PN49-00069JUNCTIONBLOCKSTUD; resemblance to hoses is not conflict. OriginalPNG visible sheet patches13/14/16 have direct printed identities despite device occlusion.",
+          "category": "partial",
+          "evidence": "Manufacturer PDF physical50 confirms original ref12 item and PN49-00069 junction block stud. Visible cover and three separate terminal projections now outlined from original pixels.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace only established terminal material12 and disjoint visible plate patches13/14/16 with openings; no envelopes over devices"
+            "Rear ring, hidden joins and crowded necks remain untraced or source-limited; not complete assembly"
           ]
         },
         {
@@ -7420,12 +7420,12 @@
           "figurePartId": "fp-11-3-15",
           "sourceRefNo": "15",
           "category": "partial",
-          "evidence": "Original-source audit11.3 identifies mounting eyes/connector gaps on existing devices1/4–11/17; plate15 two large triangular windows and small bores explicitly remain filled. Housing/cover faces themselves are opaque.",
+          "evidence": "Original narrow panel15 retraced with two triangular through-windows and foreground ECM exclusion; diagonal web retained.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual aperture/ear/connector gaps and plate15 windows; single exterior does not establish complete material"
+            "Small mounting bores, rear ears and tight occlusion junctions still require material inspection"
           ]
         },
         {
