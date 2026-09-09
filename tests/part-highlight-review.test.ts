@@ -154,6 +154,13 @@ test("Lower gate tracing preserves ladder space and foreground/source ownership"
   expect(contains(3,[227,302])).toBe(true);
 });
 
+test("Front seat support excludes its large window while preserving inner wall", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-11"))!, "hosted-review");
+  const regions=result.detail.callouts.find(c=>c.number===3)!.componentGeometry!.regions;
+  expect(regions.some(r=>pointInRegion([430,580],r))).toBe(false);
+  expect(regions.some(r=>pointInRegion([365,580],r))).toBe(true);
+});
+
 test("Roof side truss partition retains both sides and solid seam without closing apertures", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-9"))!, "hosted-review");
   const regions = result.detail.callouts.find(c=>c.number===9)!.componentGeometry!.regions;

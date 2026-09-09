@@ -15848,88 +15848,6 @@
           "evidence": "Printed reference 1 leader terminates on the seat, backrest, restraint and connected base assembly, matching 67-00007 (Lh seat & safety belt). Contour traced from the current source PNG; no label or leader is included."
         },
         {
-          "calloutId": "co-6-11-0265",
-          "figurePartId": "fp-6-11-04",
-          "partNumber": "67-00127",
-          "number": 3,
-          "x": 20.2344,
-          "y": 64.7222,
-          "polygons": [
-            [
-              [
-                26.875,
-                71.9444
-              ],
-              [
-                27.8906,
-                70.8333
-              ],
-              [
-                28.9063,
-                70.5556
-              ],
-              [
-                45.0781,
-                75.6944
-              ],
-              [
-                45.8594,
-                76.3889
-              ],
-              [
-                46.0156,
-                79.7222
-              ],
-              [
-                36.7188,
-                89.0278
-              ],
-              [
-                35.5469,
-                89.4444
-              ],
-              [
-                26.7188,
-                85.9722
-              ]
-            ]
-          ],
-          "evidence": "Printed reference 3 leader terminates on the detached left front seat support plate, matching 67-00127 (Left front seat support). Contour traced from the current source PNG; no label or leader is included."
-        },
-        {
-          "calloutId": "co-6-11-0267",
-          "figurePartId": "fp-6-11-06",
-          "partNumber": "67-00144",
-          "number": 5,
-          "x": 17.9688,
-          "y": 79.0278,
-          "polygons": [
-            [
-              [
-                26.9531,
-                89.1667
-              ],
-              [
-                28.75,
-                88.0556
-              ],
-              [
-                37.2656,
-                90.8333
-              ],
-              [
-                37.2656,
-                91.6667
-              ],
-              [
-                35.8594,
-                92.7778
-              ]
-            ]
-          ],
-          "evidence": "Printed reference 5 leader terminates on the detached narrow plate for bracket, matching 67-00144 (Plate for bracket). Contour traced from the current source PNG; no label or leader is included."
-        },
-        {
           "calloutId": "co-6-11-0264",
           "figurePartId": "fp-6-11-03",
           "partNumber": "67-00129",
@@ -15986,6 +15904,89 @@
           "evidence": "Printed2 leader reaches67-00129 top plate; exact occurrence associates to row03, not row02. Connected long plate and downturned right end traced from original6.11 PNG. Small mounting holes remain partial. Quantity4/TWO PER SEAT does not create four depictions. Unapproved2026-09-09."
         },
         {
+          "calloutId": "co-6-11-0265",
+          "figurePartId": "fp-6-11-04",
+          "partNumber": "67-00127",
+          "number": 3,
+          "x": 20.2344,
+          "y": 64.7222,
+          "polygons": [
+            [
+              [
+                26.875,
+                71.9444
+              ],
+              [
+                27.8906,
+                70.8333
+              ],
+              [
+                28.9063,
+                70.5556
+              ],
+              [
+                45.0781,
+                75.6944
+              ],
+              [
+                45.8594,
+                76.3889
+              ],
+              [
+                46.0156,
+                79.7222
+              ],
+              [
+                36.7188,
+                89.0278
+              ],
+              [
+                35.5469,
+                89.4444
+              ],
+              [
+                26.7188,
+                85.9722
+              ]
+            ]
+          ],
+          "holes": [
+            [
+              [
+                [
+                  28.7891,
+                  75.9722
+                ],
+                [
+                  40,
+                  79.7917
+                ],
+                [
+                  40.4297,
+                  80.2083
+                ],
+                [
+                  40.5469,
+                  80.625
+                ],
+                [
+                  40.3906,
+                  81.0764
+                ],
+                [
+                  35.1563,
+                  86.0417
+                ],
+                [
+                  28.8477,
+                  83.7847
+                ]
+              ]
+            ]
+          ],
+          "evidence": "Original3 left front seat support: established large central opening excluded while visible thick left/lower inner wall retained. Foreground fastener visible through opening is not support material. Existing source-bound exterior retained; small top slots and side bore still partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
           "calloutId": "co-6-11-0266",
           "figurePartId": "fp-6-11-05",
           "partNumber": "67-00130",
@@ -16032,6 +16033,214 @@
             []
           ],
           "evidence": "Printed4 leader reaches67-00130 right front seat support at the exposed diagonal under-seat rail. Only visible leader-established rail traced, with boundaries against adjacent top plate/seat; rear surfaces and small mounting apertures remain partial. No hidden outline invented. Unapproved2026-09-09."
+        },
+        {
+          "calloutId": "co-6-11-0267",
+          "figurePartId": "fp-6-11-06",
+          "partNumber": "67-00144",
+          "number": 5,
+          "x": 17.9688,
+          "y": 79.0278,
+          "polygons": [
+            [
+              [
+                26.9531,
+                89.1667
+              ],
+              [
+                28.75,
+                88.0556
+              ],
+              [
+                37.2656,
+                90.8333
+              ],
+              [
+                37.2656,
+                91.6667
+              ],
+              [
+                35.8594,
+                92.7778
+              ]
+            ]
+          ],
+          "evidence": "Printed reference 5 leader terminates on the detached narrow plate for bracket, matching 67-00144 (Plate for bracket). Contour traced from the current source PNG; no label or leader is included."
+        },
+        {
+          "calloutId": "co-6-11-0268",
+          "figurePartId": "fp-6-11-07",
+          "partNumber": "10-210030-121",
+          "number": 6,
+          "x": 16.3281,
+          "y": 90.2083,
+          "polygons": [
+            [
+              [
+                27.793,
+                93.2292
+              ],
+              [
+                27.9297,
+                92.9514
+              ],
+              [
+                28.0078,
+                92.5
+              ],
+              [
+                28.418,
+                92.4306
+              ],
+              [
+                28.5742,
+                92.5694
+              ],
+              [
+                28.7109,
+                93.0208
+              ],
+              [
+                28.9844,
+                93.2986
+              ],
+              [
+                28.9453,
+                93.6111
+              ],
+              [
+                28.4766,
+                93.8889
+              ],
+              [
+                28.4766,
+                95.3819
+              ],
+              [
+                28.2813,
+                95.5903
+              ],
+              [
+                28.0273,
+                95.5208
+              ],
+              [
+                27.9687,
+                93.9236
+              ],
+              [
+                27.7539,
+                93.5764
+              ]
+            ]
+          ],
+          "evidence": "Original6 leader targets left detached M10 screw only: visible flanged head and short shaft, excluding printed leader and right lookalike. Thread/head detail remains partial; quantity does not create a second occurrence. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-11-0269",
+          "figurePartId": "fp-6-11-08",
+          "partNumber": "18-00112",
+          "number": 7,
+          "x": 65.3125,
+          "y": 88.5417,
+          "polygons": [
+            [
+              [
+                51.1719,
+                85.4167
+              ],
+              [
+                51.4063,
+                85.2083
+              ],
+              [
+                51.6406,
+                85.4167
+              ],
+              [
+                51.6797,
+                86.1111
+              ],
+              [
+                51.875,
+                86.6667
+              ],
+              [
+                51.9531,
+                87.0833
+              ],
+              [
+                51.7969,
+                87.5
+              ],
+              [
+                51.25,
+                87.6389
+              ],
+              [
+                50.8984,
+                87.3611
+              ],
+              [
+                50.8984,
+                86.9444
+              ],
+              [
+                51.0938,
+                86.3889
+              ]
+            ]
+          ],
+          "evidence": "Original7 leader targets lower shoulder screw at right: visible head and compact shaft only. Long straight assembly guide up toward separate nut8 is excluded. Tiny shaft/head edges remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+        },
+        {
+          "calloutId": "co-6-11-0270",
+          "figurePartId": "fp-6-11-09",
+          "partNumber": "18-00060",
+          "number": 8,
+          "x": 65.3125,
+          "y": 79.375,
+          "polygons": [
+            [
+              [
+                51.1719,
+                82.6389
+              ],
+              [
+                51.4844,
+                82.5
+              ],
+              [
+                51.7969,
+                82.6389
+              ],
+              [
+                51.9531,
+                83.0556
+              ],
+              [
+                51.875,
+                83.4722
+              ],
+              [
+                51.5625,
+                83.75
+              ],
+              [
+                51.1719,
+                83.6111
+              ],
+              [
+                51.0156,
+                83.3333
+              ],
+              [
+                51.0156,
+                82.9167
+              ]
+            ]
+          ],
+          "evidence": "Original8 direct leader to upper nut above shoulder screw7. Only source-separable compact hex body is traced; centre merges with leader and cannot support an invented aperture. Tiny inner bore and edge remain resolution-limited. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
           "calloutId": "co-6-11-0271",

@@ -3663,12 +3663,12 @@
           "figurePartId": "fp-6-11-04",
           "sourceRefNo": "3",
           "category": "partial",
-          "evidence": "Original6.11 seat1 upholstery opaque, but belt/arm attachment gaps need exact ownership; support3large triangular opening and plate5long slot visible and absent from exterior-only shapes.",
+          "evidence": "Original3 detached front seat support personally inspected full and4x detail2026-09-09; central window now excluded while visible inner wall retained. Existing source-bound outer remains; foreground fastener through opening is not support material.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace support/plate actual apertures and seat-belt/arm negative space, not surface stitching holes"
+            "Small top mounting slots, side bore and fine outer/inner wall details remain partial."
           ]
         },
         {
@@ -3698,37 +3698,37 @@
         {
           "figurePartId": "fp-6-11-07",
           "sourceRefNo": "6",
-          "category": "clear-tracing",
-          "evidence": "Original6.11 explicitly labels lower-leftbolt6,vertical shoulderbolt7 and smallverticalnut8. Similar detached items remain unassociated.",
+          "category": "partial",
+          "evidence": "Original6/7 directly labelled individual screw contours inspected at useful zoom2026-09-09. Ref6 only left M10 screw; ref7 lower shoulder screw with compact shaft, not assembly guide to separate nut8. No quantity-derived copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny hardware material and bores; preserve source-resolution limits on fine threads"
+            "Fine thread, head recess and source-obscured shaft joins remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-11-08",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Original6.11 explicitly labels lower-leftbolt6,vertical shoulderbolt7 and smallverticalnut8. Similar detached items remain unassociated.",
+          "category": "partial",
+          "evidence": "Original6/7 directly labelled individual screw contours inspected at useful zoom2026-09-09. Ref6 only left M10 screw; ref7 lower shoulder screw with compact shaft, not assembly guide to separate nut8. No quantity-derived copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny hardware material and bores; preserve source-resolution limits on fine threads"
+            "Fine thread, head recess and source-obscured shaft joins remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-11-09",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Original6.11 explicitly labels lower-leftbolt6,vertical shoulderbolt7 and smallverticalnut8. Similar detached items remain unassociated.",
+          "category": "image-resolution-limited",
+          "evidence": "Original8 directly labelled compact nut above7 is source-separable at useful zoom, exterior traced2026-09-09. Printed leader merges with centre.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace directly indicated tiny hardware material and bores; preserve source-resolution limits on fine threads"
+            "Tiny nut bore and leader-obscured inner/outer edge cannot support a fabricated clear aperture; proposal remains resolution-limited partial."
           ]
         },
         {
