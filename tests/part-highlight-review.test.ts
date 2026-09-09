@@ -154,6 +154,24 @@ test("Lower gate tracing preserves ladder space and foreground/source ownership"
   expect(contains(3,[227,302])).toBe(true);
 });
 
+test("Roof side truss partition retains both sides and solid seam without closing apertures", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-9"))!, "hosted-review");
+  const regions = result.detail.callouts.find(c=>c.number===9)!.componentGeometry!.regions;
+  expect(regions).toHaveLength(2);
+  const seamX=regions[0].outer.find(p=>Math.abs(p[0]-858)<0.01)![0];
+  for(const p of [[857.8,274],[seamX,274],[858.2,274]] as [number,number][]) expect(regions.some(r=>pointInRegion(p,r))).toBe(true);
+  expect(pointInRegion([800,330],regions[0])).toBe(true);
+  expect(pointInRegion([895,243],regions[1])).toBe(true);
+  for(const p of [[784,338],[882.5,251.5],[895,239.5],[908.2,229],[920.2,218],[828,300]] as [number,number][])
+    expect(regions.some(r=>pointInRegion(p,r)),`aperture ${p}`).toBe(false);
+  for(const p of [[879,250],[892,237],[904,226],[917,215],[824,299],[830,303],[794.8,323]] as [number,number][])
+    expect(regions.some(r=>pointInRegion(p,r)),`opaque sheet ${p}`).toBe(true);
+  const rim=result.detail.callouts.find(c=>c.number===7)!.componentGeometry!.regions;
+  expect(pointInRegion([350,238.5],rim[0])).toBe(true);
+  expect(pointInRegion([350,226.5],rim[1])).toBe(true);
+  expect(rim.some(r=>pointInRegion([350,232],r))).toBe(false);
+});
+
 test("Roof rack singles do not infer adjacent slats and back truss holes stay open", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-9"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));

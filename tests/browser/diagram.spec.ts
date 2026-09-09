@@ -69,7 +69,7 @@ for (const entry of [
     {figure:"fig-engine-8-3",refs:[1,2,3]},
     {figure:"fig-fuel-system-9-1",refs:[2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,19,22],crowdedFitLabels:true},
     {figure:"fig-cabin-6-8",refs:[2,3,7,8,9,10,11,12,13,14,15,16]},
-    {figure:"fig-cabin-6-9",refs:[4,5,6,8,10,11,12,13,16]},
+    {figure:"fig-cabin-6-9",refs:[4,5,6,7,8,9,10,11,12,13,16]},
   ]) {
   test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
     test.setTimeout(90000);
@@ -110,6 +110,30 @@ for (const entry of [
   });
 }
 const figure = (page:Page) => page.locator("figure").first();
+test("task10c roof truss region pieces each select the same exact source part", async({page},info)=>{
+  await page.goto(`${base}/review/figures/fig-cabin-6-9`);
+  for(const [ref,index,sourcePoint] of [[7,0,[350,238.5]],[7,1,[350,226.5]],[9,0,[800,330]],[9,1,[895,243]]] as [number,number,[number,number]][]){
+    await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
+    const dialog=page.getByRole("dialog"),scope=dialog.locator("figure");
+    const zoomIn=dialog.getByRole("button",{name:"Zoom in",exact:true});
+    for(let i=0;i<4&&await zoomIn.isEnabled();i++)await zoomIn.click();
+    const target=scope.locator(`svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).nth(index);
+    await target.scrollIntoViewIfNeeded();await settled(page);
+    const p=await target.evaluate((el,point)=>{
+      const path=el as SVGGeometryElement,matrix=path.getScreenCTM()!;
+      const screen=new DOMPoint(...point).matrixTransform(matrix),x=Math.round(screen.x),y=Math.round(screen.y);
+      return {x,y,inside:path.isPointInFill(new DOMPoint(x,y).matrixTransform(matrix.inverse()))};
+    },sourcePoint);
+    expect(p.inside,`actual rounded point belongs to ref${ref} region${index}`).toBe(true);
+    await page.mouse.click(p.x,p.y);await page.mouse.move(0,0);
+    const chooser=page.getByRole("group",{name:"Choose overlapping component"});
+    if(await chooser.count())await chooser.getByRole("button",{name:new RegExp(`^Ref ${ref} `)}).click();
+    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)})).toHaveAttribute("aria-pressed","true");
+    await page.screenshot({path:info.outputPath(`truss-ref${ref}-region${index}-native.png`)});
+    await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
+    await page.getByRole("button",{name:"Close the illustration"}).click();
+  }
+});
 const stage = (scope:Locator) => scope.locator("img").locator("..");
 
 test("fullscreen text actions wrap and retain keyboard selection controls on a narrow viewport", async ({ page }) => {

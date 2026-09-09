@@ -3251,13 +3251,14 @@
         {
           "figurePartId": "fp-6-9-07",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original7 highly oblique truss personally inspected full,8x crops and source-only rotated inspection; native overlays confirm only two source-separable outer rail bands are traced. No full perforated-face envelope or extra occurrence. This is a bounded partial material addition, not finished truss coverage.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Perforated front-face and brace material is still untraced geometry work; not dismissed merely because a rail proposal now exists.",
+            "Tiny dark aperture walls are resolution-limited; top-lip pale interiors remain unresolved as opaque faces versus openings, not assumed solid and not subtracted by threshold."
           ]
         },
         {
@@ -3275,13 +3276,14 @@
         {
           "figurePartId": "fp-6-9-09",
           "sourceRefNo": "9",
-          "category": "clear-tracing",
-          "evidence": "Source-audit-cabin-6-7-through-6-10 records exact row/PN and directly printed leader target. Full geometry is not supplied by audit; tiny/occluded details require actual contour inspection.",
+          "category": "partial",
+          "evidence": "Original9 front sheet split into two exact adjoining material regions at solid central x858 section, same occurrence. Seventeen aperture interior subregions manually traced and source-composited at10x; misplaced upward-triangle candidates corrected individually with solid/aperture point regressions. Both region pieces independently select same source part through native pointer input.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine aperture-wall extent and dark/leader-obscured tiny holes remain partial; small interior subregions are not certified full apertures.",
+            "Uncertain narrow top-lip pale interiors are omitted; no assertion they are solid material or through-holes. Complete region/hole requirements remain independently undeclared."
           ]
         },
         {
