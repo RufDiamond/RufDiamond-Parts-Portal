@@ -4,7 +4,7 @@ import { MappingEditorDocumentSchema, MappingHistoricalDocumentSchema, MappingHi
 import type { DiagramMappingDocument, MappingEditorDocument, MappingHistoricalDocument, MappingHistory, MappingIssue, MappingRevision } from "@rufdiamond/contracts";
 
 export class MappingApiError extends Error {
-  constructor(public readonly status: number, message: string, public readonly issues: MappingIssue[] = [], public readonly requestId?: string) { super(message); this.name = "MappingApiError"; }
+  constructor(public readonly status: number, message: string, public readonly issues: MappingIssue[] = [], public readonly requestId?: string, public readonly code?: string) { super(message); this.name = "MappingApiError"; }
 }
 export type MappingApiClient = {
   loadMapping(figureId: string, signal?: AbortSignal): Promise<MappingEditorDocument>;

@@ -19,7 +19,7 @@ export function createDrawingApiClient(options: { csrfToken: string; fetch?: typ
     const result = await request(path, { method: write ? "POST" : "GET", credentials: "same-origin", cache: "no-store", redirect: "error", signal, headers: { Accept: "application/json, application/problem+json", ...(write ? { "Content-Type": "application/json", "X-CSRF-Token": options.csrfToken, "If-Match": `"${write.version}"` } : {}) }, ...(write ? { body: JSON.stringify(write.body) } : {}) });
     let body: unknown;
     try { body = await result.json(); } catch { throw new MappingApiError(502, "The drawing API returned an invalid response."); }
-    if (!result.ok) { const error = body && typeof body === "object" ? body as Record<string, unknown> : {}; throw new MappingApiError(result.status, typeof error.detail === "string" ? error.detail : "The drawing request failed."); }
+    if (!result.ok) { const error = body && typeof body === "object" ? body as Record<string, unknown> : {}; throw new MappingApiError(result.status, typeof error.detail === "string" ? error.detail : "The drawing request failed.", [], undefined, typeof error.code === "string" ? error.code : undefined); }
     if (!Value.Check(schema, body)) throw new MappingApiError(502, "The drawing API returned an invalid contract.");
     return body;
   }

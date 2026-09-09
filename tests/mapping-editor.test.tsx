@@ -4,6 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import type { MappingEditorDocument, MappingRevision } from "@rufdiamond/contracts";
 import { MappingEditor } from "../src/features/diagram-mapping/MappingEditor";
 import { MappingApiError, createMappingApiClient, type MappingApiClient } from "../src/features/diagram-mapping/api-client";
+import { createDrawingApiClient } from "../src/features/diagram-mapping/drawing-api-client";
 
 afterEach(cleanup);
 const fixture = (): MappingEditorDocument => ({ version: 1, revision: null, sourceConflict: false, document: { schemaVersion: 1, figureId: "figure", drawingFileId: "drawing", drawingSha256: "a".repeat(64), catalogueBindingSha256: "b".repeat(64), imageWidth: 640, imageHeight: 480, occurrences: [{ calloutId: "one", figurePartId: "row", refNo: "7", labelRegion: null, regions: [], evidence: "" }] }, source: { figure: { id: "figure", name: "Frame", version: 1, variantId: "variant", modelId: "model" }, drawing: { id: "drawing", filename: "frame.png", sha256: "a".repeat(64), width: 640, height: 480, fileVersion: 1, validationStatus: "valid", mediaType: "image/png" }, catalogueBindingSha256: "b".repeat(64), rows: [{ id: "row", partId: "part", partNumber: "P1", description: "Bracket", qty: 1, refLabels: ["7"], version: 1 }], occurrences: [{ id: "one", figurePartId: "row", refNo: "7", version: 1 }] } });
@@ -21,11 +22,11 @@ function point(x: number, y: number) {
   fireEvent.click(canvas, { clientX: x, clientY: y });
 }
 describe("mapping editor", () => {
-  it.each([413, 422])("allows a corrected file after definitive finalize %s without replacing local edits", async status => {
+  it.each([new MappingApiError(413, "PNG rejected"), new MappingApiError(422, "PNG rejected"), new MappingApiError(409, "Upload expired", [], undefined, "UPLOAD_EXPIRED")])("allows a corrected file after definitive finalize %s without replacing local edits", async failure => {
     const initial = fixture(), client = api(initial), confirmDiscard = vi.fn(() => false);
     const drawingApi = {
       createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
-      uploadFile: async () => {}, finalize: async () => { throw new MappingApiError(status, "PNG rejected"); },
+      uploadFile: async () => {}, finalize: async () => { throw failure; },
       loadDrawing: async () => { throw new Error("Not requested"); },
     };
     render(<MappingEditor initial={initial} drawing={drawing} authority={{ ...authority, canUploadDrawing: true }} api={client} drawingApi={drawingApi} confirmDiscard={confirmDiscard} />); loadImage();
@@ -40,7 +41,35 @@ describe("mapping editor", () => {
     expect((screen.getByRole("button", { name: "Upload replacement PNG" }) as HTMLButtonElement).disabled).toBe(false);
     expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Keep this local work");
     expect(screen.getByRole("status").textContent).toContain("Unsaved");
+    expect(screen.getByRole("status").textContent).not.toContain("Conflict");
+    expect((screen.getByRole("button", { name: "Polygon (G)" }) as HTMLButtonElement).disabled).toBe(false);
     expect(confirmDiscard).not.toHaveBeenCalled();
+  });
+  it.each(["source", "version"])("preserves an existing %s conflict when abandoning an expired upload", async conflict => {
+    const initial = fixture(), client = api(initial);
+    if (conflict === "source") initial.sourceConflict = true;
+    initial.document.occurrences[0].evidence = "Retain conflict evidence";
+    client.listRevisions = async () => { throw new MappingApiError(412, "Revision changed"); };
+    const drawingApi = {
+      createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
+      uploadFile: async () => {}, finalize: async () => { throw new MappingApiError(409, "Upload expired", [], undefined, "UPLOAD_EXPIRED"); },
+      loadDrawing: async () => { throw new Error("Not requested"); },
+    };
+    render(<MappingEditor initial={initial} drawing={drawing} authority={{ ...authority, canUploadDrawing: true }} api={client} drawingApi={drawingApi} />);
+    if (conflict === "version") { loadImage(); await act(async () => fireEvent.click(screen.getByRole("button", { name: "Saved revisions" }))); }
+    expect(screen.getByRole("status").textContent).toContain("Conflict");
+    const picker = screen.getByLabelText("Replacement PNG") as HTMLInputElement;
+    fireEvent.change(picker, { target: { files: [new File(["png"], "new.png", { type: "image/png" })] } });
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Upload replacement PNG" })));
+    expect(picker.disabled).toBe(false);
+    expect(screen.queryByRole("button", { name: "Retry PNG verification" })).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain("Conflict");
+    expect((screen.getByRole("button", { name: "Polygon (G)" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Retain conflict evidence");
+  });
+  it.each(["UPLOAD_EXPIRED", 409, null])("transports only string drawing error codes (%s)", async code => {
+    const client = createDrawingApiClient({ csrfToken: "session", fetch: async () => new Response(JSON.stringify({ code, detail: "Expired upload" }), { status: 409 }) });
+    await expect(client.finalize("11111111-1111-1111-1111-111111111111", "22222222-2222-2222-2222-222222222222", 1)).rejects.toMatchObject({ status: 409, code: typeof code === "string" ? code : undefined });
   });
   it("keeps the old overlay blocked while an attached drawing's source reload is pending", async () => {
     const initial = fixture(), client = api(initial);
@@ -57,7 +86,7 @@ describe("mapping editor", () => {
     expect(screen.queryByTestId("mapping-canvas")).toBeNull();
     await act(async () => finish({ ...initial, sourceConflict: true }));
   });
-  it.each([new TypeError("Network response lost"), new MappingApiError(500, "Internal error"), new MappingApiError(503, "Scanner unavailable")])("blocks the old overlay after uncertain finalization %s and retains a safe retry", async failure => {
+  it.each([new TypeError("Network response lost"), new MappingApiError(500, "Internal error"), new MappingApiError(503, "Scanner unavailable"), new MappingApiError(409, "Unknown conflict"), new MappingApiError(409, "Source conflict", [], undefined, "SOURCE_CONFLICT")])("blocks the old overlay after uncertain finalization %s and retains a safe retry", async failure => {
     const initial = fixture(), client = api(initial);
     const drawingApi = {
       createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
@@ -73,9 +102,9 @@ describe("mapping editor", () => {
     expect((screen.getByRole("button", { name: "Retry PNG verification" }) as HTMLButtonElement).disabled).toBe(false);
     expect((screen.getByLabelText("Replacement PNG") as HTMLInputElement).disabled).toBe(true);
   });
-  it("retains pending reconciliation when a 422 occurs after attachment during source reload", async () => {
+  it.each([new MappingApiError(422, "Source response invalid"), new MappingApiError(409, "Upload expired", [], undefined, "UPLOAD_EXPIRED")])("retains pending reconciliation when %s occurs after attachment during source reload", async failure => {
     const initial = fixture(), client = api(initial);
-    client.loadMapping = async () => { throw new MappingApiError(422, "Source response invalid"); };
+    client.loadMapping = async () => { throw failure; };
     const drawingApi = {
       createIntent: async () => ({ uploadId: "upload", figureId: "figure", figureVersion: 1, url: "https://storage.test/upload", headers: { "Content-Type": "image/png" as const }, expiresAt: "2026-09-08T23:00:00Z" }),
       uploadFile: async () => {}, finalize: async () => ({ figureId: "figure", figureVersion: 2, drawingFileId: "new", fileVersion: 2, sha256: "e".repeat(64), width: 640, height: 480, bytes: 20, filename: "new.png" }),

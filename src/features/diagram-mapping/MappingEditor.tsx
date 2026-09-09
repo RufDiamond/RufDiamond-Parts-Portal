@@ -91,13 +91,17 @@ export function MappingEditor({ initial, authority, drawing, api, drawingApi, co
       setPendingUpload(null); setReplacementFile(null);
       setUploadNotice("PNG attached. Select the current drawing version to reconcile your draft. Saved history remains available.");
     } catch (error) {
-      problem(error);
+      const expired = finalizing && error instanceof MappingApiError && error.status === 409 && error.code === "UPLOAD_EXPIRED";
+      const rejected = expired || (finalizing && error instanceof MappingApiError && [413, 422].includes(error.status));
+      // An expiry/content rejection says nothing about source state. Preserve any existing
+      // conflict and draft, without manufacturing a source conflict from expiry's HTTP 409.
+      if (!rejected) problem(error);
       if (attached) dispatch({ type: "saveFailed", message: "The PNG was attached, but its current source could not be verified. Select the current drawing version before editing.", conflict: true });
-      // Content rejection attached nothing. Release the file controls without replacing local work.
+      // Content rejection or explicit expiry attached nothing. Release only the upload intent.
       // Network/5xx failures and errors after attachment still require pending reconciliation.
-      if (finalizing && error instanceof MappingApiError && [413, 422].includes(error.status)) {
+      if (rejected) {
         setPendingUpload(null);
-        setUploadNotice("PNG rejected. Choose a corrected file. Your local work remains in memory.");
+        setUploadNotice(`${expired ? "Upload expired" : "PNG rejected"}: ${error instanceof Error ? error.message : "Verification failed"}. Choose a corrected file. Your local work remains in memory.`);
       } else setUploadNotice("Upload or verification did not complete. Your local work remains in memory. A pending verification can be retried safely.");
     } finally { end(controller); }
   }
