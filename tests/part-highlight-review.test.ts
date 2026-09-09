@@ -118,6 +118,15 @@ test("Hydraulic 4.2 hoses retain bend background and only labelled clips", async
   expect(contains(24,[650,603])).toBe(true);
 });
 
+test("Windshield frame keeps its narrow right rail separate from the attached bracket", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-cabin-6-2"))!, "hosted-review");
+  const frame = result.detail.callouts.find(c => c.number === 26)!.componentGeometry!;
+  expect(frame.regions.some(r => pointInRegion([934,340],r))).toBe(false);
+  expect(frame.regions.some(r => pointInRegion([944,340],r))).toBe(true);
+  for (const point of [[850,400],[783,530],[819,622],[801,565]] as [number,number][])
+    expect(frame.regions.some(r => pointInRegion(point,r))).toBe(false);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},

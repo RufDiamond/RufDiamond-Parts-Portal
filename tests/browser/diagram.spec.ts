@@ -65,19 +65,30 @@ for (const entry of [
     {figure:"fig-cabin-6-7",refs:[1,2,3,4,5,6,7,8,10]},
     {figure:"fig-cabin-6-10",refs:[1,3,5,6,7,8,9]},
     {figure:"fig-electric-11-3",refs:[2,12,15]},
+    {figure:"fig-cabin-6-2",refs:[1,8,16,20,21,24,26],crowdedFitLabels:true},
   ]) {
   test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
     test.setTimeout(90000);
     await page.goto(`${base}/review/figures/${entry.figure}`);
     for (const ref of entry.refs) {
       const label=figure(page).getByRole("button",{name:new RegExp(`^Callout ${ref}:`)});
-      await label.click();await page.mouse.move(0,0);
+      if ("crowdedFitLabels" in entry) {
+        // Fixed-size labels overlap at embedded fit scale; verify the keyboard
+        // equivalent here and an actual native label click in fullscreen below.
+        await label.focus(); await page.keyboard.press("Enter");
+      } else await label.click();
+      await page.mouse.move(0,0);
       const row=page.locator("tr[data-figure-part-id][data-active]").first();
       await expect(row).toBeVisible();
       await row.click();await page.mouse.move(0,0);
       await expect(label).toHaveAttribute("aria-pressed","true");
       await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
       const dialog=page.getByRole("dialog"),scope=dialog.locator("figure");
+      if ("crowdedFitLabels" in entry) {
+        await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
+        await scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).click();
+        await page.mouse.move(0,0);
+      }
       await page.screenshot({path:info.outputPath(`${entry.figure}-ref${ref}-overlay.png`)});
       const zoomIn=dialog.getByRole("button",{name:"Zoom in",exact:true});
       for(let i=0;i<4 && await zoomIn.isEnabled();i++) await zoomIn.click();

@@ -1798,13 +1798,13 @@
         {
           "figurePartId": "fp-6-2-02",
           "sourceRefNo": "1",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Actual directly labelled latch1 and handle8 below the magnified inset now traced from original pixels; handle empty openings preserved. Enlarged ellipse/arrow not shaded or counted as extra occurrence.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Fine hardware/threads and overlapping narrow handle edges remain partially measured"
           ]
         },
         {
@@ -1882,13 +1882,13 @@
         {
           "figurePartId": "fp-6-2-09",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Actual directly labelled latch1 and handle8 below the magnified inset now traced from original pixels; handle empty openings preserved. Enlarged ellipse/arrow not shaded or counted as extra occurrence.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Fine hardware/threads and overlapping narrow handle edges remain partially measured"
           ]
         },
         {
@@ -1978,13 +1978,13 @@
         {
           "figurePartId": "fp-6-2-17",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Original directly targeted gas-spring brackets now independently traced with visible end/mounting holes; source-window approximations replaced by actual pixels.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Fine middle/base features and bracket/frame occlusions remain partial; qty2 not extra occurrence"
           ]
         },
         {
@@ -2026,25 +2026,25 @@
         {
           "figurePartId": "fp-6-2-21",
           "sourceRefNo": "20",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Original directly targeted gas-spring brackets now independently traced with visible end/mounting holes; source-window approximations replaced by actual pixels.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Fine middle/base features and bracket/frame occlusions remain partial; qty2 not extra occurrence"
           ]
         },
         {
           "figurePartId": "fp-6-2-22",
           "sourceRefNo": "21",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Original21 visible wiper motor body and output shaft traced behind frame with separable mounting openings; no frame envelope assigned to motor.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Upper hidden body and fine rail overlap/source-edge details require further inspection"
           ]
         },
         {
@@ -2074,13 +2074,13 @@
         {
           "figurePartId": "fp-6-2-25",
           "sourceRefNo": "24",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Glass24 and frame26 independently traced on original pixels; glass pivot/latch opening and frame large window/two lower windows/narrow slot retained. Dashed explosion lines are not material.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Additional tiny mounting apertures, transparent overlap and close frame/bracket joins remain partially measured"
           ]
         },
         {
@@ -2098,13 +2098,13 @@
         {
           "figurePartId": "fp-6-2-27",
           "sourceRefNo": "26",
-          "category": "clear-tracing",
-          "evidence": "Full original PNG inspected: printed1–26 leaders match detached latch/spacers/handle/wiper hardware and glass24/seal25/frame26. Upper-left enlargement has no additional printed occurrences. Inset13 is a hardware kit, not a filled ellipse. No callout association inferred from quantity.",
+          "category": "partial",
+          "evidence": "Glass24 and frame26 independently traced on original pixels; glass pivot/latch opening and frame large window/two lower windows/narrow slot retained. Dashed explosion lines are not material.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Source-visible material remains tracing/required-shape inspection work: thin rings, frame apertures, kit pieces and tiny hardware need exact contours; no completeness inferred from legacy exterior presence"
+            "Additional tiny mounting apertures, transparent overlap and close frame/bracket joins remain partially measured"
           ]
         },
         {
