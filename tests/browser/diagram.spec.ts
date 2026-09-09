@@ -48,6 +48,38 @@ test("synthetic editor: native coordinates, drag, keyboard, zoom and image misma
   await expect(page.getByRole("button", { name: "Polygon (G)" })).toBeDisabled(); await expect(svg).toHaveCount(0);
   expect(errors).toEqual([]);
 });
+
+test("synthetic editor portrait: Fit drawing contains both dimensions after zoom, pan and resize", async ({ page }, info) => {
+  await page.goto("http://localhost:3101");
+  const png = await page.evaluate(() => {
+    const canvas = document.createElement("canvas"); canvas.width = 400; canvas.height = 1000;
+    const context = canvas.getContext("2d")!; context.fillStyle = "white"; context.fillRect(0, 0, 400, 1000); context.strokeRect(5, 5, 390, 990);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  await page.route("**/synthetic-editor.png", route => route.fulfill({ contentType: "image/png", body: Buffer.from(png, "base64") }));
+  await page.goto("http://localhost:3101/?editor&portrait");
+  await expect(page.getByRole("button", { name: "Pan (P)" })).toBeEnabled();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Pan (P)" }).click();
+  const svg = page.getByTestId("mapping-canvas");
+  const box = await svg.boundingBox();
+  await page.mouse.move(box!.x + box!.width / 2, 550); await page.mouse.down(); await page.mouse.move(box!.x + box!.width / 2 + 50, 580); await page.mouse.up();
+  await page.getByRole("button", { name: "Fit drawing" }).click();
+  const measurements = [];
+  for (const size of [{ width: 1440, height: 1000 }, { width: 800, height: 800 }]) {
+    await page.setViewportSize(size);
+    const fit = await svg.evaluate(el => {
+      const image = el.parentElement!.querySelector("img")!.getBoundingClientRect();
+      const viewport = el.parentElement!.parentElement!.getBoundingClientRect();
+      const overlay = el.getBoundingClientRect();
+      return { width: image.width, height: image.height, overflow: Math.max(0, viewport.left - image.left, viewport.top - image.top, image.right - viewport.right, image.bottom - viewport.bottom), overlayError: Math.max(Math.abs(image.width - overlay.width), Math.abs(image.height - overlay.height)) };
+    });
+    expect(fit.width).toBeGreaterThan(0); expect(fit.height / fit.width).toBeCloseTo(2.5, 2);
+    expect(fit.overflow).toBeLessThanOrEqual(1); expect(fit.overlayError).toBeLessThanOrEqual(1); measurements.push({ ...size, ...fit });
+  }
+  await page.screenshot({ path: info.outputPath("synthetic-editor-portrait-fit.png"), fullPage: true });
+  await info.attach("portrait-fit", { body: JSON.stringify(measurements), contentType: "application/json" });
+});
 async function zoom(scope:Locator) { return stage(scope).evaluate((el) => Number((el as HTMLElement).style.getPropertyValue("--zoom"))); }
 async function settled(page:Page) { await page.waitForTimeout(220); }
 

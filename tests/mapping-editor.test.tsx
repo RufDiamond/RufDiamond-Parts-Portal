@@ -164,4 +164,23 @@ describe("mapping editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "Discard label input" }));
     expect(screen.getByRole("status").textContent).not.toContain("Unsaved");
   });
+  it("blocks stale canvas when the source changes between historical and current reads while preserving local work", async () => {
+    const initial = fixture(); const client = api(initial);
+    const historical: MappingRevision = { revisionId: "old", version: 2, checksum: "c".repeat(64), document: initial.document, approval: null };
+    client.listRevisions = async () => ({ items: [{ revisionId: "old", revisionNumber: 1, checksum: historical.checksum, createdAt: "today", approval: null }], nextBefore: null });
+    client.loadRevision = async () => ({ revision: historical, currentVersion: 1, source: initial.source, sourceConflict: false });
+    const changed = structuredClone(initial); changed.sourceConflict = true; changed.source.drawing!.id = "replacement"; changed.source.drawing!.sha256 = "d".repeat(64);
+    client.loadMapping = async () => changed;
+    render(<MappingEditor initial={initial} authority={authority} api={client} drawing={drawing} />); loadImage();
+    fireEvent.change(screen.getByLabelText("Source evidence"), { target: { value: "Local work to retain" } });
+    fireEvent.click(screen.getByRole("button", { name: "Polygon (G)" })); point(10, 10);
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Saved revisions" })));
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Load revision 1 as new draft" })));
+    expect(screen.queryByTestId("mapping-canvas")).toBeNull();
+    expect(screen.getByRole("status").textContent).toBe("Conflict");
+    expect((screen.getByRole("button", { name: "Polygon (G)" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "Save draft" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByLabelText("Source evidence") as HTMLTextAreaElement).value).toBe("Local work to retain");
+    expect((screen.getByRole("button", { name: "Cancel unfinished ring" }) as HTMLButtonElement).disabled).toBe(false);
+  });
 });

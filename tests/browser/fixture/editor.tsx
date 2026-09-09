@@ -9,6 +9,10 @@ const initial: MappingEditorDocument = { version: 1, revision: null, sourceConfl
 const unavailable = async (): Promise<never> => { throw new Error("Synthetic fixture has no persistence or authenticated backend."); };
 const api: MappingApiClient = { loadMapping: unavailable, saveMapping: unavailable, approveMapping: unavailable, listRevisions: unavailable, loadRevision: unavailable };
 export function EditorFixture() {
-  const mismatch = new URLSearchParams(location.search).has("mismatch");
-  return <MappingEditor initial={initial} authority={{ canEdit: true, canMap: true, canApprove: false }} api={api} drawing={{ figureId: "synthetic", drawingFileId: "synthetic-png", sha256: (mismatch ? "d" : "a").repeat(64), width: 640, height: 480, url: "/synthetic-editor.png" }} />;
+  const params = new URLSearchParams(location.search);
+  const mismatch = params.has("mismatch");
+  const width = params.has("portrait") ? 400 : 640;
+  const height = params.has("portrait") ? 1000 : 480;
+  const envelope = { ...initial, document: { ...initial.document, imageWidth: width, imageHeight: height }, source: { ...initial.source, drawing: { ...initial.source.drawing!, width, height } } };
+  return <MappingEditor initial={envelope} authority={{ canEdit: true, canMap: true, canApprove: false }} api={api} drawing={{ figureId: "synthetic", drawingFileId: "synthetic-png", sha256: (mismatch ? "d" : "a").repeat(64), width, height, url: "/synthetic-editor.png" }} />;
 }

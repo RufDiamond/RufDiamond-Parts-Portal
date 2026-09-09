@@ -51,7 +51,7 @@ export function MappingCanvas({ state, drawing, enabled, dispatch, onImageReady 
   return <section aria-label="Drawing workspace">
     <div className={styles.zoomControls}><button onClick={() => setZoom(z => Math.min(8, z * 1.25))}>Zoom in</button><button onClick={() => setZoom(z => Math.max(0.25, z / 1.25))}>Zoom out</button><button onClick={() => { setZoom(1); setPan([0, 0]); }}>Fit drawing</button></div>
     <div className={styles.viewport}>
-      <div className={styles.imageLayer} style={{ aspectRatio: `${drawing.width} / ${drawing.height}`, transform: `translate(${pan[0]}px, ${pan[1]}px) scale(${zoom})` }}>
+      <div className={styles.imageLayer} style={{ width: `min(100cqw, ${100 * drawing.width / drawing.height}cqh)`, aspectRatio: `${drawing.width} / ${drawing.height}`, transform: `translate(${pan[0]}px, ${pan[1]}px) scale(${zoom})` }}>
         {/* Exact private URL is supplied by authenticated delivery; never optimize/cache it publicly. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={drawing.url} alt="Authoritative drawing" draggable={false} referrerPolicy="no-referrer" onLoad={event => onImageReady(event.currentTarget.naturalWidth === drawing.width && event.currentTarget.naturalHeight === drawing.height)} onError={() => onImageReady(false)} />

@@ -108,9 +108,10 @@ export function MappingEditor({ initial, authority, drawing, api, confirmDiscard
     try {
       const old = await api.loadRevision(state.document.figureId, revisionId, controller.signal);
       if (controller.signal.aborted) return;
-      if (old.sourceConflict) { setHistoryNotice(`Revision ${old.revision.revisionId} belongs to an older source. Historical checksum: ${old.revision.checksum}. Geometry and historical approval cannot be used on the current drawing.`); return; }
       const envelope = await api.loadMapping(state.document.figureId, controller.signal);
       if (controller.signal.aborted) return;
+      dispatch({ type: "serverChecked", envelope });
+      if (old.sourceConflict) { setHistoryNotice(`Revision ${old.revision.revisionId} belongs to an older source. Historical checksum: ${old.revision.checksum}. Geometry and historical approval cannot be used on the current drawing.`); return; }
       if (envelope.sourceConflict || !matchesSource(old.revision.document, envelope.source)) { setHistoryNotice("The source changed while loading this revision. Historical geometry was not loaded; local work is retained."); return; }
       if (hasUnsavedChanges(current.current) && !confirmDiscard("Replace unsaved work and any open ring with this saved revision as a NEW draft?")) return;
       dispatch({ type: "loadDraft", document: old.revision.document, current: envelope }); setHistoryNotice("Loaded as a new unsaved draft. No approval is inherited; saving appends a revision.");

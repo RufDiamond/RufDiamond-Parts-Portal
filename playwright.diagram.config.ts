@@ -1,5 +1,9 @@
 import { defineConfig } from "@playwright/test";
 
+// Playwright forces color for its Vite server and worker subprocesses. Remove
+// the conflicting inherited flag in this harness, leaving all warnings enabled.
+delete process.env.NO_COLOR;
+
 export default defineConfig({
   testDir: "tests/browser",
   testMatch: "diagram.spec.ts",
