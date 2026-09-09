@@ -6662,25 +6662,25 @@
         {
           "figurePartId": "fp-9-1-21",
           "sourceRefNo": "21",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "image-resolution-limited",
+          "evidence": "Original source inspected at10x (cropx875–905/y435–466): front-right cover screw head is about7pixels and merged with leader endpoint. Candidate shaft is about2pixels across and merges with dashed assembly guide. Exact head/shaft ownership cannot be separated without manufacturing a dot-shaped physical component.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Marker association remains clear, but material boundary is source-resolution/leader-occlusion limited; no generic dot contour or clearer-screw substitution."
           ]
         },
         {
           "figurePartId": "fp-9-1-22",
           "sourceRefNo": "22",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "image-resolution-limited",
+          "evidence": "Original source inspected at10x: RIGHTMOST clamp has separable exposed right ring crescent, now traced. Central leader dot and dark top fastening detail obscure the remaining tiny body boundary; no similar clamp substitution.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Only visible right crescent is established material; full head/inner rim cannot be separated from leader at original raster scale."
           ]
         },
         {
