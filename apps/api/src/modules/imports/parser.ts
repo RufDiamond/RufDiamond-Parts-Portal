@@ -27,7 +27,7 @@ export type RawImportRow = {
   rowNumber: number;
   sourcePayload: Record<string, RawCell>;
 };
-export type ParsedImport = { sourceChecksum: string; rows: RawImportRow[] };
+export type ParsedImport = { sourceChecksum: string; rows: RawImportRow[]; date1904: boolean };
 const MAX_ROWS = 100_000;
 const decoder = new TextDecoder("utf-8", { fatal: true });
 function utf8(bytes: Uint8Array) {
@@ -179,6 +179,7 @@ export async function parseImport(
   if (!bytes.length || bytes.length > MAX_IMPORT_BYTES)
     throw new Error("Source byte limit exceeded");
   let matrix: RawCell[][];
+  let date1904 = false;
   if (format === "csv") matrix = csvRows(utf8(bytes).replace(/^\uFEFF/, ""));
   else {
     await inspectXlsx(
@@ -196,6 +197,7 @@ export async function parseImport(
       cellText: false,
       bookVBA: true,
     });
+    date1904 = book.Workbook?.WBProps?.date1904 === true;
     if (book.vbaraw) throw new Error("Macros are not permitted");
     if (book.SheetNames.length !== 1)
       throw new Error("Exactly one source worksheet is required");
@@ -254,5 +256,6 @@ export async function parseImport(
   return {
     sourceChecksum: createHash("sha256").update(bytes).digest("hex"),
     rows,
+    date1904,
   };
 }

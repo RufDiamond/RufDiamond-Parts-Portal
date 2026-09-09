@@ -128,13 +128,41 @@ describe("bounded canonical import parser", () => {
     ).toHaveLength(2);
   });
   it("accepts exact midnight source dates without shifting days and retains the original timestamp", async () => {
-    const row = base.map((x, i) => (i === 8 ? "2026-01-01T00:00:00" : x));
+    const row = base.map((x, i) => (i === 8 ? "2026-01-01T00:00:00" : i === 9 ? "2026-01-02T00:00:00" : x));
     const parsed = normalizeImport(await parseImport(csv([row]), "csv"));
     expect(parsed.issues).toEqual([]);
     expect(parsed.rows[0].fields!.effectiveFrom).toBe("2026-01-01");
     expect(parsed.rows[0].sourcePayload["START DATE"]).toBe(
       "2026-01-01T00:00:00",
     );
+    expect(parsed.rows[0].fields!.effectiveTo).toBe("2026-01-02");
+    expect(parsed.rows[0].sourcePayload["END DATE"]).toBe("2026-01-02T00:00:00");
+  });
+  it.each([
+    { date1904: true, start: 44561, end: 44562 },
+    { date1904: false, start: 46023, end: 46024 },
+    { date1904: undefined, start: 46023, end: 46024 },
+  ])("preserves displayed start and end dates for workbook date1904=$date1904", async ({ date1904, start, end }) => {
+    const book = workbook();
+    if (date1904 !== undefined) book.Workbook = { WBProps: { date1904 } };
+    book.Sheets.Parts.I2 = { t: "n", v: start, z: "yyyy-mm-dd" };
+    book.Sheets.Parts.J2 = { t: "n", v: end, z: "yyyy-mm-dd" };
+    const normalized = normalizeImport(await parseImport(xlsx(book), "xlsx"));
+    expect(normalized.issues).toEqual([]);
+    expect(normalized.rows[0].fields).toMatchObject({ effectiveFrom: "2026-01-01", effectiveTo: "2026-01-02" });
+    expect(normalized.rows[0].sourcePayload["START DATE"]).toBe(start);
+    expect(normalized.rows[0].sourcePayload["END DATE"]).toBe(end);
+  });
+  it.each([
+    { cell: "I2", field: "START DATE" },
+    { cell: "J2", field: "END DATE" },
+  ])("blocks fractional numeric $field without rounding or replacing its raw value", async ({ cell, field }) => {
+    const book = workbook();
+    book.Sheets.Parts[cell] = { t: "n", v: 46023.000001, z: "yyyy-mm-dd" };
+    const normalized = normalizeImport(await parseImport(xlsx(book), "xlsx"));
+    expect(normalized.issues).toMatchObject([{ code: "INVALID_FIELD", severity: "error", field }]);
+    expect(normalized.rows[0]).toMatchObject({ normalizationState: "invalid", fields: null });
+    expect(normalized.rows[0].sourcePayload[field]).toBe(46023.000001);
   });
   it("uses unchanged semantic identities through reordering/No. changes and changed quantity", async () => {
     const original = normalizeImport(await parseImport(csv(), "csv"));
@@ -154,6 +182,8 @@ describe("bounded canonical import parser", () => {
     [10, "1.5"],
     [10, "0"],
     [8, "2026-02-30"],
+    [8, "46023"],
+    [9, "46024"],
     [9, "2025-01-01"],
     [14, "MAYBE"],
   ])(

@@ -73,7 +73,11 @@ export function normalizeImport(parsed: ParsedImport): NormalizedImport {
       if (/^\d{4}-\d{2}-\d{2}T00:00:00$/.test(value))
         value = value.slice(0, 10);
       if (typeof p[field] === "number") {
-        const d = SSF.parse_date_code(p[field]);
+        if (!Number.isFinite(p[field]) || !Number.isInteger(p[field])) {
+          invalid(field, "A real ISO date or whole Excel date is required.");
+          return null;
+        }
+        const d = SSF.parse_date_code(p[field], { date1904: parsed.date1904 });
         if (
           d &&
           d.y >= 1900 &&
