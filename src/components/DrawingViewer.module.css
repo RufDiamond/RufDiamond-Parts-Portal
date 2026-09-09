@@ -137,6 +137,10 @@
   transition: width 120ms ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .stage { transition: none; }
+}
+
 /* No plate attached: the empty state keeps the frame's own box. */
 .stage:has(> .trim) {
   width: 100%;

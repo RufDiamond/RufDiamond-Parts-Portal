@@ -173,3 +173,10 @@
   text-align: center;
   color: var(--text-secondary);
 }
+
+.selectionNotice {
+  padding: var(--space-2);
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  font-weight: var(--weight-semibold);
+}

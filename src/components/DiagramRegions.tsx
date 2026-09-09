@@ -24,10 +24,15 @@ export function DiagramRegions({ document, selectedPartIds, onSelect }: DiagramR
       preserveAspectRatio="none" aria-label="Mapped components"
       onClick={(event) => {
         if (!onSelect || event.detail === 0) return;
-        const box = event.currentTarget.getBoundingClientRect();
-        if (!box.width || !box.height) return;
-        const x = (event.clientX - box.left) * document.imageWidth / box.width;
-        const y = (event.clientY - box.top) * document.imageHeight / box.height;
+        let inverse: DOMMatrix;
+        try {
+          const matrix = event.currentTarget.getScreenCTM();
+          if (!matrix) return;
+          inverse = matrix.inverse();
+        } catch { return; }
+        const x = inverse.a * event.clientX + inverse.c * event.clientY + inverse.e;
+        const y = inverse.b * event.clientX + inverse.d * event.clientY + inverse.f;
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return;
         const hits = document.occurrences.filter((occurrence) => occurrence.regions.some((region) => pointInRegion([x,y], region)));
         const candidates = [...new Map(hits.map((hit) => [hit.partId, hit])).values()];
         if (candidates.length === 1) activate(hits[0].figurePartId);

@@ -12,6 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:callout-preview": "vitest run --config vitest.callouts.config.mts",
+    "test:diagram-browser": "playwright test --config playwright.diagram.config.ts",
     "test:contracts": "npm test -w @rufdiamond/contracts",
     "test:api": "npm test -w @rufdiamond/api",
     "test:web": "npm test -w @rufdiamond/web"
@@ -22,6 +23,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.7",
     "@types/node": "^20",

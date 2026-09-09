@@ -24,6 +24,8 @@ export default defineConfig({
       "tests/part-highlight-review.test.ts",
       "tests/diagram-selection.test.tsx",
       "tests/diagram-regions.test.tsx",
+      "tests/diagram-viewport.test.ts",
+      "tests/diagram-table-reveal.test.tsx",
     ],
   },
 });

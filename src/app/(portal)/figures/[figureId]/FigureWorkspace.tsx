@@ -85,7 +85,7 @@ export function FigureWorkspace({
 
   const { selectedPartIds: quotePartIds, toggle: toggleQuote, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
-  const { selectedPartIds, selectPart, clear } = useDiagramSelection({
+  const { selection, activation, selectedPartIds, selectPart, clear } = useDiagramSelection({
     figureId: figure.id, rows,
     releaseKey: `${variant.catalogRevision}/${drawing?.id}/${drawing?.version}/${drawing?.storagePath}/${reviewOnly}`,
   });
@@ -154,6 +154,7 @@ export function FigureWorkspace({
 
   /** Plate zoom. Markers are placed in percentages, so they scale with it. */
   const [zoom, setZoom] = useState(1);
+  const [revealRequest, setRevealRequest] = useState(0);
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
       const i = ZOOM_STEPS.indexOf(current);
@@ -364,6 +365,9 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
+        <button type="button" className={styles.button} onClick={() => setRevealRequest((value) => value + 1)} disabled={selectedPartIds.size === 0}>
+          Show selected part
+        </button>
         <button type="button" className={styles.button} onClick={clear} disabled={selectedPartIds.size === 0}>
           Clear selection
         </button>
@@ -518,6 +522,8 @@ export function FigureWorkspace({
               note={`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
               document={regions}
+              selectionActivation={activation}
+              revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
               onSelectPart={selectPart}
@@ -615,6 +621,8 @@ export function FigureWorkspace({
             ) : (
               <PartsTable
                 rows={rows}
+                selectedFigurePartId={selection?.figurePartId}
+                selectionActivation={activation}
                 selectedPartIds={selectedPartIds}
                 hoveredPartId={hoveredPartId}
                 onSelectPart={selectPart}
@@ -647,6 +655,7 @@ export function FigureWorkspace({
           note={`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
           document={regions}
+          selectionActivation={activation}
           previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}

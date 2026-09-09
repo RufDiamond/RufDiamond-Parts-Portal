@@ -9,7 +9,7 @@ import {
 } from "./DrawingViewer";
 import styles from "./FullIllustration.module.css";
 import type { DiagramRegionDocument } from "@/lib/drawing";
-import type { SelectDiagramPart } from "@/state/useDiagramSelection";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 
 export interface FullIllustrationProps {
   /** Sheet caption, e.g. "Sheet 13 / 18". */
@@ -21,6 +21,7 @@ export interface FullIllustrationProps {
   markers: DrawingMarker[];
   document?: DiagramRegionDocument;
   onSelectPart?: SelectDiagramPart;
+  selectionActivation?: SelectionActivation;
   onClearSelection?: () => void;
   previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
@@ -50,6 +51,7 @@ export function FullIllustration({
   markers,
   document,
   onSelectPart,
+  selectionActivation,
   onClearSelection,
   previewNotice = null,
   selectedPartIds,
@@ -61,6 +63,7 @@ export function FullIllustration({
   onClose,
 }: FullIllustrationProps) {
   const [zoom, setZoom] = useState(1);
+  const [revealRequest, setRevealRequest] = useState(0);
 
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
@@ -97,6 +100,7 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
+            <button type="button" disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)}>Show selected part</button>
             {onClearSelection ? <button type="button" onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
@@ -176,6 +180,8 @@ export function FullIllustration({
             markers={markers}
             document={document}
             onSelectPart={onSelectPart}
+            selectionActivation={selectionActivation}
+            revealRequest={revealRequest}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}

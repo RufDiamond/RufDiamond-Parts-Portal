@@ -9,6 +9,9 @@ import { buildDiagramRegions, buildDrawingMarkers } from "@/lib/drawing";
 import { getFigureDetail } from "@/data/repository";
 
 afterEach(cleanup);
+function screenMatrix(svg: Element, invert = () => ({ a:1, b:0, c:0, d:1, e:0, f:0 })) {
+  Object.defineProperty(svg, "getScreenCTM", { configurable:true, value:() => ({ inverse:invert }) });
+}
 const document: DiagramRegionDocument = {
   imageWidth: 100, imageHeight: 100,
   occurrences: [
@@ -28,6 +31,7 @@ function mount() {
   const svg = view.container.querySelector('svg[data-diagram-regions]')!;
   expect(svg, "numeric hit layer must exist even with no selection").not.toBeNull();
   Object.defineProperty(svg, "getBoundingClientRect", { value: () => ({ left: 0, top: 0, width: 100, height: 100 }) });
+  screenMatrix(svg);
   return { ...view, svg, path: svg.querySelector("path")! };
 }
 test("overlapping distinct parts require explicit choice; holes exclude activation and labels take priority", () => {
@@ -77,10 +81,27 @@ test("source replacement discards an open overlap chooser instead of keeping sta
   const view = render(<DiagramRegions document={document} selectedPartIds={new Set()} onSelect={() => {}} />);
   const svg = view.container.querySelector("svg")!;
   Object.defineProperty(svg, "getBoundingClientRect", { value: () => ({ left:0, top:0, width:100, height:100 }) });
+  screenMatrix(svg);
   fireEvent.click(svg.querySelector("path")!, { clientX:60, clientY:60, detail:1 });
   expect(screen.getByRole("group", { name:"Choose overlapping component" })).toBeTruthy();
   view.rerender(<DiagramRegions document={{ ...document, occurrences:[] }} selectedPartIds={new Set()} onSelect={() => {}} />);
   expect(screen.queryByRole("group", { name:"Choose overlapping component" })).toBeNull();
+});
+
+test("component picking uses the live inverse screen matrix, and ignores unavailable or singular matrices", () => {
+  const { svg, path } = mount();
+  // Screen (160, 120) maps to image (15, 15), outside the old rect-ratio hit.
+  screenMatrix(svg, () => ({ a:0.5, b:0, c:0, d:0.5, e:-65, f:-45 }));
+  fireEvent.click(path, { clientX:160, clientY:120, detail:1 });
+  expect(screen.getByText("row-a")).toBeTruthy();
+  cleanup();
+  const other = mount();
+  Object.defineProperty(other.svg, "getScreenCTM", { configurable:true, value:() => null });
+  fireEvent.click(other.path, { clientX:15, clientY:15, detail:1 });
+  expect(screen.getByText("none")).toBeTruthy();
+  screenMatrix(other.svg, () => { throw new Error("singular"); });
+  fireEvent.click(other.path, { clientX:15, clientY:15, detail:1 });
+  expect(screen.getByText("none")).toBeTruthy();
 });
 
 test("numeric source projection refuses mismatched artwork, and the viewer paints only one selected fill", async () => {

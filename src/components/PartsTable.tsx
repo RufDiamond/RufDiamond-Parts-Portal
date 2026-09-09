@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
 import styles from "./PartsTable.module.css";
-import type { SelectDiagramPart } from "@/state/useDiagramSelection";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
+import { revealDelta } from "@/lib/diagram-viewport";
 
 export interface PartsTableProps {
   rows: FigurePartRow[];
@@ -16,6 +17,8 @@ export interface PartsTableProps {
    * row; every established occurrence of that row's part responds.
    */
   selectedPartIds?: ReadonlySet<string>;
+  selectedFigurePartId?: string;
+  selectionActivation?: SelectionActivation;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onSelectPart?: SelectDiagramPart;
@@ -40,6 +43,8 @@ export function PartsTable({
   rows,
   currency,
   selectedPartIds = NONE,
+  selectedFigurePartId,
+  selectionActivation,
   hoveredPartId = null,
   onTogglePart,
   onSelectPart,
@@ -47,6 +52,8 @@ export function PartsTable({
   requestedPartIds = NONE,
   onToggleRequested,
 }: PartsTableProps) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const selectedRow = useRef<HTMLTableRowElement>(null);
   const [filters, setFilters] = useState<Record<Column, string>>({
     ref: "",
     partNo: "",
@@ -92,6 +99,22 @@ export function PartsTable({
     });
   }, [rows, filters]);
 
+  const pinned = rows.find((row) => row.figurePart.id === selectedFigurePartId && !visible.includes(row));
+  const displayed = pinned ? [pinned, ...visible] : visible;
+  useEffect(() => {
+    if (!selectionActivation || selectionActivation.origin === "table") return;
+    const box = scroller.current;
+    const row = selectedRow.current;
+    if (!box || !row || !box.clientHeight || !box.clientWidth) return;
+    const rect = box.getBoundingClientRect();
+    const headerHeight = box.querySelector("thead tr")?.getBoundingClientRect().height ?? 0;
+    const left = rect.left + box.clientLeft;
+    const top = rect.top + box.clientTop;
+    const delta = revealDelta(row.getBoundingClientRect(), { left, top:top + headerHeight, right:left + box.clientWidth, bottom:top + box.clientHeight });
+    if (delta.x || delta.y) box.scrollBy({ left:delta.x, top:delta.y,
+      behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  }, [selectedFigurePartId, selectionActivation, visible]);
+
   const set = (key: Column, value: string) =>
     setFilters((current) => ({ ...current, [key]: value }));
 
@@ -110,7 +133,7 @@ export function PartsTable({
   );
 
   return (
-    <div className={styles.scroller}>
+    <div ref={scroller} className={styles.scroller}>
       <table className={styles.table}>
         <thead>
           <tr className={styles.head}>
@@ -160,14 +183,15 @@ export function PartsTable({
         </thead>
 
         <tbody>
-          {visible.length === 0 ? (
+          {pinned ? <tr><td className={styles.selectionNotice} colSpan={tickable ? 7 : 6} role="status">Selected part is outside these filters</td></tr> : null}
+          {displayed.length === 0 ? (
             <tr>
               <td className={styles.empty} colSpan={tickable ? 7 : 6}>
                 No parts match these filters.
               </td>
             </tr>
           ) : (
-            visible.map((row) => {
+            displayed.map((row) => {
               const { figurePart, part, calloutNumbers } = row;
               const active = selectedPartIds.has(part.id);
               const hovered = part.id === hoveredPartId;
@@ -175,10 +199,12 @@ export function PartsTable({
               return (
                 <tr
                   key={figurePart.id}
+                  ref={figurePart.id === selectedFigurePartId ? selectedRow : undefined}
                   className={styles.row}
                   data-active={active || undefined}
                   data-hovered={hovered || undefined}
                   data-figure-part-id={figurePart.id}
+                  data-pinned={row === pinned || undefined}
                   tabIndex={selectable && calloutNumbers.length === 0 ? 0 : undefined}
                   onKeyDown={(event) => {
                     if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {

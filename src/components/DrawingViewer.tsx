@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
 import { DiagramRegions } from "./DiagramRegions";
 import type { DiagramRegionDocument } from "@/lib/drawing";
-import type { SelectDiagramPart } from "@/state/useDiagramSelection";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
+import { DIAGRAM_ZOOM_STEPS, revealDelta, revealZoom, type ViewportRect } from "@/lib/diagram-viewport";
 import styles from "./DrawingViewer.module.css";
 
 export interface DrawingMarker {
@@ -43,6 +44,9 @@ export interface DrawingViewerProps {
   markers: DrawingMarker[];
   document?: DiagramRegionDocument;
   onSelectPart?: SelectDiagramPart;
+  selectionActivation?: SelectionActivation;
+  /** Incremented by the explicit Show selected part action. */
+  revealRequest?: number;
   /**
    * Selected parts. EVERY marker carrying one of these part ids goes solid —
    * a part fitted in two places lights in both — and the rest recede.
@@ -64,7 +68,7 @@ export interface DrawingViewerProps {
 }
 
 /** The steps the buttons and the wheel both move through. */
-export const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
+export const ZOOM_STEPS = DIAGRAM_ZOOM_STEPS;
 
 function stepFrom(zoom: number, direction: 1 | -1): number {
   const i = ZOOM_STEPS.indexOf(zoom);
@@ -107,6 +111,8 @@ export function DrawingViewer({
   markers,
   document,
   onSelectPart,
+  selectionActivation,
+  revealRequest = 0,
   selectedPartIds = NO_SELECTION,
   hoveredPartId = null,
   onTogglePart,
@@ -158,6 +164,69 @@ export function DrawingViewer({
   } | null>(null);
   const moved = useRef(false);
   const [dragging, setDragging] = useState(false);
+
+  const reveal = useRef<{ activation?: SelectionActivation; request: number; pending: boolean }>({ request:0, pending:false });
+  useEffect(() => {
+    const previous = reveal.current;
+    if (previous.activation !== selectionActivation) {
+      previous.activation = selectionActivation;
+      previous.pending = selectionActivation?.origin === "table";
+    }
+    if (previous.request !== revealRequest) {
+      previous.request = revealRequest;
+      previous.pending = true;
+    }
+    if (!src || !selectedPartIds.size) previous.pending = false;
+    if (!previous.pending) return;
+    const box = sheet.current;
+    const area = drawing.current;
+    if (!box || !area || !box.clientWidth || !box.clientHeight) return;
+    let frame = 0;
+    let lastWidth = -1;
+    let stableFrames = 0;
+    const run = () => {
+      const plate = area.getBoundingClientRect();
+      // A fit may change zoom. Wait for the existing width transition to finish
+      // before measuring the next scroll, including under reduced motion.
+      stableFrames = Math.abs(plate.width - lastWidth) < 0.01 ? stableFrames + 1 : 0;
+      lastWidth = plate.width;
+      if (stableFrames < 2) { frame = requestAnimationFrame(run); return; }
+      const points = numericDocument?.occurrences.filter((item) => selectedPartIds.has(item.partId))
+        .flatMap((item) => item.regions.flatMap((region) => region.outer)) ?? [];
+      let targets: ViewportRect[];
+      if (points.length && numericDocument) {
+        const xs = points.map(([x]) => plate.left + x / numericDocument.imageWidth * plate.width);
+        const ys = points.map(([, y]) => plate.top + y / numericDocument.imageHeight * plate.height);
+        targets = [{ left:Math.min(...xs), top:Math.min(...ys), right:Math.max(...xs), bottom:Math.max(...ys) }];
+      } else {
+        // Legacy paths remain display-only and unchanged. Measure the live SVG
+        // shape, never parse or reinterpret its arbitrary path string.
+        targets = Array.from(area.querySelectorAll<SVGPathElement>("path[data-legacy-selected]"))
+          .map((path) => path.getBoundingClientRect()).filter((rect) => rect.width || rect.height);
+        if (!targets.length) targets = Array.from(area.querySelectorAll<HTMLButtonElement>('button[aria-pressed="true"]'))
+          .map((marker) => marker.getBoundingClientRect());
+      }
+      previous.pending = false;
+      if (!targets.length) return;
+      const target = { left:Math.min(...targets.map((rect) => rect.left)), top:Math.min(...targets.map((rect) => rect.top)),
+        right:Math.max(...targets.map((rect) => rect.right)), bottom:Math.max(...targets.map((rect) => rect.bottom)) };
+      const rect = box.getBoundingClientRect();
+      const left = rect.left + box.clientLeft;
+      const top = rect.top + box.clientTop;
+      const viewport = { left, top, right:left + box.clientWidth, bottom:top + box.clientHeight };
+      const nextZoom = revealZoom(target, viewport, zoom);
+      if (nextZoom < zoom && onZoomChange) {
+        previous.pending = true;
+        onZoomChange(nextZoom);
+        return;
+      }
+      const delta = revealDelta(target, viewport);
+      if (delta.x || delta.y) box.scrollBy({ left:delta.x, top:delta.y,
+        behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    };
+    frame = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(frame);
+  }, [selectionActivation, revealRequest, src, numericDocument, selectedPartIds, zoom, onZoomChange]);
 
   /*
    * Ordinary vertical wheel input and trackpad pinches share the existing zoom
@@ -278,7 +347,7 @@ export function DrawingViewer({
             aria-hidden="true"
           >
             {highlighted.map((marker) => (
-              <path key={marker.id} d={marker.maskPath} />
+              <path key={marker.id} d={marker.maskPath} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
             ))}
           </svg>
         ) : null}
