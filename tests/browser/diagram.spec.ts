@@ -67,6 +67,7 @@ for (const entry of [
     {figure:"fig-electric-11-3",refs:[2,12,15]},
     {figure:"fig-cabin-6-2",refs:[1,8,16,20,21,24,26],crowdedFitLabels:true},
     {figure:"fig-engine-8-3",refs:[1,2,3]},
+    {figure:"fig-fuel-system-9-1",refs:[3,4,5,7,9,10,11,12,13,16,18,19],crowdedFitLabels:true},
   ]) {
   test(`task10c detailed added contours ${entry.figure} converge through physical click, label and row`, async ({page},info) => {
     test.setTimeout(90000);
@@ -96,7 +97,7 @@ for (const entry of [
       await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
       await scope.locator(`svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).first().scrollIntoViewIfNeeded();
       await settled(page);
-      const p=await componentPoint(scope,ref);
+      const p=await componentPoint(scope,ref,true);
       expect(p,`${entry.figure}/${ref} has a usable visible physical pixel at zoom`).not.toBeNull();
       await page.mouse.click(p!.x,p!.y);await page.mouse.move(0,0);
       const chooser=page.getByRole("group",{name:"Choose overlapping component"});
@@ -227,8 +228,8 @@ async function geometry(scope:Locator) {
   return result;
 }
 
-async function componentPoint(scope:Locator, ref?:number) {
-  return scope.locator(ref === undefined ? "svg[data-diagram-regions] path" : `svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).evaluateAll((paths) => {
+async function componentPoint(scope:Locator, ref?:number, allowOverlap=false) {
+  return scope.locator(ref === undefined ? "svg[data-diagram-regions] path" : `svg[data-diagram-regions] path[aria-label^="Component ${ref}:"]`).evaluateAll((paths, allowOverlap) => {
     for (const element of paths) {
       const path = element as SVGGeometryElement;
       const b = path.getBBox();
@@ -241,11 +242,13 @@ async function componentPoint(scope:Locator, ref?:number) {
         // actual delivered point, especially for thin physical ring bands.
         const x = Math.round(screen.x), y = Math.round(screen.y);
         const delivered = new DOMPoint(x,y).matrixTransform(matrix.inverse());
-        if (path.isPointInFill(delivered) && document.elementFromPoint(x, y) === path) return { x, y, label:path.getAttribute("aria-label")! };
+        const hit = document.elementFromPoint(x,y);
+        const sameDiagramComponent = allowOverlap && hit?.matches("svg[data-diagram-regions] path[aria-label^='Component ']") && hit.closest("svg") === path.closest("svg");
+        if (path.isPointInFill(delivered) && (hit === path || sameDiagramComponent)) return { x, y, label:path.getAttribute("aria-label")! };
       }
     }
     return null;
-  });
+  },allowOverlap);
 }
 
 async function wheels(page:Page, scope:Locator) {

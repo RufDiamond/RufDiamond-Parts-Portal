@@ -6446,37 +6446,37 @@
         {
           "figurePartId": "fp-9-1-03",
           "sourceRefNo": "3",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original3 cover top and downturned front material traced with concave lower slots and three through-slots, independently from tank6 and sender tubes. Visible foreground tubes excluded by narrow top-edge notches; their source conventions and fine screw holes remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Visible foreground tubes excluded by narrow top-edge notches; their source conventions and fine screw holes remain partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-04",
           "sourceRefNo": "4",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original4 directly labelled RIGHT sender disc and sloping attached stalk only. Similar left sender excluded. Opaque top features retained; fine terminals and joins partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Opaque top features retained; fine terminals and joins partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-05",
           "sourceRefNo": "5",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original5 directly labelled RIGHT sender tube with top flange and visible stem ending at cover3 surface. Left tube not inferred. Clear top opening excluded; thin studs and lower surface/occlusion join remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Clear top opening excluded; thin studs and lower surface/occlusion join remain partial."
           ]
         },
         {
@@ -6488,19 +6488,20 @@
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Cut only genuine empty space, preserve visible inner metal/walls and exclude detached fittings"
+            "Cut only genuine empty space, preserve visible inner metal/walls and exclude detached fittings",
+            "Existing tank envelope includes foreground cover3 and sender material. Same-SVG overlap chooser verification is not proof that this tank occlusion overfill is complete or corrected."
           ]
         },
         {
           "figurePartId": "fp-9-1-07",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original7 directly labelled LEFT vent valve body/flange/spigot. Right similar valve excluded. Opaque cap retained; tiny top apertures/terminal edges remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Opaque cap retained; tiny top apertures/terminal edges remain partial."
           ]
         },
         {
@@ -6518,61 +6519,61 @@
         {
           "figurePartId": "fp-9-1-09",
           "sourceRefNo": "9",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original9 small curved fuel hose traced separately from detached clamp18, with visible end bore excluded. Fine wall/bead transitions remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine wall/bead transitions remain partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-10",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original10 directly leader-targeted LEFT plug only. Adjacent second plug is not a quantity-derived occurrence; opaque front face retained. Fine stepped edge remains partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine stepped edge remains partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-11",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original11 directly targeted upper fitting only; adjacent lower fitting and dashed guides excluded. Visible front bore preserved; fine overlap/ring detail partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Visible front bore preserved; fine overlap/ring detail partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-12",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original12 directly labelled UPPER cooler return fitting including visible attached long tube; lower similar assembly and dashed explosion line are not material. Lower tube overlap excluded at visible boundary; bore retained. Fine ring and occluded underside remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine ring and occluded underside remain partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-13",
           "sourceRefNo": "13",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original13 detached large plug: actual stepped exterior and opaque flat front face retained. Fine ring transition remains partial, not an invented through-hole.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine ring transition remains partial, not an invented through-hole."
           ]
         },
         {
@@ -6602,13 +6603,13 @@
         {
           "figurePartId": "fp-9-1-16",
           "sourceRefNo": "16",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original16 leader ends at LOWER of two adjacent 45-degree fittings. Only that lower fitting is traced; upper copy excluded despite similar outline. Established lower mouth void excluded. Exact overlap and fine ring wall remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Exact overlap and fine ring wall remain partial."
           ]
         },
         {
@@ -6626,25 +6627,25 @@
         {
           "figurePartId": "fp-9-1-18",
           "sourceRefNo": "18",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original18 small detached hose clamp ring/ear above hose9, with actual aperture excluded. Tiny band/ear transitions remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Tiny band/ear transitions remain partial."
           ]
         },
         {
           "figurePartId": "fp-9-1-19",
           "sourceRefNo": "19",
-          "category": "clear-tracing",
-          "evidence": "Original9.1 audit establishes one exact printed target each: cover3,RIGHTsender4/RIGHTtube5,LEFTvent7,hose9,plugs/fittings10–14/16,far-rightmount17,clamps18/19/RIGHTMOST22,front-rightscrew21. Similar copies are not occurrence authority.",
+          "category": "partial",
+          "evidence": "Original19 larger detached clamp ring/ear above fill hose8. Clear oblique centre excluded, thin solid band retained. Fine tightening screw transitions remain partial.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace/check visible material, local bores and sender/cover occlusion; tiny leader overlaps remain localized limitations, not unknown identity"
+            "Fine tightening screw transitions remain partial."
           ]
         },
         {

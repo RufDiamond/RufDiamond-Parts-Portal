@@ -127,6 +127,14 @@ test("Windshield frame keeps its narrow right rail separate from the attached br
     expect(frame.regions.some(r => pointInRegion(point,r))).toBe(false);
 });
 
+test("Fuel 9.1 excludes unlabelled lookalikes and source-visible clamp bores", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-fuel-system-9-1"))!, "hosted-review");
+  const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
+  for (const [ref,point] of [[10,[386,511]],[12,[219,613]],[16,[429,610]],[16,[444,622]],[18,[589,317]],[19,[585,261]],[3,[695,443]],[3,[804,396]]] as [number,[number,number]][]) expect(contains(ref,point)).toBe(false);
+  expect(contains(3,[744,412])).toBe(true);
+  expect(contains(13,[332,612])).toBe(true);
+});
+
 test("Engine 8.3 removes established support voids but retains visible rear material", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-engine-8-3"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point,r));
