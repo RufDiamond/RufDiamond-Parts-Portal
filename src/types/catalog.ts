@@ -6,6 +6,8 @@
  * both satisfy these contracts.
  */
 
+import type { ComponentRegion } from "@rufdiamond/contracts";
+
 export type Currency = "CAD" | "USD";
 
 export type ModelStatus = "active" | "legacy" | "discontinued";
@@ -175,6 +177,14 @@ export interface Callout {
    * `docs/drawing-source-review.md`.
    */
   maskPath: string | null;
+  /** Validated numeric review geometry, pinned to the rendered source. No approval implied. */
+  componentGeometry?: {
+    drawingPath: string;
+    drawingSha256: string;
+    imageWidth: number;
+    imageHeight: number;
+    regions: ComponentRegion[];
+  };
 }
 
 /** A customer or dealer account. Discount applies to list price. */

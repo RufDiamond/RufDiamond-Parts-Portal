@@ -5,20 +5,22 @@ import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
 import styles from "./PartsTable.module.css";
+import type { SelectDiagramPart } from "@/state/useDiagramSelection";
 
 export interface PartsTableProps {
   rows: FigurePartRow[];
   /** Currency shown in the column head. Defaults to the first row's currency. */
   currency?: Currency;
   /**
-   * Parts whose callouts are lit. Clicking a row toggles membership; every
-   * marker for that part responds, not just the first.
+   * Parts whose callouts are lit. The canonical callback activates an exact
+   * row; every established occurrence of that row's part responds.
    */
   selectedPartIds?: ReadonlySet<string>;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
+  onSelectPart?: SelectDiagramPart;
   onHoverPart?: (partId: string | null) => void;
-  /** Parts already on the cart. */
+  /** Independent checkbox collection used to prepare a cart addition. */
   requestedPartIds?: ReadonlySet<string>;
   onToggleRequested?: (partId: string) => void;
 }
@@ -40,6 +42,7 @@ export function PartsTable({
   selectedPartIds = NONE,
   hoveredPartId = null,
   onTogglePart,
+  onSelectPart,
   onHoverPart,
   requestedPartIds = NONE,
   onToggleRequested,
@@ -54,7 +57,9 @@ export function PartsTable({
   });
 
   const unit = currency ?? rows[0]?.part.currency ?? "CAD";
-  const selectable = Boolean(onTogglePart);
+  const selectable = Boolean(onSelectPart || onTogglePart);
+  const activate = (row: FigurePartRow) => onSelectPart
+    ? onSelectPart(row.figurePart.id, "table") : onTogglePart?.(row.part.id);
   const tickable = Boolean(onToggleRequested);
 
   /*
@@ -116,9 +121,9 @@ export function PartsTable({
                   className={styles.checkbox}
                   checked={allTicked}
                   onChange={() =>
-                    rows.forEach((row) => {
-                      const on = requestedPartIds.has(row.part.id);
-                      if (on === allTicked) onToggleRequested?.(row.part.id);
+                    [...new Set(rows.map((row) => row.part.id))].forEach((partId) => {
+                      const on = requestedPartIds.has(partId);
+                      if (on === allTicked) onToggleRequested?.(partId);
                     })
                   }
                   aria-label="Select every part on this figure"
@@ -173,10 +178,17 @@ export function PartsTable({
                   className={styles.row}
                   data-active={active || undefined}
                   data-hovered={hovered || undefined}
+                  data-figure-part-id={figurePart.id}
+                  tabIndex={selectable && calloutNumbers.length === 0 ? 0 : undefined}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                      event.preventDefault(); activate(row);
+                    }
+                  }}
                   onMouseEnter={() => onHoverPart?.(part.id)}
                   onMouseLeave={() => onHoverPart?.(null)}
                   onClick={
-                    selectable ? () => onTogglePart?.(part.id) : undefined
+                    selectable ? () => activate(row) : undefined
                   }
                 >
                   {tickable ? (
@@ -211,10 +223,11 @@ export function PartsTable({
                             number={number}
                             size="sm"
                             state={markerState(part.id)}
+                            pressed={selectedPartIds.has(part.id)}
                             title={`${part.partNumber} \u2014 ${part.description}`}
                             onActivate={
                               selectable
-                                ? () => onTogglePart?.(part.id)
+                                ? () => activate(row)
                                 : undefined
                             }
                             /*

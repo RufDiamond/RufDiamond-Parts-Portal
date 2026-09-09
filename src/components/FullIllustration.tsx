@@ -8,6 +8,8 @@ import {
   type DrawingMarker,
 } from "./DrawingViewer";
 import styles from "./FullIllustration.module.css";
+import type { DiagramRegionDocument } from "@/lib/drawing";
+import type { SelectDiagramPart } from "@/state/useDiagramSelection";
 
 export interface FullIllustrationProps {
   /** Sheet caption, e.g. "Sheet 13 / 18". */
@@ -17,6 +19,9 @@ export interface FullIllustrationProps {
   height?: number;
   note?: string;
   markers: DrawingMarker[];
+  document?: DiagramRegionDocument;
+  onSelectPart?: SelectDiagramPart;
+  onClearSelection?: () => void;
   previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
   hoveredPartId?: string | null;
@@ -43,6 +48,9 @@ export function FullIllustration({
   height,
   note,
   markers,
+  document,
+  onSelectPart,
+  onClearSelection,
   previewNotice = null,
   selectedPartIds,
   hoveredPartId,
@@ -89,6 +97,7 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
+            {onClearSelection ? <button type="button" onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
               className={styles.action}
@@ -165,6 +174,8 @@ export function FullIllustration({
             height={height}
             note={note}
             markers={markers}
+            document={document}
+            onSelectPart={onSelectPart}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}

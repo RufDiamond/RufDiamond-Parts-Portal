@@ -2,10 +2,14 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
+import { DiagramRegions } from "./DiagramRegions";
+import type { DiagramRegionDocument } from "@/lib/drawing";
+import type { SelectDiagramPart } from "@/state/useDiagramSelection";
 import styles from "./DrawingViewer.module.css";
 
 export interface DrawingMarker {
   id: string;
+  figurePartId?: string;
   number: number;
   /** Percentages, 0-100. */
   x: number;
@@ -37,6 +41,8 @@ export interface DrawingViewerProps {
   width?: number;
   height?: number;
   markers: DrawingMarker[];
+  document?: DiagramRegionDocument;
+  onSelectPart?: SelectDiagramPart;
   /**
    * Selected parts. EVERY marker carrying one of these part ids goes solid —
    * a part fitted in two places lights in both — and the rest recede.
@@ -99,6 +105,8 @@ export function DrawingViewer({
   width,
   height,
   markers,
+  document,
+  onSelectPart,
   selectedPartIds = NO_SELECTION,
   hoveredPartId = null,
   onTogglePart,
@@ -106,9 +114,12 @@ export function DrawingViewer({
   zoom = 1,
   onZoomChange,
 }: DrawingViewerProps) {
+  const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
+  const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
   const highlighted = markers.filter(
     (marker) =>
       marker.maskPath !== undefined &&
+      !numericIds.has(marker.id) &&
       (selectedPartIds.has(marker.partId) || marker.partId === hoveredPartId),
   );
 
@@ -169,7 +180,7 @@ export function DrawingViewer({
 
   const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const box = sheet.current;
-    if (!box || zoom === 1) return;
+    if (!box || event.button !== 0) return;
     from.current = {
       x: event.clientX,
       y: event.clientY,
@@ -177,8 +188,6 @@ export function DrawingViewer({
       top: box.scrollTop,
     };
     moved.current = false;
-    setDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -187,13 +196,23 @@ export function DrawingViewer({
     if (!start || !box) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved.current = true;
-    box.scrollLeft = start.left - dx;
-    box.scrollTop = start.top - dy;
+    if (Math.hypot(dx, dy) > 5) {
+      moved.current = true;
+      if (zoom > 1) {
+        setDragging(true);
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+      }
+    }
+    if (moved.current && zoom > 1) {
+      box.scrollLeft = start.left - dx;
+      box.scrollTop = start.top - dy;
+    }
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (from.current) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (from.current && Math.hypot(event.clientX - from.current.x, event.clientY - from.current.y) > 5) moved.current = true;
+    if (event.type === "pointercancel") moved.current = true;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     from.current = null;
     setDragging(false);
   };
@@ -211,6 +230,7 @@ export function DrawingViewer({
           dragging ? styles.sheetDragging : ""
         }`}
         onMouseLeave={() => onHoverPart?.(null)}
+        onPointerDownCapture={() => { moved.current = false; from.current = null; }}
         onPointerDown={startDrag}
         onPointerMove={onDrag}
         onPointerUp={endDrag}
@@ -238,7 +258,7 @@ export function DrawingViewer({
           // Plain <img>: the drawing is an arbitrary asset served by the
           // backend, and next/image would need its dimensions up front.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={label} className={styles.plate} />
+          <img src={src} alt={label} className={styles.plate} draggable={false} />
         ) : (
           <div className={styles.trim}>
             <span className="eyebrow">{note}</span>
@@ -263,6 +283,11 @@ export function DrawingViewer({
           </svg>
         ) : null}
 
+        {numericDocument ? (
+          <DiagramRegions key={src} document={numericDocument} selectedPartIds={selectedPartIds}
+            onSelect={onSelectPart ? (id) => onSelectPart(id, "component") : undefined} />
+        ) : null}
+
         {markers.map((marker) => (
           <CalloutMarker
             key={marker.id}
@@ -270,9 +295,11 @@ export function DrawingViewer({
             x={marker.x}
             y={marker.y}
             state={markerState(marker.partId)}
+            pressed={selectedPartIds.has(marker.partId)}
             title={marker.label}
             onActivate={
-              onTogglePart ? () => onTogglePart(marker.partId) : undefined
+              onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")
+                : onTogglePart ? () => onTogglePart(marker.partId) : undefined
             }
             onHoverChange={
               onHoverPart

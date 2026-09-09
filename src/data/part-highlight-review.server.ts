@@ -4,6 +4,8 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { FigureDetail } from "@/types/catalog";
 import type { CalloutPreview } from "@/lib/callout-preview";
+import { percentagePoint, validateMappingGeometry } from "@rufdiamond/contracts/diagram-geometry";
+import type { DiagramMappingDocument } from "@rufdiamond/contracts";
 
 type Point = [number, number];
 interface Artwork {
@@ -142,10 +144,41 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
       }
       // Never carry geometry across artwork versions, including earlier preview overlays.
       const sourceDetail = review.replacement ? original : result.detail;
+      const sourceArtwork = review.replacement ?? review.original;
+      // This review-only binding is computed from the verified source and exact
+      // associations, never supplied by the browser or treated as approval.
+      const binding = digest(Buffer.from(JSON.stringify({
+        catalogueSha256: value.catalogueSha256, figure: original.figure,
+        drawing: sourceArtwork,
+        associations: original.callouts.map((callout) => ({ calloutId: callout.id,
+          figurePartId: callout.figurePartId,
+          partId: original.rows.find((row) => row.figurePart.id === callout.figurePartId)?.part.id ?? null,
+        })).sort((a,b) => a.calloutId.localeCompare(b.calloutId)),
+      })));
+      let displayOnly = 0;
       const callouts = sourceDetail.callouts.map((callout) => {
         const item = byId.get(callout.id);
         if (!item) return callout;
-        return { ...callout, x: callout.x ?? item.x, y: callout.y ?? item.y, maskPath: callout.maskPath ?? pathFor(item.polygons) };
+        const legacy = { ...callout, x: callout.x ?? item.x, y: callout.y ?? item.y, maskPath: callout.maskPath ?? pathFor(item.polygons) };
+        // Supplied legacy outlines are read-only; no competing proposal can
+        // replace their geometry or turn arbitrary SVG into an activation path.
+        if (original.callouts.find((source) => source.id === callout.id)?.maskPath || !item.polygons.length) return legacy;
+        const regions = item.polygons.map((points, index) => ({ id: `${item.calloutId}-region-${index}`,
+          outer: points.map((point) => percentagePoint(point, sourceArtwork.width, sourceArtwork.height)), holes: [],
+        }));
+        const document: DiagramMappingDocument = {
+          schemaVersion: 1, figureId: original.figure.id,
+          drawingFileId: review.replacement ? `${original.drawing!.id}-source-review` : original.drawing!.id,
+          drawingSha256: sourceArtwork.sha256, imageWidth: sourceArtwork.width, imageHeight: sourceArtwork.height,
+          catalogueBindingSha256: binding,
+          occurrences: [{ calloutId: item.calloutId, figurePartId: item.figurePartId, refNo: String(item.number),
+            labelRegion: null, regions, evidence: item.evidence }],
+        };
+        if (validateMappingGeometry(document).length) { displayOnly++; return legacy; }
+        return { ...legacy, componentGeometry: {
+          drawingPath: sourceArtwork.path.slice("public".length), drawingSha256: sourceArtwork.sha256,
+          imageWidth: sourceArtwork.width, imageHeight: sourceArtwork.height, regions,
+        } };
       });
       const highlights = callouts.filter((item) => item.maskPath !== null).length;
       const drawing = review.replacement ? {
@@ -159,7 +192,7 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
       const prefix = review.replacement ? "Local preview — unapproved source-corrected drawing; not for ordering." : result.notice;
       result = {
         detail: { ...sourceDetail, drawing, callouts },
-        notice: `${prefix ?? "Local preview — unapproved; not for ordering."} ${highlights} component outlines available; untraced parts highlight their reference only.${review.warning ? ` ${review.warning}` : ""}`,
+        notice: `${prefix ?? "Local preview — unapproved; not for ordering."} ${highlights} component outlines available; untraced parts highlight their reference only.${displayOnly ? ` ${displayOnly} outlines are display-only because their numeric geometry is invalid; use their reference labels.` : ""}${review.warning ? ` ${review.warning}` : ""}`,
       };
     } catch (error) {
       if (!manifestFound && record(error) && error.code === "ENOENT") continue;

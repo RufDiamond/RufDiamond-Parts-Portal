@@ -20,10 +20,11 @@ import {
   Trail,
   type CropRect,
 } from "@/components";
-import { buildDrawingMarkers } from "@/lib/drawing";
+import { buildDiagramRegions, buildDrawingMarkers } from "@/lib/drawing";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
 import { useSelection } from "@/state/useSelection";
+import { useDiagramSelection } from "@/state/useDiagramSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
 import type { FigureDetail, PartUsageSummary } from "@/types/catalog";
 import { QuoteRequest } from "../../request/QuoteRequest";
@@ -82,13 +83,18 @@ export function FigureWorkspace({
   const { selectedModel } = useMachine();
   const { addParts, lines } = useRequest();
 
-  const { selectedPartIds, toggle, hoveredPartId, setHoveredPartId } =
+  const { selectedPartIds: quotePartIds, toggle: toggleQuote, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
+  const { selectedPartIds, selectPart, clear } = useDiagramSelection({
+    figureId: figure.id, rows,
+    releaseKey: `${variant.catalogRevision}/${drawing?.id}/${drawing?.version}/${drawing?.storagePath}/${reviewOnly}`,
+  });
 
   const markers = useMemo(
     () => buildDrawingMarkers(rows, callouts),
     [rows, callouts],
   );
+  const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
 
   useEffect(() => {
     if (reviewOnly) return;
@@ -106,36 +112,17 @@ export function FigureWorkspace({
     [lines],
   );
 
-  /*
-   * The tick and the lit marker are one state — but that state is SELECTION,
-   * not the cart.
-   *
-   * Clicking a callout, a Ref number or a row lights the part on the plate and
-   * ticks its box. Getting it onto the cart is a second, deliberate act: the
-   * Add to cart button. Wiring the tick straight to the cart made every click
-   * an order and left Add to cart with nothing to do.
-   */
-
-  /*
-   * What Add to cart will actually do. It used to sweep in EVERY part on the
-   * figure, which — now that the tick and the selection are one state — lit
-   * every row and ticked every box, reading as though the click had selected
-   * the whole sheet. It adds what is ticked, and nothing else.
-   */
-  /** A callout, a Ref number, a row or its tick: all select the part. */
-  const toggleSelected = (partId: string) => toggle(partId);
-
   /** Ticked parts not already on the cart. */
   const pending = useMemo(
     () =>
       rows
         .filter(
           (row) =>
-            selectedPartIds.has(row.part.id) &&
+            quotePartIds.has(row.part.id) &&
             !requestedPartIds.has(row.part.id),
         )
         .map((row) => ({ part: row.part, qty: row.figurePart.qty })),
-    [rows, selectedPartIds, requestedPartIds],
+    [rows, quotePartIds, requestedPartIds],
   );
 
   const addSelectedToCart = () => {
@@ -377,6 +364,10 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
+        <button type="button" className={styles.button} onClick={clear} disabled={selectedPartIds.size === 0}>
+          Clear selection
+        </button>
+
         <button
           type="button"
           className={styles.button}
@@ -406,7 +397,7 @@ export function FigureWorkspace({
           onClick={addSelectedToCart}
           disabled={reviewOnly || pending.length === 0}
           title={
-            selectedPartIds.size === 0
+            quotePartIds.size === 0
               ? "Tick a part first"
               : pending.length === 0
                 ? "Everything ticked is already on the cart"
@@ -526,9 +517,10 @@ export function FigureWorkspace({
               height={drawing?.height}
               note={`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
+              document={regions}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
-              onTogglePart={toggleSelected}
+              onSelectPart={selectPart}
               onHoverPart={setHoveredPartId}
               zoom={zoom}
               onZoomChange={setZoom}
@@ -625,10 +617,10 @@ export function FigureWorkspace({
                 rows={rows}
                 selectedPartIds={selectedPartIds}
                 hoveredPartId={hoveredPartId}
-                onTogglePart={toggleSelected}
+                onSelectPart={selectPart}
                 onHoverPart={setHoveredPartId}
-                requestedPartIds={selectedPartIds}
-                onToggleRequested={reviewOnly ? undefined : toggleSelected}
+                requestedPartIds={quotePartIds}
+                onToggleRequested={reviewOnly ? undefined : toggleQuote}
               />
             )}
           </div>
@@ -654,10 +646,12 @@ export function FigureWorkspace({
           height={drawing?.height}
           note={`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
+          document={regions}
           previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
-          onTogglePart={toggleSelected}
+          onSelectPart={selectPart}
+          onClearSelection={clear}
           onHoverPart={setHoveredPartId}
           trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
           date={new Date().toLocaleDateString("en-CA", {

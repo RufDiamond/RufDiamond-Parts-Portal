@@ -22,6 +22,8 @@ export default defineConfig({
       "tests/full-illustration-preview.test.tsx",
       "tests/hosted-marker-review.test.tsx",
       "tests/part-highlight-review.test.ts",
+      "tests/diagram-selection.test.tsx",
+      "tests/diagram-regions.test.tsx",
     ],
   },
 });

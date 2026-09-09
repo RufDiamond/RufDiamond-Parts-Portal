@@ -55,8 +55,26 @@ test("source-bound outlines reach drawing markers only on review, without changi
   expect(buildDrawingMarkers(result.detail.rows, result.detail.callouts).find((marker) => marker.number === 1)?.maskPath)
     .toBe("M 30 40 L 35 40 L 35 45 L 30 45 Z");
   expect(result.notice).toContain("unapproved");
+  expect(result.detail.callouts.find((item) => item.number === 1)?.componentGeometry).toMatchObject({
+    drawingPath: detail.drawing!.storagePath, imageWidth: 1280, imageHeight: 720,
+    regions: [{ outer: [[384, 288], [448, 288], [448, 324], [384, 324]], holes: [] }],
+  });
   expect(detail).toEqual(before);
   expect(await loadCalloutPreview(detail)).toEqual({ detail: before, notice: null });
+});
+
+test("invalid intersecting numeric regions remain display-only while valid sibling occurrences activate", async () => {
+  const { detail, manifest } = await fixture();
+  const first = detail.callouts[0];
+  detail.callouts.push({ ...first, id: "valid-sibling" });
+  manifest.figures[0].annotations.push({ ...manifest.figures[0].annotations[0], calloutId: "valid-sibling" });
+  manifest.figures[0].annotations[0].polygons = [[[10,10],[40,40],[10,40],[40,10],[50,20]]];
+  serveManifest(manifest);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  expect(result.detail.callouts.find((item) => item.id === first.id)?.maskPath).toMatch(/^M /);
+  expect(result.detail.callouts.find((item) => item.id === first.id)?.componentGeometry).toBeUndefined();
+  expect(result.detail.callouts.find((item) => item.id === "valid-sibling")?.componentGeometry?.regions).toHaveLength(1);
+  expect(result.notice).toMatch(/1.*display-only.*invalid/i);
 });
 
 test.each(["part", "occurrence", "figure-part", "catalogue", "artwork", "bounds", "degenerate", "duplicate", "status"])(

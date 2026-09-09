@@ -10,6 +10,8 @@ export interface CalloutMarkerProps {
   x?: number;
   y?: number;
   state?: CalloutMarkerState;
+  /** Persistent selection, independent of the temporary visual hover state. */
+  pressed?: boolean;
   size?: "sm" | "md";
   title?: string;
   onActivate?: () => void;
@@ -25,6 +27,7 @@ export function CalloutMarker({
   x,
   y,
   state = "default",
+  pressed,
   size = "md",
   title,
   onActivate,
@@ -40,7 +43,7 @@ export function CalloutMarker({
       style={placed ? { left: `${x}%`, top: `${y}%` } : undefined}
       title={title}
       aria-label={title ? `Callout ${number}: ${title}` : `Callout ${number}`}
-      aria-pressed={interactive ? state === "active" : undefined}
+      aria-pressed={interactive ? (pressed ?? state === "active") : undefined}
       disabled={!interactive}
       onPointerDown={(event) => event.stopPropagation()}
       onClick={onActivate}
