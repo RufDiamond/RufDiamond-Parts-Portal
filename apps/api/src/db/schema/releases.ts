@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, check, date, foreignKey, integer, numeric, pgTable, primaryKey, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import type { DiagramMappingDocument } from "@rufdiamond/contracts";
+import { bigint, boolean, check, date, foreignKey, integer, jsonb, numeric, pgTable, primaryKey, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { model } from "./catalog.js";
 import { appUser } from "./identity.js";
 import { checksumCheck, currencyCheck, id, money, time } from "./common.js";
@@ -56,3 +57,20 @@ export const releaseFigurePart = pgTable("release_figure_part", {
 export const releaseCallout = pgTable("release_callout", {
   ...snapshot(), figureId: uuid("figure_id").notNull(), figurePartId: uuid("figure_part_id").notNull(), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }).notNull(), y: numeric("y", { precision: 7, scale: 4 }).notNull(), maskPath: text("mask_path"),
 }, t => [primaryKey({ columns: [t.releaseId, t.id] }), unique("release_callout_source").on(t.releaseId, t.workingId), unique("release_callout_row").on(t.releaseId, t.figureId, t.sourceKey), foreignKey({ columns: [t.releaseId, t.figureId], foreignColumns: [releaseFigure.releaseId, releaseFigure.id] }), foreignKey({ name: "release_callout_same_figure", columns: [t.releaseId, t.figurePartId, t.figureId], foreignColumns: [releaseFigurePart.releaseId, releaseFigurePart.id, releaseFigurePart.figureId] }), check("release_callout_coordinates", sql`${t.x} BETWEEN 0 AND 100 AND ${t.y} BETWEEN 0 AND 100`)]);
+
+export const releaseDiagramMapping = pgTable("release_diagram_mapping", {
+  releaseId: uuid("release_id").notNull().references(() => publicationRelease.id),
+  figureId: uuid("figure_id").notNull(),
+  drawingId: uuid("drawing_id").notNull(),
+  document: jsonb("document").$type<DiagramMappingDocument>().notNull(),
+  sourceRevisionId: uuid("source_revision_id").notNull(),
+  sourceDocumentChecksum: text("source_document_checksum").notNull(),
+  reviewedByUserId: uuid("reviewed_by_user_id").notNull(),
+  reviewedAt: time("reviewed_at").notNull(),
+}, t => [
+  primaryKey({ columns: [t.releaseId, t.figureId] }),
+  foreignKey({ columns: [t.releaseId, t.figureId], foreignColumns: [releaseFigure.releaseId, releaseFigure.id] }),
+  foreignKey({ columns: [t.releaseId, t.drawingId], foreignColumns: [releaseDrawing.releaseId, releaseDrawing.id] }),
+  check("release_diagram_mapping_document_object", sql`jsonb_typeof(${t.document}) = 'object'`),
+  checksumCheck(t.sourceDocumentChecksum),
+]);

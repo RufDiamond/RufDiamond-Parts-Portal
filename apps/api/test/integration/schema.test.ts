@@ -15,7 +15,7 @@ describe("PostgreSQL domain constraints", () => {
     await expect(postgres.migrate()).resolves.toBeUndefined();
     await expect(postgres.migrate()).resolves.toBeUndefined();
     const result = await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations");
-    expect(result.rows[0].count).toBe(7);
+    expect(result.rows[0].count).toBe(8);
     expect((await postgres.pool.query("select count(*)::int as count from capability")).rows[0].count).toBe(45);
   });
 

@@ -7,6 +7,28 @@ import { execFileSync } from "node:child_process";
 
 export const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 
+export async function closePostgresPool(pool: Pool): Promise<void> {
+  const expectedRemovals = pool.totalCount;
+  if (expectedRemovals === 0) {
+    await pool.end();
+    return;
+  }
+
+  let removed = 0;
+  let resolveRemoved!: () => void;
+  const allRemoved = new Promise<void>(resolve => { resolveRemoved = resolve; });
+  const onRemove = () => {
+    removed += 1;
+    if (removed === expectedRemovals) resolveRemoved();
+  };
+  pool.on("remove", onRemove);
+  try {
+    await Promise.all([pool.end(), allRemoved]);
+  } finally {
+    pool.off("remove", onRemove);
+  }
+}
+
 export async function startPostgres() {
   // Testcontainers does not resolve Docker CLI contexts (notably Colima).
   // Respect explicit CI settings; otherwise use the developer's active context.
@@ -27,7 +49,7 @@ export async function startPostgres() {
     connectionString: container.getConnectionUri(),
     migrate: (folder = migrationsFolder) => migrate(drizzle(pool), { migrationsFolder: folder }),
     async stop() {
-      await pool.end();
+      await closePostgresPool(pool);
       await container.stop();
     },
   };
