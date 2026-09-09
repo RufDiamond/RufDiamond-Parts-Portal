@@ -9,6 +9,45 @@ const cases = [
 ];
 const figure = (page:Page) => page.locator("figure").first();
 const stage = (scope:Locator) => scope.locator("img").locator("..");
+
+test("synthetic editor: native coordinates, drag, keyboard, zoom and image mismatch gate", async ({ page }, info) => {
+  const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
+  await page.goto("http://localhost:3101");
+  const png = await page.evaluate(() => {
+    const canvas = document.createElement("canvas"); canvas.width = 640; canvas.height = 480;
+    const context = canvas.getContext("2d")!; context.fillStyle = "white"; context.fillRect(0, 0, 640, 480); context.strokeRect(100, 100, 100, 100);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  await page.route("**/synthetic-editor.png", route => route.fulfill({ contentType: "image/png", body: Buffer.from(png, "base64") }));
+  await page.goto("http://localhost:3101/?editor");
+  await expect(page.getByRole("button", { name: "Polygon (G)" })).toBeEnabled();
+  const svg = page.getByTestId("mapping-canvas");
+  const nativePoint = (x: number, y: number) => svg.evaluate((el, p) => {
+    const result = new DOMPoint(p.x, p.y).matrixTransform((el as SVGSVGElement).getScreenCTM()!); return { x: result.x, y: result.y };
+  }, { x, y });
+  await svg.focus(); await page.keyboard.press("g");
+  for (const [x, y] of [[100, 100], [200, 100], [200, 200], [100, 200]]) { const p = await nativePoint(x, y); await page.mouse.click(p.x, p.y); }
+  await page.keyboard.press("Enter"); await page.keyboard.press("v");
+  const p = await nativePoint(150, 150); await page.mouse.click(p.x, p.y);
+  const vertex = page.getByRole("button", { name: "Outer vertex 1" });
+  const start = await nativePoint(100, 100); const end = await nativePoint(110, 120);
+  await page.mouse.move(start.x, start.y); await page.mouse.down(); await page.mouse.move(end.x, end.y, { steps: 5 }); await page.mouse.up();
+  await expect.poll(async () => Number(await vertex.getAttribute("cx"))).toBeCloseTo(110, 0);
+  await expect.poll(async () => Number(await vertex.getAttribute("cy"))).toBeCloseTo(120, 0);
+  await vertex.focus(); await page.keyboard.press("ArrowRight");
+  await expect.poll(async () => Number(await vertex.getAttribute("cx"))).toBeCloseTo(111, 0);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  const alignment = await svg.evaluate(el => {
+    const image = el.parentElement!.querySelector("img")!.getBoundingClientRect(); const overlay = el.getBoundingClientRect();
+    return Math.max(...["left", "top", "width", "height"].map(k => Math.abs(image[k as keyof DOMRect] as number - (overlay[k as keyof DOMRect] as number))));
+  });
+  expect(alignment).toBeLessThanOrEqual(1);
+  await page.screenshot({ path: info.outputPath("synthetic-editor.png"), fullPage: true });
+  await info.attach("geometry", { body: JSON.stringify({ maximumImageOverlayError: alignment, expectedMovedVertex: [111, 120] }), contentType: "application/json" });
+  await page.goto("http://localhost:3101/?editor&mismatch");
+  await expect(page.getByRole("button", { name: "Polygon (G)" })).toBeDisabled(); await expect(svg).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
 async function zoom(scope:Locator) { return stage(scope).evaluate((el) => Number((el as HTMLElement).style.getPropertyValue("--zoom"))); }
 async function settled(page:Page) { await page.waitForTimeout(220); }
 

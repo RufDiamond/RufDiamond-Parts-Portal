@@ -84,6 +84,57 @@ describe("scoped diagram mapping API", () => {
     expect(response.json()).toMatchObject({ version: 1, revision: null, sourceConflict: false, source: { figure: { id: ids.figure, name: "Frame", version: 1 }, rows: [{ id: ids.row, partId: ids.part, qty: 2, partNumber: "P1", refLabels: ["7"] }] }, document: { figureId: ids.figure, imageWidth: 640, occurrences: [{ calloutId: ids.callout, figurePartId: ids.row, labelRegion: null, regions: [] }] } });
     expect(response.body).not.toMatch(/private-secret|objectKey|999.99|listPrice|password|signedUrl/);
   });
+  it("lists bounded nonoverlapping immutable history and reads exact revisions under current scope", async () => {
+    const d = await document(); const revisions = [];
+    for (let i = 1; i <= 22; i++) revisions.push((await save(d, i)).json());
+    const first = await app.inject({ method: "GET", url: `${path()}/revisions`, headers });
+    expect(first.statusCode).toBe(200); expect(first.json().items).toHaveLength(20); expect(first.json().nextBefore).toBe(3);
+    expect(first.json().items.map((r: { revisionNumber: number }) => r.revisionNumber)).toEqual(Array.from({ length: 20 }, (_, i) => 22 - i));
+    const second = await app.inject({ method: "GET", url: `${path()}/revisions?before=3`, headers });
+    expect(second.json().items.map((r: { revisionNumber: number }) => r.revisionNumber)).toEqual([2, 1]); expect(second.json().nextBefore).toBeNull();
+    const old = await app.inject({ method: "GET", url: `${path()}/revisions/${revisions[0].revisionId}`, headers });
+    expect(old.statusCode).toBe(200); expect(old.json()).toMatchObject({ revision: revisions[0], currentVersion: 23, sourceConflict: false });
+    expect(old.headers["cache-control"]).toBe("no-store"); expect(first.body + old.body).not.toMatch(/private-secret|objectKey|listPrice|password/);
+    expect((await pg.pool.query("select count(*)::int n from diagram_mapping_revision")).rows[0].n).toBe(22);
+  });
+  it("rejects invalid history cursors and IDs, cross-head history and revoked access", async () => {
+    const saved = (await save(await document())).json();
+    for (const before of ["0", "-1", "1.2", "2147483648", "9007199254740992", "junk"]) expect((await app.inject({ method: "GET", url: `${path()}/revisions?before=${before}`, headers })).statusCode).toBe(400);
+    for (const id of ["bad-id", randomUUID()]) expect((await app.inject({ method: "GET", url: `${path()}/revisions/${id}`, headers })).statusCode).toBe(404);
+    expect((await app.inject({ method: "GET", url: `${path().replace(ids.figure, ids.otherFigure)}/revisions/${saved.revisionId}`, headers })).statusCode).toBe(404);
+    expect((await app.inject({ method: "GET", url: `${path()}/revisions` })).statusCode).toBe(401);
+    await revoke("publish.draft.view");
+    expect((await app.inject({ method: "GET", url: `${path()}/revisions`, headers })).statusCode).toBe(403);
+    expect((await app.inject({ method: "GET", url: `${path()}/revisions/${saved.revisionId}`, headers })).statusCode).toBe(403);
+  });
+  it("returns old history unchanged with current-source conflict and historical approval", async () => {
+    const saved = (await save(await completeDocument())).json(); const approved = (await approve(saved)).json();
+    await pg.pool.query("update figure set version=version+1 where id=$1", [ids.figure]);
+    const result = await app.inject({ method: "GET", url: `${path()}/revisions/${saved.revisionId}`, headers });
+    expect(result.statusCode).toBe(200); expect(result.json()).toMatchObject({ revision: approved, currentVersion: 2, sourceConflict: true, source: { figure: { version: 2 } } });
+  });
+  it("transports client save/reload/history through real Fastify/PostgreSQL with CSRF, conflicts and session expiration", async () => {
+    // Keep frontend sources outside the API compiler root; Vitest loads the real client.
+    const clientPath = new URL("../../../src/features/diagram-mapping/api-client.ts", import.meta.url).href;
+    const { createMappingApiClient } = await import(clientPath);
+    const request: typeof fetch = async (url, init) => {
+      expect(String(url).startsWith("/api/v1/")).toBe(true);
+      expect(init?.credentials).toBe("same-origin"); expect(init?.cache).toBe("no-store");
+      const response = await app.inject({ method: (init?.method ?? "GET") as "GET" | "PUT" | "POST", url: String(url), headers: { origin, cookie: headers.cookie, ...Object.fromEntries(new Headers(init?.headers)) }, ...(init?.body ? { payload: String(init.body) } : {}) });
+      return new Response(response.body, { status: response.statusCode, headers: { "content-type": String(response.headers["content-type"]) } });
+    };
+    const client = createMappingApiClient({ csrfToken: headers["x-csrf-token"], fetch: request });
+    const initial = await client.loadMapping(ids.figure);
+    const saved = await client.saveMapping(ids.figure, initial.version, initial.document, randomUUID());
+    expect(saved.version).toBe(2); expect((await client.loadMapping(ids.figure)).revision).toEqual(saved);
+    expect((await client.listRevisions(ids.figure)).items[0].revisionId).toBe(saved.revisionId);
+    expect((await client.loadRevision(ids.figure, saved.revisionId)).currentVersion).toBe(2);
+    await expect(client.saveMapping(ids.figure, 1, initial.document, randomUUID())).rejects.toMatchObject({ status: 412 });
+    await revoke("catalog.callout.manage");
+    await expect(client.saveMapping(ids.figure, 2, initial.document, randomUUID())).rejects.toMatchObject({ status: 403 });
+    await pg.pool.query("update app_user set status='suspended' where id=$1", [ids.actor]);
+    await expect(client.loadMapping(ids.figure)).rejects.toMatchObject({ status: 401 });
+  });
   it("denies current read capability and draft environment before figure lookup", async () => {
     await revoke("catalog.figure.view");
     expect((await read()).statusCode).toBe(403);

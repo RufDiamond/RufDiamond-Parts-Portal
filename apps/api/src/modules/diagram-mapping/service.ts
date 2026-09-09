@@ -1,15 +1,14 @@
-import type { MappingApproveInput, MappingEditorDocument, MappingRevision, MappingSaveInput, MappingWriteContext } from "@rufdiamond/contracts";
+import type { MappingApproveInput, MappingEditorDocument, MappingHistoricalDocument, MappingHistory, MappingRevision, MappingSaveInput, MappingWriteContext } from "@rufdiamond/contracts";
 import type { Database, Transaction } from "../../db/client.js";
 import { AppError } from "../../plugins/error-handler.js";
 import { writeAuditLog, type MutationContext } from "../audit/repository.js";
 import { loadAuthorization, requireCapability } from "../authorization/policy.js";
-import type { AuthorizationContext } from "../authorization/types.js";
 import { canonicalJsonHash, withIdempotency } from "../outbox/idempotency.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
 import { catalogueBindingSha256, initialDocument, requireCurrentSource, sourceConflict, sourceContext, validateDocument } from "./binding.js";
-import { currentRevision, insertApproval, insertRevision, loadGraph, mappingTransaction, updateAssociations } from "./repository.js";
+import { currentRevision, historicalRevision, insertApproval, insertRevision, listRevisions, loadGraph, mappingTransaction, updateAssociations } from "./repository.js";
 
-export type MappingContext = AuthorizationContext & { requestId: string };
+export type MappingContext = { userId: string; requestId: string };
 type StoredMutation = { revision: MappingRevision; requiresMap: boolean };
 
 async function authorize(tx: Transaction, ctx: MappingContext, operation: "read" | "save" | "approve") {
@@ -31,6 +30,21 @@ async function recordMutation(tx: Transaction, ctx: MutationContext, figureId: s
 }
 
 export function createMappingService(database: Database, now: () => Date = () => new Date()) {
+  async function history(ctx: MappingContext, figureId: string, before?: number): Promise<MappingHistory> {
+    return mappingTransaction(database, async tx => {
+      const current = await authorize(tx, ctx, "read");
+      const graph = await loadGraph(tx, current, figureId, false);
+      return listRevisions(tx, graph, before);
+    }, false);
+  }
+  async function historical(ctx: MappingContext, figureId: string, revisionId: string): Promise<MappingHistoricalDocument> {
+    return mappingTransaction(database, async tx => {
+      const current = await authorize(tx, ctx, "read");
+      const graph = await loadGraph(tx, current, figureId, false);
+      const revision = await historicalRevision(tx, graph, revisionId);
+      return { revision, source: sourceContext(graph), sourceConflict: sourceConflict(graph, revision.document), currentVersion: graph.head.version };
+    }, false);
+  }
   async function read(ctx: MappingContext, figureId: string): Promise<MappingEditorDocument> {
     return mappingTransaction(database, async tx => {
       const current = await authorize(tx, ctx, "read");
@@ -78,5 +92,5 @@ export function createMappingService(database: Database, now: () => Date = () =>
       return stored.revision;
     });
   }
-  return { read, save: (ctx: MappingContext, write: MappingWriteContext, input: MappingSaveInput) => mutate(ctx, write, input, "save"), approve: (ctx: MappingContext, write: MappingWriteContext, input: MappingApproveInput) => mutate(ctx, write, input, "approve") };
+  return { read, history, historical, save: (ctx: MappingContext, write: MappingWriteContext, input: MappingSaveInput) => mutate(ctx, write, input, "save"), approve: (ctx: MappingContext, write: MappingWriteContext, input: MappingApproveInput) => mutate(ctx, write, input, "approve") };
 }

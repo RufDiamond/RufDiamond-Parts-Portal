@@ -5,6 +5,7 @@ import { PartsTable } from "@/components/PartsTable";
 import { useDiagramSelection } from "@/state/useDiagramSelection";
 import type { FigurePartRow } from "@/types/catalog";
 import "@/app/globals.css";
+import { EditorFixture } from "./editor";
 
 const canvas = document.createElement("canvas");
 canvas.width = 400; canvas.height = 1000;
@@ -46,4 +47,4 @@ function App() {
         selectedFigurePartId={focus.selection?.figurePartId} selectionActivation={focus.activation} />
     </div></>;
 }
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(new URLSearchParams(location.search).has("editor") ? <EditorFixture /> : <App />);

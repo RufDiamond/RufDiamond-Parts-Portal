@@ -162,3 +162,16 @@ export const MappingEditorDocumentSchema = Type.Union(
   { $id: "MappingEditorDocument" },
 );
 export type MappingEditorDocument = Static<typeof MappingEditorDocumentSchema>;
+
+export const MappingHistorySchema = Type.Object({
+  items: Type.Array(Type.Object({
+    revisionId: Type.String(), revisionNumber: Type.Integer({ minimum: 1 }), checksum: Sha256Schema, createdAt: Type.String(),
+    approval: Type.Union([MappingApprovalSchema, Type.Null()]),
+  }, { additionalProperties: false }), { maxItems: 20 }),
+  nextBefore: Type.Union([Type.Integer({ minimum: 1 }), Type.Null()]),
+}, { $id: "MappingHistory", additionalProperties: false });
+export type MappingHistory = Static<typeof MappingHistorySchema>;
+export const MappingHistoricalDocumentSchema = Type.Object({
+  revision: MappingRevisionSchema, source: MappingSourceSchema, sourceConflict: Type.Boolean(), currentVersion: Type.Integer({ minimum: 1 }),
+}, { $id: "MappingHistoricalDocument", additionalProperties: false });
+export type MappingHistoricalDocument = Static<typeof MappingHistoricalDocumentSchema>;

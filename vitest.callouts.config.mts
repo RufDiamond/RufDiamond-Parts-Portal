@@ -26,6 +26,8 @@ export default defineConfig({
       "tests/diagram-regions.test.tsx",
       "tests/diagram-viewport.test.ts",
       "tests/diagram-table-reveal.test.tsx",
+      "tests/mapping-editor-state.test.ts",
+      "tests/mapping-editor.test.tsx",
     ],
   },
 });

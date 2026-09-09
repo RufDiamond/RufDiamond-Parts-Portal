@@ -1,0 +1,27 @@
+.editor { padding: 24px; color: #152d3d; background: #f5f7f8; min-height: 100vh; }
+.editor h1 { margin: 0 0 12px; font-size: 1.5rem; }
+.toolbar, .actions, .zoomControls { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.editor button, .editor select, .editor input, .editor textarea { font: inherit; }
+.editor button { border: 1px solid #9aadb9; padding: 8px 12px; border-radius: 5px; background: white; color: #17394d; cursor: pointer; }
+.editor button[aria-pressed="true"] { background: #134f72; color: white; border-color: #134f72; }
+.editor button:disabled { opacity: .5; cursor: not-allowed; }
+.editor :focus-visible { outline: 3px solid #d47700; outline-offset: 3px; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; }
+.viewport { overflow: hidden; height: 65vh; min-height: 360px; background: #dce3e7; border: 1px solid #9aadb9; display: flex; align-items: center; justify-content: center; touch-action: none; }
+.imageLayer { position: relative; width: 100%; flex-shrink: 0; transform-origin: center; }
+.imageLayer img, .imageLayer svg { display: block; width: 100%; height: 100%; }
+.imageLayer svg { position: absolute; inset: 0; }
+.imageLayer img { user-select: none; }
+.region { fill: #0784c64d; stroke: #006598; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.region[aria-pressed="true"] { fill: #e997265c; stroke: #904c00; }
+.label { fill: #ffd33d44; stroke: #825d00; stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.vertex { fill: white; stroke: #164f72; stroke-width: 2px; vector-effect: non-scaling-stroke; cursor: crosshair; }
+.openRing { fill: none; stroke: #c34021; stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.inspector { border: 1px solid #c6d0d7; padding: 16px; background: white; overflow-wrap: anywhere; }
+.inspector label { display: block; margin: 8px 0; }
+.inspector select, .inspector textarea, .inspector input[type="number"] { display: block; width: 100%; padding: 6px; border: 1px solid #9aadb9; }
+.inspector fieldset { margin: 16px 0; border: 1px solid #c6d0d7; }
+.inspector button { margin: 4px; }
+.warning { padding: 12px; border: 1px solid #bc8c3a; background: #fff7e4; }
+.issues { color: #852c1f; overflow-wrap: anywhere; }
+@media (max-width: 900px) { .workspace { grid-template-columns: 1fr; } .editor { padding: 12px; } }

@@ -1,11 +1,9 @@
-import { MappingApproveInputSchema, MappingEditorDocumentSchema, MappingRevisionSchema, MappingSaveInputSchema, type MappingApproveInput, type MappingSaveInput, type MappingWriteContext } from "@rufdiamond/contracts";
+import { MappingApproveInputSchema, MappingEditorDocumentSchema, MappingHistoricalDocumentSchema, MappingHistorySchema, MappingRevisionSchema, MappingSaveInputSchema, type MappingApproveInput, type MappingSaveInput, type MappingWriteContext } from "@rufdiamond/contracts";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { AppConfig } from "../../config.js";
 import type { Database } from "../../db/client.js";
 import { requireCsrf } from "../../plugins/csrf.js";
 import { AppError } from "../../plugins/error-handler.js";
-import { loadAuthorization } from "../authorization/policy.js";
-import { mappingTransaction } from "./repository.js";
 import { createMappingService } from "./service.js";
 
 // Shared contracts inline repeated named sub-schemas. Remove annotation-only IDs
@@ -29,10 +27,20 @@ function writeContext(request: FastifyRequest<{ Params: { figureId: string } }>)
 }
 export function registerMappingRoutes(app: FastifyInstance, config: AppConfig, database: Database, now: () => Date) {
   const service = createMappingService(database, now);
-  const actor = async (request: FastifyRequest) => ({ ...await mappingTransaction(database, tx => loadAuthorization(tx, request.identitySession!.user.id), false), requestId: request.requestId });
+  const actor = (request: FastifyRequest) => ({ userId: request.identitySession!.user.id, requestId: request.requestId });
   const path = "/api/v1/admin/figures/:figureId/diagram-mapping";
   const params = { type: "object", required: ["figureId"], additionalProperties: false, properties: { figureId: { type: "string" } } };
   const onRequest = async (request: FastifyRequest) => { authenticated(request); if (request.method !== "GET") requireCsrf(request, config); };
+  app.get<{ Params: { figureId: string }; Querystring: { before?: string } }>(`${path}/revisions`, { onRequest, schema: { params, querystring: { type: "object", additionalProperties: false, properties: { before: { type: "string", pattern: "^[1-9][0-9]*$" } } }, response: { 200: routeSchema(MappingHistorySchema) } } }, async (request, reply) => {
+    const before = request.query.before === undefined ? undefined : Number(request.query.before);
+    if (before !== undefined && (!Number.isSafeInteger(before) || before > 2147483647)) throw new AppError("INVALID_CURSOR", 400, "Supply a revision cursor from 1 to 2147483647.");
+    const result = await service.history(actor(request), request.params.figureId, before);
+    reply.header("cache-control", "no-store"); return result;
+  });
+  app.get<{ Params: { figureId: string; revisionId: string } }>(`${path}/revisions/:revisionId`, { onRequest, schema: { params: { ...params, required: ["figureId", "revisionId"], properties: { ...params.properties, revisionId: { type: "string" } } }, response: { 200: routeSchema(MappingHistoricalDocumentSchema) } } }, async (request, reply) => {
+    const result = await service.historical(actor(request), request.params.figureId, request.params.revisionId);
+    reply.header("cache-control", "no-store"); return result;
+  });
   app.get<{ Params: { figureId: string } }>(path, { onRequest, schema: { params, response: { 200: routeSchema(MappingEditorDocumentSchema) } } }, async (request, reply) => {
     const result = await service.read(await actor(request), request.params.figureId);
     reply.header("etag", `"${result.version}"`).header("cache-control", "no-store");

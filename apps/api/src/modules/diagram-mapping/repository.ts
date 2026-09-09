@@ -1,5 +1,5 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
-import type { MappingRevision, DiagramMappingDocument } from "@rufdiamond/contracts";
+import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import type { MappingHistory, MappingRevision, DiagramMappingDocument } from "@rufdiamond/contracts";
 import type { Database, Transaction } from "../../db/client.js";
 import { callout, diagramMapping, diagramMappingApproval, diagramMappingRevision, drawingFile, figure, figurePart, model, part, variant } from "../../db/schema/index.js";
 import { AppError } from "../../plugins/error-handler.js";
@@ -36,6 +36,21 @@ export async function loadGraph(tx: Transaction, ctx: AuthorizationContext, figu
   return { ...scope, head, drawing: drawing ?? null, rows, occurrences };
 }
 export type MappingGraph = Awaited<ReturnType<typeof loadGraph>>;
+
+export async function listRevisions(tx: Transaction, graph: MappingGraph, before?: number): Promise<MappingHistory> {
+  const rows = await tx.select({ id: diagramMappingRevision.id, revision: diagramMappingRevision.revision, checksum: diagramMappingRevision.documentChecksum, createdAt: diagramMappingRevision.createdAt, reviewer: diagramMappingApproval.reviewedByUserId, reviewedAt: diagramMappingApproval.reviewedAt })
+    .from(diagramMappingRevision).leftJoin(diagramMappingApproval, eq(diagramMappingApproval.revisionId, diagramMappingRevision.id))
+    .where(and(eq(diagramMappingRevision.headId, graph.head.id), before === undefined ? undefined : lt(diagramMappingRevision.revision, before)))
+    .orderBy(desc(diagramMappingRevision.revision)).limit(21);
+  return { items: rows.slice(0, 20).map(r => ({ revisionId: r.id, revisionNumber: r.revision, checksum: r.checksum, createdAt: r.createdAt.toISOString(), approval: r.reviewer && r.reviewedAt ? { reviewerId: r.reviewer, reviewedAt: r.reviewedAt.toISOString() } : null })), nextBefore: rows.length > 20 ? rows[19].revision : null };
+}
+export async function historicalRevision(tx: Transaction, graph: MappingGraph, revisionId: string): Promise<MappingRevision> {
+  if (!uuid.test(revisionId)) throw new AppError("REVISION_NOT_FOUND", 404, "The requested revision was not found.");
+  const [row] = await tx.select().from(diagramMappingRevision).where(and(eq(diagramMappingRevision.headId, graph.head.id), eq(diagramMappingRevision.id, revisionId)));
+  if (!row) throw new AppError("REVISION_NOT_FOUND", 404, "The requested revision was not found.");
+  const [approval] = await tx.select().from(diagramMappingApproval).where(eq(diagramMappingApproval.revisionId, row.id));
+  return { revisionId: row.id, version: row.revision + 1, checksum: row.documentChecksum, document: row.document, approval: approval ? { reviewerId: approval.reviewedByUserId, reviewedAt: approval.reviewedAt.toISOString() } : null };
+}
 
 export async function currentRevision(tx: Transaction, graph: MappingGraph): Promise<MappingRevision | null> {
   if (!graph.head.currentRevisionId) return null;
