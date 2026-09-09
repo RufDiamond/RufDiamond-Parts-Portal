@@ -1,12 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./customer-native";
 const figure = "/figures/10000000-0000-4000-8000-000000000004";
-test("same-browser account switch, cached navigation and live scope revocation omit prior prices", async ({ page }, testInfo) => {
+test("same-browser account switch, cached navigation and live scope revocation omit prior prices", async ({ page, baseURL }, testInfo) => {
+  const url = (pathname: string) => new URL(pathname, baseURL).href;
   expect((await page.request.post("http://127.0.0.1:3299/__reset")).ok()).toBe(true);
-  await page.goto(figure);
+  await page.goto(url(figure));
   await expect(page).toHaveURL(/\/signin$/);
   const assets = await page.locator('link[rel="stylesheet"][href],script[src]').evaluateAll(elements => elements.map(el => el.getAttribute("href") ?? el.getAttribute("src")!).filter(Boolean));
   expect(assets.length).toBeGreaterThan(0);
-  for (const asset of assets) expect((await page.request.get(asset)).status()).toBe(200);
+  for (const asset of assets) expect((await page.request.get(url(asset))).status()).toBe(200);
   async function login(name: string) {
     await page.getByLabel("Username:").fill(name);
     await page.getByLabel("Password:").fill("synthetic-test-only");
@@ -15,7 +16,7 @@ test("same-browser account switch, cached navigation and live scope revocation o
     await page.waitForLoadState("load");
   }
   await login("dealer");
-  await page.goto("/parts/fat-truck");
+  await page.goto(url("/parts/fat-truck"));
   await page.getByRole("button", { name: /Fat Truck Synthetic machine/ }).click();
   await expect(page).toHaveURL(/\/systems\?variantId=/);
   await page.getByRole("link", { name: /Synthetic system/ }).click();
@@ -24,34 +25,41 @@ test("same-browser account switch, cached navigation and live scope revocation o
   await expect(page.getByText("* literal source remark", { exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: /Synthetic range/i }).first()).toHaveAttribute("href", /\/systems\?variantId=/);
   await expect(page.getByRole("link", { name: "Open marker review" })).toHaveCount(0);
+  const pricedDocument = await page.evaluate(() => performance.timeOrigin);
   await page.screenshot({ path: testInfo.outputPath("dealer-catalogue.png"), fullPage: true });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page).toHaveURL(/\/signin$/);
   await login("technician");
-  await page.goto(figure);
+  expect(await page.evaluate(() => performance.timeOrigin)).not.toBe(pricedDocument);
+  await page.goto(url(figure));
   await expect(page.getByText("SYN-PART", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("12.40", { exact: true })).toHaveCount(0);
   await page.screenshot({ path: testInfo.outputPath("technician-catalogue.png"), fullPage: true });
-  const body = await (await page.request.get(figure)).text();
+  const body = await (await page.request.get(url(figure))).text();
   expect(body).not.toContain('12.40');
-  await page.goto("/search?q=SYN-PART");
+  await page.goto(url("/search?q=SYN-PART"));
   await page.goBack();
   await expect(page.getByText("SYN-PART", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("12.40", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await login("dealer");
-  await page.goto(figure);
+  await page.goto(url(figure));
   await expect(page.getByText("12.40", { exact: true })).toBeVisible();
   const otherTab = await page.context().newPage();
   await otherTab.bringToFront();
-  await page.request.post("http://127.0.0.1:3299/__scope");
+  await expect.poll(() => page.evaluate(() => document.visibilityState)).toBe("hidden");
+  expect((await page.request.post("http://127.0.0.1:3299/__scope")).ok()).toBe(true);
+  const refreshed = page.waitForEvent("domcontentloaded");
   await page.bringToFront();
   await otherTab.close();
+  await refreshed;
+  await expect.poll(() => page.evaluate(() => document.visibilityState)).toBe("visible");
   await expect(page.getByText("12.40", { exact: true })).toHaveCount(0);
   await expect(page.getByText("SYN-PART", { exact: true }).first()).toBeVisible();
   expect(await page.evaluate(() => Object.keys(sessionStorage).filter(k => k === "rdpp:request:v1"))).toEqual([]);
-  expect((await page.request.get("/drawings/ft3w/ft3w-cabin-6-1.png")).status()).toBe(404);
-  expect((await page.request.get("/review/figures/fig-cabin-6-1")).status()).toBe(404);
-  await page.goto("/figures/fig-cabin-6-1");
+  expect(await (await page.request.get(url(figure))).text()).not.toContain("12.40");
+  expect((await page.request.get(url("/drawings/ft3w/ft3w-cabin-6-1.png"))).status()).toBe(404);
+  expect((await page.request.get(url("/review/figures/fig-cabin-6-1"))).status()).toBe(404);
+  await page.goto(url("/figures/fig-cabin-6-1"));
   await expect(page.getByRole("heading", { name: "Catalogue unavailable" })).toBeVisible();
 });
