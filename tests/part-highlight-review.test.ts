@@ -98,6 +98,17 @@ test("Electrical 11.3 scopes the directly labelled fuse holder and excludes pane
   expect(contains(15, [747, 170])).toBe(true);
 });
 
+test("Hydraulic 4.1 fittings do not infer similar copies or fill established bores", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-hydraulic-4-1"))!, "hosted-review");
+  const contains = (ref: number, point: [number, number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point, r));
+  for (const [ref, point] of [[7,[210,284]],[10,[350,696]],[11,[259,291]],[18,[680,285]]] as const)
+    expect(contains(ref, [...point])).toBe(false);
+  for (const [ref, point] of [[9,[418,664]],[10,[347,666]],[11,[167,255]],[16,[611,216]],[17,[611,343]]] as const)
+    expect(contains(ref, [...point])).toBe(false);
+  for (const ref of [7,9,10,11,12,13,14,15,16,17,18])
+    expect(result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.length).toBeGreaterThan(0);
+});
+
 test.each([
   {figure:"fig-hydraulic-4-3",ref:2,inside:[460,240],outside:[510,433]},
   {figure:"fig-cabin-6-4",ref:7,inside:[745,430],outside:[962,356]},

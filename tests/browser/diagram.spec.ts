@@ -58,7 +58,7 @@ for (const entry of [
     {figure:"fig-cabin-6-11",refs:[2,4,9,10]},
     {figure:"fig-engine-8-1",refs:[1,2]},
     {figure:"fig-cowling-fender-7-1",refs:[14,15,16,18,19,29,31,32,33]},
-    {figure:"fig-hydraulic-4-1",refs:[19,20,21,22,23,24,25,26]},
+    {figure:"fig-hydraulic-4-1",refs:[7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26]},
     {figure:"fig-cabin-6-6",refs:[7,14]},
     {figure:"fig-cabin-6-18",refs:[5,6,7,8]},
     {figure:"fig-cabin-6-12",refs:[8,9,11,12]},
