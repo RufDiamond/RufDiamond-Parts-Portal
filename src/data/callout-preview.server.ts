@@ -99,22 +99,22 @@ function unavailable(reason: string): string {
 }
 
 /**
- * Local preview remains development-only. The hosted-review surface is an
- * explicit read-only demo route, never an option on the customer catalogue API.
- * Every enabled request revalidates both the catalogue and exact drawing bytes.
+ * Overlay JSON is applied for hosted-review, explicit RUF_CALLOUT_PREVIEW=1,
+ * and production fixture demos (non-API). API mode never applies unapproved
+ * review files. Set RUF_CALLOUT_PREVIEW=0 to disable production fixture overlays.
+ * Every enabled request revalidates catalogue and drawing bytes — no OCR.
  */
 export async function loadCalloutPreview(
   detail: FigureDetail,
   surface: "local" | "hosted-review" = "local",
 ): Promise<CalloutPreview> {
   if (loadFrontendBackendConfig(process.env)) return { detail, notice: null };
-  if (
-    surface !== "hosted-review" &&
-    (process.env.NODE_ENV !== "development" ||
-      process.env.RUF_CALLOUT_PREVIEW !== "1")
-  ) {
-    return { detail, notice: null };
-  }
+  const flag = process.env.RUF_CALLOUT_PREVIEW;
+  const allow =
+    surface === "hosted-review" ||
+    flag === "1" ||
+    (process.env.NODE_ENV === "production" && flag !== "0");
+  if (!allow) return { detail, notice: null };
 
   const base = await loadValidatedPreview(detail);
   const result = base.notice?.includes("Preview unavailable")

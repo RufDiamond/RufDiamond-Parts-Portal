@@ -267,6 +267,7 @@ test("source-bound outlines reach drawing markers only on review, without changi
     regions: [{ outer: [[384, 288], [448, 288], [448, 324], [384, 324]], holes: [] }],
   });
   expect(detail).toEqual(before);
+  vi.stubEnv("RUF_CALLOUT_PREVIEW", "0");
   expect(await loadCalloutPreview(detail)).toEqual({ detail: before, notice: null });
 });
 
@@ -346,6 +347,7 @@ test("uses the corrected bumper artwork and its own coordinates only in review",
   expect(result.notice).toContain("unapproved");
   expect(detail).toEqual(before);
   vi.stubEnv("NODE_ENV", "production");
+  vi.stubEnv("RUF_CALLOUT_PREVIEW", "0");
   expect(await loadCalloutPreview(detail)).toEqual({ detail: before, notice: null });
 });
 
@@ -410,9 +412,12 @@ test("selecting one part paints both legitimate occurrence outlines, and clearin
   expect(selected).toContain('fill-rule="evenodd"');
   expect(selected).toContain('d="M 30 40 L 35 40 L 35 45 L 30 45 Z"');
   expect(selected).toContain('d="M 60 70 L 65 70 L 65 75 Z"');
+  expect(selected).toContain("highlightActive");
   const cleared = render(new Set());
-  expect(cleared).not.toContain('d="M 30 40');
-  expect(cleared).not.toContain('d="M 60 70');
+  expect(cleared).toContain('d="M 30 40 L 35 40 L 35 45 L 30 45 Z"');
+  expect(cleared).toContain('d="M 60 70 L 65 70 L 65 75 Z"');
+  expect(cleared).toContain("highlightHit");
+  expect(cleared).not.toContain("highlightActive");
 });
 
 test.each(["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json"])(

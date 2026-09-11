@@ -251,7 +251,7 @@ describe("applyCalloutPreview", () => {
 });
 
 describe("loadCalloutPreview", () => {
-  test("serves source-validated hosted review markers in a production build without changing the ordinary catalogue", async () => {
+  test("serves source-validated hosted review markers in a production build; ordinary catalogue also gets fixture overlays unless disabled", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("RUF_CALLOUT_PREVIEW", "");
     const detail = (await getFigureDetail("fig-cabin-6-2"))!;
@@ -265,6 +265,11 @@ describe("loadCalloutPreview", () => {
     expect(result.notice).toContain("unapproved");
     expect(result.notice).toContain("not for ordering");
     expect(detail).toEqual(before);
+    const ordinary = await loadCalloutPreview(detail);
+    expect(ordinary.detail.callouts.find(({ number }) => number === 1)).toEqual(
+      expect.objectContaining({ x: 34.8047, y: 42.1528 }),
+    );
+    vi.stubEnv("RUF_CALLOUT_PREVIEW", "0");
     await expect(loadCalloutPreview(detail)).resolves.toEqual({ detail: before, notice: null });
   });
 
@@ -277,7 +282,7 @@ describe("loadCalloutPreview", () => {
   });
 
   test.each([
-    ["production", "1"],
+    ["production", "0"],
     ["development", undefined],
     ["development", "0"],
   ])("does not read review files in %s with flag %s", async (nodeEnv, flag) => {
@@ -292,6 +297,16 @@ describe("loadCalloutPreview", () => {
       notice: null,
     });
     expect(readFile).not.toHaveBeenCalled();
+  });
+
+  test("production fixture overlays load without an explicit flag", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("RUF_CALLOUT_PREVIEW", "");
+    const detail = await getFigureDetail("fig-cabin-6-2");
+    const result = await loadCalloutPreview(detail!);
+    expect(result.detail.callouts.find(({ number }) => number === 1)).toEqual(
+      expect.objectContaining({ x: 34.8047, y: 42.1528 }),
+    );
   });
 
   test("loads real proposal positions only for an enabled development preview", async () => {

@@ -122,15 +122,13 @@ export function DrawingViewer({
 }: DrawingViewerProps) {
   const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
   const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
-  const highlighted = markers.filter(
-    (marker) =>
-      marker.maskPath !== undefined &&
-      !numericIds.has(marker.id) &&
-      (selectedPartIds.has(marker.partId) || marker.partId === hoveredPartId),
+  const outlined = markers.filter(
+    (marker) => marker.maskPath !== undefined && !numericIds.has(marker.id),
   );
+  const isLit = (partId: string) => selectedPartIds.has(partId) || partId === hoveredPartId;
 
   const markerState = (partId: string) => {
-    if (selectedPartIds.has(partId) || partId === hoveredPartId) {
+    if (isLit(partId)) {
       return "active" as const;
     }
     // Once something is selected, everything else steps back.
@@ -346,20 +344,46 @@ export function DrawingViewer({
         )}
 
         {/*
-          * Selected parts, filled on top of the plate. viewBox is 0-100 in
-          * both axes and preserveAspectRatio is off, so the path tracks the
-          * plate exactly as the percentage-placed markers do.
+          * Component outlines over the plate. viewBox is 0-100 so paths track
+          * the PNG; hit-testing stays on even when the fill is dormant so the
+          * physical part is clickable, not only the printed reference number.
           */}
-        {highlighted.length > 0 ? (
+        {outlined.length > 0 ? (
           <svg
             className={styles.highlight}
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
-            aria-hidden="true"
+            aria-label="Mapped components"
           >
-            {highlighted.map((marker) => (
-              <path key={marker.id} d={marker.maskPath} fillRule="evenodd" data-callout-id={marker.id} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
-            ))}
+            {outlined.map((marker) => {
+              const lit = isLit(marker.partId);
+              const selectable = Boolean(onSelectPart && marker.figurePartId);
+              return (
+                <path
+                  key={marker.id}
+                  d={marker.maskPath}
+                  fillRule="evenodd"
+                  data-callout-id={marker.id}
+                  data-legacy-selected={selectedPartIds.has(marker.partId) || undefined}
+                  data-active={lit || undefined}
+                  role={selectable ? "button" : undefined}
+                  tabIndex={selectable ? 0 : undefined}
+                  aria-label={marker.label ? `Component ${marker.number}: ${marker.label}` : `Component ${marker.number}`}
+                  aria-pressed={selectable ? selectedPartIds.has(marker.partId) : undefined}
+                  className={lit ? styles.highlightActive : styles.highlightHit}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={selectable ? () => onSelectPart!(marker.figurePartId!, "component") : undefined}
+                  onKeyDown={selectable ? (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onSelectPart!(marker.figurePartId!, "component");
+                    }
+                  } : undefined}
+                  onMouseEnter={onHoverPart ? () => onHoverPart(marker.partId) : undefined}
+                  onMouseLeave={onHoverPart ? () => onHoverPart(null) : undefined}
+                />
+              );
+            })}
           </svg>
         ) : null}
 
