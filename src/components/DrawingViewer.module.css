@@ -101,8 +101,7 @@
   }
 }
 
-/* Selected parts, painted over the plate. Sits under the markers so a numbered
-   square is never obscured by its own highlight. */
+/* Component outlines over the plate. Hit targets stay active; fill only when lit. */
 .highlight {
   position: absolute;
   inset: 0;
@@ -112,12 +111,23 @@
 }
 
 .highlight path {
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: fill;
+  cursor: var(--cursor-pointer);
+}
+
+.highlightHit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0.25;
+}
+
+.highlightActive {
   fill: var(--select);
   fill-opacity: 0.28;
   stroke: var(--select);
   stroke-width: 0.25;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
 }
 
 /*

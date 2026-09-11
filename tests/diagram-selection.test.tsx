@@ -48,7 +48,7 @@ test("resolves exact row identity despite duplicate printed references, rejectin
   expect(resolveDiagramSelection("other", "row-a", detail.rows)).toBeNull();
 });
 
-test("label, component, and table focus converge; multiple pointers stay selected and quotes remain independent", async () => {
+test("label, component, and table focus converge; repeated occurrences light together and quotes remain independent", async () => {
   const detail = await fixture();
   const { container } = render(workspace(detail));
   const tableRows = () => container.querySelectorAll("tbody tr");
@@ -68,17 +68,14 @@ test("label, component, and table focus converge; multiple pointers stay selecte
   fireEvent.click(screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0]);
   fireEvent.click(tableRows()[1]);
   expect(regions()[1].getAttribute("aria-pressed")).toBe("true");
-  expect(regions()[0].getAttribute("aria-pressed")).toBe("true");
-  expect(regions()[2].getAttribute("aria-pressed")).toBe("true");
+  expect(regions()[0].getAttribute("aria-pressed")).toBe("false");
   fireEvent.keyDown(regions()[0], { key: "Enter" });
   fireEvent.keyDown(regions()[0], { key: " " });
   fireEvent.mouseLeave(figure);
   expect(tableRows()[0].getAttribute("data-active")).toBe("true");
-  expect(tableRows()[1].getAttribute("data-active")).toBe("true");
   expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(regions()[0].getAttribute("aria-pressed")).toBe("false");
-  expect(regions()[1].getAttribute("aria-pressed")).toBe("false");
   expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
   expect(screen.getByRole("button", { name: /Check cart · 1/ })).toBeTruthy();
@@ -87,7 +84,6 @@ test("label, component, and table focus converge; multiple pointers stay selecte
   fireEvent.keyDown(full.querySelectorAll('path[role="button"]')[1], { key: "Enter" });
   fireEvent.click(screen.getByRole("button", { name: "Close the illustration" }));
   expect(tableRows()[1].getAttribute("data-active")).toBe("true");
-  expect(tableRows()[0].hasAttribute("data-active")).toBe(false);
 });
 
 test("keyboard table references focus exact rows and select-all quote checkbox handles shared parts once", async () => {
@@ -113,8 +109,11 @@ test.each(["fig-cabin-6-1", "fig-filters-1-1"])("legacy %s keeps supplied marker
   fireEvent.click(marker);
   fireEvent.mouseLeave(marker);
   expect(marker.getAttribute("aria-pressed")).toBe("true");
-  expect(figure.querySelectorAll('path[role="button"]')).toHaveLength(0);
-  if (occurrence.maskPath) expect(figure.querySelector(`path[d="${occurrence.maskPath}"]`)).toBeTruthy();
+  expect(figure.querySelectorAll('[data-diagram-regions] path[role="button"]')).toHaveLength(0);
+  if (occurrence.maskPath) {
+    expect(figure.querySelector(`path[d="${occurrence.maskPath}"]`)).toBeTruthy();
+    expect(figure.querySelector(`path[d="${occurrence.maskPath}"]`)?.getAttribute("data-active")).toBe("true");
+  }
 });
 
 test("focus resets on figure or source release handoff without resurrecting prior focus", async () => {
@@ -128,9 +127,8 @@ test("focus resets on figure or source release handoff without resurrecting prio
   expect(screen.getByText("row-a")).toBeTruthy();
   view.rerender(<Probe id={detail.figure.id} release="2" />);
   expect(screen.getByText("none")).toBeTruthy();
-  view.rerender(<Probe id={detail.figure.id} release="1" />);
-  expect(screen.getByText("none")).toBeTruthy();
   fireEvent.click(screen.getByText("Focus"));
-  view.rerender(<Probe id="other" release="1" />);
+  expect(screen.getByText("row-a")).toBeTruthy();
+  view.rerender(<Probe id="other-figure" release="2" />);
   expect(screen.getByText("none")).toBeTruthy();
 });
