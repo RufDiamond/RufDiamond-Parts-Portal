@@ -54,8 +54,11 @@ describe("problem responses", () => {
       headers: { "content-type": "application/json", ...(scenario === "invalid content length" ? { "content-length": "1" } : {}) },
       payload: scenario === "invalid content length" ? "{}" : JSON.stringify({ value: "x".repeat(256) }),
     });
-    expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ code: "INVALID_REQUEST", status: 400, detail: "The request is invalid." });
+    const oversized = scenario === "body exceeds limit";
+    expect(response.statusCode).toBe(oversized ? 413 : 400);
+    expect(response.json()).toMatchObject(oversized
+      ? { code: "PAYLOAD_TOO_LARGE", status: 413, title: "Payload Too Large" }
+      : { code: "INVALID_REQUEST", status: 400, detail: "The request is invalid." });
     expect(response.headers["content-type"]).toContain("application/problem+json");
     expect(response.headers["x-request-id"]).toBe(response.json().requestId);
     expect(response.body).not.toMatch(/stack|Error:|FST_ERR/);

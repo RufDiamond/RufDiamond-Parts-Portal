@@ -1,5 +1,10 @@
 # Exploded drawing placement review
 
+**8 September update:** [Component highlighting review](part-highlight-review.md)
+adds source-bound part silhouettes and correct PDF-derived Bumper 2.1/Motor 3.1
+drawings on the read-only review surface. Historical blocker/coverage statements
+below describe the earlier marker-only pass; no customer approval is implied.
+
 Date: 7 September 2026. Status: **hosted read-only review prepared; no new customer mappings approved**.
 
 ## Hosted marker review rollout

@@ -2,33 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback } from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Trail } from "@/components";
-import { getFigureDetail, getFigures, getSystems } from "@/data/repository";
-import { useAsync } from "@/state/useAsync";
+import type { FiguresData } from "@/data/customer-navigation.server";
 import { useMachine } from "@/state/MachineContext";
 import styles from "../tiles.module.css";
-
-async function load(variantId: string, systemId: string) {
-  const systems = await getSystems(variantId);
-  const system = systems.find((s) => s.id === systemId) ?? null;
-  if (!system) return { system: null, figures: [] };
-
-  const figures = await getFigures(variantId, systemId);
-  // The section number is the leading part of the figures' GROUPNO.
-  const number = Number.parseInt(figures[0]?.groupNo.split(".")[0] ?? "", 10);
-  const withPlates = await Promise.all(
-    figures.map(async (figure) => {
-      const detail = await getFigureDetail(figure.id);
-      return { figure, plate: detail?.drawing?.storagePath ?? null };
-    }),
-  );
-  return {
-    system,
-    number: Number.isFinite(number) ? number : null,
-    figures: withPlates,
-  };
-}
 
 /**
  * A figure's number exactly as the catalogue writes it: "FIG- 6.1" reads 6.1.
@@ -39,19 +18,13 @@ function figureNumber(groupNo: string): string {
 }
 
 /** Figures within a system — slide 13. */
-export function FiguresGrid({ systemId }: { systemId: string }) {
-  const { hydrated, selectedModel, selectedVariant } = useMachine();
-  const variantId = selectedVariant?.id ?? null;
-
-  const run = useCallback(
-    () => (variantId ? load(variantId, systemId) : Promise.resolve(null)),
-    [variantId, systemId],
-  );
-  const { data } = useAsync(run);
-
-  if (!hydrated) return null;
-
-  if (!selectedModel || !selectedVariant) {
+export function FiguresGrid({ systemId, data, requestedVariant }: { systemId: string; data: FiguresData; requestedVariant?: string }) {
+  const { selectedVariant } = useMachine();
+  const router = useRouter();
+  useEffect(() => {
+    if (!requestedVariant && selectedVariant) router.replace(`/systems/${systemId}?variantId=${encodeURIComponent(selectedVariant.id)}`);
+  }, [requestedVariant, selectedVariant, systemId, router]);
+  if (!data) {
     return (
       <div className={styles.screen}>
         <Trail steps={[{ label: "No machine selected" }]} />
@@ -64,7 +37,7 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
   }
 
   const system = data?.system ?? null;
-  const machine = `Fat Truck ${selectedModel.name}`;
+  const machine = data.model.name;
   const systemStep = system
     ? `${data?.number ?? ""} ${system.name}`.trim()
     : "";
@@ -75,10 +48,10 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
         steps={
           systemStep
             ? [
-                { label: machine, href: "/systems" },
+                { label: machine, href: `/systems?variantId=${encodeURIComponent(data.variant.id)}` },
                 { label: systemStep },
               ]
-            : [{ label: machine, href: "/systems" }]
+            : [{ label: machine, href: `/systems?variantId=${encodeURIComponent(data.variant.id)}` }]
         }
       />
       <div className={styles.grid}>
@@ -96,6 +69,7 @@ export function FiguresGrid({ systemId }: { systemId: string }) {
                   alt=""
                   width={320}
                   height={180}
+                  unoptimized
                   className={styles.plate}
                 />
               ) : null}

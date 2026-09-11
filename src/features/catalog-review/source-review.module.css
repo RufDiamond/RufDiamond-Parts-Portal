@@ -1,0 +1,132 @@
+.review {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #152d3d;
+  overflow-wrap: anywhere;
+}
+.review h1 {
+  margin: 0 0 12px;
+  font-size: 1.5rem;
+}
+.review p {
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.review code {
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}
+.review button,
+.review select,
+.review textarea {
+  font: inherit;
+}
+.review button {
+  border: 1px solid #9aadb9;
+  padding: 8px 12px;
+  border-radius: 5px;
+  background: white;
+  color: #17394d;
+  cursor: pointer;
+  margin: 4px 8px 4px 0;
+}
+.review button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.review :focus-visible {
+  outline: 3px solid #d47700;
+  outline-offset: 3px;
+}
+.review fieldset {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  max-width: 760px;
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid #c6d0d7;
+  background: #f5f7f8;
+}
+.review label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-weight: 600;
+}
+.review select,
+.review textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #9aadb9;
+  border-radius: 4px;
+  background: white;
+  color: #152d3d;
+  font-weight: 400;
+}
+.review textarea {
+  min-height: 144px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.review fieldset > button {
+  justify-self: start;
+}
+.review ul {
+  padding-left: 22px;
+}
+.review li {
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.tableScroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+.tableScroll table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.tableScroll caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.tableScroll th,
+.tableScroll td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border-bottom: 1px solid #c6d0d7;
+}
+.tableScroll th:first-child {
+  width: 90px;
+  overflow-wrap: normal;
+}
+.tableScroll th { overflow-wrap: normal; }
+.tableScroll th:last-child {
+  width: 38%;
+}
+.confirmation {
+  max-width: 760px;
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid #bc8c3a;
+  background: #fff7e4;
+}
+@media (max-width: 600px) {
+  .review {
+    padding: 16px;
+  }
+  .review fieldset {
+    padding: 12px;
+  }
+}

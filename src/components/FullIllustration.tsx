@@ -8,6 +8,8 @@ import {
   type DrawingMarker,
 } from "./DrawingViewer";
 import styles from "./FullIllustration.module.css";
+import type { DiagramRegionDocument } from "@/lib/drawing";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 
 export interface FullIllustrationProps {
   /** Sheet caption, e.g. "Sheet 13 / 18". */
@@ -17,6 +19,10 @@ export interface FullIllustrationProps {
   height?: number;
   note?: string;
   markers: DrawingMarker[];
+  document?: DiagramRegionDocument;
+  onSelectPart?: SelectDiagramPart;
+  selectionActivation?: SelectionActivation;
+  onClearSelection?: () => void;
   previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
   hoveredPartId?: string | null;
@@ -43,6 +49,10 @@ export function FullIllustration({
   height,
   note,
   markers,
+  document,
+  onSelectPart,
+  selectionActivation,
+  onClearSelection,
   previewNotice = null,
   selectedPartIds,
   hoveredPartId,
@@ -53,6 +63,7 @@ export function FullIllustration({
   onClose,
 }: FullIllustrationProps) {
   const [zoom, setZoom] = useState(1);
+  const [revealRequest, setRevealRequest] = useState(0);
 
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
@@ -89,6 +100,8 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
+            <button type="button" className={`${styles.action} ${styles.textAction}`} disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)}>Show selected part</button>
+            {onClearSelection ? <button type="button" className={`${styles.action} ${styles.textAction}`} onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
               className={styles.action}
@@ -165,6 +178,10 @@ export function FullIllustration({
             height={height}
             note={note}
             markers={markers}
+            document={document}
+            onSelectPart={onSelectPart}
+            selectionActivation={selectionActivation}
+            revealRequest={revealRequest}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}

@@ -137,6 +137,10 @@
   transition: width 120ms ease-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .stage { transition: none; }
+}
+
 /* No plate attached: the empty state keeps the frame's own box. */
 .stage:has(> .trim) {
   width: 100%;
@@ -152,4 +156,45 @@
   cursor: grabbing;
   /* Selection during a drag makes the plate flicker blue. */
   user-select: none;
+}
+
+.regions {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.regions path {
+  pointer-events: fill;
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2;
+  cursor: pointer;
+}
+
+.regions path[data-selected] {
+  fill: var(--select);
+  fill-opacity: 0.28;
+  stroke: var(--select);
+}
+
+.regions path:focus-visible {
+  stroke: var(--ink);
+  stroke-width: 3;
+  outline: none;
+}
+
+.regionChooser {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+  max-width: 260px;
+  padding: 10px;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  box-shadow: 0 4px 16px #0003;
 }

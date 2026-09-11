@@ -65,6 +65,8 @@
   grid-column: 2;
   grid-row: 1;
   display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-2);
@@ -90,6 +92,21 @@
 .action:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+.textAction {
+  width: auto;
+  height: auto;
+  min-height: 36px;
+  padding: 6px 12px;
+  color: var(--ink);
+  font: var(--weight-semibold) var(--text-xs) / 1.35 var(--font-ui);
+  white-space: normal;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .actionIcon {

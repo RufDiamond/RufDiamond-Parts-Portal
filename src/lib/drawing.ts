@@ -1,5 +1,30 @@
 import type { DrawingMarker } from "@/components/DrawingViewer";
-import type { Callout, FigurePartRow } from "@/types/catalog";
+import type { ComponentRegion } from "@rufdiamond/contracts";
+import type { Callout, DrawingFile, FigurePartRow } from "@/types/catalog";
+
+/** Renderer projection; deliberately not an approval/persistence document. */
+export interface DiagramRegionDocument {
+  imageWidth: number;
+  imageHeight: number;
+  occurrences: {
+    calloutId: string; figurePartId: string; partId: string; partNumber: string;
+    refNo: string; regions: ComponentRegion[];
+  }[];
+}
+
+export function buildDiagramRegions(rows: FigurePartRow[], callouts: Callout[], drawing: DrawingFile | null): DiagramRegionDocument | undefined {
+  if (!drawing) return undefined;
+  const occurrences: DiagramRegionDocument["occurrences"] = [];
+  for (const callout of callouts) {
+    const geometry = callout.componentGeometry;
+    const row = rows.find((candidate) => candidate.figurePart.id === callout.figurePartId);
+    if (!geometry || !row || row.figurePart.figureId !== callout.figureId || row.figurePart.partId !== row.part.id ||
+      geometry.drawingPath !== drawing.storagePath || geometry.imageWidth !== drawing.width || geometry.imageHeight !== drawing.height) continue;
+    occurrences.push({ calloutId: callout.id, figurePartId: row.figurePart.id, partId: row.part.id,
+      partNumber: row.part.partNumber, refNo: String(callout.number), regions: geometry.regions });
+  }
+  return { imageWidth: drawing.width, imageHeight: drawing.height, occurrences };
+}
 
 /**
  * Turn a figure's callouts into drawing markers.
@@ -27,6 +52,7 @@ export function buildDrawingMarkers(
 
     markers.push({
       id: callout.id,
+      figurePartId: row.figurePart.id,
       number: callout.number,
       x: callout.x,
       y: callout.y,

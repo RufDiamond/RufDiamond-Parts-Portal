@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "./signin.module.css";
+import { signInCustomer, resetCustomerNavigation } from "@/state/customer-session";
 
 /**
  * Portal login — slide 1.
@@ -11,15 +12,16 @@ import styles from "./signin.module.css";
  * One dark screen: the emblem oversized and bleeding off the left edge, the
  * wordmark and title across the top, account access down the right.
  *
- * No authentication behind it yet — there is no session, no user store and no
- * password handling. Signing in routes into the portal so the rest of the
- * screens can be walked. Auth is `build-plan.md` stage 5.
+ * API mode signs in through the same-origin authenticated backend proxy.
+ * The explicitly local fixture demo retains its walkthrough entry.
  */
-export function SignInForm({ date }: { date: string }) {
+export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: boolean }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [language, setLanguage] = useState("en-CA");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   return (
     <main className={styles.screen}>
@@ -64,12 +66,17 @@ export function SignInForm({ date }: { date: string }) {
 
         <form
           className={styles.form}
-          onSubmit={(event) => {
+          onSubmit={async (event) => {
             event.preventDefault();
-            router.push("/");
+            if (!apiMode) { router.push("/"); return; }
+            setBusy(true); setError("");
+            try { await signInCustomer(username, password); setPassword(""); resetCustomerNavigation("/"); }
+            catch { setError("Sign-in failed. Check your details and try again."); setBusy(false); }
           }}
         >
           <p className={styles.formTitle}>Account access</p>
+          {!apiMode && <p>Local fixture demo</p>}
+          {error && <p role="alert">{error}</p>}
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="username">
@@ -130,7 +137,7 @@ export function SignInForm({ date }: { date: string }) {
             </select>
           </div>
 
-          <button type="submit" className={styles.submit}>
+          <button type="submit" className={styles.submit} disabled={busy}>
             Sign in
           </button>
 

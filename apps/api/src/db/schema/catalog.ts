@@ -24,10 +24,11 @@ export const drawingFile = pgTable("drawing_file", {
 ]);
 
 export const model = pgTable("model", {
+  publicationVersion: integer("publication_version").notNull().default(1),
   id: id(), productLineId: uuid("product_line_id").notNull().references(() => productLine.id), name: text("name").notNull(),
   photoFileId: uuid("photo_file_id").references(() => drawingFile.id), sortOrder: integer("sort_order").notNull().default(0),
   status: text("status", { enum: ["active", "legacy", "discontinued"] }).notNull().default("active"), ...mutable(),
-}, t => [unique("model_line_name").on(t.productLineId, t.name), versionCheck(t), check("model_lifecycle", sql`${t.status} IN ('active','legacy','discontinued')`)]);
+}, t => [unique("model_line_name").on(t.productLineId, t.name), versionCheck(t), check("model_publication_version_positive", sql`${t.publicationVersion} > 0`), check("model_lifecycle", sql`${t.status} IN ('active','legacy','discontinued')`)]);
 
 export const variant = pgTable("variant", {
   id: id(), modelId: uuid("model_id").notNull().references(() => model.id), label: text("label").notNull(), serialFrom: text("serial_from"), serialTo: text("serial_to"), catalogRevision: text("catalog_revision"), ...mutable(),
@@ -59,8 +60,8 @@ export const partRequires = pgTable("part_requires", {
 
 export const figurePart = pgTable("figure_part", {
   id: id(), figureId: uuid("figure_id").notNull().references(() => figure.id), partId: uuid("part_id").notNull().references(() => part.id), sourceRowKey: text("source_row_key").notNull(),
-  qty: integer("qty").notNull(), remarks: text("remarks"), serviceable: boolean("serviceable").notNull().default(true), effectiveFrom: date("effective_from"), effectiveTo: date("effective_to"), ...mutable(),
-}, t => [unique("figure_part_id_figure").on(t.id, t.figureId), unique("figure_part_source_identity").on(t.figureId, t.sourceRowKey), index("figure_part_part").on(t.partId), versionCheck(t), check("figure_part_qty_positive", sql`${t.qty} > 0`), check("figure_part_dates", sql`${t.effectiveTo} >= ${t.effectiveFrom}`)]);
+  qty: integer("qty"), quantitySemantics: text("quantity_semantics", {enum:["known","unspecified-installed"]}).notNull().default("known"), remarks: text("remarks"), serviceable: boolean("serviceable").notNull().default(true), effectiveFrom: date("effective_from"), effectiveTo: date("effective_to"), ...mutable(),
+}, t => [unique("figure_part_id_figure").on(t.id, t.figureId), unique("figure_part_source_identity").on(t.figureId, t.sourceRowKey), index("figure_part_part").on(t.partId), versionCheck(t), check("figure_part_qty_positive", sql`(${t.quantitySemantics}='known' AND ${t.qty} IS NOT NULL AND ${t.qty}>0) OR (${t.quantitySemantics}='unspecified-installed' AND ${t.qty} IS NULL)`), check("figure_part_dates", sql`${t.effectiveTo} >= ${t.effectiveFrom}`)]);
 
 export const callout = pgTable("callout", {
   id: id(), figureId: uuid("figure_id").notNull().references(() => figure.id), figurePartId: uuid("figure_part_id"), sourceKey: text("source_key").notNull(), number: text("number").notNull(), x: numeric("x", { precision: 7, scale: 4 }), y: numeric("y", { precision: 7, scale: 4 }), maskPath: text("mask_path"), ...mutable(),

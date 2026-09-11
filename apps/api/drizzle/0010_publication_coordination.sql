@@ -1,0 +1,2 @@
+ALTER TABLE "model" ADD COLUMN "publication_version" integer DEFAULT 1 NOT NULL;--> statement-breakpoint
+ALTER TABLE "model" ADD CONSTRAINT "model_publication_version_positive" CHECK ("model"."publication_version" > 0);

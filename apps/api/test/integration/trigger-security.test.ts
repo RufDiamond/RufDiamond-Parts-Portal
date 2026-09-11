@@ -8,9 +8,10 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool, type PoolClient } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { migrationsFolder, startPostgres } from "../helpers/postgres.js";
+import { closePostgresPool, migrationsFolder, startPostgres } from "../helpers/postgres.js";
 
 const securityTriggerFunctions = [
+  "protect_canonical_import_normalization",
   "protect_idempotency_record",
   "protect_import_source",
   "protect_import_staging_source",
@@ -93,6 +94,17 @@ describe("snapshot trigger security", () => {
     }
   });
 
+  it("waits for owned pool clients to be removed before pool shutdown resolves", async () => {
+    const ownedPool = new Pool({ connectionString: postgres.connectionString });
+    await ownedPool.query("select 1");
+    let removed = false;
+    ownedPool.once("remove", () => { removed = true; });
+
+    await closePostgresPool(ownedPool);
+
+    expect(removed).toBe(true);
+  });
+
   it("upgrades 0001-0006 additively and replays without changing prior history", async () => {
     const historicalFolder = await mkdtemp(join(tmpdir(), "ruf-migrations-"));
     const databaseName = `upgrade_${randomUUID().replaceAll("-", "")}`;
@@ -111,10 +123,10 @@ describe("snapshot trigger security", () => {
       const oldHistory = (await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows;
       await migrate(drizzle(upgradePool), { migrationsFolder });
       await migrate(drizzle(upgradePool), { migrationsFolder });
-      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(7);
+      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(12);
       expect((await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 6)).toEqual(oldHistory);
     } finally {
-      await upgradePool.end();
+      await closePostgresPool(upgradePool);
       await postgres.pool.query(`drop database "${databaseName}" with (force)`);
       await rm(historicalFolder, { recursive: true, force: true });
     }

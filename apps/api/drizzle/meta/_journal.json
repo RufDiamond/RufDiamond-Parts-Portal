@@ -50,6 +50,29 @@
       "when": 1788833460655,
       "tag": "0007_snapshot_trigger_hardening",
       "breakpoints": true
-    }
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788918054653,
+      "tag": "0008_diagram_mapping_revisions",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788921795820,
+      "tag": "0009_private_drawing_uploads",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788923741369,
+      "tag": "0010_publication_coordination",
+      "breakpoints": true
+    },
+    { "idx": 10, "version": "7", "when": 1788940000000, "tag": "0011_canonical_import_lineage", "breakpoints": true },
+    { "idx": 11, "version": "7", "when": 1788940000001, "tag": "0012_catalog_source_reviews", "breakpoints": true }
   ]
 }

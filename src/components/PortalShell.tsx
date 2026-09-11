@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useMachine } from "@/state/MachineContext";
 import type { ReactNode } from "react";
 import styles from "./PortalShell.module.css";
+import { SignOutButton, useCustomerSession } from "@/state/SessionBoundary";
 
 /**
  * The portal chrome from the V2 deck: an icon rail down the left and a header
@@ -117,6 +118,7 @@ export interface PortalShellProps {
 }
 
 export function PortalShell({ children, date }: PortalShellProps) {
+  const session = useCustomerSession();
   const pathname = usePathname() ?? "/";
   const { selectedModel } = useMachine();
   const lineHref = selectedModel
@@ -222,6 +224,8 @@ export function PortalShell({ children, date }: PortalShellProps) {
               className={styles.calendar}
             />
             <span className={styles.date}>{date}</span>
+            {session?.scopes.environment === "draft" && ["publish.draft.view", "catalog.figure.view"].every(key => session.capabilities.includes(key)) && <Link href="/admin">Draft administration</Link>}
+            <SignOutButton />
           </span>
         </header>
 

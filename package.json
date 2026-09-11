@@ -7,11 +7,14 @@
     "packages/*"
   ],
   "scripts": {
+    "predev": "node tools/build-frontend-contracts.mjs",
+    "prebuild": "node tools/build-frontend-contracts.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test:callout-preview": "vitest run --config vitest.callouts.config.mts",
+    "test:diagram-browser": "playwright test --config playwright.diagram.config.ts",
     "test:contracts": "npm test -w @rufdiamond/contracts",
     "test:api": "npm test -w @rufdiamond/api",
     "test:web": "npm test -w @rufdiamond/web",
@@ -31,12 +34,16 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
+    "jsdom": "30.0.1",
     "tsx": "^4.23.13",
     "typescript": "^5"
   }

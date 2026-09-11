@@ -48,3 +48,4 @@ next-env.d.ts
 
 # Generated customer-artwork review packs and reviewer corrections stay local.
 /output/pdf/
+/output/diagram-browser/

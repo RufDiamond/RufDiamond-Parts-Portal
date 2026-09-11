@@ -48,7 +48,7 @@ export function buildPartsCsv(rows: AdminPartRow[]): string {
       row.systems.join(" · "),
       row.figures.map((groupNo) => `FIG ${groupNo}`).join(" · "),
       row.totalQty,
-      row.part.listPrice.toFixed(2),
+      row.part.listPrice === undefined ? "" : typeof row.part.listPrice === "string" ? row.part.listPrice : row.part.listPrice.toFixed(2),
       row.remarks.join(" · "),
       row.supersededBy?.partNumber ?? "",
       row.supersedes?.partNumber ?? "",

@@ -20,11 +20,14 @@ import {
   Trail,
   type CropRect,
 } from "@/components";
-import { buildDrawingMarkers } from "@/lib/drawing";
+import { buildDiagramRegions, buildDrawingMarkers } from "@/lib/drawing";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
+import { useRequestAddition } from "@/state/useRequestAddition";
 import { useSelection } from "@/state/useSelection";
+import { useDiagramSelection } from "@/state/useDiagramSelection";
 import { recordRecentFigure } from "@/state/useRecentlyViewed";
+import { useReleasedDrawing } from "@/state/useReleasedDrawing";
 import type { FigureDetail, PartUsageSummary } from "@/types/catalog";
 import { QuoteRequest } from "../../request/QuoteRequest";
 import styles from "./figure.module.css";
@@ -79,51 +82,41 @@ export function FigureWorkspace({
 }: FigureWorkspaceProps) {
   const router = useRouter();
   const { figure, drawing, system, variant, rows, callouts } = detail;
+  const releasedDrawing = useReleasedDrawing(detail);
   const { selectedModel } = useMachine();
-  const { addParts, lines } = useRequest();
+  const { lines } = useRequest();
+  const addition = useRequestAddition(figure.id);
 
-  const { selectedPartIds, toggle, hoveredPartId, setHoveredPartId } =
+  const { selectedPartIds: quotePartIds, toggle: toggleQuote, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
+  const { selection, activation, selectedPartIds, selectPart, clear } = useDiagramSelection({
+    figureId: figure.id, rows,
+    releaseKey: `${variant.catalogRevision}/${drawing?.id}/${drawing?.version}/${drawing?.storagePath}/${reviewOnly}`,
+  });
 
   const markers = useMemo(
     () => buildDrawingMarkers(rows, callouts),
     [rows, callouts],
   );
+  const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
 
   useEffect(() => {
-    if (reviewOnly) return;
+    if (reviewOnly || detail.release) return;
     recordRecentFigure({
       figureId: figure.id,
       groupNo: figure.groupNo,
       figureName: figure.name,
       systemName: system.name,
     });
-  }, [figure.id, figure.groupNo, figure.name, system.name, reviewOnly]);
+  }, [figure.id, figure.groupNo, figure.name, system.name, reviewOnly, detail.release]);
 
-  const machineName = selectedModel?.name ?? "FT3 Wagon";
+  const machineName = detail.release ? variant.label : selectedModel?.name ?? "FT3 Wagon";
+  const machineLabel = detail.release ? machineName : `Fat Truck ${machineName}`;
+  const variantQuery = `?variantId=${encodeURIComponent(variant.id)}`;
   const requestedPartIds = useMemo(
     () => new Set(lines.map((line) => line.partId)),
     [lines],
   );
-
-  /*
-   * The tick and the lit marker are one state — but that state is SELECTION,
-   * not the cart.
-   *
-   * Clicking a callout, a Ref number or a row lights the part on the plate and
-   * ticks its box. Getting it onto the cart is a second, deliberate act: the
-   * Add to cart button. Wiring the tick straight to the cart made every click
-   * an order and left Add to cart with nothing to do.
-   */
-
-  /*
-   * What Add to cart will actually do. It used to sweep in EVERY part on the
-   * figure, which — now that the tick and the selection are one state — lit
-   * every row and ticked every box, reading as though the click had selected
-   * the whole sheet. It adds what is ticked, and nothing else.
-   */
-  /** A callout, a Ref number, a row or its tick: all select the part. */
-  const toggleSelected = (partId: string) => toggle(partId);
 
   /** Ticked parts not already on the cart. */
   const pending = useMemo(
@@ -131,16 +124,16 @@ export function FigureWorkspace({
       rows
         .filter(
           (row) =>
-            selectedPartIds.has(row.part.id) &&
+            quotePartIds.has(row.part.id) &&
             !requestedPartIds.has(row.part.id),
         )
-        .map((row) => ({ part: row.part, qty: row.figurePart.qty })),
-    [rows, selectedPartIds, requestedPartIds],
+        .map((row) => ({ part: row.part, qty: row.figurePart.qty ?? 1 })),
+    [rows, quotePartIds, requestedPartIds],
   );
 
-  const addSelectedToCart = () => {
+  const addSelectedToCart = (openQuote = false) => {
     if (reviewOnly) return;
-    if (pending.length > 0) addParts(pending);
+    return addition.add(pending, () => { if (openQuote) setQuoting(true); });
   };
 
   const go = (id: string | null) => {
@@ -167,6 +160,7 @@ export function FigureWorkspace({
 
   /** Plate zoom. Markers are placed in percentages, so they scale with it. */
   const [zoom, setZoom] = useState(1);
+  const [revealRequest, setRevealRequest] = useState(0);
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
       const i = ZOOM_STEPS.indexOf(current);
@@ -233,7 +227,7 @@ export function FigureWorkspace({
     const lines = rows.map(
       (row) =>
         `${row.calloutNumbers.join(", ") || "-"}\t${row.part.partNumber}\t` +
-        `${row.part.description}\tx${row.figurePart.qty}`,
+        `${row.part.description}\t${row.figurePart.qty===null?"Installed quantity unspecified":`x${row.figurePart.qty}`}`,
     );
     const body = [
       `${figure.name} — Fat Truck ${machineName}`,
@@ -252,25 +246,28 @@ export function FigureWorkspace({
 
   return (
     <div className={styles.screen}>
+      {addition.pending && <p role="status">Validating selected parts…</p>}
+      {addition.error && !quoting && <p role="alert">{addition.error}</p>}
+      {releasedDrawing.error && <p role="alert">{releasedDrawing.error}</p>}
       <Trail
         steps={[
-          { label: `Fat Truck ${machineName}`, href: "/systems" },
+          { label: machineLabel, href: `/systems${variantQuery}` },
           {
             label: `${systemNumber} ${system.name}`.trim(),
-            href: `/systems/${system.id}`,
+            href: `/systems/${system.id}${variantQuery}`,
           },
           { label: figure.name },
         ]}
       />
 
       <div className={styles.controls}>
-        <p className={styles.previewNotice}>
+        {!detail.release && <p className={styles.previewNotice}>
           {reviewOnly ? (
             <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
           ) : (
             <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
           )}
-        </p>
+        </p>}
         {previewNotice ? (
           <p role="status" className={styles.previewNotice}>
             {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
@@ -377,6 +374,13 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
+        <button type="button" className={styles.button} onClick={() => setRevealRequest((value) => value + 1)} disabled={selectedPartIds.size === 0}>
+          Show selected part
+        </button>
+        <button type="button" className={styles.button} onClick={clear} disabled={selectedPartIds.size === 0}>
+          Clear selection
+        </button>
+
         <button
           type="button"
           className={styles.button}
@@ -385,13 +389,9 @@ export function FigureWorkspace({
            * on the cart, so jumping straight to the request list would have
            * arrived empty — which is exactly what it did.
            */
-          onClick={() => {
-            if (reviewOnly) return;
-            addSelectedToCart();
-            setQuoting(true);
-          }}
+          onClick={() => { void addSelectedToCart(true); }}
           title="Add anything ticked, then draw up the request"
-          disabled={reviewOnly}
+          disabled={reviewOnly || addition.pending}
           aria-pressed={quoting}
           data-armed={quoting || undefined}
         >
@@ -403,10 +403,10 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={addSelectedToCart}
-          disabled={reviewOnly || pending.length === 0}
+          onClick={() => { void addSelectedToCart(); }}
+          disabled={reviewOnly || addition.pending || pending.length === 0}
           title={
-            selectedPartIds.size === 0
+            quotePartIds.size === 0
               ? "Tick a part first"
               : pending.length === 0
                 ? "Everything ticked is already on the cart"
@@ -521,14 +521,17 @@ export function FigureWorkspace({
           >
             <DrawingViewer
               label={`Sheet ${sheet}`}
-              src={drawing?.storagePath}
+              src={releasedDrawing.src}
               width={drawing?.width}
               height={drawing?.height}
-              note={`Assembly drawing not supplied — ${figure.name}`}
+              note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
+              document={regions}
+              selectionActivation={activation}
+              revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
-              onTogglePart={toggleSelected}
+              onSelectPart={selectPart}
               onHoverPart={setHoveredPartId}
               zoom={zoom}
               onZoomChange={setZoom}
@@ -623,12 +626,14 @@ export function FigureWorkspace({
             ) : (
               <PartsTable
                 rows={rows}
+                selectedFigurePartId={selection?.figurePartId}
+                selectionActivation={activation}
                 selectedPartIds={selectedPartIds}
                 hoveredPartId={hoveredPartId}
-                onTogglePart={toggleSelected}
+                onSelectPart={selectPart}
                 onHoverPart={setHoveredPartId}
-                requestedPartIds={selectedPartIds}
-                onToggleRequested={reviewOnly ? undefined : toggleSelected}
+                requestedPartIds={quotePartIds}
+                onToggleRequested={reviewOnly ? undefined : toggleQuote}
               />
             )}
           </div>
@@ -649,17 +654,20 @@ export function FigureWorkspace({
       {fullScreen ? (
         <FullIllustration
           label={`Sheet ${sheet}`}
-          src={drawing?.storagePath}
+          src={releasedDrawing.src}
           width={drawing?.width}
           height={drawing?.height}
-          note={`Assembly drawing not supplied — ${figure.name}`}
+          note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
+          document={regions}
+          selectionActivation={activation}
           previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
-          onTogglePart={toggleSelected}
+          onSelectPart={selectPart}
+          onClearSelection={clear}
           onHoverPart={setHoveredPartId}
-          trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
+          trail={`Model image > ${machineLabel} > ${system.name} > ${figure.name}`}
           date={new Date().toLocaleDateString("en-CA", {
             year: "numeric",
             month: "long",
@@ -671,7 +679,7 @@ export function FigureWorkspace({
 
       {crop && drawing ? (
         <CroppedPart
-          src={drawing.storagePath}
+          src={releasedDrawing.src ?? ""}
           rect={crop}
           trail={`Model image > Fat Truck ${machineName} > ${system.name} > ${figure.name}`}
           /*

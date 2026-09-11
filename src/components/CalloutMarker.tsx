@@ -5,11 +5,15 @@ import styles from "./CalloutMarker.module.css";
 export type CalloutMarkerState = "default" | "active" | "muted";
 
 export interface CalloutMarkerProps {
-  number: number;
+  number: number | string;
+  /** Stable drawing occurrence identity; omitted for inline table references. */
+  occurrenceId?: string;
   /** Percentages, 0-100. Omit to render inline rather than on a drawing. */
   x?: number;
   y?: number;
   state?: CalloutMarkerState;
+  /** Persistent selection, independent of the temporary visual hover state. */
+  pressed?: boolean;
   size?: "sm" | "md";
   title?: string;
   onActivate?: () => void;
@@ -22,9 +26,11 @@ export interface CalloutMarkerProps {
  */
 export function CalloutMarker({
   number,
+  occurrenceId,
   x,
   y,
   state = "default",
+  pressed,
   size = "md",
   title,
   onActivate,
@@ -36,11 +42,12 @@ export function CalloutMarker({
   return (
     <button
       type="button"
+      data-callout-id={occurrenceId}
       className={`${styles.marker} ${styles[state]} ${size === "sm" ? styles.sm : ""} ${placed ? styles.placed : ""}`}
       style={placed ? { left: `${x}%`, top: `${y}%` } : undefined}
       title={title}
       aria-label={title ? `Callout ${number}: ${title}` : `Callout ${number}`}
-      aria-pressed={interactive ? state === "active" : undefined}
+      aria-pressed={interactive ? (pressed ?? state === "active") : undefined}
       disabled={!interactive}
       onPointerDown={(event) => event.stopPropagation()}
       onClick={onActivate}

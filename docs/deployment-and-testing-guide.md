@@ -7,6 +7,67 @@ Full API/frontend integration, a connected public staging URL, tester accounts
 and OVH deployment have not yet been verified. This guide is the handoff
 checklist, not a claim that those steps have already happened.
 
+### PNG integration: current local implementation
+
+The Next customer pages now use the authenticated Fastify contracts in explicit
+API mode, with identity-scoped state and private asset packaging. Protected admin
+discovery, mapping, upload and publication are connected locally. See
+[the native integration guide](admin-native-integration.md) for isolated commands,
+runtime/setup separation and evidence limits. Task9c acceptance remains subject
+to its final report and independent review; none of this establishes remote
+staging or production acceptance.
+
+The placeholder-only settings are in [frontend-api.env.example](frontend-api.env.example).
+`RUF_REPOSITORY_MODE=fixture` (the current local default) makes the proxy return404,
+never seed data. Explicit `api` mode requires `RUF_API_UPSTREAM_URL` and
+`RUF_WEB_ORIGIN`, both exact origins without paths, queries, user information or
+wildcards. HTTPS is required except explicit HTTP loopback for local work. The
+API's `WEB_ORIGIN` must exactly equal the frontend `RUF_WEB_ORIGIN`. Set
+`RUF_DEPLOYMENT_ENV=staging|production` for connected hosted environments; both
+reject fixture mode and require HTTPS browser origins. No database/storage/session
+secret belongs in these frontend settings or a `NEXT_PUBLIC_*` variable.
+
+The proxy permits only implemented catalogue, identity, mapping, drawing-intent
+and publication paths/methods. Request bodies are JSON with route-specific bounds;
+PNG bytes go through the authorized storage intent. Every write checks the
+incoming Origin and any Referer; protected writes require CSRF. Only the two
+session cookie names and explicit API headers are forwarded. Set-Cookie values
+remain separate. Responses are contract-validated and private/no-store. Only
+release-pinned customer drawing delivery may redirect to HTTPS storage for legacy
+clients. The Next proxy requests authenticated, version-pinned PNG bytes instead,
+with bounded reads and fresh authorization after storage I/O. It never follows
+redirects or fetches arbitrary caller URLs. Private drawing storage
+URLs remain short-lived capabilities and must not be logged.
+
+`getBackendApiRepository()` creates a request-local server repository with the
+current cookie context. Its list/search methods consume up to100 pages of100 rows
+and return shared `{items,nextCursor:null,releases}` envelopes. The contributing
+release references are a union, **not** a per-part ownership mapping. In particular,
+search results preserve `releasePartId`; clients must not guess a singular
+`releaseId` from the first metadata entry. RFQ submission remains gated until its
+real service and exact ownership validation exist. `getPartUsageIndex()` returns
+`{items: Record<partId,summary>,releases}`. `getFigureDetail`/`getFigure` preserve the
+complete shared release/mapping envelope and reject inconsistent figure/row/
+callout/drawing identities. The unused `getDrawingFile(id)` seam explicitly throws
+`DRAWING_LOOKUP_UNAVAILABLE`; use the figure's release-pinned content URL instead.
+
+`CATALOG_CURSOR_STALE` restarts the entire aggregate at most once. Repeated
+cursors, duplicated entity identities, contradictory same-model releases and oversized
+aggregates fail visibly; partial/stale data and fixture fallback are never returned.
+Usage rows preserve multiplicity: distinct figure-part records can share a part
+and figure, while their DTO omits the source row identity. The client cannot
+distinguish those legitimate identical projections from duplicate backend rows;
+cursor/release/page limits remain enforced without inventing usage IDs.
+The customer boundary keeps separately requested page fragments mutually consistent
+and handles nullable shared types without reconstructing prices or reference
+labels. Transport unit tests exercise injected Request/Response boundaries; they
+are not native authentication, storage, browser-upload or hosted-staging evidence.
+
+Isolated tests must use explicitly created disposable PostgreSQL, private versioned
+storage and scanner services. Never source `apps/api/.env.local`: its existing
+Supabase migration credentials are unrelated to disposable integration testing.
+Use a separate unused Next port and preserve the existing port3100 preview.
+
 ## What runs where
 
 - **Temporary testing:** Vercel frontend → same-origin API proxy → Fastify and
@@ -64,8 +125,9 @@ in `VITE_*`, `NEXT_PUBLIC_*`, screenshots, email or Git. The browser uses relati
 The executable deployment scripts and final build commands are deliverables of
 the [OVH deployment plan](superpowers/plans/2026-09-07-ovh-staging-production.md).
 They must be verified before being presented as copy-and-run production steps.
-The repository currently still builds Next.js at its root; do not change Vercel
-to `apps/web/dist` until the planned Vite cutover has passed its review and tests.
+The approved PNG integration retains the root Next.js application. Use its private
+API-mode standalone package; a Vite/framework migration is outside this task.
+Backend placeholder settings are in [backend-api.env.example](backend-api.env.example).
 
 ## Test access
 

@@ -1,4 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
+import { DiagramMappingDocumentSchema } from "./diagram-mapping.js";
 import {
   AddressSchema,
   MoneySchema,
@@ -114,18 +115,17 @@ export const FigureSchema = Type.Object(
 );
 export type Figure = Static<typeof FigureSchema>;
 
-export const ReleasedFigureSchema = Type.Object(
-  {
+const releasedFigureFields={
     id: Type.String(),
     variantId: Type.String(),
     systemId: Type.String(),
     name: Type.String(),
     groupNo: nullableString(),
-    drawingFileId: Type.String(),
     status: Type.Literal("published"),
-  },
-  { $id: "ReleasedFigure", additionalProperties: false },
-);
+};
+const physicalFigureSchema=Type.Object({...releasedFigureFields,drawingFileId:Type.String(),depictionMode:Type.Optional(Type.Literal("physical"))},{additionalProperties:false});
+const tableOnlyFigureSchema=Type.Object({...releasedFigureFields,drawingFileId:Type.Null(),depictionMode:Type.Literal("table-only")},{additionalProperties:false});
+export const ReleasedFigureSchema = Type.Union([physicalFigureSchema,tableOnlyFigureSchema],{$id:"ReleasedFigure"});
 export type ReleasedFigure = Static<typeof ReleasedFigureSchema>;
 
 export const PartRequirementSchema = Type.Object(
@@ -183,17 +183,17 @@ export const DraftPartSchema = Type.Object(
 );
 export type DraftPart = Static<typeof DraftPartSchema>;
 
-export const FigurePartSchema = Type.Object(
-  {
+const figurePartIdentity = {
     id: Type.String(),
     figureId: Type.String(),
     partId: Type.String(),
-    qty: QuantitySchema,
     remarks: nullableString(),
     serviceable: Type.Boolean(),
-  },
-  { $id: "FigurePart", additionalProperties: false },
-);
+};
+export const FigurePartSchema = Type.Union([
+  Type.Object({ ...figurePartIdentity, qty: QuantitySchema, quantitySemantics: Type.Optional(Type.Literal("known")) }, { additionalProperties: false }),
+  Type.Object({ ...figurePartIdentity, qty: Type.Null(), quantitySemantics: Type.Literal("unspecified-installed") }, { additionalProperties: false }),
+], { $id: "FigurePart" });
 export type FigurePart = Static<typeof FigurePartSchema>;
 
 const CoordinateSchema = Type.Number({ minimum: 0, maximum: 100 });
@@ -325,6 +325,13 @@ export const DrawingAssetSchema = Type.Object(
 export type DrawingAsset = Static<typeof DrawingAssetSchema>;
 
 const figureDetailFields = {
+  sourceReferences:Type.Optional(Type.Array(Type.Object({figurePartId:Type.String(),number:CalloutNumberSchema},{additionalProperties:false}))),
+  mapping: Type.Union([Type.Object({
+    document: DiagramMappingDocumentSchema,
+    sourceRevisionId: Type.String(), sourceDocumentChecksum: Type.String(),
+    storedDocumentChecksum: Type.String(), documentChecksum: Type.String(),
+    reviewerId: Type.String(), reviewedAt: Type.String(),
+  }, { additionalProperties: false }), Type.Null()]),
   release: ReleaseRefSchema,
   figure: ReleasedFigureSchema,
   drawing: DrawingAssetSchema,
@@ -333,22 +340,19 @@ const figureDetailFields = {
   callouts: Type.Array(ReleasedCalloutSchema),
 };
 
-export const PricedFigureDetailSchema = Type.Object(
-  {
+const pricedPhysicalFigureDetail=Type.Object({
     ...figureDetailFields,
+    figure:physicalFigureSchema,
     rows: Type.Array(PricedFigurePartRowSchema),
-  },
-  { $id: "PricedFigureDetail", additionalProperties: false },
-);
+},{additionalProperties:false});
+const tableOnlyDetailFields={...figureDetailFields,figure:tableOnlyFigureSchema,drawing:Type.Null(),mapping:Type.Null(),callouts:Type.Array(ReleasedCalloutSchema,{maxItems:0})};
+export const PricedFigureDetailSchema = Type.Union([pricedPhysicalFigureDetail,Type.Object({...tableOnlyDetailFields,rows:Type.Array(PricedFigurePartRowSchema)},{additionalProperties:false})],{$id:"PricedFigureDetail"});
 export type PricedFigureDetail = Static<typeof PricedFigureDetailSchema>;
 
-export const UnpricedFigureDetailSchema = Type.Object(
-  {
-    ...figureDetailFields,
-    rows: Type.Array(UnpricedFigurePartRowSchema),
-  },
-  { $id: "UnpricedFigureDetail", additionalProperties: false },
-);
+export const UnpricedFigureDetailSchema = Type.Union([
+  Type.Object({...figureDetailFields,figure:physicalFigureSchema,rows:Type.Array(UnpricedFigurePartRowSchema)},{additionalProperties:false}),
+  Type.Object({...tableOnlyDetailFields,rows:Type.Array(UnpricedFigurePartRowSchema)},{additionalProperties:false}),
+],{$id:"UnpricedFigureDetail"});
 export type UnpricedFigureDetail = Static<typeof UnpricedFigureDetailSchema>;
 
 export const FigureDetailSchema = Type.Union(
@@ -416,3 +420,5 @@ export const PartUsageSummarySchema = Type.Object(
   { $id: "PartUsageSummary", additionalProperties: false },
 );
 export type PartUsageSummary = Static<typeof PartUsageSummarySchema>;
+
+export const PartUsageIndexEntrySchema = Type.Object({ partId: Type.String(), summary: PartUsageSummarySchema }, { additionalProperties: false });

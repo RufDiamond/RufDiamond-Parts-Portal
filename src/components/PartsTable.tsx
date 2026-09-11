@@ -1,24 +1,30 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
 import styles from "./PartsTable.module.css";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
+import { revealDelta } from "@/lib/diagram-viewport";
+import { ZeroPriceNotice } from "./ZeroPriceNotice";
 
 export interface PartsTableProps {
   rows: FigurePartRow[];
   /** Currency shown in the column head. Defaults to the first row's currency. */
   currency?: Currency;
   /**
-   * Parts whose callouts are lit. Clicking a row toggles membership; every
-   * marker for that part responds, not just the first.
+   * Parts whose callouts are lit. The canonical callback activates an exact
+   * row; every established occurrence of that row's part responds.
    */
   selectedPartIds?: ReadonlySet<string>;
+  selectedFigurePartId?: string;
+  selectionActivation?: SelectionActivation;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
+  onSelectPart?: SelectDiagramPart;
   onHoverPart?: (partId: string | null) => void;
-  /** Parts already on the cart. */
+  /** Independent checkbox collection used to prepare a cart addition. */
   requestedPartIds?: ReadonlySet<string>;
   onToggleRequested?: (partId: string) => void;
 }
@@ -38,12 +44,17 @@ export function PartsTable({
   rows,
   currency,
   selectedPartIds = NONE,
+  selectedFigurePartId,
+  selectionActivation,
   hoveredPartId = null,
   onTogglePart,
+  onSelectPart,
   onHoverPart,
   requestedPartIds = NONE,
   onToggleRequested,
 }: PartsTableProps) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const selectedRow = useRef<HTMLTableRowElement>(null);
   const [filters, setFilters] = useState<Record<Column, string>>({
     ref: "",
     partNo: "",
@@ -54,7 +65,9 @@ export function PartsTable({
   });
 
   const unit = currency ?? rows[0]?.part.currency ?? "CAD";
-  const selectable = Boolean(onTogglePart);
+  const selectable = Boolean(onSelectPart || onTogglePart);
+  const activate = (row: FigurePartRow) => onSelectPart
+    ? onSelectPart(row.figurePart.id, "table") : onTogglePart?.(row.part.id);
   const tickable = Boolean(onToggleRequested);
 
   /*
@@ -77,7 +90,7 @@ export function PartsTable({
         ref: row.calloutNumbers.join(" "),
         partNo: row.part.partNumber,
         description: row.part.description,
-        qty: String(row.figurePart.qty),
+        qty: row.figurePart.qty===null?"Unspecified":String(row.figurePart.qty),
         price: formatPrice(row.part.listPrice, row.part.currency),
         remarks: row.figurePart.remarks ?? "",
       };
@@ -86,6 +99,22 @@ export function PartsTable({
       );
     });
   }, [rows, filters]);
+
+  const pinned = rows.find((row) => row.figurePart.id === selectedFigurePartId && !visible.includes(row));
+  const displayed = pinned ? [pinned, ...visible] : visible;
+  useEffect(() => {
+    if (!selectionActivation || selectionActivation.origin === "table") return;
+    const box = scroller.current;
+    const row = selectedRow.current;
+    if (!box || !row || !box.clientHeight || !box.clientWidth) return;
+    const rect = box.getBoundingClientRect();
+    const headerHeight = box.querySelector("thead tr")?.getBoundingClientRect().height ?? 0;
+    const left = rect.left + box.clientLeft;
+    const top = rect.top + box.clientTop;
+    const delta = revealDelta(row.getBoundingClientRect(), { left, top:top + headerHeight, right:left + box.clientWidth, bottom:top + box.clientHeight });
+    if (delta.x || delta.y) box.scrollBy({ left:delta.x, top:delta.y,
+      behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  }, [selectedFigurePartId, selectionActivation, visible]);
 
   const set = (key: Column, value: string) =>
     setFilters((current) => ({ ...current, [key]: value }));
@@ -105,7 +134,8 @@ export function PartsTable({
   );
 
   return (
-    <div className={styles.scroller}>
+    <div ref={scroller} className={styles.scroller}>
+      <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
       <table className={styles.table}>
         <thead>
           <tr className={styles.head}>
@@ -116,9 +146,9 @@ export function PartsTable({
                   className={styles.checkbox}
                   checked={allTicked}
                   onChange={() =>
-                    rows.forEach((row) => {
-                      const on = requestedPartIds.has(row.part.id);
-                      if (on === allTicked) onToggleRequested?.(row.part.id);
+                    [...new Set(rows.map((row) => row.part.id))].forEach((partId) => {
+                      const on = requestedPartIds.has(partId);
+                      if (on === allTicked) onToggleRequested?.(partId);
                     })
                   }
                   aria-label="Select every part on this figure"
@@ -155,14 +185,15 @@ export function PartsTable({
         </thead>
 
         <tbody>
-          {visible.length === 0 ? (
+          {pinned ? <tr><td className={styles.selectionNotice} colSpan={tickable ? 7 : 6} role="status">Selected part is outside these filters</td></tr> : null}
+          {displayed.length === 0 ? (
             <tr>
               <td className={styles.empty} colSpan={tickable ? 7 : 6}>
                 No parts match these filters.
               </td>
             </tr>
           ) : (
-            visible.map((row) => {
+            displayed.map((row) => {
               const { figurePart, part, calloutNumbers } = row;
               const active = selectedPartIds.has(part.id);
               const hovered = part.id === hoveredPartId;
@@ -170,13 +201,22 @@ export function PartsTable({
               return (
                 <tr
                   key={figurePart.id}
+                  ref={figurePart.id === selectedFigurePartId ? selectedRow : undefined}
                   className={styles.row}
                   data-active={active || undefined}
                   data-hovered={hovered || undefined}
+                  data-figure-part-id={figurePart.id}
+                  data-pinned={row === pinned || undefined}
+                  tabIndex={selectable && calloutNumbers.length === 0 ? 0 : undefined}
+                  onKeyDown={(event) => {
+                    if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                      event.preventDefault(); activate(row);
+                    }
+                  }}
                   onMouseEnter={() => onHoverPart?.(part.id)}
                   onMouseLeave={() => onHoverPart?.(null)}
                   onClick={
-                    selectable ? () => onTogglePart?.(part.id) : undefined
+                    selectable ? () => activate(row) : undefined
                   }
                 >
                   {tickable ? (
@@ -211,10 +251,11 @@ export function PartsTable({
                             number={number}
                             size="sm"
                             state={markerState(part.id)}
+                            pressed={selectedPartIds.has(part.id)}
                             title={`${part.partNumber} \u2014 ${part.description}`}
                             onActivate={
                               selectable
-                                ? () => onTogglePart?.(part.id)
+                                ? () => activate(row)
                                 : undefined
                             }
                             /*
@@ -236,7 +277,7 @@ export function PartsTable({
                   </th>
 
                   <td className={styles.description}>{part.description}</td>
-                  <td className={styles.qty}>{figurePart.qty}</td>
+                  <td className={styles.qty}>{figurePart.qty===null?<span title="Installed quantity is unspecified in the reviewed assembly reference">Unspecified</span>:figurePart.qty}</td>
                   <td className={styles.price}>
                     {formatPrice(part.listPrice, part.currency)}
                   </td>

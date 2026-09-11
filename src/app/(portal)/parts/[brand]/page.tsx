@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
 import { BRANDS } from "@/lib/brands";
 import {
-  getFiguresForModel,
-  getModels,
-  getProductLines,
-  getVariants,
+  composeCustomerRead,
 } from "@/data/repository";
 import { BrandParts, type BrandModel } from "./BrandParts";
 
@@ -31,21 +28,28 @@ export default async function BrandPage({
   const name = BRANDS[brand];
   if (!name) notFound();
 
-  const lines = await getProductLines();
+  const { productLine, entries } = await composeCustomerRead(async repo => {
+  const lines = await repo.getProductLines();
   const productLine = lines.find((line) => line.name === name);
   if (!productLine) notFound();
 
-  const models = await getModels();
+  const models = await repo.getModels();
   const mine = models.filter((m) => m.productLineId === productLine.id);
 
   const entries: BrandModel[] = await Promise.all(
-    mine.map(async (model) => ({
-      model,
-      variants: await getVariants(model.id),
-      photo: PHOTOS[model.id] ?? null,
-      figureCount: (await getFiguresForModel(model.id)).length,
-    })),
+    mine.map(async (model) => {
+      const variants = await repo.getVariants(model.id);
+      let figureCount = 0;
+      for (const variant of variants) {
+        for (const system of await repo.getSystems(variant.id)) {
+          figureCount += (await repo.getFigures(variant.id, system.id)).length;
+        }
+      }
+      return { model, variants, photo: PHOTOS[model.id] ?? null, figureCount };
+    }),
   );
+  return { productLine, entries };
+  });
 
   return (
     <BrandParts productLine={productLine} models={entries} slug={brand} />

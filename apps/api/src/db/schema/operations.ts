@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm";
 import type { RfqDetails } from "@rufdiamond/contracts";
 import { check, foreignKey, index, integer, jsonb, pgSequence, pgTable, primaryKey, text, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
-import { model, part, variant } from "./catalog.js";
+import { callout, figure, figurePart, model, part, variant } from "./catalog.js";
 import { appUser, company } from "./identity.js";
 import { publicationRelease, releasePart, releaseVariant } from "./releases.js";
 import { checksumCheck, currencyCheck, id, money, mutable, rate, time, versionCheck } from "./common.js";
@@ -56,6 +56,7 @@ export const orderLine = pgTable("order_line", {
 ]);
 
 export const importJob = pgTable("import_job", {
+  lineageKey: text("lineage_key"), sourceKind: text("source_kind", { enum: ["workbook", "legacy-draft", "synthetic"] }), format: text("format", { enum: ["csv", "xlsx"] }), sourceBytes: integer("source_bytes"),
   id: id(), modelId: uuid("model_id").notNull().references(() => model.id), variantId: uuid("variant_id").notNull(), sourceChecksum: text("source_checksum").notNull(), objectKey: text("object_key").notNull().unique(), objectVersionId: text("object_version_id"), filename: text("filename"),
   state: text("state", { enum: ["uploaded", "staged", "validated", "applying", "applied", "failed"] }).notNull().default("uploaded"), summary: jsonb("summary"), actorId: uuid("actor_id").notNull().references(() => appUser.id), appliedAt: time("applied_at"), ...mutable(),
 }, t => [unique("import_source_target").on(t.variantId, t.sourceChecksum), foreignKey({ columns: [t.variantId, t.modelId], foreignColumns: [variant.id, variant.modelId] }), versionCheck(t), checksumCheck(t.sourceChecksum), check("import_object_version", sql`${t.objectVersionId} IS NULL OR length(btrim(${t.objectVersionId})) > 0`), check("import_state", sql`${t.state} IN ('uploaded','staged','validated','applying','applied','failed')`)]);
@@ -68,6 +69,15 @@ export const importIssue = pgTable("import_issue", {
   id: id(), jobId: uuid("job_id").notNull().references(() => importJob.id), stagingRowId: uuid("staging_row_id"),
   severity: text("severity", { enum: ["warning", "error"] }).notNull(), code: text("code").notNull(), field: text("field"), message: text("message").notNull(), details: jsonb("details"), resolution: jsonb("resolution"), resolvedByUserId: uuid("resolved_by_user_id").references(() => appUser.id), resolvedAt: time("resolved_at"), ...mutable(),
 }, t => [index("import_issue_job").on(t.jobId), versionCheck(t), foreignKey({ columns: [t.stagingRowId, t.jobId], foreignColumns: [importStagingRow.id, importStagingRow.jobId] }), check("import_issue_severity", sql`${t.severity} IN ('warning','error')`)]);
+
+export const importSourceAlias = pgTable("import_source_alias", {
+  id: id(), jobId: uuid("job_id").notNull().references(() => importJob.id), stagingRowId: uuid("staging_row_id").notNull(),
+  identityKey: text("identity_key").notNull(), figureKey: text("figure_key").notNull(), figureId: uuid("figure_id").notNull().references(() => figure.id), figurePartId: uuid("figure_part_id").notNull(), calloutId: uuid("callout_id").references(() => callout.id), createdAt: time("created_at").notNull().defaultNow(),
+}, t => [unique("import_alias_staging").on(t.stagingRowId), unique("import_alias_job_identity").on(t.jobId,t.identityKey), foreignKey({columns:[t.stagingRowId,t.jobId],foreignColumns:[importStagingRow.id,importStagingRow.jobId]}), foreignKey({columns:[t.figurePartId,t.figureId],foreignColumns:[figurePart.id,figurePart.figureId]}), check("import_alias_keys",sql`${t.identityKey} ~ '^[a-f0-9]{64}$' AND ${t.figureKey} ~ '^[a-f0-9]{64}$'`)]);
+
+export const importIssueReview = pgTable("import_issue_review", {
+  id: id(), issueId: uuid("issue_id").notNull().references(() => importIssue.id), issueVersion: integer("issue_version").notNull(), decision: text("decision").notNull(), evidence: text("evidence").notNull(), actorId: uuid("actor_id").notNull().references(() => appUser.id), reviewedAt: time("reviewed_at").notNull().defaultNow(),
+}, t => [unique("import_review_version").on(t.issueId,t.issueVersion),check("import_review_valid",sql`${t.issueVersion} > 0 AND ${t.decision} IN ('acknowledged','source-correction-required') AND length(btrim(${t.evidence})) BETWEEN 10 AND 4000`)]);
 
 export const auditLog = pgTable("audit_log", {
   id: id(), actorId: uuid("actor_id").references(() => appUser.id), effectiveCompanyId: uuid("effective_company_id").references(() => company.id), capability: text("capability").notNull(),

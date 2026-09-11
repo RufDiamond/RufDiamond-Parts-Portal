@@ -1,5 +1,11 @@
 # Callout placement: review tooling, not a production importer
 
+**8 September component-highlight update:** source-bound silhouettes and two
+corrected drawing crops extend the explicit review surface. See
+[component highlighting review](../../docs/part-highlight-review.md) for source
+corrections, current manifests, remaining gaps and testing steps. Earlier totals
+below describe the original marker-only pass, not the newer review layer.
+
 The customer viewer already supports part/marker selection. The catalogue has
 572 imported callouts but only 15 positioned markers. New proposals in `review/`
 are deliberately outside `src/`; they are **not used in ordinary catalogue

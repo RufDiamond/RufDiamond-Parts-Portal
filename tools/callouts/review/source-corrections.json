@@ -1,0 +1,1051 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_FOR_CUSTOMER_USE",
+  "reviewer": null,
+  "catalogueSha256": "df26ac87cbba1b0a88800d78459c225e93ce37a09e1d693196b1f92a507887c2",
+  "figures": [
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "warning": "Ref. 2 needs source review: the PDF says M10 but the imported description says M4. Parts and prices have not been changed.",
+      "original": {
+        "path": "public/drawings/ft3w/ft3w-frame-assy-2-1.png",
+        "sha256": "dee6f9df2ee8e9c2c018a751e5e9480e849df3f28c36ea74cc07667ac5a023e5",
+        "width": 1280,
+        "height": 720
+      },
+      "replacement": {
+        "path": "public/drawings/ft3w/review-source-20260908/ft3w-frame-assy-2-1.png",
+        "sha256": "36533a8062e807060d27deaa81af602ee8c270fef204fc3081ef2b0411fed1e3",
+        "width": 1010,
+        "height": 590,
+        "source": {
+          "pdfSha256": "00698197a467c6ae4a1a809a108c8f225854f25897ea3ff4372f209948273bca",
+          "physicalPage": 6,
+          "renderWidth": 1275,
+          "renderHeight": 1650,
+          "crop": {
+            "x": 140,
+            "y": 145,
+            "width": 1010,
+            "height": 590
+          }
+        }
+      },
+      "annotations": [
+        {
+          "calloutId": "co-2-1-0007",
+          "figurePartId": "fp-2-1-01",
+          "partNumber": "82-00127",
+          "number": 1,
+          "x": 53.2673,
+          "y": 90.339,
+          "polygons": [
+            [
+              [
+                54.6535,
+                62.3729
+              ],
+              [
+                57.4257,
+                60
+              ],
+              [
+                70.8911,
+                70.5085
+              ],
+              [
+                72.7723,
+                68.9831
+              ],
+              [
+                72.9703,
+                68.1356
+              ],
+              [
+                74.6535,
+                68.6441
+              ],
+              [
+                74.6535,
+                65.5932
+              ],
+              [
+                78.3168,
+                63.2203
+              ],
+              [
+                79.0099,
+                63.5593
+              ],
+              [
+                79.0099,
+                67.6271
+              ],
+              [
+                80.495,
+                70
+              ],
+              [
+                81.2871,
+                71.1864
+              ],
+              [
+                81.8812,
+                73.8983
+              ],
+              [
+                81.8812,
+                79.661
+              ],
+              [
+                80.7921,
+                80.678
+              ],
+              [
+                81.5842,
+                82.3729
+              ],
+              [
+                81.4851,
+                85.5932
+              ],
+              [
+                80.5941,
+                87.9661
+              ],
+              [
+                80.8911,
+                90.1695
+              ],
+              [
+                80.6931,
+                93.0508
+              ],
+              [
+                79.703,
+                94.2373
+              ],
+              [
+                78.4158,
+                94.5763
+              ],
+              [
+                77.2277,
+                93.8983
+              ],
+              [
+                76.1386,
+                91.8644
+              ],
+              [
+                74.3564,
+                90.678
+              ],
+              [
+                73.3663,
+                88.4746
+              ],
+              [
+                72.9703,
+                85.9322
+              ],
+              [
+                70.9901,
+                83.8983
+              ],
+              [
+                67.5248,
+                80
+              ],
+              [
+                54.7525,
+                68.9831
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 1: 82-00127, PINTLE HOOK. Printed 1 leader terminates on the separate pintle-hook receiver shank; outline follows this shank and attached hook assembly. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-2-1-0008",
+          "figurePartId": "fp-2-1-02",
+          "partNumber": "10-404012-122",
+          "number": 2,
+          "x": 27.6238,
+          "y": 95.7627,
+          "polygons": [
+            [
+              [
+                25.6436,
+                80.1695
+              ],
+              [
+                26.3366,
+                80
+              ],
+              [
+                31.6832,
+                84.7458
+              ],
+              [
+                32.2772,
+                85.4237
+              ],
+              [
+                32.9703,
+                85.2542
+              ],
+              [
+                33.5644,
+                86.1017
+              ],
+              [
+                33.4653,
+                87.4576
+              ],
+              [
+                32.8713,
+                88.3051
+              ],
+              [
+                31.9802,
+                87.9661
+              ],
+              [
+                31.7822,
+                87.1186
+              ],
+              [
+                26.0396,
+                81.6949
+              ],
+              [
+                25.7426,
+                81.0169
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 2: 10-404012-122, M10 HEX SCREW. Printed 2 leader terminates on the lower-left exploded screw. SOURCE DESCRIPTION CONFLICT: PDF says M10 HEX SCREW while portal says M4; part number matches, mapping remains unapproved. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-2-1-0009",
+          "figurePartId": "fp-2-1-03",
+          "partNumber": "13-110020-122",
+          "number": 3,
+          "x": 20.9901,
+          "y": 92.8814,
+          "polygons": [
+            [
+              [
+                23.2673,
+                77.9661
+              ],
+              [
+                24.0594,
+                77.2881
+              ],
+              [
+                24.6535,
+                77.6271
+              ],
+              [
+                25.0495,
+                78.4746
+              ],
+              [
+                24.8515,
+                79.661
+              ],
+              [
+                24.2574,
+                80.5085
+              ],
+              [
+                23.5644,
+                80.339
+              ],
+              [
+                23.1683,
+                79.4915
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 3: 13-110020-122, M10 WASHER. Printed 3 leader terminates at the lower-left washer between screw and nut. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-2-1-0010",
+          "figurePartId": "fp-2-1-04",
+          "partNumber": "12-210000-12",
+          "number": 4,
+          "x": 14.8515,
+          "y": 88.8136,
+          "polygons": [
+            [
+              [
+                20.198,
+                75.4237
+              ],
+              [
+                21.0891,
+                74.7458
+              ],
+              [
+                21.7822,
+                75.0847
+              ],
+              [
+                22.1782,
+                76.1017
+              ],
+              [
+                22.0792,
+                77.2881
+              ],
+              [
+                21.4851,
+                77.9661
+              ],
+              [
+                20.7921,
+                77.7966
+              ],
+              [
+                20.099,
+                76.7797
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 4: 12-210000-12, M10 HEX FLANGED NUT. Printed 4 leader terminates at the lower-left flanged nut. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-2-1-0011",
+          "figurePartId": "fp-2-1-05",
+          "partNumber": "70-02270",
+          "number": 5,
+          "x": 3.6634,
+          "y": 88.3051,
+          "polygons": [
+            [
+              [
+                3.0693,
+                68.1356
+              ],
+              [
+                5.3465,
+                66.6102
+              ],
+              [
+                5.3465,
+                64.7458
+              ],
+              [
+                33.3663,
+                46.6102
+              ],
+              [
+                33.6634,
+                44.4068
+              ],
+              [
+                37.1287,
+                42.2034
+              ],
+              [
+                38.5149,
+                42.8814
+              ],
+              [
+                74.3564,
+                20.8475
+              ],
+              [
+                75.5446,
+                20.678
+              ],
+              [
+                79.604,
+                23.5593
+              ],
+              [
+                79.901,
+                28.9831
+              ],
+              [
+                81.2871,
+                32.2034
+              ],
+              [
+                80,
+                33.7288
+              ],
+              [
+                79.604,
+                34.7458
+              ],
+              [
+                75.9406,
+                33.8983
+              ],
+              [
+                51.2871,
+                48.8136
+              ],
+              [
+                50.198,
+                58.3051
+              ],
+              [
+                49.505,
+                61.0169
+              ],
+              [
+                47.6238,
+                62.5424
+              ],
+              [
+                44.7525,
+                63.2203
+              ],
+              [
+                43.8614,
+                62.2034
+              ],
+              [
+                43.3663,
+                62.8814
+              ],
+              [
+                39.0099,
+                63.3898
+              ],
+              [
+                36.9307,
+                61.6949
+              ],
+              [
+                36.9307,
+                60.1695
+              ],
+              [
+                41.2871,
+                57.1186
+              ],
+              [
+                14.8515,
+                72.7119
+              ],
+              [
+                14.4554,
+                74.7458
+              ],
+              [
+                9.901,
+                81.0169
+              ],
+              [
+                8.4158,
+                80.5085
+              ],
+              [
+                7.1287,
+                80.8475
+              ],
+              [
+                5.3465,
+                77.9661
+              ],
+              [
+                4.2574,
+                77.9661
+              ],
+              [
+                3.4653,
+                75.2542
+              ],
+              [
+                3.9604,
+                73.8983
+              ],
+              [
+                5.3465,
+                72.5424
+              ],
+              [
+                5.1485,
+                71.3559
+              ],
+              [
+                3.1683,
+                69.661
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 5: 70-02270, RECEIVER HITCH BUMPER. Printed 5 leader terminates on the left end of the long receiver-hitch bumper. Exterior contour includes the attached center receiver and visible mounting tabs; opening corrections follow below. Manually traced from the exact replacement PNG; unapproved. On 2026-09-09, manually inspected source-bound holes added: Center triangular opening and two visible portions of the square receiver opening traced; diagonal internal material band retained. Remaining small mounting holes and obscured internal surfaces are partial. Unapproved.",
+          "holes": [
+            [
+              [
+                [
+                  38.1188,
+                  60.678
+                ],
+                [
+                  39.505,
+                  59.661
+                ],
+                [
+                  40.5941,
+                  60.1695
+                ],
+                [
+                  41.9802,
+                  61.5254
+                ],
+                [
+                  39.604,
+                  61.8644
+                ],
+                [
+                  38.4158,
+                  61.5254
+                ]
+              ],
+              [
+                [
+                  45.3465,
+                  54.5763
+                ],
+                [
+                  45.6436,
+                  53.8983
+                ],
+                [
+                  48.1188,
+                  52.3729
+                ],
+                [
+                  48.6139,
+                  53.2203
+                ],
+                [
+                  48.6139,
+                  56.7797
+                ]
+              ],
+              [
+                [
+                  45.4455,
+                  56.4407
+                ],
+                [
+                  48.3168,
+                  58.4746
+                ],
+                [
+                  48.3168,
+                  58.9831
+                ],
+                [
+                  45.5446,
+                  60.8475
+                ]
+              ]
+            ]
+          ]
+        },
+        {
+          "calloutId": "co-2-1-0012",
+          "figurePartId": "fp-2-1-06",
+          "partNumber": "19-00210",
+          "number": 6,
+          "x": 89.2079,
+          "y": 13.2203,
+          "polygons": [
+            [
+              [
+                77.4257,
+                15.9322
+              ],
+              [
+                78.5149,
+                15.0847
+              ],
+              [
+                81.2871,
+                22.3729
+              ],
+              [
+                80.297,
+                23.2203
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 6: 19-00210, NONSLIP BUMPER. Printed 6 leader terminates on the lower of the two separated strips above the right bumper end. Other-side occurrence is explicitly NOT SHOWN. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-2-1-0013",
+          "figurePartId": "fp-2-1-07",
+          "partNumber": "62-00881",
+          "number": 7,
+          "x": 88.2178,
+          "y": 4.0678,
+          "polygons": [
+            [
+              [
+                77.1287,
+                5.9322
+              ],
+              [
+                78.4158,
+                4.9153
+              ],
+              [
+                81.5842,
+                12.3729
+              ],
+              [
+                80.5941,
+                13.2203
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 6, same-figure table reference 7: 62-00881, DOOR STOPPER SHIM. Printed 7 leader terminates on the upper separated strip above the right bumper end. Other-side occurrence is explicitly NOT SHOWN. Manually traced from the exact replacement PNG; unapproved."
+        }
+      ],
+      "notes": "UNAPPROVED: Manufacturer physical page 6, printed page 2, figure 2.1 BUMPER AND HITCH RECEIVER supplies the correct source drawing; the original portal image is the figure 2.2 winch plate. Same-figure table explicitly lists references 8 and 9 as NOT SHOWN; no placements manufactured. Reference 2 part number 10-404012-122 matches the portal row but manufacturer description M10 HEX SCREW conflicts with portal description Hex drive flat head m4 x 0.7 x 12 zinc plated class 10.9. Preserve imported description; require attributable source resolution before ordering or publication. Silhouettes are manually traced exterior outlines of the explicit leader-target component; holes are not subtracted, and unlabelled duplicate hardware is not associated by resemblance. Review still requires RUF Diamond sign-off."
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "warning": "Motor shading covers the visible housing only. Additional unlabelled hardware occurrences have not been traced.",
+      "original": {
+        "path": "public/drawings/ft3w/ft3w-drive-system-3-1.png",
+        "sha256": "89b59fd269dceb9e3dccdafaf638bea39716913b63cbf16bb74f7421f48f1e61",
+        "width": 1280,
+        "height": 720
+      },
+      "replacement": {
+        "path": "public/drawings/ft3w/review-source-20260908/ft3w-drive-system-3-1.png",
+        "sha256": "29f508735e46ca268dd2f65b7fdf92282cae7a041b5b6515833bee1c19028a71",
+        "width": 1070,
+        "height": 657,
+        "source": {
+          "pdfSha256": "00698197a467c6ae4a1a809a108c8f225854f25897ea3ff4372f209948273bca",
+          "physicalPage": 8,
+          "renderWidth": 1275,
+          "renderHeight": 1650,
+          "crop": {
+            "x": 100,
+            "y": 154,
+            "width": 1070,
+            "height": 657
+          }
+        }
+      },
+      "annotations": [
+        {
+          "calloutId": "co-3-1-0027",
+          "figurePartId": "fp-3-1-01",
+          "partNumber": "51-00045",
+          "number": 1,
+          "x": 44.9533,
+          "y": 4.5662,
+          "polygons": [
+            [
+              [
+                47.8505,
+                32.7245
+              ],
+              [
+                48.972,
+                26.484
+              ],
+              [
+                50.2804,
+                22.2222
+              ],
+              [
+                52.0561,
+                20.2435
+              ],
+              [
+                54.1121,
+                19.1781
+              ],
+              [
+                54.5794,
+                15.0685
+              ],
+              [
+                55.514,
+                14.3075
+              ],
+              [
+                56.8224,
+                14.003
+              ],
+              [
+                60.0935,
+                15.3729
+              ],
+              [
+                63.6449,
+                16.895
+              ],
+              [
+                64.7664,
+                19.0259
+              ],
+              [
+                65.9813,
+                17.8082
+              ],
+              [
+                68.6916,
+                16.4384
+              ],
+              [
+                70.0935,
+                16.7428
+              ],
+              [
+                72.6168,
+                18.8737
+              ],
+              [
+                76.9159,
+                16.4384
+              ],
+              [
+                78.1308,
+                12.481
+              ],
+              [
+                79.5327,
+                10.8067
+              ],
+              [
+                81.7757,
+                9.589
+              ],
+              [
+                84.9533,
+                7.9148
+              ],
+              [
+                88.1308,
+                6.6971
+              ],
+              [
+                89.0654,
+                8.2192
+              ],
+              [
+                90.1869,
+                8.6758
+              ],
+              [
+                92.243,
+                10.6545
+              ],
+              [
+                93.8318,
+                12.1766
+              ],
+              [
+                94.6729,
+                13.8508
+              ],
+              [
+                97.0093,
+                23.8965
+              ],
+              [
+                97.757,
+                26.3318
+              ],
+              [
+                97.8505,
+                28.4627
+              ],
+              [
+                97.9439,
+                30.898
+              ],
+              [
+                97.757,
+                39.726
+              ],
+              [
+                97.1028,
+                40.7915
+              ],
+              [
+                96.5421,
+                43.9878
+              ],
+              [
+                94.8598,
+                46.5753
+              ],
+              [
+                92.5234,
+                48.0974
+              ],
+              [
+                89.7196,
+                49.3151
+              ],
+              [
+                87.1028,
+                49.9239
+              ],
+              [
+                85.1402,
+                49.6195
+              ],
+              [
+                83.6449,
+                47.3364
+              ],
+              [
+                79.5327,
+                50.0761
+              ],
+              [
+                75.4206,
+                52.6636
+              ],
+              [
+                74.8598,
+                58.9041
+              ],
+              [
+                73.7383,
+                64.2314
+              ],
+              [
+                72.8972,
+                66.8189
+              ],
+              [
+                71.4953,
+                67.8843
+              ],
+              [
+                69.5327,
+                66.9711
+              ],
+              [
+                67.6636,
+                65.449
+              ],
+              [
+                65.9813,
+                63.6225
+              ],
+              [
+                63.5514,
+                65.449
+              ],
+              [
+                61.4019,
+                66.6667
+              ],
+              [
+                59.2523,
+                66.3623
+              ],
+              [
+                57.3832,
+                65.1446
+              ],
+              [
+                55.7944,
+                63.4703
+              ],
+              [
+                53.7383,
+                59.2085
+              ],
+              [
+                51.028,
+                61.035
+              ],
+              [
+                51.1215,
+                54.6423
+              ],
+              [
+                50.5607,
+                47.3364
+              ],
+              [
+                49.6262,
+                40.4871
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 8, same-figure table reference 1: 51-00045, HYDRAULIC MOTOR (POCLAIN MSE08). Printed 1 leader terminates on the main motor bell housing. Partial visible housing silhouette follows the distinct exterior behind the front wheel flange; flange and occluded zones deliberately excluded. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-3-1-0028",
+          "figurePartId": "fp-3-1-02",
+          "partNumber": "10-316060-121",
+          "number": 2,
+          "x": 7.1028,
+          "y": 14.3075,
+          "polygons": [
+            [
+              [
+                1.3084,
+                37.1385
+              ],
+              [
+                2.9907,
+                36.3775
+              ],
+              [
+                3.3645,
+                36.8341
+              ],
+              [
+                11.215,
+                34.0944
+              ],
+              [
+                11.7757,
+                35.1598
+              ],
+              [
+                11.9626,
+                37.2907
+              ],
+              [
+                3.9252,
+                40.6393
+              ],
+              [
+                3.7383,
+                41.5525
+              ],
+              [
+                2.243,
+                42.1613
+              ],
+              [
+                1.6822,
+                40.6393
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 8, same-figure table reference 2: 10-316060-121, M16 SOCKET SCREW. Printed 2 leader terminates on the uppermost left exploded socket screw. Only this explicit leader target is traced; other hardware occurrences are not inferred. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-3-1-0029",
+          "figurePartId": "fp-3-1-03",
+          "partNumber": "12-216000-122",
+          "number": 3,
+          "x": 17.1028,
+          "y": 11.7199,
+          "polygons": [
+            [
+              [
+                15.7944,
+                30.5936
+              ],
+              [
+                16.4486,
+                30.137
+              ],
+              [
+                16.729,
+                30.898
+              ],
+              [
+                17.8505,
+                30.2892
+              ],
+              [
+                18.4112,
+                30.898
+              ],
+              [
+                18.8785,
+                33.6377
+              ],
+              [
+                18.5981,
+                34.551
+              ],
+              [
+                17.1028,
+                35.7686
+              ],
+              [
+                16.5421,
+                35.0076
+              ],
+              [
+                16.1682,
+                33.4855
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 8, same-figure table reference 3: 12-216000-122, M16 FLANGED NUT. Printed 3 leader terminates on the uppermost left exploded flanged nut. Only this explicit leader target is traced. Manually traced from the exact replacement PNG; unapproved."
+        },
+        {
+          "calloutId": "co-3-1-0030",
+          "figurePartId": "fp-3-1-04",
+          "partNumber": "19-00204",
+          "number": 4,
+          "x": 30.0935,
+          "y": 8.2192,
+          "polygons": [
+            [
+              [
+                32.6168,
+                32.7245
+              ],
+              [
+                38.972,
+                29.8326
+              ],
+              [
+                39.5327,
+                29.376
+              ],
+              [
+                40.5607,
+                28.9193
+              ],
+              [
+                41.1215,
+                30.137
+              ],
+              [
+                41.1215,
+                31.8113
+              ],
+              [
+                40.0935,
+                32.4201
+              ],
+              [
+                39.6262,
+                32.1157
+              ],
+              [
+                33.0841,
+                35.1598
+              ],
+              [
+                32.7103,
+                34.551
+              ]
+            ]
+          ],
+          "evidence": "Manufacturer 96-00073 Parts_catalog_FT3-REV.2, physical page 8, same-figure table reference 4: 19-00204, M14 WHEEL STUD. Printed 4 leader terminates on the upper-left wheel stud projecting from the front flange. Only this explicit leader target is traced; remaining seven studs are not assigned silhouettes by elimination. Manually traced from the exact replacement PNG; unapproved."
+        }
+      ],
+      "notes": "UNAPPROVED: Manufacturer physical page 8, printed page 4, figure 3.1 HYDRAULIC MOTOR ASSEMBLY explicitly prints references 1 and 4 in circles that are blank in the original portal image. These are direct source observations, not missing-number elimination. Same-figure table supplies references 1-4 and describes 5-8 as NOT SHOWN. Silhouette for motor reference 1 is deliberately partial: main motor housing only, withholding the crowded front flange/occluded regions beside separate studs. Hardware silhouettes cover only the component directly reached by each printed leader; remaining repeated hardware contours are withheld pending occurrence review. Holes are not subtracted. All data remains pending RUF Diamond sign-off."
+    }
+  ]
+}

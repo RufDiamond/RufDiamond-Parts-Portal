@@ -4,7 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./diagram-geometry": "./src/diagram-geometry.ts",
+    "./diagram-mapping": "./src/diagram-mapping.ts",
+    "./drawing-upload": "./src/drawing-upload.ts"
   },
   "types": "./src/index.ts",
   "scripts": {

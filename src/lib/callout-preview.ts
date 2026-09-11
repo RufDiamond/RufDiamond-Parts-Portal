@@ -51,14 +51,14 @@ export function applyCalloutPreview(
     };
   }
 
-  const proposalCount = new Map<number, number>();
-  const proposalByNumber = new Map<number, PreviewMarker>();
+  const proposalCount = new Map<number | string, number>();
+  const proposalByNumber = new Map<number | string, PreviewMarker>();
   for (const marker of proposal.markers) {
     proposalCount.set(marker.number, (proposalCount.get(marker.number) ?? 0) + 1);
     proposalByNumber.set(marker.number, marker);
   }
 
-  const calloutCount = new Map<number, number>();
+  const calloutCount = new Map<number | string, number>();
   for (const callout of detail.callouts) {
     calloutCount.set(callout.number, (calloutCount.get(callout.number) ?? 0) + 1);
   }
@@ -95,6 +95,6 @@ export function applyCalloutPreview(
 
   return {
     detail: { ...detail, callouts },
-    notice: `${NOTICE} Applied ${applied} marker position${applied === 1 ? "" : "s"}; ${unresolved} unresolved.`,
+    notice: `${NOTICE} Applied ${applied} marker position${applied === 1 ? "" : "s"}; ${unresolved} existing-row markers unpositioned. Source-only references and incomplete contours are separate review questions.`,
   };
 }

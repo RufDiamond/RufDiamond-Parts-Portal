@@ -12,12 +12,14 @@ export interface AppConfig {
     keys: Readonly<Record<string, string>>;
   };
   s3: {
+    provider?: "s3" | "minio";
     endpoint: string;
     region: string;
     bucket: string;
     accessKeyId: string;
     secretAccessKey: string;
   };
+  drawingScanner?: { host: string; port: number; timeoutMs: number };
 }
 
 type Environment = Record<string, string | undefined>;
@@ -110,6 +112,14 @@ export function loadConfig(environment: Environment): AppConfig {
     }
   }
 
+  let drawingScanner: AppConfig["drawingScanner"];
+  if (environment.S3_PROVIDER && !["s3", "minio"].includes(environment.S3_PROVIDER)) throw new Error("S3_PROVIDER must be s3 or minio");
+  if (environment.DRAWING_SCANNER_HOST || environment.DRAWING_SCANNER_PORT || environment.DRAWING_SCANNER_TIMEOUT_MS) {
+    const host = required(environment, "DRAWING_SCANNER_HOST"), scannerPort = Number(required(environment, "DRAWING_SCANNER_PORT"));
+    const timeoutMs = Number(environment.DRAWING_SCANNER_TIMEOUT_MS ?? "30000");
+    if (!/^[a-zA-Z0-9.:-]+$/.test(host) || !Number.isInteger(scannerPort) || scannerPort < 1 || scannerPort > 65535 || !Number.isInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 60000) throw new Error("Invalid drawing scanner host, port, or timeout");
+    drawingScanner = { host, port: scannerPort, timeoutMs };
+  }
   return {
     nodeEnv,
     port,
@@ -118,7 +128,9 @@ export function loadConfig(environment: Environment): AppConfig {
     webOrigin,
     allowInsecureLoopbackCookie,
     deliveryEncryption: deliveryEncryption(environment),
+    drawingScanner,
     s3: {
+      provider: environment.S3_PROVIDER === "minio" ? "minio" : "s3",
       endpoint: validHttpUrl(required(environment, "S3_ENDPOINT"), "S3_ENDPOINT"),
       region: required(environment, "S3_REGION"),
       bucket: required(environment, "S3_BUCKET"),

@@ -2,11 +2,16 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
+import { DiagramRegions } from "./DiagramRegions";
+import type { DiagramRegionDocument } from "@/lib/drawing";
+import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
+import { DIAGRAM_ZOOM_STEPS, revealDelta, revealZoom, type ViewportRect } from "@/lib/diagram-viewport";
 import styles from "./DrawingViewer.module.css";
 
 export interface DrawingMarker {
   id: string;
-  number: number;
+  figurePartId?: string;
+  number: number | string;
   /** Percentages, 0-100. */
   x: number;
   y: number;
@@ -37,6 +42,11 @@ export interface DrawingViewerProps {
   width?: number;
   height?: number;
   markers: DrawingMarker[];
+  document?: DiagramRegionDocument;
+  onSelectPart?: SelectDiagramPart;
+  selectionActivation?: SelectionActivation;
+  /** Incremented by the explicit Show selected part action. */
+  revealRequest?: number;
   /**
    * Selected parts. EVERY marker carrying one of these part ids goes solid —
    * a part fitted in two places lights in both — and the rest recede.
@@ -58,7 +68,7 @@ export interface DrawingViewerProps {
 }
 
 /** The steps the buttons and the wheel both move through. */
-export const ZOOM_STEPS = [1, 1.5, 2, 3, 4];
+export const ZOOM_STEPS = DIAGRAM_ZOOM_STEPS;
 
 function stepFrom(zoom: number, direction: 1 | -1): number {
   const i = ZOOM_STEPS.indexOf(zoom);
@@ -99,6 +109,10 @@ export function DrawingViewer({
   width,
   height,
   markers,
+  document,
+  onSelectPart,
+  selectionActivation,
+  revealRequest = 0,
   selectedPartIds = NO_SELECTION,
   hoveredPartId = null,
   onTogglePart,
@@ -106,9 +120,12 @@ export function DrawingViewer({
   zoom = 1,
   onZoomChange,
 }: DrawingViewerProps) {
+  const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
+  const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
   const highlighted = markers.filter(
     (marker) =>
       marker.maskPath !== undefined &&
+      !numericIds.has(marker.id) &&
       (selectedPartIds.has(marker.partId) || marker.partId === hoveredPartId),
   );
 
@@ -148,6 +165,80 @@ export function DrawingViewer({
   const moved = useRef(false);
   const [dragging, setDragging] = useState(false);
 
+  const reveal = useRef<{ activation?: SelectionActivation; request: number; pending: boolean }>({ request:0, pending:false });
+  useEffect(() => {
+    const previous = reveal.current;
+    if (previous.activation !== selectionActivation) {
+      previous.activation = selectionActivation;
+      previous.pending = selectionActivation?.origin === "table";
+    }
+    if (previous.request !== revealRequest) {
+      previous.request = revealRequest;
+      previous.pending = true;
+    }
+    if (!src || !selectedPartIds.size) previous.pending = false;
+    if (!previous.pending) return;
+    const box = sheet.current;
+    const area = drawing.current;
+    if (!box || !area || !box.clientWidth || !box.clientHeight) return;
+    let frame = 0;
+    let lastWidth = -1;
+    let stableFrames = 0;
+    const run = () => {
+      const plate = area.getBoundingClientRect();
+      // A fit may change zoom. Wait for the existing width transition to finish
+      // before measuring the next scroll, including under reduced motion.
+      stableFrames = Math.abs(plate.width - lastWidth) < 0.01 ? stableFrames + 1 : 0;
+      lastWidth = plate.width;
+      if (stableFrames < 2) { frame = requestAnimationFrame(run); return; }
+      const targets: ViewportRect[] = [];
+      const represented = new Set<string>();
+      if (numericDocument) {
+        for (const occurrence of numericDocument.occurrences) {
+          if (!selectedPartIds.has(occurrence.partId)) continue;
+          const points = occurrence.regions.flatMap((region) => region.outer);
+          if (!points.length) continue;
+          const xs = points.map(([x]) => plate.left + x / numericDocument.imageWidth * plate.width);
+          const ys = points.map(([, y]) => plate.top + y / numericDocument.imageHeight * plate.height);
+          targets.push({ left:Math.min(...xs), top:Math.min(...ys), right:Math.max(...xs), bottom:Math.max(...ys) });
+          represented.add(occurrence.calloutId);
+        }
+      }
+      const legacyPaths = new Map(Array.from(area.querySelectorAll<SVGPathElement>("path[data-legacy-selected][data-callout-id]"))
+        .map((path) => [path.dataset.calloutId, path]));
+      const markerElements = new Map(Array.from(area.querySelectorAll<HTMLButtonElement>(":scope > button[data-callout-id]"))
+        .map((marker) => [marker.dataset.calloutId, marker]));
+      for (const marker of markers) {
+        if (!selectedPartIds.has(marker.partId) || represented.has(marker.id)) continue;
+        // Fallback is per occurrence, never per part: measure its unchanged SVG
+        // shape first, then its own marker. Do not parse arbitrary legacy paths.
+        const legacy = legacyPaths.get(marker.id)?.getBoundingClientRect();
+        const target = legacy && (legacy.width || legacy.height) ? legacy : markerElements.get(marker.id)?.getBoundingClientRect();
+        if (target) targets.push(target);
+        represented.add(marker.id);
+      }
+      previous.pending = false;
+      if (!targets.length) return;
+      const target = { left:Math.min(...targets.map((rect) => rect.left)), top:Math.min(...targets.map((rect) => rect.top)),
+        right:Math.max(...targets.map((rect) => rect.right)), bottom:Math.max(...targets.map((rect) => rect.bottom)) };
+      const rect = box.getBoundingClientRect();
+      const left = rect.left + box.clientLeft;
+      const top = rect.top + box.clientTop;
+      const viewport = { left, top, right:left + box.clientWidth, bottom:top + box.clientHeight };
+      const nextZoom = revealZoom(target, viewport, zoom);
+      if (nextZoom < zoom && onZoomChange) {
+        previous.pending = true;
+        onZoomChange(nextZoom);
+        return;
+      }
+      const delta = revealDelta(target, viewport);
+      if (delta.x || delta.y) box.scrollBy({ left:delta.x, top:delta.y,
+        behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    };
+    frame = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(frame);
+  }, [selectionActivation, revealRequest, src, numericDocument, markers, selectedPartIds, zoom, onZoomChange]);
+
   /*
    * Ordinary vertical wheel input and trackpad pinches share the existing zoom
    * steps while the pointer is over the drawing itself. Bound by hand because
@@ -169,7 +260,7 @@ export function DrawingViewer({
 
   const startDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     const box = sheet.current;
-    if (!box || zoom === 1) return;
+    if (!box || event.button !== 0) return;
     from.current = {
       x: event.clientX,
       y: event.clientY,
@@ -177,8 +268,6 @@ export function DrawingViewer({
       top: box.scrollTop,
     };
     moved.current = false;
-    setDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const onDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -187,13 +276,23 @@ export function DrawingViewer({
     if (!start || !box) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved.current = true;
-    box.scrollLeft = start.left - dx;
-    box.scrollTop = start.top - dy;
+    if (Math.hypot(dx, dy) > 5) {
+      moved.current = true;
+      if (zoom > 1) {
+        setDragging(true);
+        event.currentTarget.setPointerCapture?.(event.pointerId);
+      }
+    }
+    if (moved.current && zoom > 1) {
+      box.scrollLeft = start.left - dx;
+      box.scrollTop = start.top - dy;
+    }
   };
 
   const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (from.current) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (from.current && Math.hypot(event.clientX - from.current.x, event.clientY - from.current.y) > 5) moved.current = true;
+    if (event.type === "pointercancel") moved.current = true;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     from.current = null;
     setDragging(false);
   };
@@ -211,6 +310,7 @@ export function DrawingViewer({
           dragging ? styles.sheetDragging : ""
         }`}
         onMouseLeave={() => onHoverPart?.(null)}
+        onPointerDownCapture={() => { moved.current = false; from.current = null; }}
         onPointerDown={startDrag}
         onPointerMove={onDrag}
         onPointerUp={endDrag}
@@ -238,7 +338,7 @@ export function DrawingViewer({
           // Plain <img>: the drawing is an arbitrary asset served by the
           // backend, and next/image would need its dimensions up front.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={src} alt={label} className={styles.plate} />
+          <img src={src} alt={label} className={styles.plate} draggable={false} />
         ) : (
           <div className={styles.trim}>
             <span className="eyebrow">{note}</span>
@@ -258,21 +358,29 @@ export function DrawingViewer({
             aria-hidden="true"
           >
             {highlighted.map((marker) => (
-              <path key={marker.id} d={marker.maskPath} />
+              <path key={marker.id} d={marker.maskPath} fillRule="evenodd" data-callout-id={marker.id} data-legacy-selected={selectedPartIds.has(marker.partId) || undefined} />
             ))}
           </svg>
+        ) : null}
+
+        {numericDocument ? (
+          <DiagramRegions key={src} document={numericDocument} selectedPartIds={selectedPartIds}
+            onSelect={onSelectPart ? (id) => onSelectPart(id, "component") : undefined} />
         ) : null}
 
         {markers.map((marker) => (
           <CalloutMarker
             key={marker.id}
+            occurrenceId={marker.id}
             number={marker.number}
             x={marker.x}
             y={marker.y}
             state={markerState(marker.partId)}
+            pressed={selectedPartIds.has(marker.partId)}
             title={marker.label}
             onActivate={
-              onTogglePart ? () => onTogglePart(marker.partId) : undefined
+              onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")
+                : onTogglePart ? () => onTogglePart(marker.partId) : undefined
             }
             onHoverChange={
               onHoverPart

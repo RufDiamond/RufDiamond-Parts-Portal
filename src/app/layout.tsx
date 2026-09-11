@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
-import { AppProviders } from "@/state";
 import "./globals.css";
 
 // Interface text.
@@ -35,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${plusJakartaSans.variable} ${ibmPlexMono.variable}`}
     >
       <body>
-        <AppProviders>{children}</AppProviders>
+        {children}
       </body>
     </html>
   );

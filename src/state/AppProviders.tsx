@@ -4,13 +4,13 @@ import type { ReactNode } from "react";
 import type { Company } from "@/types/catalog";
 import { MachineProvider } from "./MachineContext";
 import { RequestProvider } from "./RequestContext";
+import { SessionBoundary } from "./SessionBoundary";
+import { scopeKey } from "./customer-session";
+import type { MeResponse } from "@rufdiamond/contracts";
 
 /**
- * PLACEHOLDER ACCOUNT.
- *
- * The request screen has to show a discount line, and the rate belongs to the
- * signed-in company — which does not exist until auth lands. This stands in
- * for it. Replace with the company from the session; nothing else changes.
+ * Local fixture demo account only. Connected pages receive the current
+ * authenticated company and never use this value as an API fallback.
  */
 const PLACEHOLDER_COMPANY: Company = {
   id: "co-placeholder",
@@ -29,10 +29,17 @@ const PLACEHOLDER_COMPANY: Company = {
  * `children` arrives as a prop from the server layout, so wrapping the tree
  * here does not force any screen to become a client component.
  */
-export function AppProviders({ children }: { children: ReactNode }) {
+export function AppProviders({ children, session = null }: { children: ReactNode; session?: MeResponse | null }) {
+  const company: Company = session ? {
+    id: session.company.id, name: session.company.name, type: session.company.type,
+    ...(Object.hasOwn(session.company, "discountRate") ? { discountRate: Number("discountRate" in session.company ? session.company.discountRate : undefined) } : {}),
+    defaultShippingAddress: session.company.defaultShippingAddress ? Object.values(session.company.defaultShippingAddress).filter(Boolean).join(", ") : null,
+  } : PLACEHOLDER_COMPANY;
   return (
-    <MachineProvider>
-      <RequestProvider company={PLACEHOLDER_COMPANY}>{children}</RequestProvider>
+    <SessionBoundary session={session}>
+    <MachineProvider key={session ? scopeKey(session) : "fixture"} persist={!session}>
+      <RequestProvider company={company} apiSession={session}>{children}</RequestProvider>
     </MachineProvider>
+    </SessionBoundary>
   );
 }

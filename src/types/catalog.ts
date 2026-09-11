@@ -6,6 +6,8 @@
  * both satisfy these contracts.
  */
 
+import type { ComponentRegion, ReleaseRef, FigureDetail as ReleasedDetail } from "@rufdiamond/contracts";
+
 export type Currency = "CAD" | "USD";
 
 export type ModelStatus = "active" | "legacy" | "discontinued";
@@ -14,15 +16,15 @@ export type FigureStatus = "published" | "draft" | "superseded";
 
 export type PartStatus = "active" | "superseded" | "obsolete" | "special-order";
 
-export type CompanyType = "customer" | "dealer";
+export type CompanyType = "customer" | "dealer" | "internal";
 
 /** A machine family, e.g. Fat Truck. */
 export interface ProductLine {
   id: string;
   name: string;
-  manufacturer: string;
+  manufacturer: string | null;
   /** ISO 3166-1 alpha-2, e.g. "CA". */
-  country: string;
+  country: string | null;
   /** True when RufDiamond distributes the line rather than manufacturing it. */
   isDistributed: boolean;
 }
@@ -61,7 +63,7 @@ export interface Variant {
   serialFrom: string | null;
   /** Null means "and up" — the range is open-ended. */
   serialTo: string | null;
-  catalogRevision: string;
+  catalogRevision: string | null;
 }
 
 /** A top-level grouping of figures, e.g. Hydraulic. Shared across variants. */
@@ -82,6 +84,7 @@ export interface Figure {
   /** Handle for the drawing asset; null while the plate is unattached. */
   drawingFileId: string | null;
   status: FigureStatus;
+  depictionMode?: "physical" | "table-only";
 }
 
 /**
@@ -109,7 +112,10 @@ export interface Part {
   partNumber: string;
   description: string;
   manufacturer: string | null;
-  listPrice: number;
+  listPrice?: number | string;
+  releasePartId?: string;
+  /** Contributors to the validated read, not a guessed per-part release owner. */
+  contributingReleases?: ReleaseRef[];
   currency: Currency;
   /** Points at the replacement when this part has been superseded. */
   supersededByPartId: string | null;
@@ -128,15 +134,7 @@ export interface PartRequirement {
 }
 
 /** A part's appearance on a figure, with the quantity used there. */
-export interface FigurePart {
-  id: string;
-  figureId: string;
-  partId: string;
-  qty: number;
-  remarks: string | null;
-  /** False for reference-only items that cannot be ordered separately. */
-  serviceable: boolean;
-}
+export type FigurePart = import("@rufdiamond/contracts").FigurePart;
 
 /**
  * A numbered marker on a drawing. One figure part may have several callouts
@@ -152,7 +150,7 @@ export interface Callout {
    * incomplete. Attaching a part is the editor's secondary path.
    */
   figurePartId: string | null;
-  number: number;
+  number: number | string;
   /**
    * Position on the plate, as percentages of drawing width and height, 0-100.
    * Never pixels — the drawing can be replaced at another resolution.
@@ -175,6 +173,14 @@ export interface Callout {
    * `docs/drawing-source-review.md`.
    */
   maskPath: string | null;
+  /** Validated numeric review geometry, pinned to the rendered source. No approval implied. */
+  componentGeometry?: {
+    drawingPath: string;
+    drawingSha256: string;
+    imageWidth: number;
+    imageHeight: number;
+    regions: ComponentRegion[];
+  };
 }
 
 /** A customer or dealer account. Discount applies to list price. */
@@ -183,7 +189,7 @@ export interface Company {
   name: string;
   type: CompanyType;
   /** Fraction, e.g. 0.15 for 15% off list. */
-  discountRate: number;
+  discountRate?: number;
   /**
    * Where this account's parts normally ship. Offered on the quote request as
    * "Use my default shipping address" (slide 51); null when none is saved, and
@@ -198,11 +204,12 @@ export interface Company {
  */
 export interface OrderLine {
   partId: string;
+  releasePartId?: string;
   partNumberSnapshot: string;
   descriptionSnapshot: string;
   qty: number;
-  unitPriceSnapshot: number;
-  lineTotal: number;
+  unitPriceSnapshot?: number | string;
+  lineTotal?: number;
 }
 
 /* ------------------------------------------------------------------ *
@@ -217,11 +224,13 @@ export interface FigurePartRow {
   figurePart: FigurePart;
   part: Part;
   /** Ascending, de-duplicated. Empty when the item has no marker on the plate. */
-  calloutNumbers: number[];
+  calloutNumbers: (number | string)[];
 }
 
 /** Everything needed to render one figure screen. */
 export interface FigureDetail {
+  release?: ReleaseRef;
+  mapping?: ReleasedDetail["mapping"];
   figure: Figure;
   /** The resolved plate, or null while the figure has no drawing attached. */
   drawing: DrawingFile | null;
