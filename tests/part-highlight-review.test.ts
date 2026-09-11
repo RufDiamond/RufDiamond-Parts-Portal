@@ -154,6 +154,16 @@ test("Lower gate tracing preserves ladder space and foreground/source ownership"
   expect(contains(3,[227,302])).toBe(true);
 });
 
+test("Air-conditioning parts retain open guard space and exclude foreground hardware", async () => {
+  const result=await loadCalloutPreview((await getFigureDetail("fig-cabin-6-17"))!,"hosted-review");
+  const contains=(ref:number,p:[number,number])=>result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(r=>pointInRegion(p,r));
+  expect(contains(1,[220,90])).toBe(false);
+  expect(contains(1,[200,62])).toBe(true);
+  expect(contains(17,[942,524])).toBe(false);
+  expect(contains(17,[930,521])).toBe(true);
+  expect(contains(12,[713,347])).toBe(false);
+});
+
 test("Rear seat supports exclude source slots without changing shared-seat identities", async () => {
   const result=await loadCalloutPreview((await getFigureDetail("fig-cabin-6-14"))!,"hosted-review");
   const contains=(ref:number,p:[number,number])=>result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(r=>pointInRegion(p,r));

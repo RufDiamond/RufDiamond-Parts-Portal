@@ -4422,13 +4422,13 @@
         {
           "figurePartId": "fp-6-17-01",
           "sourceRefNo": "1",
-          "category": "clear-tracing",
-          "evidence": "Read-only original source audit follows separate brushguard, left/right plenum and explicit louver18 targets; no qty-derived copies.",
+          "category": "partial",
+          "evidence": "Original brushguard personally inspected full and4x crop2026-09-09: front/rear bent bars and source-connected crossmember traced as three material regions under the single labelled assembly, preserving open background.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Fine foot edges, welded joins and leader-covered crossing remain partial."
           ]
         },
         {
@@ -4494,73 +4494,73 @@
         {
           "figurePartId": "fp-6-17-07",
           "sourceRefNo": "7",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "image-resolution-limited",
+          "evidence": "Original separately labelled spacer7/8 personally inspected5x crop2026-09-09; each compact cylindrical body traced without leader extensions.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Tiny bore and leader merge; inner walls cannot be completely established at source resolution."
           ]
         },
         {
           "figurePartId": "fp-6-17-08",
           "sourceRefNo": "8",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "image-resolution-limited",
+          "evidence": "Original separately labelled spacer7/8 personally inspected5x crop2026-09-09; each compact cylindrical body traced without leader extensions.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Tiny bore and leader merge; inner walls cannot be completely established at source resolution."
           ]
         },
         {
           "figurePartId": "fp-6-17-09",
           "sourceRefNo": "9",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "partial",
+          "evidence": "Original individually labelled fittings personally inspected5x crop2026-09-09; only directly targeted elbow9 and separate fittings10/11 traced, not adjacent quantity copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Fine bores, collars and line-merged contact boundaries remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-17-10",
           "sourceRefNo": "10",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "partial",
+          "evidence": "Original individually labelled fittings personally inspected5x crop2026-09-09; only directly targeted elbow9 and separate fittings10/11 traced, not adjacent quantity copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Fine bores, collars and line-merged contact boundaries remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-17-11",
           "sourceRefNo": "11",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "partial",
+          "evidence": "Original individually labelled fittings personally inspected5x crop2026-09-09; only directly targeted elbow9 and separate fittings10/11 traced, not adjacent quantity copies.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Fine bores, collars and line-merged contact boundaries remain partial."
           ]
         },
         {
           "figurePartId": "fp-6-17-12",
           "sourceRefNo": "12",
-          "category": "clear-tracing",
-          "evidence": "Original6.17 explicitly labels lower spacer7,upper spacer8 and separate hosefittings9–12. Printed source identity clear; these are not additional plenum regions.",
+          "category": "partial",
+          "evidence": "Original12 leader directly targets front/lower collar; close overlapping upper/outlet parts cannot all be assigned from this raster. Only established collar material traced after removing initial broad candidate.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Trace actual tiny bore/neck exteriors at useful zoom, no envelope over neighboring fittings"
+            "Upper elbow/outlet ownership at overlapping similar fitting remains unresolved; additional source-clear body and fine bore work are pending."
           ]
         },
         {
@@ -4590,13 +4590,13 @@
         {
           "figurePartId": "fp-6-17-15",
           "sourceRefNo": "15",
-          "category": "clear-tracing",
-          "evidence": "Read-only original source audit follows separate brushguard, left/right plenum and explicit louver18 targets; no qty-derived copies.",
+          "category": "partial",
+          "evidence": "Original separately labelled plenums personally inspected full and2x crop2026-09-09; known near-side/end walls traced without filled tray envelopes, grille16 association or foreground cylinder material.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Far walls, close joins and broad pale interior/bottom material require further source-material inspection; current visible-wall regions are not full-plenum coverage."
           ]
         },
         {
@@ -4614,13 +4614,13 @@
         {
           "figurePartId": "fp-6-17-17",
           "sourceRefNo": "17",
-          "category": "clear-tracing",
-          "evidence": "Read-only original source audit follows separate brushguard, left/right plenum and explicit louver18 targets; no qty-derived copies.",
+          "category": "partial",
+          "evidence": "Original separately labelled plenums personally inspected full and2x crop2026-09-09; known near-side/end walls traced without filled tray envelopes, grille16 association or foreground cylinder material.",
           "requiredRegionIds": null,
           "requiredHoleIds": null,
           "requirementsComplete": false,
           "unresolvedDetails": [
-            "Entire visible material, apertures and established repetitions still require contour inspection"
+            "Far walls, close joins and broad pale interior/bottom material require further source-material inspection; current visible-wall regions are not full-plenum coverage."
           ]
         },
         {
