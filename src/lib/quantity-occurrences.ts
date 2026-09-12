@@ -132,15 +132,15 @@ export function splitCalloutByRegions(callout: Callout): Callout[] {
   if (callout.x === null || callout.y === null) return [callout];
   if (!geometry.imageWidth || !geometry.imageHeight) return [callout];
 
-  const toPercent = ([x, y]: [number, number]): [number, number] => [
-    (x / geometry.imageWidth) * 100,
-    (y / geometry.imageHeight) * 100,
+  const toPercent = (point: readonly [number, number]): [number, number] => [
+    (point[0] / geometry.imageWidth) * 100,
+    (point[1] / geometry.imageHeight) * 100,
   ];
 
   return regions.map((region, index) => {
     const percentOuter = region.outer.map(toPercent);
     const centroid = percentOuter.reduce(
-      (sum, [x, y]) => [sum[0] + x, sum[1] + y] as [number, number],
+      (sum, point) => [sum[0] + point[0], sum[1] + point[1]] as [number, number],
       [0, 0] as [number, number],
     );
     const x = centroid[0] / percentOuter.length;
@@ -149,15 +149,15 @@ export function splitCalloutByRegions(callout: Callout): Callout[] {
       .map((hole) => {
         const percentHole = hole.map(toPercent);
         return ` ${percentHole
-          .map(([px, py], pointIndex) =>
-            `${pointIndex === 0 ? "M" : "L"} ${px} ${py}`,
+          .map((point, pointIndex) =>
+            `${pointIndex === 0 ? "M" : "L"} ${point[0]} ${point[1]}`,
           )
           .join(" ")} Z`;
       })
       .join("");
     const maskPath = `${percentOuter
-      .map(([px, py], pointIndex) =>
-        `${pointIndex === 0 ? "M" : "L"} ${px} ${py}`,
+      .map((point, pointIndex) =>
+        `${pointIndex === 0 ? "M" : "L"} ${point[0]} ${point[1]}`,
       )
       .join(" ")} Z${holePaths}`;
 

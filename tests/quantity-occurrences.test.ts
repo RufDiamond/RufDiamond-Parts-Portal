@@ -9,7 +9,7 @@ import {
 } from "@/lib/quantity-occurrences";
 import type { Callout, FigureDetail, FigurePartRow } from "@/types/catalog";
 
-function row(overrides: Partial<FigurePartRow["figurePart"]> & { id: string; qty: number | null }): FigurePartRow {
+function row(overrides: { id: string; qty: number }): FigurePartRow {
   return {
     figurePart: {
       id: overrides.id,
@@ -18,7 +18,6 @@ function row(overrides: Partial<FigurePartRow["figurePart"]> & { id: string; qty
       qty: overrides.qty,
       remarks: null,
       serviceable: true,
-      ...overrides,
     },
     part: {
       id: "part-1",
