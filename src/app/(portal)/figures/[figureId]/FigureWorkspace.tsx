@@ -21,6 +21,10 @@ import {
   type CropRect,
 } from "@/components";
 import { buildDiagramRegions, buildDrawingMarkers } from "@/lib/drawing";
+import {
+  expandCalloutsForQuantity,
+  reportQuantityOccurrences,
+} from "@/lib/quantity-occurrences";
 import { useMachine } from "@/state/MachineContext";
 import { useRequest } from "@/state/RequestContext";
 import { useRequestAddition } from "@/state/useRequestAddition";
@@ -99,6 +103,18 @@ export function FigureWorkspace({
     [rows, callouts],
   );
   const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
+  const quantityReports = useMemo(() => {
+    const reports = reportQuantityOccurrences(
+      rows,
+      expandCalloutsForQuantity(rows, callouts),
+    );
+    return new Map(reports.map((report) => [report.figurePartId, report]));
+  }, [rows, callouts]);
+  const selectedQuantityReview = useMemo(() => {
+    if (!selection) return null;
+    const report = quantityReports.get(selection.figurePartId);
+    return report?.needsReview ? report : null;
+  }, [quantityReports, selection]);
 
   useEffect(() => {
     if (reviewOnly || detail.release) return;
@@ -557,6 +573,14 @@ export function FigureWorkspace({
                 column against the numbers printed on the plate.
               </p>
             ) : null}
+            {selectedQuantityReview ? (
+              <p className={styles.plateNotice} role="status">
+                Quantity review: {selectedQuantityReview.detected} of{" "}
+                {selectedQuantityReview.expected} physical instances mapped for
+                this part. Flagged because Quantity and detected markers do not
+                match.
+              </p>
+            ) : null}
           </div>
 
           {/*
@@ -634,6 +658,7 @@ export function FigureWorkspace({
                 onHoverPart={setHoveredPartId}
                 requestedPartIds={quotePartIds}
                 onToggleRequested={reviewOnly ? undefined : toggleQuote}
+                quantityReports={quantityReports}
               />
             )}
           </div>

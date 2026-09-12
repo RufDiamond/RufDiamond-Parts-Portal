@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
+import type { QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
 import styles from "./PartsTable.module.css";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 import { revealDelta } from "@/lib/diagram-viewport";
@@ -27,6 +28,8 @@ export interface PartsTableProps {
   /** Independent checkbox collection used to prepare a cart addition. */
   requestedPartIds?: ReadonlySet<string>;
   onToggleRequested?: (partId: string) => void;
+  /** Quantity vs detected instance reports keyed by figure-part id. */
+  quantityReports?: ReadonlyMap<string, QuantityOccurrenceReport>;
 }
 
 const NONE: ReadonlySet<string> = new Set();
@@ -52,6 +55,7 @@ export function PartsTable({
   onHoverPart,
   requestedPartIds = NONE,
   onToggleRequested,
+  quantityReports,
 }: PartsTableProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const selectedRow = useRef<HTMLTableRowElement>(null);
@@ -197,6 +201,15 @@ export function PartsTable({
               const { figurePart, part, calloutNumbers } = row;
               const active = selectedPartIds.has(part.id);
               const hovered = part.id === hoveredPartId;
+              const report = quantityReports?.get(figurePart.id);
+              const multiInstance =
+                active &&
+                ((report?.expected ?? 0) > 1 || (report?.detected ?? 0) > 1);
+              const quantityTitle = report?.needsReview
+                ? `Quantity review: ${report.detected} of ${report.expected} instances mapped on the drawing`
+                : figurePart.qty === null
+                  ? "Installed quantity is unspecified in the reviewed assembly reference"
+                  : undefined;
 
               return (
                 <tr
@@ -207,6 +220,8 @@ export function PartsTable({
                   data-hovered={hovered || undefined}
                   data-figure-part-id={figurePart.id}
                   data-pinned={row === pinned || undefined}
+                  data-multi-instance={multiInstance || undefined}
+                  data-quantity-review={report?.needsReview || undefined}
                   tabIndex={selectable && calloutNumbers.length === 0 ? 0 : undefined}
                   onKeyDown={(event) => {
                     if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
@@ -277,7 +292,22 @@ export function PartsTable({
                   </th>
 
                   <td className={styles.description}>{part.description}</td>
-                  <td className={styles.qty}>{figurePart.qty===null?<span title="Installed quantity is unspecified in the reviewed assembly reference">Unspecified</span>:figurePart.qty}</td>
+                  <td
+                    className={styles.qty}
+                    data-quantity-review={report?.needsReview || undefined}
+                    title={quantityTitle}
+                  >
+                    {figurePart.qty === null ? (
+                      <span title={quantityTitle}>Unspecified</span>
+                    ) : (
+                      figurePart.qty
+                    )}
+                    {report?.needsReview ? (
+                      <span className={styles.quantityReview} aria-label={quantityTitle}>
+                        {report.detected}/{report.expected}
+                      </span>
+                    ) : null}
+                  </td>
                   <td className={styles.price}>
                     {formatPrice(part.listPrice, part.currency)}
                   </td>

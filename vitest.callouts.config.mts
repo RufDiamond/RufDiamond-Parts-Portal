@@ -32,6 +32,7 @@ export default defineConfig({
       "tests/api-repository.test.ts",
       "tests/catalog-adapter.test.ts",
       "tests/callout-preview.test.ts",
+      "tests/quantity-occurrences.test.ts",
       "tests/drawing-viewer-pan.test.tsx",
       "tests/drawing-viewer-wheel.test.ts",
       "tests/full-illustration-preview.test.tsx",

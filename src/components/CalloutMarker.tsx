@@ -16,6 +16,8 @@ export interface CalloutMarkerProps {
   pressed?: boolean;
   size?: "sm" | "md";
   title?: string;
+  /** True when several physical instances of this part are selected together. */
+  dataMultiInstance?: boolean;
   onActivate?: () => void;
   onHoverChange?: (hovering: boolean) => void;
 }
@@ -33,6 +35,7 @@ export function CalloutMarker({
   pressed,
   size = "md",
   title,
+  dataMultiInstance,
   onActivate,
   onHoverChange,
 }: CalloutMarkerProps) {
@@ -43,6 +46,7 @@ export function CalloutMarker({
     <button
       type="button"
       data-callout-id={occurrenceId}
+      data-multi-instance={dataMultiInstance || undefined}
       className={`${styles.marker} ${styles[state]} ${size === "sm" ? styles.sm : ""} ${placed ? styles.placed : ""}`}
       style={placed ? { left: `${x}%`, top: `${y}%` } : undefined}
       title={title}

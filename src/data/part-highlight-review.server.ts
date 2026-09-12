@@ -7,6 +7,10 @@ import type { CalloutPreview } from "@/lib/callout-preview";
 import { validateMappingGeometry } from "@rufdiamond/contracts/diagram-geometry";
 import { proposalRegions } from "@/lib/proposal-geometry";
 import type { DiagramMappingDocument } from "@rufdiamond/contracts";
+import {
+  expandCalloutsForQuantity,
+  reportQuantityOccurrences,
+} from "@/lib/quantity-occurrences";
 
 type Point = [number, number];
 interface Artwork {
@@ -193,9 +197,16 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
         version: original.drawing.version + 1,
       } : result.detail.drawing;
       const prefix = review.replacement ? "Local preview — unapproved source-corrected drawing; not for ordering." : result.notice;
+      const quantityMismatches = reportQuantityOccurrences(
+        original.rows,
+        expandCalloutsForQuantity(original.rows, callouts),
+      ).filter((report) => report.needsReview);
+      const quantityNotice = quantityMismatches.length
+        ? ` Quantity review: ${quantityMismatches.length} part${quantityMismatches.length === 1 ? "" : "s"} flagged because detected instances do not match the Quantity column.`
+        : "";
       result = {
         detail: { ...sourceDetail, drawing, callouts },
-        notice: `${prefix ?? "Local preview — unapproved; not for ordering."} ${highlights} component outlines available; untraced parts highlight their reference only.${displayOnly ? ` ${displayOnly} outlines are display-only because their numeric geometry is invalid; use their reference labels.` : ""}${review.warning ? ` ${review.warning}` : ""}`,
+        notice: `${prefix ?? "Local preview — unapproved; not for ordering."} ${highlights} component outlines available; untraced parts highlight their reference only.${displayOnly ? ` ${displayOnly} outlines are display-only because their numeric geometry is invalid; use their reference labels.` : ""}${quantityNotice}${review.warning ? ` ${review.warning}` : ""}`,
       };
     } catch (error) {
       if (!manifestFound && record(error) && error.code === "ENOENT") continue;

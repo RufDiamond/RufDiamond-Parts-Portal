@@ -152,6 +152,24 @@
   text-align: center;
 }
 
+.quantityReview {
+  display: block;
+  margin-top: 2px;
+  font: var(--weight-semibold) var(--text-2xs) / 1.2 var(--font-mono);
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.row[data-quantity-review] .quantityReview,
+.qty[data-quantity-review] .quantityReview {
+  color: var(--ink);
+}
+
+.row[data-multi-instance][data-active] {
+  box-shadow: inset var(--rule-heavy) 0 0 0 var(--select),
+    inset 0 0 0 2px color-mix(in srgb, var(--select) 35%, transparent);
+}
+
 .price {
   text-align: right;
   font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-mono);

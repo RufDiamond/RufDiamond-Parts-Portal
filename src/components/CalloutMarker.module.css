@@ -41,6 +41,12 @@
   color: var(--select-on);
 }
 
+.marker[data-multi-instance].active {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--select) 45%, transparent);
+  outline: 1px solid var(--select-on);
+  outline-offset: -3px;
+}
+
 .muted {
   border-color: var(--rule);
   color: var(--mid);

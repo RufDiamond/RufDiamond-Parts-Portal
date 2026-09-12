@@ -134,6 +134,10 @@ export function DrawingViewer({
     // Once something is selected, everything else steps back.
     return selectedPartIds.size > 0 ? ("muted" as const) : ("default" as const);
   };
+  const instanceCountByPart = markers.reduce((counts, marker) => {
+    counts.set(marker.partId, (counts.get(marker.partId) ?? 0) + 1);
+    return counts;
+  }, new Map<string, number>());
 
   /*
    * The frame no longer carries the drawing's aspect ratio. It used to, which
@@ -401,7 +405,18 @@ export function DrawingViewer({
             y={marker.y}
             state={markerState(marker.partId)}
             pressed={selectedPartIds.has(marker.partId)}
-            title={marker.label}
+            title={
+              (instanceCountByPart.get(marker.partId) ?? 0) > 1 &&
+              selectedPartIds.has(marker.partId)
+                ? `${marker.label ?? `Callout ${marker.number}`} (${instanceCountByPart.get(marker.partId)} instances selected)`
+                : marker.label
+            }
+            dataMultiInstance={
+              selectedPartIds.has(marker.partId) &&
+              (instanceCountByPart.get(marker.partId) ?? 0) > 1
+                ? true
+                : undefined
+            }
             onActivate={
               onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")
                 : onTogglePart ? () => onTogglePart(marker.partId) : undefined

@@ -1,6 +1,7 @@
 import type { DrawingMarker } from "@/components/DrawingViewer";
 import type { ComponentRegion } from "@rufdiamond/contracts";
 import type { Callout, DrawingFile, FigurePartRow } from "@/types/catalog";
+import { materializeQuantityOccurrences } from "@/lib/quantity-occurrences";
 
 /** Renderer projection; deliberately not an approval/persistence document. */
 export interface DiagramRegionDocument {
@@ -15,7 +16,7 @@ export interface DiagramRegionDocument {
 export function buildDiagramRegions(rows: FigurePartRow[], callouts: Callout[], drawing: DrawingFile | null): DiagramRegionDocument | undefined {
   if (!drawing) return undefined;
   const occurrences: DiagramRegionDocument["occurrences"] = [];
-  for (const callout of callouts) {
+  for (const callout of materializeQuantityOccurrences(rows, callouts)) {
     const geometry = callout.componentGeometry;
     const row = rows.find((candidate) => candidate.figurePart.id === callout.figurePartId);
     if (!geometry || !row || row.figurePart.figureId !== callout.figureId || row.figurePart.partId !== row.part.id ||
@@ -29,9 +30,10 @@ export function buildDiagramRegions(rows: FigurePartRow[], callouts: Callout[], 
 /**
  * Turn a figure's callouts into drawing markers.
  *
- * Each marker carries the part id rather than the callout id, which is what
- * makes multi-occurrence highlighting work: two markers for the same part
- * carry the same `partId`, so selecting that part lights both.
+ * Quantity is the expected instance count: callouts are expanded to that many
+ * slots and multi-region geometry is split so each physical instance gets its
+ * own marker. Markers still share `partId` / Ref. No., so selecting the table
+ * row lights every matching instance together.
  */
 export function buildDrawingMarkers(
   rows: FigurePartRow[],
@@ -40,7 +42,7 @@ export function buildDrawingMarkers(
   const rowByFigurePartId = new Map(rows.map((row) => [row.figurePart.id, row]));
 
   const markers: DrawingMarker[] = [];
-  for (const callout of callouts) {
+  for (const callout of materializeQuantityOccurrences(rows, callouts)) {
     // A marker needs both a position to sit at and a part to point at. Either
     // gap keeps it off the plate — and off the customer's screen, since a
     // figure in that state cannot be published.
