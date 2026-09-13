@@ -1954,108 +1954,152 @@
             ],
             [
               [
-                68.4355,
-                62.4375
+                66.71875,
+                61.94444
               ],
               [
-                68.8261,
-                61.743
+                66.875,
+                61.52778
               ],
               [
-                69.92,
-                63.6875
+                67.1875,
+                61.94444
               ],
               [
-                70.3886,
-                63.9652
+                67.96875,
+                63.33333
               ],
               [
-                70.2325,
-                64.9375
+                68.125,
+                63.05556
               ],
               [
-                69.7636,
-                65.6319
+                68.51562,
+                63.33333
               ],
               [
-                69.295,
-                65.2152
+                68.67188,
+                64.16667
               ],
               [
-                69.1386,
-                64.3819
+                68.35938,
+                64.86111
+              ],
+              [
+                67.89062,
+                65.27778
+              ],
+              [
+                67.65625,
+                64.72222
+              ],
+              [
+                67.57812,
+                64.16667
+              ],
+              [
+                66.875,
+                62.91667
               ]
             ],
             [
               [
-                69.4355,
-                64.9375
+                54.96094,
+                76.94444
               ],
               [
-                69.8261,
-                64.243
+                55.3125,
+                76.45833
               ],
               [
-                70.92,
-                66.1875
+                56.5625,
+                78.47222
               ],
               [
-                71.3886,
-                66.4652
+                56.71875,
+                78.19444
               ],
               [
-                71.2325,
-                67.4375
+                57.10937,
+                78.75
               ],
               [
-                70.7636,
-                68.1319
+                57.10937,
+                79.44444
               ],
               [
-                70.295,
-                67.7152
+                56.5625,
+                80.27778
               ],
               [
-                70.1386,
-                66.8819
+                56.09375,
+                80.27778
+              ],
+              [
+                55.78125,
+                79.72222
+              ],
+              [
+                55.85938,
+                79.02778
+              ],
+              [
+                55.0,
+                77.63889
               ]
             ],
             [
               [
-                60.9355,
-                54.4375
+                51.95312,
+                80.55556
               ],
               [
-                61.3261,
-                53.743
+                52.1875,
+                80.0
               ],
               [
-                62.42,
-                55.6875
+                52.5,
+                80.13889
               ],
               [
-                62.8886,
-                55.9652
+                53.4375,
+                81.66667
               ],
               [
-                62.7325,
-                56.9375
+                53.67188,
+                81.38889
               ],
               [
-                62.2636,
-                57.6319
+                53.98437,
+                81.94444
               ],
               [
-                61.795,
-                57.2152
+                53.98437,
+                82.77778
               ],
               [
-                61.6386,
-                56.3819
+                53.4375,
+                83.47222
+              ],
+              [
+                53.04688,
+                83.33333
+              ],
+              [
+                52.73438,
+                82.77778
+              ],
+              [
+                52.8125,
+                82.22222
+              ],
+              [
+                52.03125,
+                81.11111
               ]
             ]
           ],
-          "evidence": "Current frame-assy-2-2 PNG, exact original hash recorded. Printed reference 4 linked to imported row 10-710050-145 (qty 4). Four physical stud instances traced: leader-indicated upper stud plus three identical studs on the fairlead/plate fastener paths. Quantity is the expected instance count. Agent proposal, not RUF Diamond approval.",
+          "evidence": "Source-corrected 2026-09-13 against the exact original frame-assy-2-2 PNG (1280x720). Printed Ref. 4 indicates the upper-right stud. Three matching physical studs are separately visible at the second upper-right fastener path and the two lower-left fastener paths. Their shaft/head contours are traced at actual source positions, not translated from the first stud to satisfy Quantity. Four independent interior probes: (905,437), (867,459), (717,564), (679,589). Prior three offset polygons replaced after visual source inspection; first leader-established contour and all occurrence identities preserved. Unapproved source review.",
           "instanceIds": [
             "co-2-2-0017-physical-1",
             "co-2-2-0017-physical-2",

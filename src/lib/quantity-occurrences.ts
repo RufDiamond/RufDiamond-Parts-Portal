@@ -181,10 +181,19 @@ export function materializeQuantityOccurrences(
 }
 
 /** Selection feedback uses the same resolved instances as the renderer. */
+export function quantityValidationStatus(report: QuantityOccurrenceReport): string {
+  return report.needsReview ? "Needs Review" : report.status === "match" ? "Complete" : "Quantity unspecified";
+}
+
+export function quantityValidationMessage(report: QuantityOccurrenceReport): string {
+  return `Expected quantity: ${report.expected ?? "unspecified"} · Instances found: ${report.detected} · Status: ${quantityValidationStatus(report)}`;
+}
+
 export function quantitySelectionMessage(report: QuantityOccurrenceReport): string {
   const ref = `Ref. ${report.refNumbers.join(", ")}`;
-  if (report.reviewReason) return `${ref}: ${report.detected} mapped pointers highlighted; Quantity ${report.expected ?? "unspecified"}. Review needed — ${report.reviewReason}`;
-  if (report.status === "match") return `${ref}: All ${report.detected} instances highlighted.`;
-  if (report.status === "unspecified") return `${ref}: ${report.detected} mapped instances highlighted. Quantity unspecified.`;
-  return `${ref}: ${report.detected} instances highlighted; Quantity requires ${report.expected}. Review needed — ${report.detected < (report.expected ?? 0) ? "missing locations" : "extra locations"}.`;
+  const validation = `${ref} — ${quantityValidationMessage(report)}.`;
+  if (report.reviewReason) return `${validation} ${report.detected} mapped pointers highlighted. ${report.reviewReason}`;
+  if (report.status === "match") return `${validation} All ${report.detected} instances highlighted.`;
+  if (report.status === "unspecified") return `${validation} ${report.detected} mapped instances highlighted.`;
+  return `${validation} ${report.detected} instances highlighted; ${report.detected < (report.expected ?? 0) ? "missing locations" : "extra locations"}.`;
 }

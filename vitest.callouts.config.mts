@@ -34,6 +34,7 @@ export default defineConfig({
       "tests/callout-preview.test.ts",
       "tests/quantity-occurrences.test.ts",
       "tests/fat-truck-quantity-mapping.test.ts",
+      "tests/catalogue-quantity-selection.test.tsx",
       "tests/drawing-viewer-pan.test.tsx",
       "tests/drawing-viewer-wheel.test.ts",
       "tests/full-illustration-preview.test.tsx",

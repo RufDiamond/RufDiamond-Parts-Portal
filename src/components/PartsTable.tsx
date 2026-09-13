@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CalloutMarker, type CalloutMarkerState } from "./CalloutMarker";
 import { formatPrice } from "@/lib/format";
 import type { Currency, FigurePartRow } from "@/types/catalog";
-import type { QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
+import { quantityValidationMessage, quantityValidationStatus, type QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
 import styles from "./PartsTable.module.css";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 import { revealDelta } from "@/lib/diagram-viewport";
@@ -205,8 +205,8 @@ export function PartsTable({
               const multiInstance =
                 active &&
                 ((report?.expected ?? 0) > 1 || (report?.detected ?? 0) > 1);
-              const quantityTitle = report?.needsReview
-                ? `Quantity review: ${report.detected} of ${report.expected} instances mapped on the drawing${report.reviewReason ? `. ${report.reviewReason}` : ""}`
+              const quantityTitle = report
+                ? `${quantityValidationMessage(report)}${report.reviewReason ? `. ${report.reviewReason}` : ""}`
                 : figurePart.qty === null
                   ? "Installed quantity is unspecified in the reviewed assembly reference"
                   : undefined;
@@ -302,9 +302,9 @@ export function PartsTable({
                     ) : (
                       figurePart.qty
                     )}
-                    {report?.needsReview ? (
+                    {report && (report.needsReview || (report.expected ?? 0) > 1) ? (
                       <span className={styles.quantityReview} aria-label={quantityTitle}>
-                        Review
+                        {quantityValidationStatus(report)}
                       </span>
                     ) : null}
                   </td>

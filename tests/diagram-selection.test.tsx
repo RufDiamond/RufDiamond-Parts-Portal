@@ -105,6 +105,19 @@ test("keyboard table references focus exact rows and select-all quote checkbox h
   expect(rows[1].getAttribute("data-active")).toBe("true");
 });
 
+test("clicking another occurrence of an already-selected part clears that whole group and keeps other parts", async () => {
+  const detail = await fixture();
+  const {container} = render(workspace(detail));
+  const rows = container.querySelectorAll("tbody tr");
+  fireEvent.click(rows[2]); // Same part as row 0, but a different source row.
+  fireEvent.click(rows[1]); // Unrelated part remains selected.
+  const firstOccurrence = within(container.querySelector("figure")!).getAllByRole("button",{name:/Callout 13: A/})[0];
+  fireEvent.click(firstOccurrence);
+  expect(rows[0].hasAttribute("data-active")).toBe(false);
+  expect(rows[2].hasAttribute("data-active")).toBe(false);
+  expect(rows[1].getAttribute("data-active")).toBe("true");
+});
+
 test.each(["fig-cabin-6-1", "fig-filters-1-1"])("legacy %s keeps supplied markers and read-only masks", async (id) => {
   const detail = (await getFigureDetail(id))!;
   const { container } = render(workspace(detail));
@@ -161,3 +174,28 @@ test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instance
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
   assertSelected(screen.getByRole("dialog").querySelector("figure")!);
 });
+
+test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,status:"Needs Review"}])(
+  "Quantity 4 with $found physical instances displays $status without duplicating its row",
+  async ({found,status}) => {
+    const detail = await fixture();
+    detail.rows = [detail.rows[0]];
+    detail.rows[0].figurePart.qty = 4;
+    detail.callouts = Array.from({length:found},(_,i)=>({...detail.callouts[0],id:`physical-${i}`,x:10+i*10,y:20}));
+    const {container} = render(workspace(detail));
+    const rows = container.querySelectorAll("tbody tr");
+    expect(rows).toHaveLength(1);
+    expect(within(rows[0] as HTMLElement).getByText(status)).toBeTruthy();
+    fireEvent.click(rows[0]);
+    const assertValidation = (scope:HTMLElement) => {
+      const message = within(scope).getByRole("status").textContent!;
+      expect(message).toContain("Expected quantity: 4");
+      expect(message).toContain(`Instances found: ${found}`);
+      expect(message).toContain(`Status: ${status}`);
+      expect(scope.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(found);
+    };
+    assertValidation(container.querySelector("figure")!);
+    fireEvent.click(screen.getByRole("button",{name:"Illustration full screen"}));
+    assertValidation(screen.getByRole("dialog").querySelector("figure")!);
+  },
+);

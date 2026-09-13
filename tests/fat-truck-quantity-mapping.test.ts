@@ -37,6 +37,22 @@ test("quantity supplements add all physical pointers through the validated loade
 
 const supplements = ["chassis", "cabin", "engine-electric"];
 
+test("Frame 2.2 Ref 4 maps all four actual studs, excluding the fairlead and blank offsets", async () => {
+  const result = await loadCalloutPreview((await getFigureDetail("fig-frame-assy-2-2"))!, "hosted-review");
+  const callout = result.detail.callouts.find(c=>c.number===4)!;
+  expect(result.detail.rows.find(r=>r.figurePart.id===callout.figurePartId)!.part.partNumber).toBe("10-710050-145");
+  const geometry = callout.componentGeometry!;
+  // Independently inspected source PNG pixels: two upper-right studs and two
+  // lower-left studs. A count-only assertion misses translated, misplaced masks.
+  for (const point of [[905,437],[867,459],[717,564],[679,589]] as [number,number][]) {
+    expect(geometry.regions.filter(r=>pointInRegion(point,r)), `actual stud ${point}`).toHaveLength(1);
+  }
+  for (const point of [[890,460],[900,478],[792,401]] as [number,number][]) {
+    expect(geometry.regions.some(r=>pointInRegion(point,r)), `not a stud ${point}`).toBe(false);
+  }
+  expect(buildDrawingMarkers(result.detail.rows,result.detail.callouts).filter(m=>m.figurePartId===callout.figurePartId)).toHaveLength(4);
+});
+
 test("quantity geometry cannot bind to the old image when replacement evidence is missing", async () => {
   const read = fs.readFile.bind(fs);
   vi.spyOn(fs, "readFile").mockImplementation(async (file, options) => {

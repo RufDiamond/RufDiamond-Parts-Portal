@@ -44,6 +44,12 @@ Shortfalls, excesses, unmapped quantities and documented source identity conflic
 show **Review**. A source conflict remains Review even when its pointer count
 matches Quantity. Zero Quantity with zero pointers is a valid count match.
 
+The selection readout explicitly shows **Expected quantity**, **Instances found**
+and **Status: Complete / Needs Review** in both viewer sizes. Multi-quantity rows
+also show their status below the unchanged table Quantity. Clicking any mapped
+copy toggles the whole selected part group, including when its occurrences are
+associated with more than one source row; unrelated selected parts are retained.
+
 `componentGeometry.instanceIds` identifies which physical component owns each
 region. Equal IDs group disconnected faces into one physical instance. Without
 these IDs, a callout's regions remain one occurrence. The renderer and count
@@ -68,21 +74,35 @@ No coordinates are generated simply to make a count match.
 Finishing those rows requires corrected source art, clearer views or clarified
 part/quantity identities. This pass does not add an unattended vision detector.
 
-## Verification
+## Source correction and verification, 2026-09-13
 
-- 315 frontend tests passed, including all 635 audited rows through the real
-  review loader and 558 active source geometry probes.
+Reinspection found three misplaced Ref. 4 contours in Frame 2.2 despite the
+previous 4/4 pointer count. Both chassis manifests now place those contours on
+the actual second upper-right stud and two lower-left studs. The original
+leader-established first contour and all four instance identities are retained.
+Independent source probes cover `(905,437)`, `(867,459)`, `(717,564)`, `(679,589)`
+in the original 1280×720 PNG and reject the previous offset locations. A matching
+count alone cannot verify the source locations.
+
+- 361 frontend tests passed, including all 635 audited rows through the real
+  review loader and 562 active source geometry probes.
+- Real table/viewer interaction tests select every one of the 268 multi-quantity
+  rows across 40 figures, compare visible pointer counts with the source audit,
+  verify shared numbering, retain one table row, highlight every mapped contour,
+  and clear the entire group when any selected pointer is clicked.
+- Real-catalogue fullscreen selection cases cover 2, 3, 4, 8, 10 and 16 instances.
+  Controlled 3-of-4 and 5-of-4 cases both show Needs Review without adding locations.
 - All supplemental contours load without invalid-geometry fallbacks. Artwork
   hashes, dimensions and part associations are validated; negative tests verify
   that missing replacement evidence and earlier validation failures block additions.
 - Source row reasons survive loading and retain Review when counts match.
 - Browser: Drive 3.1 Ref. 2 selects ten screws together; Cabin 6.17 Ref. 18 selects
   eight louvers together in normal and fullscreen views.
-- Earlier browser checks: Frame 2.2 Ref. 4 selects four studs together; Hydraulic
+- Browser recheck: Frame 2.2 Ref. 4 selects the four source-corrected studs together
+  in normal/fullscreen views and reveals them after zoom. Hydraulic
   4.1 Ref. 14 selects three instances together, retaining alignment through wheel
   zoom. Clicking a selected pointer clears the whole matching selection.
-- TypeScript, production build and ESLint checked locally. ESLint retains one
-  pre-existing hook dependency warning in `useDiagramSelection.ts`.
+- TypeScript, production build and ESLint checked locally with no errors.
 
 Regenerate the coverage CSV and summary from the actual loader:
 

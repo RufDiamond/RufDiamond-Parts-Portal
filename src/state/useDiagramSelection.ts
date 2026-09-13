@@ -34,17 +34,14 @@ export function useDiagramSelection({ figureId, releaseKey, rows }: {
     setState({ figureId, releaseKey, figurePartIds: new Set(), focusFigurePartId: null });
   }
 
-  const figurePartIds = state.figureId === figureId && state.releaseKey === releaseKey
-    ? state.figurePartIds
-    : new Set<string>();
-
   const resolvedIds = useMemo(() => {
     const next = new Set<string>();
-    for (const id of figurePartIds) {
+    if (state.figureId !== figureId || state.releaseKey !== releaseKey) return next;
+    for (const id of state.figurePartIds) {
       if (resolveDiagramSelection(figureId, id, rows)) next.add(id);
     }
     return next;
-  }, [figureId, figurePartIds, rows]);
+  }, [figureId, releaseKey, state.figureId, state.releaseKey, state.figurePartIds, rows]);
 
   const selection = state.focusFigurePartId && resolvedIds.has(state.focusFigurePartId)
     ? resolveDiagramSelection(figureId, state.focusFigurePartId, rows)
@@ -59,8 +56,11 @@ export function useDiagramSelection({ figureId, releaseKey, rows }: {
         return previous;
       }
       const nextIds = new Set(previous.figurePartIds);
-      const removing = nextIds.has(figurePartId);
-      if (removing) nextIds.delete(figurePartId);
+      const partId = rows.find(row=>row.figurePart.id===figurePartId)!.part.id;
+      const groupIds = rows.filter(row=>row.part.id===partId &&
+        resolveDiagramSelection(figureId,row.figurePart.id,rows)).map(row=>row.figurePart.id);
+      const removing = groupIds.some(id=>nextIds.has(id));
+      if (removing) for (const id of groupIds) nextIds.delete(id);
       else nextIds.add(figurePartId);
       const focusFigurePartId = removing
         ? (previous.focusFigurePartId === figurePartId

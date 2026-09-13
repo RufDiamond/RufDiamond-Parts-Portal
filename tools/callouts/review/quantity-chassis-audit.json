@@ -253,7 +253,7 @@
           "baselineMapped": 4,
           "addedInstances": 0,
           "remaining": 0,
-          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+          "reason": "Source-corrected 2026-09-13 against the exact original frame-assy-2-2 PNG (1280x720). Printed Ref. 4 indicates the upper-right stud. Three matching physical studs are separately visible at the second upper-right fastener path and the two lower-left fastener paths. Their shaft/head contours are traced at actual source positions, not translated from the first stud to satisfy Quantity. Four independent interior probes: (905,437), (867,459), (717,564), (679,589). Prior three offset polygons replaced after visual source inspection; first leader-established contour and all occurrence identities preserved. Unapproved source review."
         },
         {
           "ref": 5,
@@ -4692,6 +4692,50 @@
       ],
       "expected": "inside",
       "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 4,
+      "instanceId": "co-2-2-0017-physical-1",
+      "point": [
+        70.703125,
+        60.69444444444444
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 4,
+      "instanceId": "co-2-2-0017-physical-2",
+      "point": [
+        67.734375,
+        63.74999999999999
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 4,
+      "instanceId": "co-2-2-0017-physical-3",
+      "point": [
+        56.015625,
+        78.33333333333333
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 4,
+      "instanceId": "co-2-2-0017-physical-4",
+      "point": [
+        53.04687500000001,
+        81.80555555555556
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
     }
   ]
 }
