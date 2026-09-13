@@ -420,6 +420,25 @@ test("selecting one part paints both legitimate occurrence outlines, and clearin
   expect(cleared).not.toContain("highlightActive");
 });
 
+test("Frame 2.2 Ref 4 qty 4 highlights four stud instances and matches Quantity", async () => {
+  const detail = (await getFigureDetail("fig-frame-assy-2-2"))!;
+  const row = detail.rows.find((item) => item.calloutNumbers.includes(4))!;
+  expect(row.figurePart.qty).toBe(4);
+  const result = await loadCalloutPreview(detail, "hosted-review");
+  const markers = buildDrawingMarkers(result.detail.rows, result.detail.callouts).filter(
+    (marker) => marker.number === 4,
+  );
+  expect(markers).toHaveLength(4);
+  expect(markers.every((marker) => marker.figurePartId === row.figurePart.id)).toBe(true);
+  expect(markers.every((marker) => marker.partId === row.part.id)).toBe(true);
+  const { reportQuantityOccurrences } = await import("@/lib/quantity-occurrences");
+  expect(
+    reportQuantityOccurrences(result.detail.rows, result.detail.callouts).find(
+      (item) => item.figurePartId === row.figurePart.id,
+    ),
+  ).toEqual(expect.objectContaining({ expected: 4, detected: 4, status: "match", needsReview: false }));
+});
+
 test.each(["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json"])(
   "every saved outline in %s survives the real runtime validation and reaches its occurrence", async (filename) => {
     const source = JSON.parse(await fs.readFile(`tools/callouts/review/${filename}`, "utf8")) as {

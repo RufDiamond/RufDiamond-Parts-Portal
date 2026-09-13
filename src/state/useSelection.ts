@@ -20,6 +20,8 @@ export interface Selection {
   selectedRows: FigurePartRow[];
   isSelected: (partId: string) => boolean;
   toggle: (partId: string) => void;
+  /** Add a part to the quote ticks without toggling others off. */
+  ensure: (partId: string) => void;
   selectOnly: (partId: string) => void;
   deselect: (partId: string) => void;
   clear: () => void;
@@ -91,6 +93,16 @@ export function useSelection({ rows, callouts }: UseSelectionOptions): Selection
     });
   }, []);
 
+  /** Tick a part for the cart without clearing other ticks. */
+  const ensure = useCallback((partId: string) => {
+    setSelectedPartIds((current) => {
+      if (current.has(partId)) return current;
+      const next = new Set(current);
+      next.add(partId);
+      return next;
+    });
+  }, []);
+
   const selectOnly = useCallback((partId: string) => {
     setSelectedPartIds(new Set([partId]));
   }, []);
@@ -143,6 +155,7 @@ export function useSelection({ rows, callouts }: UseSelectionOptions): Selection
     selectedRows,
     isSelected,
     toggle,
+    ensure,
     selectOnly,
     deselect,
     clear,

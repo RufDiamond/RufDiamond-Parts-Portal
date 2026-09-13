@@ -48,7 +48,7 @@ test("resolves exact row identity despite duplicate printed references, rejectin
   expect(resolveDiagramSelection("other", "row-a", detail.rows)).toBeNull();
 });
 
-test("label, component, and table focus converge; multiple items stay selected and quotes remain independent", async () => {
+test("label, component, and table focus converge; selecting a part also ticks its cart checkbox", async () => {
   const detail = await fixture();
   const { container } = render(workspace(detail));
   const tableRows = () => container.querySelectorAll("tbody tr");
@@ -64,12 +64,12 @@ test("label, component, and table focus converge; multiple items stay selected a
   expect(tableRows()[1].hasAttribute("data-active")).toBe(false);
   expect(regions()[0].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[2].getAttribute("aria-pressed")).toBe("true");
-  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(false);
-  fireEvent.click(screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0]);
+  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(tableRows()[1]);
   expect(regions()[1].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[0].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[2].getAttribute("aria-pressed")).toBe("true");
+  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.keyDown(regions()[0], { key: "Enter" });
   fireEvent.keyDown(regions()[0], { key: " " });
   fireEvent.mouseLeave(figure);
@@ -80,8 +80,9 @@ test("label, component, and table focus converge; multiple items stay selected a
   expect(regions()[0].getAttribute("aria-pressed")).toBe("false");
   expect(regions()[1].getAttribute("aria-pressed")).toBe("false");
   expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
+  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
-  expect(screen.getByRole("button", { name: /Check cart · 1/ })).toBeTruthy();
+  expect(screen.getByRole("button", { name: /Check cart · 2/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
   const full = screen.getByRole("dialog");
   fireEvent.keyDown(full.querySelectorAll('path[role="button"]')[1], { key: "Enter" });

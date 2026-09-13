@@ -172,6 +172,9 @@ describe("quantity occurrences", () => {
     expect(split[0].x).toBe(12);
     expect(split[1].x).toBe(65);
     expect(materializeQuantityOccurrences([row({ id: "fp-4", qty: 2 })], [base])).toHaveLength(2);
+    expect(
+      reportQuantityOccurrences([row({ id: "fp-4", qty: 2 })], [base])[0],
+    ).toEqual(expect.objectContaining({ detected: 2, status: "match", needsReview: false }));
   });
 
   test("applyCalloutPreview zips Quantity-matching proposal markers onto every slot", () => {

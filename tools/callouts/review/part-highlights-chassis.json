@@ -461,9 +461,111 @@
                 70.625,
                 61.25
               ]
+            ],
+            [
+              [
+                68.4355,
+                62.4375
+              ],
+              [
+                68.8261,
+                61.743
+              ],
+              [
+                69.92,
+                63.6875
+              ],
+              [
+                70.3886,
+                63.9652
+              ],
+              [
+                70.2325,
+                64.9375
+              ],
+              [
+                69.7636,
+                65.6319
+              ],
+              [
+                69.295,
+                65.2152
+              ],
+              [
+                69.1386,
+                64.3819
+              ]
+            ],
+            [
+              [
+                69.4355,
+                64.9375
+              ],
+              [
+                69.8261,
+                64.243
+              ],
+              [
+                70.92,
+                66.1875
+              ],
+              [
+                71.3886,
+                66.4652
+              ],
+              [
+                71.2325,
+                67.4375
+              ],
+              [
+                70.7636,
+                68.1319
+              ],
+              [
+                70.295,
+                67.7152
+              ],
+              [
+                70.1386,
+                66.8819
+              ]
+            ],
+            [
+              [
+                60.9355,
+                54.4375
+              ],
+              [
+                61.3261,
+                53.743
+              ],
+              [
+                62.42,
+                55.6875
+              ],
+              [
+                62.8886,
+                55.9652
+              ],
+              [
+                62.7325,
+                56.9375
+              ],
+              [
+                62.2636,
+                57.6319
+              ],
+              [
+                61.795,
+                57.2152
+              ],
+              [
+                61.6386,
+                56.3819
+              ]
             ]
           ],
-          "evidence": "Current frame-assy-2-2 PNG, exact original hash recorded. Printed reference 4 linked to its same-figure imported row 10-710050-145; manually followed leader and traced actual component. Leader 4 terminates on the upper-right exploded threaded stud; only this explicit occurrence is traced. Agent proposal, not RUF Diamond approval."
+          "evidence": "Current frame-assy-2-2 PNG, exact original hash recorded. Printed reference 4 linked to imported row 10-710050-145 (qty 4). Four physical stud instances traced: leader-indicated upper stud plus three identical studs on the fairlead/plate fastener paths. Quantity is the expected instance count. Agent proposal, not RUF Diamond approval."
         },
         {
           "calloutId": "co-2-2-0018",
@@ -1234,7 +1336,7 @@
           "evidence": "Current frame-assy-2-2 PNG, exact original hash recorded. Printed reference 12 linked to its same-figure imported row 12-210000-122; manually followed leader and traced actual component. Leader 12 terminates on the upper-right flanged nut. Agent proposal, not RUF Diamond approval."
         }
       ],
-      "notes": "All 12 visible labels were manually followed to their physical targets. Reference 17 is absent and remains withheld. Only explicit leader-target occurrences are traced; duplicate hardware contours remain unassociated. Exterior outlines preserve source geometry, but internal holes in complex solid components are not subtracted. Every outline and part association remains unapproved."
+      "notes": "All 12 visible labels were manually followed to their physical targets. Reference 17 is absent and remains withheld. Only explicit leader-target occurrences are traced; duplicate hardware contours remain unassociated. Exterior outlines preserve source geometry, but internal holes in complex solid components are not subtracted. Every outline and part association remains unapproved. Ref 4 qty 4: four stud instance outlines supplied for quantity-driven highlighting."
     },
     {
       "figureId": "fig-tire-wheel-5-1",

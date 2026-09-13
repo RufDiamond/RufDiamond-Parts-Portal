@@ -32,15 +32,21 @@ export function isPositionedCallout(callout: Callout): boolean {
   return callout.x !== null && callout.y !== null;
 }
 
-/** Count of placed markers for one figure-part row. */
+/** Count of placed physical instances for one figure-part row. */
 export function countDetectedOccurrences(
   callouts: readonly Callout[],
   figurePartId: string,
 ): number {
-  return callouts.filter(
-    (callout) =>
-      callout.figurePartId === figurePartId && isPositionedCallout(callout),
-  ).length;
+  let total = 0;
+  for (const callout of callouts) {
+    if (callout.figurePartId !== figurePartId || !isPositionedCallout(callout)) {
+      continue;
+    }
+    // Multi-region outlines are distinct physical instances of the same Ref. No.
+    const regions = callout.componentGeometry?.regions?.length ?? 0;
+    total += regions > 1 ? regions : 1;
+  }
+  return total;
 }
 
 export function quantityOccurrenceStatus(
@@ -58,11 +64,13 @@ export function reportQuantityOccurrences(
   rows: readonly FigurePartRow[],
   callouts: readonly Callout[],
 ): QuantityOccurrenceReport[] {
+  const instances = materializeQuantityOccurrences(rows, callouts);
   return rows.map((row) => {
-    const slots = callouts.filter(
+    const forPart = instances.filter(
       (callout) => callout.figurePartId === row.figurePart.id,
-    ).length;
-    const detected = countDetectedOccurrences(callouts, row.figurePart.id);
+    );
+    const detected = forPart.filter(isPositionedCallout).length;
+    const slots = Math.max(forPart.length, row.figurePart.qty ?? forPart.length);
     const expected = row.figurePart.qty;
     const status = quantityOccurrenceStatus(expected, detected);
     return {

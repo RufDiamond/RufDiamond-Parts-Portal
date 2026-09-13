@@ -91,12 +91,19 @@ export function FigureWorkspace({
   const { lines } = useRequest();
   const addition = useRequestAddition(figure.id);
 
-  const { selectedPartIds: quotePartIds, toggle: toggleQuote, hoveredPartId, setHoveredPartId } =
+  const { selectedPartIds: quotePartIds, toggle: toggleQuote, ensure: ensureQuoted, hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
   const { selection, activation, selectedPartIds, selectPart, clear } = useDiagramSelection({
     figureId: figure.id, rows,
     releaseKey: `${variant.catalogRevision}/${drawing?.id}/${drawing?.version}/${drawing?.storagePath}/${reviewOnly}`,
   });
+
+  // Selecting a marker/row also ticks that part for the cart so Add to cart /
+  // Request a quote have something to take. Clearing highlight leaves ticks.
+  useEffect(() => {
+    if (reviewOnly) return;
+    for (const partId of selectedPartIds) ensureQuoted(partId);
+  }, [ensureQuoted, reviewOnly, selectedPartIds]);
 
   const markers = useMemo(
     () => buildDrawingMarkers(rows, callouts),
@@ -401,9 +408,8 @@ export function FigureWorkspace({
           type="button"
           className={styles.button}
           /*
-           * Takes the ticked parts with it. Selecting a part no longer puts it
-           * on the cart, so jumping straight to the request list would have
-           * arrived empty — which is exactly what it did.
+           * Takes the ticked parts with it. Selecting a marker or row also
+           * ticks that part, so Request a quote can leave with a cart.
            */
           onClick={() => { void addSelectedToCart(true); }}
           title="Add anything ticked, then draw up the request"
