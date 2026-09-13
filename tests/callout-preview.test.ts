@@ -452,11 +452,12 @@ describe("loadCalloutPreview", () => {
     }
 
     expect({ newPositions, fullyPositioned, partial, withheld, noUsableProposal }).toEqual({
-      newPositions: 538,
+      // Accessories 12.1 now has its PDF-established Poclain tool location.
+      newPositions: 539,
       fullyPositioned: 37,
-      partial: 5,
+      partial: 6,
       withheld: 1,
-      noUsableProposal: 1,
+      noUsableProposal: 0,
     });
   });
 });

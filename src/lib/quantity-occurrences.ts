@@ -26,10 +26,13 @@ export interface QuantityOccurrenceReport {
   slots: number;
   status: QuantityOccurrenceStatus;
   needsReview: boolean;
+  reviewReason?: string;
 }
 
 export function isPositionedCallout(callout: Callout): boolean {
-  return callout.x !== null && callout.y !== null;
+  return [callout.x, callout.y].every((value) =>
+    typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100,
+  );
 }
 
 /** Count of placed physical instances for one figure-part row. */
@@ -37,16 +40,9 @@ export function countDetectedOccurrences(
   callouts: readonly Callout[],
   figurePartId: string,
 ): number {
-  let total = 0;
-  for (const callout of callouts) {
-    if (callout.figurePartId !== figurePartId || !isPositionedCallout(callout)) {
-      continue;
-    }
-    // Multi-region outlines are distinct physical instances of the same Ref. No.
-    const regions = callout.componentGeometry?.regions?.length ?? 0;
-    total += regions > 1 ? regions : 1;
-  }
-  return total;
+  return callouts.flatMap(splitCalloutByRegions).filter((callout) =>
+    callout.figurePartId === figurePartId && isPositionedCallout(callout),
+  ).length;
 }
 
 export function quantityOccurrenceStatus(
@@ -54,6 +50,7 @@ export function quantityOccurrenceStatus(
   detected: number,
 ): QuantityOccurrenceStatus {
   if (expected === null || expected === undefined) return "unspecified";
+  if (expected === 0 && detected === 0) return "match";
   if (detected === 0) return "unmapped";
   if (detected < expected) return "shortfall";
   if (detected > expected) return "excess";
@@ -81,7 +78,8 @@ export function reportQuantityOccurrences(
       detected,
       slots,
       status,
-      needsReview: status === "shortfall" || status === "excess",
+      needsReview: !!row.mappingReviewReason || status === "shortfall" || status === "excess" || status === "unmapped",
+      ...(row.mappingReviewReason ? { reviewReason: row.mappingReviewReason } : {}),
     };
   });
 }
@@ -129,63 +127,49 @@ export function expandCalloutsForQuantity(
 }
 
 /**
- * When one callout carries several component regions, treat each region as a
- * physical instance: emit one marker per region (shared Ref. No.) so Quantity
- * instances are independently addressable on the plate.
+ * Project source-established physical instances to pointers sharing a Ref. No.
+ * Multiple contours of a single component remain one physical instance.
  */
 export function splitCalloutByRegions(callout: Callout): Callout[] {
   const geometry = callout.componentGeometry;
-  const regions = geometry?.regions;
-  if (!geometry || !regions || regions.length <= 1) return [callout];
-  if (callout.x === null || callout.y === null) return [callout];
-  if (!geometry.imageWidth || !geometry.imageHeight) return [callout];
+  if (!geometry?.regions.length) return [callout];
+  if (!Number.isFinite(geometry.imageWidth) || geometry.imageWidth <= 0 ||
+      !Number.isFinite(geometry.imageHeight) || geometry.imageHeight <= 0) return [callout];
 
-  const toPercent = (point: readonly [number, number]): [number, number] => [
-    (point[0] / geometry.imageWidth) * 100,
-    (point[1] / geometry.imageHeight) * 100,
-  ];
+  // Disconnected visible faces can belong to ONE component. Only explicit
+  // source identities establish separate physical instances, never polygon count.
+  const identities = geometry.instanceIds;
+  if (identities && (identities.length !== geometry.regions.length || identities.some((id) => !id.trim()))) return [callout];
+  const groups = new Map<string, typeof geometry.regions>();
+  geometry.regions.forEach((region, index) => {
+    const id = identities?.[index] ?? callout.id;
+    groups.set(id, [...(groups.get(id) ?? []), region]);
+  });
+  if (groups.size === 1 && isPositionedCallout(callout)) return [callout];
 
-  return regions.map((region, index) => {
-    const percentOuter = region.outer.map(toPercent);
-    const centroid = percentOuter.reduce(
-      (sum, point) => [sum[0] + point[0], sum[1] + point[1]] as [number, number],
-      [0, 0] as [number, number],
-    );
-    const x = centroid[0] / percentOuter.length;
-    const y = centroid[1] / percentOuter.length;
-    const holePaths = (region.holes ?? [])
-      .map((hole) => {
-        const percentHole = hole.map(toPercent);
-        return ` ${percentHole
-          .map((point, pointIndex) =>
-            `${pointIndex === 0 ? "M" : "L"} ${point[0]} ${point[1]}`,
-          )
-          .join(" ")} Z`;
-      })
-      .join("");
-    const maskPath = `${percentOuter
-      .map((point, pointIndex) =>
-        `${pointIndex === 0 ? "M" : "L"} ${point[0]} ${point[1]}`,
-      )
-      .join(" ")} Z${holePaths}`;
+  const toPercent = ([x, y]: readonly [number, number]): [number, number] =>
+    [x / geometry.imageWidth * 100, y / geometry.imageHeight * 100];
+  const ringPath = (points: readonly (readonly [number, number])[]) =>
+    points.map(toPercent).map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ") + " Z";
 
+  return Array.from(groups, ([identity, regions], index) => {
+    const points = regions.flatMap((region) => region.outer).map(toPercent);
+    const x = points.reduce((sum, point) => sum + point[0], 0) / points.length;
+    const y = points.reduce((sum, point) => sum + point[1], 0) / points.length;
     return {
       ...callout,
-      id: index === 0 ? callout.id : `${callout.id}__region-${index + 1}`,
-      // Keep the printed label on the first instance; siblings use the
-      // component centroid so each physical occurrence is independently lit.
-      x: index === 0 ? callout.x : x,
-      y: index === 0 ? callout.y : y,
-      maskPath,
-      componentGeometry: {
-        ...geometry,
-        regions: [region],
-      },
+      id: index === 0 ? callout.id : `${callout.id}__instance-${encodeURIComponent(identity)}`,
+      // Keep the established printed label; every additional instance gets its
+      // own component-relative pointer, with the same Ref. No. and part identity.
+      x: index === 0 && isPositionedCallout(callout) ? callout.x : x,
+      y: index === 0 && isPositionedCallout(callout) ? callout.y : y,
+      maskPath: regions.flatMap((region) => [region.outer, ...region.holes]).map(ringPath).join(" "),
+      componentGeometry: { ...geometry, regions, instanceIds: regions.map(() => identity) },
     };
   });
 }
 
-/** Expand multi-region geometry first, then fill remaining Quantity slots. */
+/** Resolve physical instances first, then fill remaining unpositioned Quantity slots. */
 export function materializeQuantityOccurrences(
   rows: readonly FigurePartRow[],
   callouts: readonly Callout[],
@@ -194,4 +178,13 @@ export function materializeQuantityOccurrences(
     rows,
     callouts.flatMap(splitCalloutByRegions),
   );
+}
+
+/** Selection feedback uses the same resolved instances as the renderer. */
+export function quantitySelectionMessage(report: QuantityOccurrenceReport): string {
+  const ref = `Ref. ${report.refNumbers.join(", ")}`;
+  if (report.reviewReason) return `${ref}: ${report.detected} mapped pointers highlighted; Quantity ${report.expected ?? "unspecified"}. Review needed — ${report.reviewReason}`;
+  if (report.status === "match") return `${ref}: All ${report.detected} instances highlighted.`;
+  if (report.status === "unspecified") return `${ref}: ${report.detected} mapped instances highlighted. Quantity unspecified.`;
+  return `${ref}: ${report.detected} instances highlighted; Quantity requires ${report.expected}. Review needed — ${report.detected < (report.expected ?? 0) ? "missing locations" : "extra locations"}.`;
 }

@@ -137,3 +137,27 @@ test("focus resets on figure or source release handoff without resurrecting prio
   view.rerender(<Probe id="other-figure" release="2" />);
   expect(screen.getByText("none")).toBeTruthy();
 });
+
+
+test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instances in normal and fullscreen views", async (qty) => {
+  const detail = await fixture();
+  detail.rows = [detail.rows[0]];
+  detail.rows[0].figurePart.qty = qty;
+  detail.callouts = Array.from({ length: qty }, (_, i) => ({ ...detail.callouts[0],
+    id: `physical-${i}`, x: 5 + i * 8, y: 40,
+    componentGeometry: { ...detail.callouts[0].componentGeometry!, regions: [{ id: `r-${i}`,
+      outer: [[10+i*80,20],[60+i*80,20],[60+i*80,70],[10+i*80,70]], holes: [] }] },
+  }));
+  const { container } = render(workspace(detail));
+  fireEvent.click(container.querySelector("tbody tr")!);
+  const assertSelected = (scope: HTMLElement) => {
+    const markers = scope.querySelectorAll('button[data-callout-id]');
+    expect(markers).toHaveLength(qty);
+    for (const marker of markers) { expect(marker.getAttribute("aria-pressed")).toBe("true"); expect(marker.textContent).toBe("13"); }
+    expect(scope.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(qty);
+    expect(within(scope).getByRole("status").textContent).toContain(`All ${qty} instances highlighted`);
+  };
+  assertSelected(container.querySelector("figure")!);
+  fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
+  assertSelected(screen.getByRole("dialog").querySelector("figure")!);
+});

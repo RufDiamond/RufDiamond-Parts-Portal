@@ -1,7 +1,7 @@
 import type { DrawingMarker } from "@/components/DrawingViewer";
 import type { ComponentRegion } from "@rufdiamond/contracts";
 import type { Callout, DrawingFile, FigurePartRow } from "@/types/catalog";
-import { materializeQuantityOccurrences } from "@/lib/quantity-occurrences";
+import { isPositionedCallout, materializeQuantityOccurrences } from "@/lib/quantity-occurrences";
 
 /** Renderer projection; deliberately not an approval/persistence document. */
 export interface DiagramRegionDocument {
@@ -46,7 +46,7 @@ export function buildDrawingMarkers(
     // A marker needs both a position to sit at and a part to point at. Either
     // gap keeps it off the plate — and off the customer's screen, since a
     // figure in that state cannot be published.
-    if (callout.x === null || callout.y === null) continue;
+    if (!isPositionedCallout(callout)) continue;
     if (callout.figurePartId === null) continue;
 
     const row = rowByFigurePartId.get(callout.figurePartId);
@@ -56,8 +56,8 @@ export function buildDrawingMarkers(
       id: callout.id,
       figurePartId: row.figurePart.id,
       number: callout.number,
-      x: callout.x,
-      y: callout.y,
+      x: callout.x!,
+      y: callout.y!,
       partId: row.part.id,
       // Absent wherever the part's outline could not be recovered from the
       // flat plate, which is the common case. Highlighting degrades to the
@@ -67,4 +67,32 @@ export function buildDrawingMarkers(
     });
   }
   return markers;
+}
+
+/** Spread selected labels in display pixels; source anchors never move. */
+export function layoutSelectedMarkers(
+  markers: readonly DrawingMarker[], selectedPartIds: ReadonlySet<string>, width: number, height: number,
+): Map<string, { x: number; y: number }> {
+  const positions = new Map<string, { x: number; y: number }>();
+  if (width <= 0 || height <= 0) return positions;
+  const placed: { x: number; y: number }[] = [];
+  const gap = 40;
+  for (const marker of markers) {
+    if (!selectedPartIds.has(marker.partId)) continue;
+    const anchor = { x: marker.x * width / 100, y: marker.y * height / 100 };
+    let position = anchor;
+    search: for (let radius = 0; radius <= markers.length; radius++) {
+      for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+        const candidate = { x: anchor.x + dx * gap, y: anchor.y + dy * gap };
+        if (candidate.x < 18 || candidate.x > width - 18 || candidate.y < 18 || candidate.y > height - 18) continue;
+        if (placed.some((other) => Math.abs(other.x - candidate.x) < gap && Math.abs(other.y - candidate.y) < gap)) continue;
+        position = candidate;
+        break search;
+      }
+    }
+    placed.push(position);
+    positions.set(marker.id, { x: position.x / width * 100, y: position.y / height * 100 });
+  }
+  return positions;
 }

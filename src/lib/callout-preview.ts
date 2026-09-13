@@ -85,8 +85,9 @@ export function applyCalloutPreview(
     const markers = proposalsByNumber.get(number) ?? [];
     const originals = callouts.filter((callout) => !isQuantitySlot(callout));
     // Prefer an exact multi-instance zip when proposal count matches every
-    // quantity slot. Otherwise keep the established 1:1 / N:N pairing on the
-    // imported callouts and leave quantity-expansion slots for review.
+    // quantity slot. Keep partial observations for a single established row,
+    // leaving its remaining quantity slots for review. Ambiguous repeated
+    // imported references still require an exact pairing.
     // Never place onto quantity-only leftovers when every imported callout for
     // this number is already positioned — that would invent a duplicate marker.
     const targets =
@@ -94,6 +95,9 @@ export function applyCalloutPreview(
         ? originals
         : markers.length === callouts.length && originals.length > 0
           ? callouts
+          : originals.length === 1 && markers.length > 1 && markers.length < callouts.length &&
+              new Set(callouts.map((callout) => callout.figurePartId)).size === 1
+            ? callouts.slice(0, markers.length)
           : [];
 
     if (

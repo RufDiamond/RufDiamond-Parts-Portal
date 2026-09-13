@@ -28,6 +28,7 @@ interface Annotation {
   y: number;
   polygons: Point[][];
   holes?: Point[][][];
+  instanceIds?: string[];
   evidence: string;
 }
 interface FigureReview {
@@ -36,6 +37,7 @@ interface FigureReview {
   annotations: Annotation[];
   notes: string;
   warning?: string;
+  rowReviews?: { figurePartId: string; partNumber: string; reason: string }[];
   replacement?: Artwork & { source: {
     pdfSha256: string; physicalPage: number; renderWidth: number; renderHeight: number;
     crop: { x: number; y: number; width: number; height: number };
@@ -66,6 +68,8 @@ function annotation(value: unknown): value is Annotation {
     typeof value.figurePartId === "string" && typeof value.partNumber === "string" &&
     Number.isInteger(value.number) && percent(value.x) && percent(value.y) &&
     Array.isArray(value.polygons) && value.polygons.length <= 100 && value.polygons.every(polygon) &&
+    (value.instanceIds === undefined || (Array.isArray(value.instanceIds) && value.instanceIds.length === value.polygons.length &&
+      value.instanceIds.every((id) => typeof id === "string" && id.trim().length > 0))) &&
     (value.holes === undefined || (Array.isArray(value.holes) && value.holes.length === value.polygons.length &&
       value.holes.every((holes) => Array.isArray(holes) && holes.length <= 16 && holes.every(polygon)))) &&
     typeof value.evidence === "string" && value.evidence.trim().length > 0;
@@ -111,7 +115,11 @@ function pathFor(polygons: Point[][]): string | null {
 /** Called only after the development/explicit hosted-review surface gate. */
 export async function addPartHighlightReview(original: FigureDetail, base: CalloutPreview): Promise<CalloutPreview> {
   let result = base;
-  for (const filename of ["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json"]) {
+  let validationFailed = false;
+  for (const filename of ["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json",
+    "part-highlights-quantity-chassis.json", "part-highlights-quantity-cabin.json", "part-highlights-quantity-engine-electric.json"]) {
+    const supplement = filename.startsWith("part-highlights-quantity-");
+    if (supplement && validationFailed) continue;
     let manifestFound = false;
     try {
       const bytes = await fs.readFile(path.join(ROOT, "tools/callouts/review", filename));
@@ -129,14 +137,29 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
         !entry.annotations.every(annotation) || typeof entry.notes !== "string" ||
         (entry.warning !== undefined && typeof entry.warning !== "string")) throw new Error("invalid outline evidence");
       const review = entry as unknown as FigureReview;
+      if (entry.rowReviews !== undefined && (!supplement || !Array.isArray(entry.rowReviews) ||
+        !entry.rowReviews.every((item) => record(item) && typeof item.figurePartId === "string" &&
+          typeof item.partNumber === "string" && typeof item.reason === "string" && item.reason.trim().length > 0 &&
+          original.rows.some((row) => row.figurePart.id === item.figurePartId && row.part.partNumber === item.partNumber)) ||
+        new Set(review.rowReviews!.map(item => item.figurePartId)).size !== review.rowReviews!.length)) {
+        throw new Error("invalid row review evidence");
+      }
       if (!original.drawing || review.original.path !== `public${original.drawing.storagePath}` ||
         review.original.width !== original.drawing.width || review.original.height !== original.drawing.height) throw new Error("drawing identity mismatch");
       await verifyArtwork(review.original);
       if (entry.replacement !== undefined) {
-        if (filename !== "source-corrections.json" || !replacement(entry.replacement) ||
+        if (!replacement(entry.replacement) ||
+          (filename !== "source-corrections.json" && (!supplement ||
+            result.detail.drawing?.storagePath !== entry.replacement.path.slice("public".length) ||
+            result.detail.drawing.width !== entry.replacement.width || result.detail.drawing.height !== entry.replacement.height)) ||
           entry.replacement.path === review.original.path ||
           original.callouts.some((item) => item.x !== null || item.y !== null || item.maskPath !== null)) throw new Error("replacement evidence mismatch");
         await verifyArtwork(entry.replacement);
+      }
+      const sourceArtwork = review.replacement ?? review.original;
+      if (supplement && (result.detail.drawing?.storagePath !== sourceArtwork.path.slice("public".length) ||
+        result.detail.drawing.width !== sourceArtwork.width || result.detail.drawing.height !== sourceArtwork.height)) {
+        throw new Error("supplement artwork mismatch");
       }
       if (original.figure.id === "fig-cabin-6-13" ||
         (original.figure.id === "fig-frame-assy-2-1" && !review.replacement)) throw new Error("unresolved source conflict");
@@ -151,8 +174,11 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
         byId.set(item.calloutId, item);
       }
       // Never carry geometry across artwork versions, including earlier preview overlays.
-      const sourceDetail = review.replacement ? original : result.detail;
-      const sourceArtwork = review.replacement ?? review.original;
+      const sourceDetail = review.replacement && !supplement ? original : result.detail;
+      const rows = sourceDetail.rows.map(row => {
+        const evidence = review.rowReviews?.find(item => item.figurePartId === row.figurePart.id);
+        return evidence ? { ...row, mappingReviewReason: evidence.reason } : row;
+      });
       // This review-only binding is computed from the verified source and exact
       // associations, never supplied by the browser or treated as approval.
       const binding = digest(Buffer.from(JSON.stringify({
@@ -185,6 +211,7 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
         return { ...legacy, componentGeometry: {
           drawingPath: sourceArtwork.path.slice("public".length), drawingSha256: sourceArtwork.sha256,
           imageWidth: sourceArtwork.width, imageHeight: sourceArtwork.height, regions,
+          instanceIds: item.instanceIds,
         } };
       });
       const highlights = callouts.filter((item) => item.maskPath !== null).length;
@@ -196,20 +223,23 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
         width: review.replacement.width, height: review.replacement.height,
         version: original.drawing.version + 1,
       } : result.detail.drawing;
-      const prefix = review.replacement ? "Local preview — unapproved source-corrected drawing; not for ordering." : result.notice;
+      // Recompute from final geometry: the label-only pass may have reported
+      // shortfalls that the physical instance contours now resolve.
+      const prefix = review.replacement ? `Local preview — unapproved source-corrected drawing; not for ordering.${validationFailed ? " Part highlights unavailable: source or mapping validation failed." : ""}` : result.notice?.replace(/ \d+ component outlines available; untraced parts highlight their reference only\./g, "").replace(/ Quantity review: \d+ parts? flagged (?:because detected instances do not match the Quantity column|for count or source review)\./g, "");
       const quantityMismatches = reportQuantityOccurrences(
-        original.rows,
-        expandCalloutsForQuantity(original.rows, callouts),
+        rows,
+        expandCalloutsForQuantity(rows, callouts),
       ).filter((report) => report.needsReview);
       const quantityNotice = quantityMismatches.length
-        ? ` Quantity review: ${quantityMismatches.length} part${quantityMismatches.length === 1 ? "" : "s"} flagged because detected instances do not match the Quantity column.`
+        ? ` Quantity review: ${quantityMismatches.length} part${quantityMismatches.length === 1 ? "" : "s"} flagged for count or source review.`
         : "";
       result = {
-        detail: { ...sourceDetail, drawing, callouts },
+        detail: { ...sourceDetail, rows, drawing, callouts },
         notice: `${prefix ?? "Local preview — unapproved; not for ordering."} ${highlights} component outlines available; untraced parts highlight their reference only.${displayOnly ? ` ${displayOnly} outlines are display-only because their numeric geometry is invalid; use their reference labels.` : ""}${quantityNotice}${review.warning ? ` ${review.warning}` : ""}`,
       };
     } catch (error) {
       if (!manifestFound && record(error) && error.code === "ENOENT") continue;
+      validationFailed = true;
       result = { ...result, notice: `${result.notice ?? "Local preview — unapproved; not for ordering."} Part highlights unavailable: source or mapping validation failed.` };
     }
   }

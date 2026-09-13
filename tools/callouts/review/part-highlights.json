@@ -8772,7 +8772,7 @@
           "evidence": "Printed14 leader targets upright rounded door-latch cover62-00829. Thin strap and two visible end holes traced. Other similar strap not assigned by quantity; fine lower aperture boundary approximate/source-resolution limited. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
-      "notes": "Task10c adds clear7 plate/aperture and14 thin strap/end apertures. Door/ladder cropped extents, cables and inset20–22 still require separate contour work; no filled envelopes or grey-inset shading."
+      "notes": "Task10c adds clear7 plate/aperture and14 thin strap/end apertures. Door/ladder cropped extents, cables and inset20\u201322 still require separate contour work; no filled envelopes or grey-inset shading."
     },
     {
       "figureId": "fig-cabin-6-7",
@@ -11232,7 +11232,7 @@
               ]
             ]
           ],
-          "evidence": "Original3 complete source-visible ladder exterior and clear upper opening traced, preserving open space below the cross rung through concave outer boundary. Printed ladder top is at y15, not cropped. Cubic mounts and tubular feet retained; small mounting bores/serrated rung detail remain partial. Left rail outer edge remeasured from original rows200/220/244/270/300/311 (x211/213/215–216/218–219/221–222/221–222) to remove initial background overfill. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Original3 complete source-visible ladder exterior and clear upper opening traced, preserving open space below the cross rung through concave outer boundary. Printed ladder top is at y15, not cropped. Cubic mounts and tubular feet retained; small mounting bores/serrated rung detail remain partial. Left rail outer edge remeasured from original rows200/220/244/270/300/311 (x211/213/215\u2013216/218\u2013219/221\u2013222/221\u2013222) to remove initial background overfill. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         },
         {
           "calloutId": "co-6-8-0222",
@@ -20223,10 +20223,10 @@
               ]
             ]
           ],
-          "evidence": "Printed8 leader targets rear-left holder86-00184. Distinct bent sheet/uprights traced, not mirrored/copy of5–7. Small mounting apertures remain partial, detached hardware excluded. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Printed8 leader targets rear-left holder86-00184. Distinct bent sheet/uprights traced, not mirrored/copy of5\u20137. Small mounting apertures remain partial, detached hardware excluded. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
-      "notes": "Task10c adds individually labelled5–8 holders with distinct PNs; partial small holes/folds. Quantities do not establish additional copies."
+      "notes": "Task10c adds individually labelled5\u20138 holders with distinct PNs; partial small holes/folds. Quantities do not establish additional copies."
     },
     {
       "figureId": "fig-hydraulic-4-1",
@@ -20680,9 +20680,71 @@
                 26.1719,
                 56.8056
               ]
+            ],
+            [
+              [
+                33.28125,
+                40.41667
+              ],
+              [
+                33.59375,
+                39.02778
+              ],
+              [
+                34.60938,
+                38.47222
+              ],
+              [
+                36.40625,
+                38.47222
+              ],
+              [
+                37.65625,
+                39.16667
+              ],
+              [
+                38.28125,
+                40.41667
+              ],
+              [
+                38.51562,
+                56.94444
+              ],
+              [
+                38.28125,
+                58.88889
+              ],
+              [
+                37.5,
+                60.13889
+              ],
+              [
+                36.25,
+                60.69444
+              ],
+              [
+                34.6875,
+                60.27778
+              ],
+              [
+                33.75,
+                59.16667
+              ],
+              [
+                33.4375,
+                57.36111
+              ]
             ]
           ],
-          "evidence": "Printed reference 3 leader terminates on the left directly indicated hydraulic oil cartridge, matching 56-00007 (Hydraulic oil cartridge). Manually traced from the current source PNG; no numeral or leader included."
+          "evidence": "Quantity instance review, 2026-09-12: The second cartridge is directly below the second matching housing in the paired filter assembly; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0033-physical-1",
+            "co-4-1-0033-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0034",
@@ -20781,9 +20843,99 @@
                 25,
                 28.0556
               ]
+            ],
+            [
+              [
+                32.96875,
+                27.63889
+              ],
+              [
+                33.75,
+                26.52778
+              ],
+              [
+                34.375,
+                26.38889
+              ],
+              [
+                34.21875,
+                25.27778
+              ],
+              [
+                35.23438,
+                24.86111
+              ],
+              [
+                36.01562,
+                25.27778
+              ],
+              [
+                36.17188,
+                25.97222
+              ],
+              [
+                37.42188,
+                25.97222
+              ],
+              [
+                38.125,
+                27.08333
+              ],
+              [
+                38.51562,
+                29.30556
+              ],
+              [
+                38.20312,
+                31.66667
+              ],
+              [
+                37.42188,
+                32.91667
+              ],
+              [
+                37.10938,
+                35.13889
+              ],
+              [
+                36.5625,
+                36.52778
+              ],
+              [
+                35.46875,
+                36.80556
+              ],
+              [
+                34.6875,
+                35.83333
+              ],
+              [
+                34.375,
+                34.16667
+              ],
+              [
+                33.51562,
+                33.05556
+              ],
+              [
+                32.73438,
+                31.11111
+              ],
+              [
+                32.5,
+                29.30556
+              ]
             ]
           ],
-          "evidence": "Printed reference 4 leader terminates on the left directly indicated hydraulic oil filter housing, matching 56-00009 (Hydraulic oil filter housing). Manually traced from the current source PNG; no numeral or leader included."
+          "evidence": "Quantity instance review, 2026-09-12: The second housing is above the second cartridge on the same support, with matching ports/body; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0034-physical-1",
+            "co-4-1-0034-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0035",
@@ -21012,9 +21164,63 @@
                 21.7969,
                 42.3611
               ]
+            ],
+            [
+              [
+                14.76562,
+                38.75
+              ],
+              [
+                15.3125,
+                37.63889
+              ],
+              [
+                15.9375,
+                37.77778
+              ],
+              [
+                16.40625,
+                38.33333
+              ],
+              [
+                17.65625,
+                38.47222
+              ],
+              [
+                18.04688,
+                39.16667
+              ],
+              [
+                17.96875,
+                40.27778
+              ],
+              [
+                17.42188,
+                40.69444
+              ],
+              [
+                16.32812,
+                40.0
+              ],
+              [
+                15.70312,
+                40.27778
+              ],
+              [
+                15.15625,
+                40.0
+              ]
             ]
           ],
-          "evidence": "Original ref7 leader ends on right-hand detached pressure transmitter next to the right adapter11. Traces this one threaded end, hex body and connector envelope, not similar left copy. Tiny connector face and threads remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: The second transmitter is in the corresponding left adapter branch of the paired filter assembly; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0037-physical-1",
+            "co-4-1-0037-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0038",
@@ -21118,6 +21324,52 @@
                 32.1875,
                 90.4167
               ]
+            ],
+            [
+              [
+                30.9375,
+                86.80556
+              ],
+              [
+                31.48438,
+                85.55556
+              ],
+              [
+                32.5,
+                84.44444
+              ],
+              [
+                33.28125,
+                85.0
+              ],
+              [
+                34.375,
+                85.41667
+              ],
+              [
+                34.6875,
+                86.66667
+              ],
+              [
+                34.21875,
+                87.91667
+              ],
+              [
+                33.4375,
+                88.88889
+              ],
+              [
+                32.57812,
+                89.44444
+              ],
+              [
+                31.79688,
+                89.02778
+              ],
+              [
+                31.32812,
+                88.33333
+              ]
             ]
           ],
           "holes": [
@@ -21156,9 +21408,14 @@
                   92.2222
                 ]
               ]
-            ]
+            ],
+            []
           ],
-          "evidence": "Original9 leader directly targets lower right 45degree pump fitting; traced exposed contour and its visible central bore. Nearby upper fitting and backside quantity remark do not establish extra occurrences. Attached junction/threads remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Two front pump 45-degree fittings are visible in the same connection group. Quantity 4 and the table remark identify two backside instances, which remain unlocated. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "instanceIds": [
+            "co-4-1-0039-physical-1",
+            "co-4-1-0039-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0040",
@@ -21233,6 +21490,52 @@
                 27.0313,
                 90
               ]
+            ],
+            [
+              [
+                26.32812,
+                95.41667
+              ],
+              [
+                26.875,
+                94.58333
+              ],
+              [
+                27.8125,
+                93.75
+              ],
+              [
+                28.75,
+                94.30556
+              ],
+              [
+                29.375,
+                95.41667
+              ],
+              [
+                29.375,
+                96.66667
+              ],
+              [
+                28.90625,
+                97.91667
+              ],
+              [
+                27.96875,
+                98.88889
+              ],
+              [
+                27.26562,
+                98.75
+              ],
+              [
+                26.32812,
+                97.77778
+              ],
+              [
+                26.09375,
+                96.66667
+              ]
             ]
           ],
           "holes": [
@@ -21271,9 +21574,45 @@
                   92.9167
                 ]
               ]
+            ],
+            [
+              [
+                [
+                  26.79688,
+                  96.25
+                ],
+                [
+                  27.34375,
+                  95.97222
+                ],
+                [
+                  27.89062,
+                  96.38889
+                ],
+                [
+                  28.04688,
+                  97.08333
+                ],
+                [
+                  27.73438,
+                  97.77778
+                ],
+                [
+                  27.1875,
+                  97.63889
+                ],
+                [
+                  26.79688,
+                  97.08333
+                ]
+              ]
             ]
           ],
-          "evidence": "Original10 leader targets upper of two left detached pump adapters. Visible body/bore traced; lower similar adapter and backside source remark are not extra occurrence authority. Narrow overlaps/threads remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Two front pump adapters are visible in a stacked connection group. Quantity 4 and the table remark identify two backside instances, which remain unlocated. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "instanceIds": [
+            "co-4-1-0040-physical-1",
+            "co-4-1-0040-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0041",
@@ -21376,6 +21715,56 @@
                 11.875,
                 35.9722
               ]
+            ],
+            [
+              [
+                19.0625,
+                38.19444
+              ],
+              [
+                19.6875,
+                37.36111
+              ],
+              [
+                20.70312,
+                37.36111
+              ],
+              [
+                21.40625,
+                38.33333
+              ],
+              [
+                21.48438,
+                39.86111
+              ],
+              [
+                21.09375,
+                40.97222
+              ],
+              [
+                21.25,
+                41.80556
+              ],
+              [
+                20.9375,
+                43.47222
+              ],
+              [
+                20.0,
+                44.30556
+              ],
+              [
+                19.14062,
+                43.61111
+              ],
+              [
+                18.82812,
+                42.08333
+              ],
+              [
+                18.90625,
+                40.41667
+              ]
             ]
           ],
           "holes": [
@@ -21418,9 +21807,45 @@
                   36.1111
                 ]
               ]
+            ],
+            [
+              [
+                [
+                  19.45312,
+                  38.61111
+                ],
+                [
+                  19.92188,
+                  38.19444
+                ],
+                [
+                  20.70312,
+                  38.33333
+                ],
+                [
+                  20.9375,
+                  38.88889
+                ],
+                [
+                  20.70312,
+                  39.44444
+                ],
+                [
+                  20.07812,
+                  39.58333
+                ],
+                [
+                  19.53125,
+                  39.16667
+                ]
+              ]
             ]
           ],
-          "evidence": "Original11 leader explicitly targets left detached vertical hydraulic adapter. Traces outer hex/thread body and clear top open bore; right similar adapter not associated by resemblance. Fine interior-wall/threads remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Both matching vertical adapters belong to the paired filter branches below fittings 13 and 14; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "instanceIds": [
+            "co-4-1-0041-physical-1",
+            "co-4-1-0041-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0042",
@@ -21705,9 +22130,115 @@
                 18.9844,
                 34.7222
               ]
+            ],
+            [
+              [
+                38.35938,
+                24.58333
+              ],
+              [
+                39.14062,
+                23.88889
+              ],
+              [
+                40.625,
+                23.75
+              ],
+              [
+                42.34375,
+                24.16667
+              ],
+              [
+                42.5,
+                25.41667
+              ],
+              [
+                42.34375,
+                27.5
+              ],
+              [
+                41.32812,
+                28.47222
+              ],
+              [
+                40.54688,
+                28.33333
+              ],
+              [
+                40.23438,
+                26.94444
+              ],
+              [
+                39.29688,
+                27.08333
+              ],
+              [
+                38.75,
+                26.80556
+              ]
+            ],
+            [
+              [
+                39.14062,
+                27.91667
+              ],
+              [
+                39.92188,
+                27.08333
+              ],
+              [
+                41.25,
+                27.08333
+              ],
+              [
+                42.89062,
+                27.5
+              ],
+              [
+                43.20312,
+                28.75
+              ],
+              [
+                43.04688,
+                31.25
+              ],
+              [
+                42.42188,
+                32.36111
+              ],
+              [
+                41.5625,
+                32.77778
+              ],
+              [
+                40.85938,
+                32.22222
+              ],
+              [
+                40.625,
+                30.41667
+              ],
+              [
+                39.6875,
+                30.41667
+              ],
+              [
+                39.14062,
+                29.72222
+              ]
             ]
           ],
-          "evidence": "Original14 leader directly targets detached right-angle fitting above right adapter. Continuous elbow/thread contour follows original; small end bores and lower junction remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: The labelled left elbow plus two matching detached elbows at the filter housings account for Quantity 3. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0044-physical-1",
+            "co-4-1-0044-physical-2",
+            "co-4-1-0044-physical-3"
+          ]
         },
         {
           "calloutId": "co-4-1-0045",
@@ -22093,9 +22624,79 @@
                 51.4063,
                 42.5
               ]
+            ],
+            [
+              [
+                51.40625,
+                38.88889
+              ],
+              [
+                51.95312,
+                38.33333
+              ],
+              [
+                52.65625,
+                38.75
+              ],
+              [
+                52.96875,
+                38.61111
+              ],
+              [
+                54.45312,
+                38.88889
+              ],
+              [
+                55.0,
+                39.58333
+              ],
+              [
+                55.0,
+                40.55556
+              ],
+              [
+                54.45312,
+                41.25
+              ],
+              [
+                53.51562,
+                40.41667
+              ],
+              [
+                52.96875,
+                40.55556
+              ],
+              [
+                52.89062,
+                41.52778
+              ],
+              [
+                52.26562,
+                41.80556
+              ],
+              [
+                51.875,
+                41.11111
+              ],
+              [
+                51.875,
+                40.13889
+              ],
+              [
+                51.40625,
+                39.86111
+              ]
             ]
           ],
-          "evidence": "Original18 leader ends on lower of the two detached tees to right of valve6. Only that directly targeted tee traced; upper similar item has no separate occurrence authority. Fine port bores and threads remain partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Both matching tees are shown together beside valve 6; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0048-physical-1",
+            "co-4-1-0048-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0049",
@@ -22285,6 +22886,60 @@
                 62.6563,
                 38.4722
               ]
+            ],
+            [
+              [
+                62.96875,
+                42.91667
+              ],
+              [
+                63.75,
+                42.22222
+              ],
+              [
+                64.60938,
+                42.36111
+              ],
+              [
+                65.23438,
+                41.94444
+              ],
+              [
+                66.09375,
+                42.5
+              ],
+              [
+                66.64062,
+                43.75
+              ],
+              [
+                66.5625,
+                45.55556
+              ],
+              [
+                66.09375,
+                46.66667
+              ],
+              [
+                65.3125,
+                47.08333
+              ],
+              [
+                64.53125,
+                46.52778
+              ],
+              [
+                63.67188,
+                46.52778
+              ],
+              [
+                62.96875,
+                45.55556
+              ],
+              [
+                62.65625,
+                44.44444
+              ]
             ]
           ],
           "holes": [
@@ -22319,9 +22974,45 @@
                   38.1944
                 ]
               ]
+            ],
+            [
+              [
+                [
+                  65.625,
+                  42.91667
+                ],
+                [
+                  66.09375,
+                  43.05556
+                ],
+                [
+                  66.32812,
+                  43.88889
+                ],
+                [
+                  66.17188,
+                  45.41667
+                ],
+                [
+                  65.85938,
+                  46.11111
+                ],
+                [
+                  65.39062,
+                  46.25
+                ],
+                [
+                  65.39062,
+                  44.44444
+                ]
+              ]
             ]
           ],
-          "evidence": "Printed20 leader targets upper detached fitting54-01032. Upper contour/end opening only; unlabelled similar lower fitting not assigned by qty2. Other tiny openings partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Both matching fittings are shown in a vertical pair on the left side of manifold 5; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "instanceIds": [
+            "co-4-1-0050-physical-1",
+            "co-4-1-0050-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0051",
@@ -22631,9 +23322,55 @@
                 77.8906,
                 39.1667
               ]
+            ],
+            [
+              [
+                77.89062,
+                41.52778
+              ],
+              [
+                78.67188,
+                41.38889
+              ],
+              [
+                79.375,
+                41.11111
+              ],
+              [
+                79.92188,
+                41.94444
+              ],
+              [
+                80.0,
+                43.61111
+              ],
+              [
+                79.53125,
+                44.86111
+              ],
+              [
+                78.75,
+                44.72222
+              ],
+              [
+                78.28125,
+                43.88889
+              ],
+              [
+                77.8125,
+                43.75
+              ]
             ]
           ],
-          "evidence": "Printed24 targets upper plug54-00980. Only explicit upper depiction traced; similar lower plug not inferred from qty2; tiny tool recess partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Both matching plugs align with the two right-side manifold ports; Quantity 2. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "holes": [
+            [],
+            []
+          ],
+          "instanceIds": [
+            "co-4-1-0054-physical-1",
+            "co-4-1-0054-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0055",
@@ -22712,6 +23449,60 @@
                 82.5,
                 44.0278
               ]
+            ],
+            [
+              [
+                82.57812,
+                46.11111
+              ],
+              [
+                83.20312,
+                45.69444
+              ],
+              [
+                83.98438,
+                46.11111
+              ],
+              [
+                84.375,
+                45.83333
+              ],
+              [
+                85.625,
+                46.66667
+              ],
+              [
+                86.01562,
+                47.5
+              ],
+              [
+                85.85938,
+                48.88889
+              ],
+              [
+                85.3125,
+                50.0
+              ],
+              [
+                84.53125,
+                49.72222
+              ],
+              [
+                84.21875,
+                49.16667
+              ],
+              [
+                83.35938,
+                49.16667
+              ],
+              [
+                82.65625,
+                48.61111
+              ],
+              [
+                82.26562,
+                47.5
+              ]
             ]
           ],
           "holes": [
@@ -22742,9 +23533,41 @@
                   43.4722
                 ]
               ]
+            ],
+            [
+              [
+                [
+                  85.23438,
+                  47.22222
+                ],
+                [
+                  85.625,
+                  47.5
+                ],
+                [
+                  85.625,
+                  48.33333
+                ],
+                [
+                  85.3125,
+                  49.16667
+                ],
+                [
+                  84.92188,
+                  49.02778
+                ],
+                [
+                  84.92188,
+                  48.33333
+                ]
+              ]
             ]
           ],
-          "evidence": "Printed25 targets upper fitting54-00385. Actual outer and far opening traced; lower copy and other qty4 instances not assigned automatically; small near recess partial. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
+          "evidence": "Quantity instance review, 2026-09-12: Two detached fittings align with the right-side manifold ports. Quantity 4 and the remark locate one on each pump, but their exact visible boundaries cannot be isolated here; two remain unlocated. Association uses the printed leader, repeated assembly/port arrangement, part description and table quantity together. Existing leader-linked contour preserved; additional visible exteriors traced from this exact PNG. Fine threads and small unresolved recesses are partial. Agent proposal, unapproved; not for ordering.",
+          "instanceIds": [
+            "co-4-1-0055-physical-1",
+            "co-4-1-0055-physical-2"
+          ]
         },
         {
           "calloutId": "co-4-1-0056",
@@ -22854,7 +23677,7 @@
           "evidence": "Printed26 leader targets single bottom-right fitting54-00800. Body and small end opening traced; source qty2 not occurrence authority. Unapproved source-bound proposal, 2026-09-09; no quantity-derived occurrences."
         }
       ],
-      "notes": "Task10c adds only independently labelled19–26 fitting targets. Small internal detail remains partial; lower similar copies unassigned. Visible source27/28/29 lack rows and must remain source-only conflicts."
+      "notes": "Task10c adds only independently labelled19\u201326 fitting targets. Small internal detail remains partial; lower similar copies unassigned. Visible source27/28/29 lack rows and must remain source-only conflicts. Quantity instance review 2026-09-12: repeated visible members are now traced for refs 3,4,7,9,10,11,14,18,20,24,25. Refs 9,10,25 remain short by two; ref26 remains short by one. No coordinates are generated for invisible/backside parts."
     },
     {
       "figureId": "fig-cowling-fender-7-1",

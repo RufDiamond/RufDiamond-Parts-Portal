@@ -117,11 +117,6 @@ export function FigureWorkspace({
     );
     return new Map(reports.map((report) => [report.figurePartId, report]));
   }, [rows, callouts]);
-  const selectedQuantityReview = useMemo(() => {
-    if (!selection) return null;
-    const report = quantityReports.get(selection.figurePartId);
-    return report?.needsReview ? report : null;
-  }, [quantityReports, selection]);
 
   useEffect(() => {
     if (reviewOnly || detail.release) return;
@@ -549,6 +544,7 @@ export function FigureWorkspace({
               note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
               document={regions}
+              quantityReports={quantityReports}
               selectionActivation={activation}
               revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
@@ -577,14 +573,6 @@ export function FigureWorkspace({
                   : `${unplaced} of ${callouts.length} callout numbers are not positioned yet`}
                 , so clicking a part cannot highlight it here. Match the Ref. no.
                 column against the numbers printed on the plate.
-              </p>
-            ) : null}
-            {selectedQuantityReview ? (
-              <p className={styles.plateNotice} role="status">
-                Quantity review: {selectedQuantityReview.detected} of{" "}
-                {selectedQuantityReview.expected} physical instances mapped for
-                this part. Flagged because Quantity and detected markers do not
-                match.
               </p>
             ) : null}
           </div>
@@ -691,6 +679,7 @@ export function FigureWorkspace({
           note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
           document={regions}
+          quantityReports={quantityReports}
           selectionActivation={activation}
           previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}

@@ -1,9 +1,11 @@
 "use client";
 
+import { quantitySelectionMessage, type QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
+
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
 import { DiagramRegions } from "./DiagramRegions";
-import type { DiagramRegionDocument } from "@/lib/drawing";
+import { layoutSelectedMarkers, type DiagramRegionDocument } from "@/lib/drawing";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 import { DIAGRAM_ZOOM_STEPS, revealDelta, revealZoom, type ViewportRect } from "@/lib/diagram-viewport";
 import styles from "./DrawingViewer.module.css";
@@ -52,6 +54,7 @@ export interface DrawingViewerProps {
    * a part fitted in two places lights in both — and the rest recede.
    */
   selectedPartIds?: ReadonlySet<string>;
+  quantityReports?: ReadonlyMap<string, QuantityOccurrenceReport>;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
@@ -114,12 +117,15 @@ export function DrawingViewer({
   selectionActivation,
   revealRequest = 0,
   selectedPartIds = NO_SELECTION,
+  quantityReports,
   hoveredPartId = null,
   onTogglePart,
   onHoverPart,
   zoom = 1,
   onZoomChange,
 }: DrawingViewerProps) {
+  const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
+  const labelPositions = layoutSelectedMarkers(markers, selectedPartIds, displaySize.width, displaySize.height);
   const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
   const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
   const outlined = markers.filter(
@@ -158,6 +164,17 @@ export function DrawingViewer({
    */
   const sheet = useRef<HTMLDivElement>(null);
   const drawing = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = drawing.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      const rect = element.getBoundingClientRect();
+      setDisplaySize({ width: rect.width, height: rect.height });
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [src]);
+
   const from = useRef<{
     x: number;
     y: number;
@@ -211,12 +228,14 @@ export function DrawingViewer({
       const markerElements = new Map(Array.from(area.querySelectorAll<HTMLButtonElement>(":scope > button[data-callout-id]"))
         .map((marker) => [marker.dataset.calloutId, marker]));
       for (const marker of markers) {
-        if (!selectedPartIds.has(marker.partId) || represented.has(marker.id)) continue;
-        // Fallback is per occurrence, never per part: measure its unchanged SVG
-        // shape first, then its own marker. Do not parse arbitrary legacy paths.
+        if (!selectedPartIds.has(marker.partId)) continue;
+        // Labels can be displaced to avoid collisions. Reveal them alongside
+        // every component so all selected pointers remain visible at zoom.
+        const label = markerElements.get(marker.id)?.getBoundingClientRect();
+        if (label && (label.width || label.height)) targets.push(label);
+        if (represented.has(marker.id)) continue;
         const legacy = legacyPaths.get(marker.id)?.getBoundingClientRect();
-        const target = legacy && (legacy.width || legacy.height) ? legacy : markerElements.get(marker.id)?.getBoundingClientRect();
-        if (target) targets.push(target);
+        if (legacy && (legacy.width || legacy.height)) targets.push(legacy);
         represented.add(marker.id);
       }
       previous.pending = false;
@@ -396,13 +415,20 @@ export function DrawingViewer({
             onSelect={onSelectPart ? (id) => onSelectPart(id, "component") : undefined} />
         ) : null}
 
+        <svg className={styles.instanceLeaders} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          {markers.filter((marker) => selectedPartIds.has(marker.partId)).map((marker) => {
+            const position = labelPositions.get(marker.id);
+            if (!position || (position.x === marker.x && position.y === marker.y)) return null;
+            return <line key={marker.id} x1={marker.x} y1={marker.y} x2={position.x} y2={position.y} />;
+          })}
+        </svg>
         {markers.map((marker) => (
           <CalloutMarker
             key={marker.id}
             occurrenceId={marker.id}
             number={marker.number}
-            x={marker.x}
-            y={marker.y}
+            x={labelPositions.get(marker.id)?.x ?? marker.x}
+            y={labelPositions.get(marker.id)?.y ?? marker.y}
             state={markerState(marker.partId)}
             pressed={selectedPartIds.has(marker.partId)}
             title={
@@ -430,6 +456,15 @@ export function DrawingViewer({
         ))}
         </div>
       </div>
+      {quantityReports && selectedPartIds.size > 0 ? (
+        <div className={styles.selectionSummary} role="status" aria-live="polite">
+          {Array.from(quantityReports.values()).filter((report) => selectedPartIds.has(report.partId)).map((report) => (
+            <div key={report.figurePartId} data-review={report.needsReview || undefined}>
+              {quantitySelectionMessage(report)}
+            </div>
+          ))}
+        </div>
+      ) : null}
     </figure>
   );
 }

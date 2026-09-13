@@ -36,6 +36,7 @@
 }
 
 .active {
+  z-index: 1;
   background: var(--select);
   border-color: var(--select);
   color: var(--select-on);

@@ -206,7 +206,7 @@ export function PartsTable({
                 active &&
                 ((report?.expected ?? 0) > 1 || (report?.detected ?? 0) > 1);
               const quantityTitle = report?.needsReview
-                ? `Quantity review: ${report.detected} of ${report.expected} instances mapped on the drawing`
+                ? `Quantity review: ${report.detected} of ${report.expected} instances mapped on the drawing${report.reviewReason ? `. ${report.reviewReason}` : ""}`
                 : figurePart.qty === null
                   ? "Installed quantity is unspecified in the reviewed assembly reference"
                   : undefined;
@@ -304,7 +304,7 @@ export function PartsTable({
                     )}
                     {report?.needsReview ? (
                       <span className={styles.quantityReview} aria-label={quantityTitle}>
-                        {report.detected}/{report.expected}
+                        Review
                       </span>
                     ) : null}
                   </td>

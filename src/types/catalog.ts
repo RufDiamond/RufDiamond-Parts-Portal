@@ -180,6 +180,8 @@ export interface Callout {
     imageWidth: number;
     imageHeight: number;
     regions: ComponentRegion[];
+    /** Source-established physical identity per region; omitted means one component. */
+    instanceIds?: string[];
   };
 }
 
@@ -225,6 +227,8 @@ export interface FigurePartRow {
   part: Part;
   /** Ascending, de-duplicated. Empty when the item has no marker on the plate. */
   calloutNumbers: (number | string)[];
+  /** Source-bound review evidence; a matching pointer count cannot clear it. */
+  mappingReviewReason?: string;
 }
 
 /** Everything needed to render one figure screen. */

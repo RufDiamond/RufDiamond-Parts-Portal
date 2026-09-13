@@ -1,0 +1,4697 @@
+{
+  "schemaVersion": 1,
+  "status": "NOT_FOR_CUSTOMER_USE",
+  "catalogueSha256": "df26ac87cbba1b0a88800d78459c225e93ce37a09e1d693196b1f92a507887c2",
+  "figures": [
+    {
+      "figureId": "fig-filters-1-1",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-filters-1-1.png",
+        "sha256": "5a47aaf6d53c34c4d3aeb87adca95029c6bfb0f7be72a2288b85e46d9197752c",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-1-1-01",
+          "partNumber": "36-00304",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-1-1-02",
+          "partNumber": "31-00469",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-1-1-03",
+          "partNumber": "56-00007",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Representative filter plate contains one orange hydraulic cartridge only; the two physical installation instances are depicted in Hydraulic 4.1, not duplicated on Filters 1.1."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-1-1-04",
+          "partNumber": "35-00068",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-1-1-05",
+          "partNumber": "30-00040",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-1-1-06",
+          "partNumber": "31-00471",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "source": {
+        "path": "public/drawings/ft3w/review-source-20260908/ft3w-frame-assy-2-1.png",
+        "sha256": "36533a8062e807060d27deaa81af602ee8c270fef204fc3081ef2b0411fed1e3",
+        "width": 1010,
+        "height": 590,
+        "source": {
+          "pdfSha256": "00698197a467c6ae4a1a809a108c8f225854f25897ea3ff4372f209948273bca",
+          "physicalPage": 6,
+          "renderWidth": 1275,
+          "renderHeight": 1650,
+          "crop": {
+            "x": 140,
+            "y": 145,
+            "width": 1010,
+            "height": 590
+          }
+        }
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-2-1-01",
+          "partNumber": "82-00127",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-2-1-02",
+          "partNumber": "10-404012-122",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-2-1-03",
+          "partNumber": "13-110020-122",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-2-1-04",
+          "partNumber": "12-210000-12",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-2-1-05",
+          "partNumber": "70-02270",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-2-1-06",
+          "partNumber": "19-00210",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: OTHER SIDE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-2-1-07",
+          "partNumber": "62-00881",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: OTHER SIDE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-1-08",
+          "partNumber": "10-210016-121",
+          "qty": 4,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 4,
+          "reason": "Source table explicitly states: NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-1-09",
+          "partNumber": "10-110100-121",
+          "qty": 2,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Source table explicitly states: NOT SHOWN. No contours invented for these omitted locations."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-frame-assy-2-2.png",
+        "sha256": "dee6f9df2ee8e9c2c018a751e5e9480e849df3f28c36ea74cc07667ac5a023e5",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-2-2-01",
+          "partNumber": "82-00127",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-2-2-02",
+          "partNumber": "87-00136",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-2-2-03",
+          "partNumber": "80-00013",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-2-2-04",
+          "partNumber": "10-710050-145",
+          "qty": 4,
+          "visibleMapped": 4,
+          "baselineMapped": 4,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-2-2-05",
+          "partNumber": "87-00320",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-2-2-06",
+          "partNumber": "87-00107",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-2-2-07",
+          "partNumber": "87-00071",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-2-2-08",
+          "partNumber": "62-00881",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: FOR ADJSUTMENT - OTHER SIDE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-2-2-09",
+          "partNumber": "19-00210",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: OTHER SIDE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-2-2-10",
+          "partNumber": "10-110100-121",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 11,
+          "figurePartId": "fp-2-2-11",
+          "partNumber": "13-110020-122",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 12,
+          "figurePartId": "fp-2-2-12",
+          "partNumber": "12-210000-122",
+          "qty": 3,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 1,
+          "reason": "Source table explicitly states: MIDDLE NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-2-13",
+          "partNumber": "10-504020-120",
+          "qty": 4,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 4,
+          "reason": "Source table explicitly states: NOT SHOWN - FOR 19-00210. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-2-14",
+          "partNumber": "12-504000-121",
+          "qty": 4,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 4,
+          "reason": "Source table explicitly states: NOT SHOWN - FOR 19-00210. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-2-15",
+          "partNumber": "87-00329",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: NOT SHOWN - REPLACEMENT PART. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-2-2-16",
+          "partNumber": "87-00195",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: NOT SHOWN - REPLACEMENT PART. No contours invented for these omitted locations."
+        },
+        {
+          "ref": 17,
+          "figurePartId": "fp-2-2-17",
+          "partNumber": "87-00332",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "No source-supported visible contour or unique same-reference pointer established on inspected plate; row remains withheld."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "source": {
+        "path": "public/drawings/ft3w/review-source-20260908/ft3w-drive-system-3-1.png",
+        "sha256": "29f508735e46ca268dd2f65b7fdf92282cae7a041b5b6515833bee1c19028a71",
+        "width": 1070,
+        "height": 657,
+        "source": {
+          "pdfSha256": "00698197a467c6ae4a1a809a108c8f225854f25897ea3ff4372f209948273bca",
+          "physicalPage": 8,
+          "renderWidth": 1275,
+          "renderHeight": 1650,
+          "crop": {
+            "x": 100,
+            "y": 154,
+            "width": 1070,
+            "height": 657
+          }
+        }
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-3-1-01",
+          "partNumber": "51-00045",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-3-1-02",
+          "partNumber": "10-316060-121",
+          "qty": 10,
+          "visibleMapped": 10,
+          "baselineMapped": 1,
+          "addedInstances": 9,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-3-1-03",
+          "partNumber": "12-216000-122",
+          "qty": 10,
+          "visibleMapped": 10,
+          "baselineMapped": 1,
+          "addedInstances": 9,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-3-1-04",
+          "partNumber": "19-00204",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-3-1-05",
+          "partNumber": "46-00107",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-3-1-06",
+          "partNumber": "56-00066",
+          "qty": 4,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 4,
+          "reason": "Source table explicitly states: NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-3-1-07",
+          "partNumber": "19-00511",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: WHEEL SEAL - NOT SHOWN. No contours invented for these omitted locations."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-1",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-hydraulic-4-1.png",
+        "sha256": "bd99a5437f28a8ff8baa5552c900eaa31802db35d955e6f1386cb731006b8aa5",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-4-1-01",
+          "partNumber": "50-00036",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-4-1-02",
+          "partNumber": "50-00035",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-4-1-03",
+          "partNumber": "56-00007",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-4-1-04",
+          "partNumber": "56-00009",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-4-1-05",
+          "partNumber": "56-00019",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-4-1-06",
+          "partNumber": "52-00004",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-4-1-07",
+          "partNumber": "56-00035",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-4-1-08",
+          "partNumber": "59-00037",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-4-1-09",
+          "partNumber": "54-00618",
+          "qty": 4,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Plate shows only 2 independently identifiable 45 deg hyd. fitting instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-4-1-10",
+          "partNumber": "54-00251",
+          "qty": 4,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Plate shows only 2 independently identifiable Hydraulic hose adapter instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 11,
+          "figurePartId": "fp-4-1-11",
+          "partNumber": "54-00901",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 12,
+          "figurePartId": "fp-4-1-12",
+          "partNumber": "54-01131",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 13,
+          "figurePartId": "fp-4-1-13",
+          "partNumber": "54-00098",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 14,
+          "figurePartId": "fp-4-1-14",
+          "partNumber": "54-00024",
+          "qty": 3,
+          "visibleMapped": 3,
+          "baselineMapped": 3,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 15,
+          "figurePartId": "fp-4-1-15",
+          "partNumber": "54-00047",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 16,
+          "figurePartId": "fp-4-1-16",
+          "partNumber": "54-00457",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 17,
+          "figurePartId": "fp-4-1-17",
+          "partNumber": "54-00041",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 18,
+          "figurePartId": "fp-4-1-18",
+          "partNumber": "54-00045",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 19,
+          "figurePartId": "fp-4-1-19",
+          "partNumber": "54-01083",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 20,
+          "figurePartId": "fp-4-1-20",
+          "partNumber": "54-01032",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 21,
+          "figurePartId": "fp-4-1-21",
+          "partNumber": "19-00340",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 22,
+          "figurePartId": "fp-4-1-22",
+          "partNumber": "54-00749",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 23,
+          "figurePartId": "fp-4-1-23",
+          "partNumber": "52-00031",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 24,
+          "figurePartId": "fp-4-1-24",
+          "partNumber": "54-00980",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 25,
+          "figurePartId": "fp-4-1-25",
+          "partNumber": "54-00385",
+          "qty": 4,
+          "visibleMapped": 2,
+          "baselineMapped": 2,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Two loose Ref.25 fittings are visible beside manifold; table locates additional fittings one on each pump, but dense pump port outlines do not establish separable visible contours for them."
+        },
+        {
+          "ref": 26,
+          "figurePartId": "fp-4-1-26",
+          "partNumber": "54-00800",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Only one isolated Ref.26 adapter is drawn at bottom right; no second uniquely identifiable adapter contour or leader exists on this plate."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-hydraulic-4-2.png",
+        "sha256": "bb27d9ca9952f3672d1ffa9271065c102f876ff1d716261b1491d7bca2ed0652",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-4-2-01",
+          "partNumber": "34-00582",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-4-2-02",
+          "partNumber": "34-00599",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-4-2-03",
+          "partNumber": "34-00194",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-4-2-04",
+          "partNumber": "34-00596",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-4-2-05",
+          "partNumber": "51-00006",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-4-2-06",
+          "partNumber": "34-00581",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-4-2-07",
+          "partNumber": "34-00946",
+          "qty": 4,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 3,
+          "reason": "Plate shows only 1 independently identifiable Radiator mount instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-4-2-08",
+          "partNumber": "19-00739",
+          "qty": 4,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 3,
+          "reason": "Plate shows only 1 independently identifiable Radiator bushing support instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-4-2-09",
+          "partNumber": "34-00947",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-4-2-10",
+          "partNumber": "34-00778",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Fan spacer instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 11,
+          "figurePartId": "fp-4-2-11",
+          "partNumber": "34-00099",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 12,
+          "figurePartId": "fp-4-2-12",
+          "partNumber": "34-00504",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Heater hoses dia 5/16'' instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 13,
+          "figurePartId": "fp-4-2-13",
+          "partNumber": "54-00615",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 14,
+          "figurePartId": "fp-4-2-14",
+          "partNumber": "52-00103",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 15,
+          "figurePartId": "fp-4-2-15",
+          "partNumber": "59-00126",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 16,
+          "figurePartId": "fp-4-2-16",
+          "partNumber": "34-00621",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 17,
+          "figurePartId": "fp-4-2-17",
+          "partNumber": "34-00576",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "One source-identifiable level indicator at extreme right edge, with only its visible clipped strip traced; complete outline extends beyond source crop."
+        },
+        {
+          "ref": 18,
+          "figurePartId": "fp-4-2-18",
+          "partNumber": "47-00005",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 19,
+          "figurePartId": "fp-4-2-19",
+          "partNumber": "47-00009",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 20,
+          "figurePartId": "fp-4-2-20",
+          "partNumber": "39-00016",
+          "qty": 3,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Plate shows only 1 independently identifiable Hose clamp 35-50/12 instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 21,
+          "figurePartId": "fp-4-2-21",
+          "partNumber": "19-00432",
+          "qty": 4,
+          "visibleMapped": 4,
+          "baselineMapped": 1,
+          "addedInstances": 3,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 22,
+          "figurePartId": "fp-4-2-22",
+          "partNumber": "39-00019",
+          "qty": 6,
+          "visibleMapped": 6,
+          "baselineMapped": 1,
+          "addedInstances": 5,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 23,
+          "figurePartId": "fp-4-2-23",
+          "partNumber": "34-00577",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 24,
+          "figurePartId": "fp-4-2-24",
+          "partNumber": "54-00617",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 25,
+          "figurePartId": "fp-4-2-25",
+          "partNumber": "54-00755",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 26,
+          "figurePartId": "fp-4-2-26",
+          "partNumber": "54-00104",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 27,
+          "figurePartId": "fp-4-2-27",
+          "partNumber": "54-00044",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 28,
+          "figurePartId": "fp-4-2-28",
+          "partNumber": "54-00103",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 29,
+          "figurePartId": "fp-4-2-29",
+          "partNumber": "12-210000-121",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 30,
+          "figurePartId": "fp-4-2-30",
+          "partNumber": "10-510030-121",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 31,
+          "figurePartId": "fp-4-2-31",
+          "partNumber": "10-106050-121",
+          "qty": 4,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 2,
+          "reason": "Only two separate M6 screws are drawn beside fan support, though table requires four; no other two independent screw contours can be identified in the support occlusion."
+        },
+        {
+          "ref": 32,
+          "figurePartId": "fp-4-2-32",
+          "partNumber": "10-210025-121",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 33,
+          "figurePartId": "fp-4-2-33",
+          "partNumber": "10-210016-121",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-hydraulic-4-3.png",
+        "sha256": "7be19cf083b1cff8bc5d9b8fd3b1689f031337654f375c01d3af00ce528ef749",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-4-3-01",
+          "partNumber": "34-00851",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-4-3-02",
+          "partNumber": "34-00539",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-4-3-03",
+          "partNumber": "34-00540",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-4-3-04",
+          "partNumber": "56-00026",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-4-3-05",
+          "partNumber": "54-00460",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-4-3-06",
+          "partNumber": "54-01155",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-4-3-07",
+          "partNumber": "10-208030-122",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-4-3-08",
+          "partNumber": "10-008035-120",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-4-3-09",
+          "partNumber": "19-00474",
+          "qty": 4,
+          "visibleMapped": 4,
+          "baselineMapped": 1,
+          "addedInstances": 3,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-4-3-10",
+          "partNumber": "19-00473",
+          "qty": 4,
+          "visibleMapped": 4,
+          "baselineMapped": 1,
+          "addedInstances": 3,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-hydraulic-4-4",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-hydraulic-4-4.png",
+        "sha256": "fff40d364e27f147b32c4680ba21a15833558e68f4eb00eddc8a5c0177d5d9f2",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-4-4-01",
+          "partNumber": "50-00026",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-4-4-02",
+          "partNumber": "54-00104",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-4-4-03",
+          "partNumber": "54-00043",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-4-4-04",
+          "partNumber": "56-00085",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: Kit with O-ring, adapter, hardware (not shown). No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-4-4-05",
+          "partNumber": "56-00086",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: Gear Pump Mounting O-ring (not shown). No contours invented for these omitted locations."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-tire-wheel-5-1.png",
+        "sha256": "da8dd7b8d725e81d0f4e76ba8861eba28d1339e8ccfe8d49f9c150b734b64ab1",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-5-1-01",
+          "partNumber": "23-00124",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-5-1-02",
+          "partNumber": "89-00061",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-5-1-03",
+          "partNumber": "10-208045-111",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-5-1-04",
+          "partNumber": "10-208040-121",
+          "qty": 16,
+          "visibleMapped": 16,
+          "baselineMapped": 1,
+          "addedInstances": 15,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-5-1-05",
+          "partNumber": "10-208035-121",
+          "qty": 16,
+          "visibleMapped": 16,
+          "baselineMapped": 1,
+          "addedInstances": 15,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-5-1-06",
+          "partNumber": "23-00068",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-5-1-07",
+          "partNumber": "19-00352",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-5-1-08",
+          "partNumber": "19-00511",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: INCLUDED IN WHEEL SEAL KIT - NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-5-1-09",
+          "partNumber": "19-00212",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: INCLUDED IN WHEEL SEAL KIT - NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-5-1-10",
+          "partNumber": "10-908025-121",
+          "qty": 8,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 8,
+          "reason": "Source table explicitly states: INCLUDED IN WHEEL SEAL KIT - NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-5-1-11",
+          "partNumber": "19-00065",
+          "qty": 2,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 2,
+          "reason": "Source table explicitly states: INCLUDED IN WHEEL SEAL KIT - NOT SHOWN. No contours invented for these omitted locations."
+        },
+        {
+          "ref": null,
+          "figurePartId": "fp-5-1-12",
+          "partNumber": "23-00157",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Source table explicitly states: WHEEL SEAL KIT - NOT SHOWN. No contours invented for these omitted locations."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-tire-wheel-5-2.png",
+        "sha256": "1b2c024d68332afc69ebbdb0754ee87e74a94c3a5f88008170369d6014d8ac04",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-5-2-01",
+          "partNumber": "23-00069",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "Tire is uniquely identified by printed Ref.1 but right/top tread is clipped and complex inter-tread gaps lack a preserved full silhouette; no filled tire envelope fabricated."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-5-2-02",
+          "partNumber": "86-00104",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-5-2-03",
+          "partNumber": "89-00061",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-5-2-04",
+          "partNumber": "10-208040-121",
+          "qty": 16,
+          "visibleMapped": 16,
+          "baselineMapped": 1,
+          "addedInstances": 15,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-5-2-05",
+          "partNumber": "89-00073",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-5-2-06",
+          "partNumber": "89-00074",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-5-2-07",
+          "partNumber": "10-208045-111",
+          "qty": 8,
+          "visibleMapped": 8,
+          "baselineMapped": 1,
+          "addedInstances": 7,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-5-2-08",
+          "partNumber": "88-00039",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "No source-supported visible contour or unique same-reference pointer established on inspected plate; row remains withheld."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-5-2-09",
+          "partNumber": "86-00112",
+          "qty": 104,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 104,
+          "reason": "No source-supported visible contour or unique same-reference pointer established on inspected plate; row remains withheld."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-5-2-10",
+          "partNumber": "TBD",
+          "qty": 4,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 4,
+          "reason": "No source-supported visible contour or unique same-reference pointer established on inspected plate; row remains withheld."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-cowling-fender-7-1.png",
+        "sha256": "0ce0b00f44310dd2e4d2c09d236e1ef0d7787b7a1d8f197101d6d16308aa85b9",
+        "width": 1280,
+        "height": 720
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-7-1-01",
+          "partNumber": "42-00007",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Front light near flood 12v instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-7-1-02",
+          "partNumber": "42-00005",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Front light far flood 12v instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-7-1-03",
+          "partNumber": "42-00002",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Marker lamp instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-7-1-04",
+          "partNumber": "42-00017",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Front led strip instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-7-1-05",
+          "partNumber": "42-00001",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-7-1-06",
+          "partNumber": "63-00635",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 7,
+          "figurePartId": "fp-7-1-07",
+          "partNumber": "63-00217",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 8,
+          "figurePartId": "fp-7-1-08",
+          "partNumber": "63-01068",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 9,
+          "figurePartId": "fp-7-1-09",
+          "partNumber": "63-00225",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 10,
+          "figurePartId": "fp-7-1-10",
+          "partNumber": "63-01069",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 11,
+          "figurePartId": "fp-7-1-11",
+          "partNumber": "63-00718",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 12,
+          "figurePartId": "fp-7-1-12",
+          "partNumber": "63-00722",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 13,
+          "figurePartId": "fp-7-1-13",
+          "partNumber": "60-00513",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 14,
+          "figurePartId": "fp-7-1-14",
+          "partNumber": "63-00643",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 15,
+          "figurePartId": "fp-7-1-15",
+          "partNumber": "63-00224",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 16,
+          "figurePartId": "fp-7-1-16",
+          "partNumber": "63-00227",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 17,
+          "figurePartId": "fp-7-1-17",
+          "partNumber": "63-01194",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 18,
+          "figurePartId": "fp-7-1-18",
+          "partNumber": "63-00226",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 19,
+          "figurePartId": "fp-7-1-19",
+          "partNumber": "63-00242",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 20,
+          "figurePartId": "fp-7-1-20",
+          "partNumber": "63-00306",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Plate shows only 1 independently identifiable Water stopper instance(s); remaining locations are occluded or not separately depicted, and quantity alone does not locate them."
+        },
+        {
+          "ref": 21,
+          "figurePartId": "fp-7-1-21",
+          "partNumber": "63-00454",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 22,
+          "figurePartId": "fp-7-1-22",
+          "partNumber": "63-00448",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 23,
+          "figurePartId": "fp-7-1-23",
+          "partNumber": "63-00716",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 24,
+          "figurePartId": "fp-7-1-24",
+          "partNumber": "63-00720",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 25,
+          "figurePartId": "fp-7-1-25",
+          "partNumber": "63-01145",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 26,
+          "figurePartId": "fp-7-1-26",
+          "partNumber": "63-01146",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 27,
+          "figurePartId": "fp-7-1-27",
+          "partNumber": "63-01147",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 28,
+          "figurePartId": "fp-7-1-28",
+          "partNumber": "63-01148",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 29,
+          "figurePartId": "fp-7-1-29",
+          "partNumber": "63-00640",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Two original flange polygons belong to one broad top-fender grille. Other visible long narrow grilles match Ref.6; no second independent broad Ref.29 grille contour is established. Slatted interior remains partial."
+        },
+        {
+          "ref": 30,
+          "figurePartId": "fp-7-1-30",
+          "partNumber": "63-00846",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 31,
+          "figurePartId": "fp-7-1-31",
+          "partNumber": "65-00231",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 32,
+          "figurePartId": "fp-7-1-32",
+          "partNumber": "63-00634",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 33,
+          "figurePartId": "fp-7-1-33",
+          "partNumber": "60-00452",
+          "qty": 1,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 34,
+          "figurePartId": "fp-7-1-34",
+          "partNumber": "49-00097",
+          "qty": 10,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 10,
+          "reason": "Rubber grommet Ref.34 is not pictured on this source plate; ten expected locations cannot be inferred from holes in unrelated panels."
+        }
+      ]
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "source": {
+        "path": "public/drawings/ft3w/ft3w-cowling-fender-7-2.png",
+        "sha256": "edf82b409b8e33a6959d531d27c20cf26a14f0250bdd1e0a755a74243bb6d80d",
+        "width": 3856,
+        "height": 2459
+      },
+      "rows": [
+        {
+          "ref": 1,
+          "figurePartId": "fp-7-2-01",
+          "partNumber": "70-02269",
+          "qty": 4,
+          "visibleMapped": 4,
+          "baselineMapped": 1,
+          "addedInstances": 3,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 2,
+          "figurePartId": "fp-7-2-02",
+          "partNumber": "70-01766",
+          "qty": 2,
+          "visibleMapped": 2,
+          "baselineMapped": 1,
+          "addedInstances": 1,
+          "remaining": 0,
+          "reason": "All table-quantity instances identified on the inspected source plate; contour detail remains subject to existing partial-geometry notes."
+        },
+        {
+          "ref": 3,
+          "figurePartId": "fp-7-2-03",
+          "partNumber": "18-00019",
+          "qty": 2,
+          "visibleMapped": 1,
+          "baselineMapped": 1,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "Only one detached drain plug is shown on right-hand bottom projection; second plug location is obscured or omitted."
+        },
+        {
+          "ref": 4,
+          "figurePartId": "fp-7-2-04",
+          "partNumber": "10-106014-121",
+          "qty": 72,
+          "visibleMapped": 17,
+          "baselineMapped": 1,
+          "addedInstances": 16,
+          "remaining": 55,
+          "reason": "Source depicts one detached 18-position side-bolt group for four panels; 17 unobscured bolt contours are mapped, while the Ref.4 dot obscures the eighteenth contour. Additional panel bolt groups are omitted; table expected72 remains review."
+        },
+        {
+          "ref": 5,
+          "figurePartId": "fp-7-2-05",
+          "partNumber": "10-408010-122",
+          "qty": 20,
+          "visibleMapped": 11,
+          "baselineMapped": 1,
+          "addedInstances": 10,
+          "remaining": 9,
+          "reason": "Source depicts twelve positions in one detached bottom-screw group, but table specifies20 for two panels. Eleven unobscured contours mapped; the leader-dot target is contour-obscured. Omitted second-group screws and depiction/count discrepancy remain review."
+        },
+        {
+          "ref": 6,
+          "figurePartId": "fp-7-2-06",
+          "partNumber": "87-00321",
+          "qty": 1,
+          "visibleMapped": 0,
+          "baselineMapped": 0,
+          "addedInstances": 0,
+          "remaining": 1,
+          "reason": "No source-supported visible contour or unique same-reference pointer established on inspected plate; row remains withheld."
+        }
+      ]
+    }
+  ],
+  "geometricProbes": [
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "reference": 2,
+      "instanceId": "co-2-1-0008-physical-2",
+      "point": [
+        92.1978,
+        40.0847
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "reference": 3,
+      "instanceId": "co-2-1-0009-physical-2",
+      "point": [
+        86.8069,
+        36.3983
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "reference": 3,
+      "instanceId": "co-2-1-0009-physical-2",
+      "point": [
+        87.3268,
+        36.3983
+      ],
+      "expected": "hole",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-1",
+      "reference": 4,
+      "instanceId": "co-2-1-0010-physical-2",
+      "point": [
+        84.3798,
+        34.8305
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 10,
+      "instanceId": "co-2-2-0023-physical-2",
+      "point": [
+        49.445,
+        72.0498
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 11,
+      "instanceId": "co-2-2-0024-physical-2",
+      "point": [
+        46.4193,
+        69.0278
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 11,
+      "instanceId": "co-2-2-0024-physical-2",
+      "point": [
+        46.7188,
+        68.75
+      ],
+      "expected": "hole",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-frame-assy-2-2",
+      "reference": 12,
+      "instanceId": "co-2-2-0025-physical-2",
+      "point": [
+        44.8864,
+        67.2223
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-2",
+      "point": [
+        5.2925,
+        43.1506
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-3",
+      "point": [
+        6.75,
+        48.2496
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-4",
+      "point": [
+        8.1361,
+        54.1857
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-5",
+      "point": [
+        9.3838,
+        60.9589
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-6",
+      "point": [
+        11.1329,
+        73.6682
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-7",
+      "point": [
+        12.6682,
+        82.1157
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-8",
+      "point": [
+        14.1177,
+        88.965
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-9",
+      "point": [
+        15.124,
+        94.4445
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 2,
+      "instanceId": "co-3-1-0028-physical-10",
+      "point": [
+        18.7757,
+        96.347
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-2",
+      "point": [
+        17.9648,
+        36.9102
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-3",
+      "point": [
+        18.8259,
+        42.6941
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-4",
+      "point": [
+        19.5273,
+        48.4019
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-5",
+      "point": [
+        20.6707,
+        54.1857
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-6",
+      "point": [
+        26.4499,
+        64.0031
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-7",
+      "point": [
+        27.9031,
+        72.5267
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-8",
+      "point": [
+        29.0213,
+        80.2131
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-9",
+      "point": [
+        29.5683,
+        86.073
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 3,
+      "instanceId": "co-3-1-0029-physical-10",
+      "point": [
+        30.1083,
+        90.9437
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-2",
+      "point": [
+        35.1776,
+        35.7686
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-3",
+      "point": [
+        40.4184,
+        41.2481
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-4",
+      "point": [
+        34.3061,
+        47.793
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-5",
+      "point": [
+        44.7056,
+        55.7839
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-6",
+      "point": [
+        38.7018,
+        59.7413
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-7",
+      "point": [
+        44.8301,
+        68.3409
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-drive-system-3-1",
+      "reference": 4,
+      "instanceId": "co-3-1-0030-physical-8",
+      "point": [
+        39.5794,
+        70.2435
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 3,
+      "instanceId": "co-4-3-0092-physical-2",
+      "point": [
+        39.3826,
+        81.5277
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 5,
+      "instanceId": "co-4-3-0094-physical-2",
+      "point": [
+        18.3431,
+        24.3056
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 6,
+      "instanceId": "co-4-3-0095-physical-2",
+      "point": [
+        12.5737,
+        28.8194
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 7,
+      "instanceId": "co-4-3-0096-physical-2",
+      "point": [
+        72.3438,
+        17.5
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 8,
+      "instanceId": "co-4-3-0097-physical-2",
+      "point": [
+        29.1116,
+        5.9127
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-2",
+      "point": [
+        23.846,
+        13.7986
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-2",
+      "point": [
+        24.375,
+        13.7986
+      ],
+      "expected": "hole",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-3",
+      "point": [
+        71.7367,
+        19.7708
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-3",
+      "point": [
+        72.2656,
+        19.7708
+      ],
+      "expected": "hole",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-4",
+      "point": [
+        77.0133,
+        15.2292
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 9,
+      "instanceId": "co-4-3-0098-physical-4",
+      "point": [
+        76.4844,
+        15.2292
+      ],
+      "expected": "hole",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 10,
+      "instanceId": "co-4-3-0099-physical-2",
+      "point": [
+        24.6916,
+        18.4028
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 10,
+      "instanceId": "co-4-3-0099-physical-3",
+      "point": [
+        72.2697,
+        25.4861
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-hydraulic-4-3",
+      "reference": 10,
+      "instanceId": "co-4-3-0099-physical-4",
+      "point": [
+        76.4885,
+        20.7639
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-4",
+      "reference": 2,
+      "instanceId": "co-4-4-0101-physical-2",
+      "point": [
+        24.5501,
+        55.2083
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-4",
+      "reference": 3,
+      "instanceId": "co-4-4-0102-physical-2",
+      "point": [
+        24.47,
+        95.3472
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 9,
+      "instanceId": "co-4-2-0065-physical-2",
+      "point": [
+        7.2656,
+        26.5278
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 21,
+      "instanceId": "co-4-2-0077-physical-2",
+      "point": [
+        59.7438,
+        30.9722
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 21,
+      "instanceId": "co-4-2-0077-physical-3",
+      "point": [
+        70.0564,
+        34.3055
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 21,
+      "instanceId": "co-4-2-0077-physical-4",
+      "point": [
+        76.4626,
+        36.6667
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-2",
+      "point": [
+        46.6992,
+        36.3889
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-3",
+      "point": [
+        53.9648,
+        34.1667
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-4",
+      "point": [
+        85.8491,
+        51.6805
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-4",
+      "point": [
+        85.8594,
+        52.2847
+      ],
+      "expected": "hole",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-5",
+      "point": [
+        91.3179,
+        56.9583
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-5",
+      "point": [
+        91.3281,
+        57.5625
+      ],
+      "expected": "hole",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-6",
+      "point": [
+        90.5366,
+        59.5973
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 22,
+      "instanceId": "co-4-2-0078-physical-6",
+      "point": [
+        90.5469,
+        60.2014
+      ],
+      "expected": "hole",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 25,
+      "instanceId": "co-4-2-0081-physical-2",
+      "point": [
+        56.8994,
+        51.8055
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 26,
+      "instanceId": "co-4-2-0082-physical-2",
+      "point": [
+        57.1086,
+        46.0417
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 29,
+      "instanceId": "co-4-2-0085-physical-1",
+      "point": [
+        49.0625,
+        58.6458
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 29,
+      "instanceId": "co-4-2-0085-physical-2",
+      "point": [
+        50.5469,
+        55.382
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 30,
+      "instanceId": "co-4-2-0086-physical-1",
+      "point": [
+        45.8877,
+        56.9121
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 30,
+      "instanceId": "co-4-2-0086-physical-2",
+      "point": [
+        47.0368,
+        54.2116
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 31,
+      "instanceId": "co-4-2-0087-physical-1",
+      "point": [
+        39.3213,
+        51.4793
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 31,
+      "instanceId": "co-4-2-0087-physical-2",
+      "point": [
+        38.868,
+        52.5859
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 32,
+      "instanceId": "co-4-2-0088-physical-1",
+      "point": [
+        16.7969,
+        14.7569
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 32,
+      "instanceId": "co-4-2-0088-physical-2",
+      "point": [
+        14.6875,
+        16.4236
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 33,
+      "instanceId": "co-4-2-0089-physical-1",
+      "point": [
+        8.5937,
+        11.2153
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 33,
+      "instanceId": "co-4-2-0089-physical-2",
+      "point": [
+        6.4844,
+        12.7431
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 18,
+      "instanceId": "co-4-2-0074-physical-1",
+      "point": [
+        77.9687,
+        57.0833
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 19,
+      "instanceId": "co-4-2-0075-physical-1",
+      "point": [
+        80.8454,
+        57.9861
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-hydraulic-4-2",
+      "reference": 17,
+      "instanceId": "co-4-2-0073-physical-1",
+      "point": [
+        98.9258,
+        84.5833
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-2",
+      "point": [
+        23.7511,
+        57.5
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-2",
+      "point": [
+        24.0625,
+        57.5
+      ],
+      "expected": "hole",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-3",
+      "point": [
+        28.807,
+        56.8055
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-3",
+      "point": [
+        29.1407,
+        56.8055
+      ],
+      "expected": "hole",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-4",
+      "point": [
+        24.0635,
+        72.6388
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-4",
+      "point": [
+        24.375,
+        72.6388
+      ],
+      "expected": "hole",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-5",
+      "point": [
+        31.173,
+        72.0833
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-5",
+      "point": [
+        31.4844,
+        72.0833
+      ],
+      "expected": "hole",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-6",
+      "point": [
+        27.1509,
+        87.6389
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-6",
+      "point": [
+        26.7969,
+        87.6389
+      ],
+      "expected": "hole",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-7",
+      "point": [
+        31.6221,
+        87.3611
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-7",
+      "point": [
+        31.9531,
+        87.3611
+      ],
+      "expected": "hole",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 2,
+      "instanceId": "co-5-1-0104-physical-8",
+      "point": [
+        29.7639,
+        93.5417
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-2",
+      "point": [
+        14.4461,
+        62.5378
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-3",
+      "point": [
+        19.2244,
+        62.1257
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-4",
+      "point": [
+        14.7913,
+        77.1221
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-5",
+      "point": [
+        21.6463,
+        76.8479
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-6",
+      "point": [
+        17.1198,
+        91.7058
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-7",
+      "point": [
+        21.9007,
+        91.7054
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 3,
+      "instanceId": "co-5-1-0105-physical-8",
+      "point": [
+        20.0257,
+        97.6776
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-2",
+      "point": [
+        35.3962,
+        46.2051
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-3",
+      "point": [
+        34.4619,
+        49.4879
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-4",
+      "point": [
+        33.9593,
+        55.4548
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-5",
+      "point": [
+        34.0555,
+        63.3712
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-6",
+      "point": [
+        34.8368,
+        71.7045
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-7",
+      "point": [
+        36.026,
+        79.4836
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-8",
+      "point": [
+        37.5885,
+        85.3169
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-9",
+      "point": [
+        39.3454,
+        88.5105
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-10",
+      "point": [
+        38.6468,
+        48.927
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-11",
+      "point": [
+        40.2294,
+        54.7618
+      ],
+      "expected": "inside",
+      "polygonIndex": 10
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-12",
+      "point": [
+        41.4948,
+        62.8169
+      ],
+      "expected": "inside",
+      "polygonIndex": 11
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-13",
+      "point": [
+        42.276,
+        71.2891
+      ],
+      "expected": "inside",
+      "polygonIndex": 12
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-14",
+      "point": [
+        42.4476,
+        79.0665
+      ],
+      "expected": "inside",
+      "polygonIndex": 13
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-15",
+      "point": [
+        41.9189,
+        85.1234
+      ],
+      "expected": "inside",
+      "polygonIndex": 14
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 4,
+      "instanceId": "co-5-1-0106-physical-16",
+      "point": [
+        40.7453,
+        88.5129
+      ],
+      "expected": "inside",
+      "polygonIndex": 15
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-2",
+      "point": [
+        89.8781,
+        19.9021
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-3",
+      "point": [
+        91.5969,
+        19.6243
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-4",
+      "point": [
+        93.3407,
+        22.4051
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-5",
+      "point": [
+        95.2157,
+        27.9608
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-6",
+      "point": [
+        96.4887,
+        35.2812
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-7",
+      "point": [
+        97.4032,
+        43.6552
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-8",
+      "point": [
+        97.4813,
+        51.7108
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-9",
+      "point": [
+        96.4887,
+        57.3646
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-10",
+      "point": [
+        95.1606,
+        60.8368
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-11",
+      "point": [
+        93.4418,
+        60.8368
+      ],
+      "expected": "inside",
+      "polygonIndex": 10
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-12",
+      "point": [
+        91.4657,
+        58.0996
+      ],
+      "expected": "inside",
+      "polygonIndex": 11
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-13",
+      "point": [
+        89.7469,
+        52.544
+      ],
+      "expected": "inside",
+      "polygonIndex": 12
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-14",
+      "point": [
+        88.0282,
+        45.183
+      ],
+      "expected": "inside",
+      "polygonIndex": 13
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-15",
+      "point": [
+        87.7938,
+        36.9885
+      ],
+      "expected": "inside",
+      "polygonIndex": 14
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 5,
+      "instanceId": "co-5-1-0107-physical-16",
+      "point": [
+        87.9501,
+        29.4885
+      ],
+      "expected": "inside",
+      "polygonIndex": 15
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-2",
+      "point": [
+        3.6361,
+        78.3333
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-3",
+      "point": [
+        5.433,
+        78.4723
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-4",
+      "point": [
+        3.8704,
+        84.0277
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-5",
+      "point": [
+        6.2923,
+        83.75
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-6",
+      "point": [
+        4.6517,
+        89.4445
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-7",
+      "point": [
+        6.4486,
+        89.3055
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-1",
+      "reference": 7,
+      "instanceId": "co-5-1-0109-physical-8",
+      "point": [
+        5.7454,
+        91.8055
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-1",
+      "point": [
+        54.224,
+        35.5035
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-1",
+      "point": [
+        54.7656,
+        35.5035
+      ],
+      "expected": "hole",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-2",
+      "point": [
+        52.1613,
+        39.8612
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-2",
+      "point": [
+        52.5,
+        39.8612
+      ],
+      "expected": "hole",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-3",
+      "point": [
+        57.3748,
+        40.6945
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-3",
+      "point": [
+        57.7344,
+        40.6945
+      ],
+      "expected": "hole",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-4",
+      "point": [
+        52.4207,
+        51.9445
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-4",
+      "point": [
+        52.1093,
+        51.9445
+      ],
+      "expected": "hole",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-5",
+      "point": [
+        59.1416,
+        53.1944
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-5",
+      "point": [
+        59.4532,
+        53.1944
+      ],
+      "expected": "hole",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-6",
+      "point": [
+        54.1019,
+        64.1667
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-6",
+      "point": [
+        53.75,
+        64.1667
+      ],
+      "expected": "hole",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-7",
+      "point": [
+        58.798,
+        65.5555
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-7",
+      "point": [
+        59.1406,
+        65.5555
+      ],
+      "expected": "hole",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-8",
+      "point": [
+        56.1209,
+        69.7917
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 3,
+      "instanceId": "co-5-2-0112-physical-8",
+      "point": [
+        56.6406,
+        69.7917
+      ],
+      "expected": "hole",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-2",
+      "point": [
+        43.4844,
+        37.4374
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-3",
+      "point": [
+        42.4291,
+        39.7767
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-4",
+      "point": [
+        41.6966,
+        44.4891
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-5",
+      "point": [
+        41.4622,
+        50.6001
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-6",
+      "point": [
+        41.8529,
+        57.4056
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-7",
+      "point": [
+        42.7904,
+        63.7946
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-8",
+      "point": [
+        43.9453,
+        68.9338
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-9",
+      "point": [
+        45.3685,
+        71.989
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-10",
+      "point": [
+        46.7578,
+        72.5449
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-11",
+      "point": [
+        47.9466,
+        70.3224
+      ],
+      "expected": "inside",
+      "polygonIndex": 10
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-12",
+      "point": [
+        48.7279,
+        65.739
+      ],
+      "expected": "inside",
+      "polygonIndex": 11
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-13",
+      "point": [
+        48.9622,
+        59.4891
+      ],
+      "expected": "inside",
+      "polygonIndex": 12
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-14",
+      "point": [
+        48.5716,
+        52.4056
+      ],
+      "expected": "inside",
+      "polygonIndex": 13
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-15",
+      "point": [
+        47.634,
+        45.8779
+      ],
+      "expected": "inside",
+      "polygonIndex": 14
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 4,
+      "instanceId": "co-5-2-0113-physical-16",
+      "point": [
+        46.4421,
+        40.757
+      ],
+      "expected": "inside",
+      "polygonIndex": 15
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-1",
+      "point": [
+        18.5361,
+        43.5417
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-2",
+      "point": [
+        16.7392,
+        48.125
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-3",
+      "point": [
+        20.958,
+        49.2361
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-4",
+      "point": [
+        16.7392,
+        59.6528
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-5",
+      "point": [
+        22.5986,
+        61.7361
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-6",
+      "point": [
+        18.1455,
+        71.7361
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-7",
+      "point": [
+        22.3642,
+        73.5417
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 5,
+      "instanceId": "co-5-2-0114-physical-8",
+      "point": [
+        20.5673,
+        77.5695
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-2",
+      "point": [
+        11.6406,
+        49.2708
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-3",
+      "point": [
+        15.7032,
+        50.5208
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-4",
+      "point": [
+        11.6406,
+        61.0764
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-5",
+      "point": [
+        17.3438,
+        62.6736
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-6",
+      "point": [
+        13.125,
+        72.8125
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-7",
+      "point": [
+        17.1875,
+        75.1042
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 6,
+      "instanceId": "co-5-2-0115-physical-8",
+      "point": [
+        15.3906,
+        79.132
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-2",
+      "point": [
+        5.8172,
+        50.3404
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-3",
+      "point": [
+        9.6595,
+        51.7328
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-4",
+      "point": [
+        5.6809,
+        62.1279
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-5",
+      "point": [
+        11.1615,
+        64.3543
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-6",
+      "point": [
+        7.1889,
+        74.3582
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-7",
+      "point": [
+        11.0716,
+        76.2946
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-tire-wheel-5-2",
+      "reference": 7,
+      "instanceId": "co-5-2-0116-physical-8",
+      "point": [
+        9.0638,
+        80.3305
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 1,
+      "instanceId": "co-7-2-0377-physical-2",
+      "point": [
+        24.4437,
+        44.391
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 1,
+      "instanceId": "co-7-2-0377-physical-3",
+      "point": [
+        78.0833,
+        18.1891
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 1,
+      "instanceId": "co-7-2-0377-physical-4",
+      "point": [
+        91.1624,
+        24.5994
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 2,
+      "instanceId": "co-7-2-0378-physical-2",
+      "point": [
+        35.0815,
+        63.1811
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-1",
+      "point": [
+        4.2525,
+        55.428
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-2",
+      "point": [
+        6.5519,
+        57.0306
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-3",
+      "point": [
+        8.8003,
+        58.7133
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-4",
+      "point": [
+        11.0997,
+        60.3158
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-5",
+      "point": [
+        13.3991,
+        61.9184
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-6",
+      "point": [
+        15.7497,
+        63.6011
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-7",
+      "point": [
+        15.7497,
+        67.6075
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-8",
+      "point": [
+        15.7497,
+        75.7005
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-9",
+      "point": [
+        15.7497,
+        79.8671
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-10",
+      "point": [
+        13.5013,
+        78.1043
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-11",
+      "point": [
+        11.2019,
+        76.4216
+      ],
+      "expected": "inside",
+      "polygonIndex": 10
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-12",
+      "point": [
+        8.9536,
+        74.8191
+      ],
+      "expected": "inside",
+      "polygonIndex": 11
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-13",
+      "point": [
+        6.603,
+        73.1363
+      ],
+      "expected": "inside",
+      "polygonIndex": 12
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-14",
+      "point": [
+        4.4569,
+        71.4537
+      ],
+      "expected": "inside",
+      "polygonIndex": 13
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-15",
+      "point": [
+        4.4569,
+        67.4472
+      ],
+      "expected": "inside",
+      "polygonIndex": 14
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-16",
+      "point": [
+        4.4058,
+        63.4408
+      ],
+      "expected": "inside",
+      "polygonIndex": 15
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 4,
+      "instanceId": "co-7-2-0380-physical-17",
+      "point": [
+        4.3547,
+        59.4344
+      ],
+      "expected": "inside",
+      "polygonIndex": 16
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-1",
+      "point": [
+        47.0618,
+        78.5657
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-2",
+      "point": [
+        48.3904,
+        79.5272
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-3",
+      "point": [
+        49.7701,
+        80.4888
+      ],
+      "expected": "inside",
+      "polygonIndex": 2
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-4",
+      "point": [
+        51.0986,
+        81.5305
+      ],
+      "expected": "inside",
+      "polygonIndex": 3
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-5",
+      "point": [
+        49.5657,
+        82.3317
+      ],
+      "expected": "inside",
+      "polygonIndex": 4
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-6",
+      "point": [
+        47.9816,
+        83.2131
+      ],
+      "expected": "inside",
+      "polygonIndex": 5
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-7",
+      "point": [
+        45.0179,
+        83.3734
+      ],
+      "expected": "inside",
+      "polygonIndex": 6
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-8",
+      "point": [
+        43.6893,
+        82.3317
+      ],
+      "expected": "inside",
+      "polygonIndex": 7
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-9",
+      "point": [
+        42.3608,
+        81.5305
+      ],
+      "expected": "inside",
+      "polygonIndex": 8
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-10",
+      "point": [
+        43.9448,
+        80.4888
+      ],
+      "expected": "inside",
+      "polygonIndex": 9
+    },
+    {
+      "figureId": "fig-cowling-fender-7-2",
+      "reference": 5,
+      "instanceId": "co-7-2-0381-physical-11",
+      "point": [
+        45.5289,
+        79.6074
+      ],
+      "expected": "inside",
+      "polygonIndex": 10
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 5,
+      "instanceId": "co-7-1-0347-physical-1",
+      "point": [
+        61.9076,
+        17.4306
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 5,
+      "instanceId": "co-7-1-0347-physical-2",
+      "point": [
+        78.5137,
+        36.6667
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 6,
+      "instanceId": "co-7-1-0348-physical-2",
+      "point": [
+        36.9769,
+        29.5139
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 17,
+      "instanceId": "co-7-1-0359-physical-2",
+      "point": [
+        34.7452,
+        25.4167
+      ],
+      "expected": "inside",
+      "polygonIndex": 1
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 7,
+      "instanceId": "co-7-1-0349-physical-1",
+      "point": [
+        76.6289,
+        39.1667
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 8,
+      "instanceId": "co-7-1-0350-physical-1",
+      "point": [
+        59.9922,
+        20.4861
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 9,
+      "instanceId": "co-7-1-0351-physical-1",
+      "point": [
+        74.5312,
+        41.8055
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 10,
+      "instanceId": "co-7-1-0352-physical-1",
+      "point": [
+        57.9167,
+        23.6111
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 20,
+      "instanceId": "co-7-1-0362-physical-1",
+      "point": [
+        59.1406,
+        72.2223
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 21,
+      "instanceId": "co-7-1-0363-physical-1",
+      "point": [
+        60.2914,
+        78.8889
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 22,
+      "instanceId": "co-7-1-0364-physical-1",
+      "point": [
+        43.1858,
+        38.8889
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 25,
+      "instanceId": "co-7-1-0367-physical-1",
+      "point": [
+        42.9773,
+        83.75
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 26,
+      "instanceId": "co-7-1-0368-physical-1",
+      "point": [
+        32.94,
+        52.0139
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 27,
+      "instanceId": "co-7-1-0369-physical-1",
+      "point": [
+        40.3386,
+        89.5833
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 28,
+      "instanceId": "co-7-1-0370-physical-1",
+      "point": [
+        30.2832,
+        56.875
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 1,
+      "instanceId": "co-7-1-0343-physical-1",
+      "point": [
+        26.6602,
+        60.3472
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 4,
+      "instanceId": "co-7-1-0346-physical-1",
+      "point": [
+        26.1198,
+        58.8195
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 2,
+      "instanceId": "co-7-1-0344-physical-1",
+      "point": [
+        36.9318,
+        93.75
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    },
+    {
+      "figureId": "fig-cowling-fender-7-1",
+      "reference": 3,
+      "instanceId": "co-7-1-0345-physical-1",
+      "point": [
+        37.6107,
+        94.3056
+      ],
+      "expected": "inside",
+      "polygonIndex": 0
+    }
+  ]
+}

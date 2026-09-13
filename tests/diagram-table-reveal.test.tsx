@@ -80,7 +80,7 @@ test("table activation and Show selected reveal numeric regions at existing zoom
   await waitFor(() => expect(sheet.scrollTop).toBe(260));
 });
 
-test("mixed selected occurrences reveal numeric, legacy and marker union once, excluding their lower-priority fallbacks and unrelated parts", async () => {
+test("mixed selected occurrences reveal component and displaced pointer union, excluding unrelated parts", async () => {
   const props = { label:"Mixed", src:"/test.png", width:100, height:100, zoom:4, onZoomChange:vi.fn(),
     selectedPartIds:new Set(["part"]), markers:[
       { id:"numeric", number:1, figurePartId:"row", partId:"part", x:1, y:1, maskPath:"M0 0 L100 0 L100 100 Z" },
@@ -104,11 +104,11 @@ test("mixed selected occurrences reveal numeric, legacy and marker union once, e
   // All references intentionally share the same printed number. DOM order is
   // used only to install this jsdom geometry fixture, never to resolve identity.
   stage.querySelectorAll("button").forEach((button,index) => {
-    button.getBoundingClientRect = () => index === 2 ? rect(360,380) : rect(0,20);
+    button.getBoundingClientRect = () => index === 0 ? rect(380,400) : index === 1 ? rect(340,360) : index === 2 ? rect(360,380) : rect(0,20);
   });
   Object.defineProperty(sheet, "scrollBy", { value:({ top=0, left=0 }:ScrollToOptions) => { sheet.scrollTop+=top;sheet.scrollLeft+=left; } });
   view.rerender(<DrawingViewer {...props} hoveredPartId="other" selectionActivation={{ origin:"table", sequence:1 }} />);
-  await waitFor(() => expect(sheet.scrollTop).toBe(280));
-  expect(sheet.scrollLeft).toBe(280);
+  await waitFor(() => expect(sheet.scrollTop).toBe(300));
+  expect(sheet.scrollLeft).toBe(300);
   expect(props.onZoomChange).not.toHaveBeenCalled();
 });

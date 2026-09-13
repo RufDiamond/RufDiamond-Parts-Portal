@@ -40,6 +40,7 @@ function serveManifest(manifest: unknown) {
   const read = fs.readFile.bind(fs);
   vi.spyOn(fs, "readFile").mockImplementation(async (file, options) => {
     if (String(file).endsWith("/part-highlights.json")) return Buffer.from(JSON.stringify(manifest)) as never;
+    if (String(file).includes("/part-highlights-quantity-")) return Buffer.from(JSON.stringify({ ...manifest as object, figures: [] })) as never;
     if (String(file).endsWith("/source-corrections.json")) return Buffer.from(JSON.stringify({ ...manifest as object, figures: [] })) as never;
     return read(file, options as never) as never;
   });
@@ -88,21 +89,22 @@ test("Console 6.10 retains neck arms and interior metal without filling its T-sh
   expect(geometry.regions.some((r) => pointInRegion([609,659],r))).toBe(true);
 });
 
-test("Electrical 11.3 scopes the directly labelled fuse holder and excludes panel windows", async () => {
+test("Electrical 11.3 includes repeated fuse holders and excludes panel windows", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-electric-11-3"))!, "hosted-review");
   const contains = (ref: number, point: [number, number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point, r));
   expect(contains(2, [296, 210])).toBe(true);
-  expect(contains(2, [345, 198])).toBe(false);
+  expect(contains(2, [345, 198])).toBe(true);
   expect(contains(15, [765, 157])).toBe(false);
   expect(contains(15, [790, 120])).toBe(false);
   expect(contains(15, [747, 170])).toBe(true);
 });
 
-test("Hydraulic 4.1 fittings do not infer similar copies or fill established bores", async () => {
+test("Hydraulic 4.1 repeated fittings preserve established bores", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-hydraulic-4-1"))!, "hosted-review");
   const contains = (ref: number, point: [number, number]) => result.detail.callouts.find(c => c.number === ref)!.componentGeometry!.regions.some(r => pointInRegion(point, r));
-  for (const [ref, point] of [[7,[210,284]],[10,[350,696]],[11,[259,291]],[18,[680,285]]] as const)
-    expect(contains(ref, [...point])).toBe(false);
+  for (const [ref, point] of [[7,[210,284]],[11,[259,291]],[18,[680,285]]] as const)
+    expect(contains(ref, [...point])).toBe(true);
+  expect(contains(10, [350,696])).toBe(false);
   for (const [ref, point] of [[9,[418,664]],[10,[347,666]],[11,[167,255]],[16,[611,216]],[17,[611,343]]] as const)
     expect(contains(ref, [...point])).toBe(false);
   for (const ref of [7,9,10,11,12,13,14,15,16,17,18])
@@ -127,10 +129,11 @@ test("Windshield frame keeps its narrow right rail separate from the attached br
     expect(frame.regions.some(r => pointInRegion(point,r))).toBe(false);
 });
 
-test("Fuel 9.1 excludes unlabelled lookalikes and source-visible clamp bores", async () => {
+test("Fuel 9.1 includes the second plug and excludes source-visible clamp bores", async () => {
   const result = await loadCalloutPreview((await getFigureDetail("fig-fuel-system-9-1"))!, "hosted-review");
   const contains = (ref: number, point: [number,number]) => result.detail.callouts.find(c=>c.number===ref)!.componentGeometry!.regions.some(region=>pointInRegion(point,region));
-  for (const [ref,point] of [[10,[386,511]],[12,[219,613]],[16,[429,610]],[16,[444,622]],[18,[589,317]],[19,[585,261]],[3,[695,443]],[3,[804,396]]] as [number,[number,number]][]) expect(contains(ref,point)).toBe(false);
+  expect(contains(10,[386,511])).toBe(true);
+  for (const [ref,point] of [[12,[219,613]],[16,[429,610]],[16,[444,622]],[18,[589,317]],[19,[585,261]],[3,[695,443]],[3,[804,396]]] as [number,[number,number]][]) expect(contains(ref,point)).toBe(false);
   expect(contains(3,[744,412])).toBe(true);
   expect(contains(13,[332,612])).toBe(true);
 });
@@ -460,3 +463,19 @@ test.each(["part-highlights.json", "part-highlights-chassis.json", "source-corre
     }
   },
 );
+
+
+test("Hydraulic 4.1 finds the repeated visible instances, retaining review for hidden ones", async () => {
+  const { reportQuantityOccurrences } = await import("@/lib/quantity-occurrences");
+  const result = await loadCalloutPreview((await getFigureDetail("fig-hydraulic-4-1"))!, "hosted-review");
+  const reports = reportQuantityOccurrences(result.detail.rows, result.detail.callouts);
+  expect(result.notice?.match(/Quantity review:/g)).toHaveLength(1);
+  for (const ref of [3, 4, 7, 11, 18, 20, 24]) {
+    expect(reports.find(r => r.refNumbers.includes(ref)), `Ref ${ref}`).toMatchObject({ expected: 2, detected: 2, status: "match" });
+  }
+  expect(reports.find(r => r.refNumbers.includes(14))).toMatchObject({ expected: 3, detected: 3, status: "match" });
+  for (const ref of [9, 10, 25]) {
+    expect(reports.find(r => r.refNumbers.includes(ref)), `Ref ${ref}`).toMatchObject({ expected: 4, detected: 2, needsReview: true });
+  }
+  expect(result.notice).not.toContain("display-only");
+});

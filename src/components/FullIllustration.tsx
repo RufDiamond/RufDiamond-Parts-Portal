@@ -8,6 +8,7 @@ import {
   type DrawingMarker,
 } from "./DrawingViewer";
 import styles from "./FullIllustration.module.css";
+import type { QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
 import type { DiagramRegionDocument } from "@/lib/drawing";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 
@@ -25,6 +26,7 @@ export interface FullIllustrationProps {
   onClearSelection?: () => void;
   previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
+  quantityReports?: ReadonlyMap<string, QuantityOccurrenceReport>;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
@@ -55,6 +57,7 @@ export function FullIllustration({
   onClearSelection,
   previewNotice = null,
   selectedPartIds,
+  quantityReports,
   hoveredPartId,
   onTogglePart,
   onHoverPart,
@@ -183,6 +186,7 @@ export function FullIllustration({
             selectionActivation={selectionActivation}
             revealRequest={revealRequest}
             selectedPartIds={selectedPartIds}
+            quantityReports={quantityReports}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}
             onHoverPart={onHoverPart}

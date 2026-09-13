@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { buildDrawingMarkers } from "@/lib/drawing";
+import { buildDrawingMarkers, layoutSelectedMarkers } from "@/lib/drawing";
 import { applyCalloutPreview } from "@/lib/callout-preview";
 import {
   expandCalloutsForQuantity,
   materializeQuantityOccurrences,
   reportQuantityOccurrences,
+  quantitySelectionMessage,
   splitCalloutByRegions,
 } from "@/lib/quantity-occurrences";
 import type { Callout, FigureDetail, FigurePartRow } from "@/types/catalog";
@@ -82,6 +83,13 @@ function detail(callouts: Callout[], qty = 4): FigureDetail {
 }
 
 describe("quantity occurrences", () => {
+  test("a matching pointer count does not clear an unresolved source identity", () => {
+    const sourceRow = { ...row({ id: "fp-4", qty: 1 }), mappingReviewReason: "Printed reference points to a different component." };
+    const report = reportQuantityOccurrences([sourceRow], [callout({id:"co-1",x:10,y:20})])[0];
+    expect(report).toMatchObject({status:"match",detected:1,needsReview:true,reviewReason:sourceRow.mappingReviewReason});
+    expect(quantitySelectionMessage(report)).toContain(sourceRow.mappingReviewReason);
+    expect(quantitySelectionMessage(report)).not.toContain("All 1 instances");
+  });
   test("Quantity is the expected instance count and shortfalls need review", () => {
     const rows = [row({ id: "fp-4", qty: 4 })];
     const callouts = [callout({ id: "co-1", x: 10, y: 20 })];
@@ -143,6 +151,7 @@ describe("quantity occurrences", () => {
         drawingSha256: "a".repeat(64),
         imageWidth: 100,
         imageHeight: 100,
+        instanceIds: ["left", "right"],
         regions: [
           {
             id: "r1",
@@ -213,4 +222,70 @@ describe("quantity occurrences", () => {
     expect(result.notice).toContain("Quantity review");
     expect(result.notice).toContain("flagged");
   });
+});
+
+
+test("a completely unmapped Quantity is flagged for review", () => {
+  expect(reportQuantityOccurrences([row({ id: "fp-4", qty: 4 })], [callout({ id: "empty" })])[0])
+    .toMatchObject({ detected: 0, expected: 4, status: "unmapped", needsReview: true });
+});
+
+test("physical regions supply every pointer even when no printed-label coordinate is available", () => {
+  const source = callout({ id: "regions-only", componentGeometry: {
+    instanceIds: ["left", "middle", "right"],
+    drawingPath: "/drawings/demo.png", drawingSha256: "a".repeat(64), imageWidth: 100, imageHeight: 100,
+    regions: [10, 30, 50].map((x) => ({ id: `r-${x}`, outer: [[x,10],[x+8,10],[x+8,18],[x,18]], holes: [] })),
+  } });
+  const rows = [row({ id: "fp-4", qty: 3 })];
+  expect(buildDrawingMarkers(rows, [source])).toHaveLength(3);
+  expect(reportQuantityOccurrences(rows, [source])[0]).toMatchObject({ detected: 3, status: "match" });
+});
+
+test.each([NaN, Infinity, -1, 101])("invalid coordinate %s cannot count as a detected instance", (x) => {
+  const rows = [row({ id: "fp-4", qty: 1 })];
+  const observations = [callout({ id: "invalid", x, y: 20 })];
+  expect(buildDrawingMarkers(rows, observations)).toHaveLength(0);
+  expect(reportQuantityOccurrences(rows, observations)[0]).toMatchObject({ detected: 0, needsReview: true });
+});
+
+
+test("separate contours of one physical component do not inflate Quantity", () => {
+  const source = callout({ id: "one-component", x: 10, y: 10, componentGeometry: {
+    drawingPath: "/drawings/demo.png", drawingSha256: "a".repeat(64), imageWidth: 100, imageHeight: 100,
+    regions: [10, 30].map((x) => ({ id: `r-${x}`, outer: [[x,10],[x+8,10],[x+8,18],[x,18]], holes: [] })),
+  } });
+  const rows = [row({ id: "fp-4", qty: 1 })];
+  expect(buildDrawingMarkers(rows, [source])).toHaveLength(1);
+  expect(reportQuantityOccurrences(rows, [source])[0]).toMatchObject({ detected: 1, status: "match" });
+});
+
+
+test("three source locations for Quantity four remain visible and flagged for review", () => {
+  const result = applyCalloutPreview(detail([callout({ id: "co-1" })]), {
+    figureId: "fig-demo", drawingPath: "public/drawings/demo.png", sha256: "b".repeat(64),
+    width: 100, height: 100, notes: "test", markers: [
+      { number: 4, x: 10, y: 10 }, { number: 4, x: 30, y: 30 }, { number: 4, x: 50, y: 50 },
+    ],
+  });
+  expect(buildDrawingMarkers(result.detail.rows, result.detail.callouts)).toHaveLength(3);
+  expect(reportQuantityOccurrences(result.detail.rows, result.detail.callouts)[0]).toMatchObject({ detected: 3, expected: 4, needsReview: true });
+});
+
+
+test("nearby selected pointers remain separate without changing physical coordinates", () => {
+  const markers = [0,1,2,3].map((i) => ({ id: `m-${i}`, partId: "part-1", number: 4, x: 50, y: 50 + i }));
+  const before = structuredClone(markers);
+  const positions = layoutSelectedMarkers(markers, new Set(["part-1"]), 500, 300);
+  expect(markers).toEqual(before);
+  expect(positions.size).toBe(4);
+  const placed = Array.from(positions.values());
+  for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
+    expect(Math.abs(placed[i].x - placed[j].x) * 5 >= 36 || Math.abs(placed[i].y - placed[j].y) * 3 >= 36).toBe(true);
+  }
+  expect(layoutSelectedMarkers(markers, new Set(), 500, 300).size).toBe(0);
+});
+
+test("zero quantity with no occurrences needs no physical mapping", () => {
+  expect(reportQuantityOccurrences([row({ id: "fp-4", qty: 0 })], [])[0])
+    .toMatchObject({ expected: 0, detected: 0, status: "match", needsReview: false });
 });

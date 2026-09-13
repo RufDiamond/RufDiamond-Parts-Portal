@@ -1,0 +1,19 @@
+{
+  "status": "NOT_FOR_CUSTOMER_USE",
+  "summary": {
+    "figures": 45,
+    "rows": 635,
+    "expectedQuantity": 1680,
+    "mappedPointers": 957,
+    "numericContourInstances": 901,
+    "retainedMaskInstances": 7,
+    "labelOnlyInstances": 49,
+    "baselinePointers": 568,
+    "addedPointers": 389,
+    "remainingExpected": 723,
+    "countMatchedRows": 447,
+    "reviewRows": 200,
+    "countMatchedButSourceReview": 12
+  },
+  "note": "Pointer counts include retained labels. A count match does not establish complete contour coverage, source correctness, or approval. Quantity can include lengths (for example seals sold by foot); these remain review cases under the requested count validation."
+}
