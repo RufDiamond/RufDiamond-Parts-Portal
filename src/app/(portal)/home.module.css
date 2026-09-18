@@ -20,12 +20,13 @@
   padding: clamp(12px, 1.4vw, 24px);
   width: 100%;
   min-height: 100%;
-  background-image: linear-gradient(#ffffff12 1px, transparent 1px),
-    linear-gradient(90deg, #ffffff12 1px, transparent 1px),
-    radial-gradient(ellipse at center, #292929, #0d0d0d);
-  background-size: 26px 26px, 26px 26px, 100% 100%;
-  background-position: center;
   background-color: #0d0d0d;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    radial-gradient(ellipse at center, #2a2a2a, #0d0d0d);
+  background-size: 24px 24px, 24px 24px, 100% 100%;
+  background-position: center top;
 }
 
 /* Two columns of cards, each column flush top to bottom. */
