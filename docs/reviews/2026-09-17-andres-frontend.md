@@ -21,7 +21,7 @@ Source: the user's compiled notes from Andres's September 16 review and earlier 
 | Cursor-centred wheel zoom | Preserve image-relative pointer anchor; account for letterboxing and scroll boundaries. |
 | Centred headers | Parts table column headings centred. |
 | Diagram/list deselect, checkbox sync, Clear Selection | One part-level selection drives highlights and checkboxes. Repeated physical occurrences remain grouped. Clearing does not remove parts already added to the request. |
-| Bottom selection notices | Labelled as selected part locations/drawing coverage, distinct from request quantities. Mapping gaps remain visible and do not invent locations. |
+| Bottom selection notices | Removed from the customer drawing view. Quantity/mapping status stays on the parts table only; customers should not see “Needs Review / missing locations” dumps under the plate. |
 | Show selected part | Renamed to “Show selection in drawing” with an explanatory tooltip; brings selected mapped parts into view. |
 | Customer quote document | Only the original left-hand RUF/factory-format document is visible to the customer, as requested; the second document is hidden. No delivery claim is made. |
 | Print / Save PDF | Customer document only. Save PDF opens the browser print dialog; select Save as PDF. Multi-page tables retain their headers. |

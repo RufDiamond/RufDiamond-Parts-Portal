@@ -1,7 +1,5 @@
 "use client";
 
-import { quantitySelectionMessage, type QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
-
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
 import { DiagramRegions } from "./DiagramRegions";
@@ -54,7 +52,6 @@ export interface DrawingViewerProps {
    * a part fitted in two places lights in both — and the rest recede.
    */
   selectedPartIds?: ReadonlySet<string>;
-  quantityReports?: ReadonlyMap<string, QuantityOccurrenceReport>;
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
@@ -117,7 +114,6 @@ export function DrawingViewer({
   selectionActivation,
   revealRequest = 0,
   selectedPartIds = NO_SELECTION,
-  quantityReports,
   hoveredPartId = null,
   onTogglePart,
   onHoverPart,
@@ -491,17 +487,6 @@ export function DrawingViewer({
         ))}
         </div>
       </div>
-      {quantityReports && selectedPartIds.size > 0 ? (
-        <div className={styles.selectionSummary} role="status" aria-live="polite">
-          <strong>Selected part locations</strong>
-          <p>Drawing coverage only; request quantities are unchanged.</p>
-          {Array.from(quantityReports.values()).filter((report) => selectedPartIds.has(report.partId)).map((report) => (
-            <div key={report.figurePartId} data-review={report.needsReview || undefined}>
-              {quantitySelectionMessage(report)}
-            </div>
-          ))}
-        </div>
-      ) : null}
     </figure>
   );
 }
