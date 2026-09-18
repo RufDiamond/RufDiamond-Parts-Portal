@@ -29,7 +29,7 @@ export default async function FigurePage({
   return (
     <FigureWorkspace
       detail={preview.detail}
-      previewNotice={preview.notice}
+      previewNotice={null}
       usage={usage}
       sheet={index === -1 ? "—" : `${pad(index + 1)} / ${pad(total)}`}
       index={index === -1 ? 0 : index}

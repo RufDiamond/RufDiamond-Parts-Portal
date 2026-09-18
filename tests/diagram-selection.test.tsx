@@ -207,6 +207,11 @@ test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,
   },
 );
 
+test("customer figure hides marker-review notices", async () => {
+  const { container } = render(workspace(await fixture()));
+  expect(container.textContent).not.toMatch(/marker review|unapproved|local preview|Expected quantity/i);
+});
+
  test("checkbox, diagram deselection, and fullscreen clear share one selection", async () => {
   const { container } = render(workspace(await fixture()));
   const boxes = screen.getAllByRole("checkbox", { name: "Select A on the drawing" }) as HTMLInputElement[];

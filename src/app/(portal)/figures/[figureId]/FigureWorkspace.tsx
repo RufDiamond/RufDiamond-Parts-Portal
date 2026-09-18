@@ -646,20 +646,17 @@ export function FigureWorkspace({
       )}
 
       <footer className={styles.notices}>
-        {!detail.release && <p className={styles.previewNotice}>
-          {reviewOnly ? (
-            <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
-          ) : (
-            <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
-          )}
-        </p>}
-        {previewNotice ? (
-          <p role="status" className={styles.previewNotice}>
-            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
-            open the full illustration.
+        {reviewOnly && !detail.release ? (
+          <p className={styles.previewNotice}>
+            Read-only marker review. Select references to check their positions; ordering and exports are disabled.{" "}
+            <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link>
           </p>
         ) : null}
-
+        {reviewOnly && previewNotice ? (
+          <p role="status" className={styles.previewNotice}>
+            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or open the full illustration.
+          </p>
+        ) : null}
       </footer>
 
       {cartComingSoon ? (
