@@ -167,17 +167,26 @@ export function DrawingViewer({
     const box = sheet.current;
     const area = drawing.current;
     if (!box || !area) return;
-    if (!anchor) { area.style.marginLeft = ""; return; }
+    if (!anchor) {
+      area.style.marginLeft = "";
+      area.style.marginTop = "";
+      return;
+    }
     const bounds = box.getBoundingClientRect();
     const padding = parseFloat(getComputedStyle(box).paddingLeft) || 0;
-    const plate = area.getBoundingClientRect();
+    const plate = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     // Letterboxed artwork can move within the unused horizontal space too.
     const free = Math.max(0, box.clientWidth - padding * 2 - plate.width);
     area.style.marginLeft = `${Math.max(0, Math.min(free,
       anchor.x - anchor.u * plate.width - bounds.left - box.clientLeft - padding))}px`;
-    const positioned = area.getBoundingClientRect();
+    area.style.marginTop = "";
+    const positioned = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     box.scrollLeft += positioned.left + anchor.u * positioned.width - anchor.x;
     box.scrollTop += positioned.top + anchor.v * positioned.height - anchor.y;
+    const scrolled = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
+    // A tall viewport may have no vertical overflow yet. Shift by the
+    // unconsumed remainder so the real artwork point still stays anchored.
+    area.style.marginTop = `${anchor.y - scrolled.top - anchor.v * scrolled.height}px`;
   }, [zoom, src]);
   useEffect(() => {
     const element = drawing.current;
@@ -298,7 +307,7 @@ export function DrawingViewer({
     const onWheel = (event: WheelEvent) => {
       handleDrawingWheel(event, area, zoom, (nextZoom) => {
         if (nextZoom === zoom) return;
-        const plate = area.getBoundingClientRect();
+        const plate = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
         wheelAnchor.current = { x: event.clientX, y: event.clientY,
           u: (event.clientX - plate.left) / plate.width,
           v: (event.clientY - plate.top) / plate.height };

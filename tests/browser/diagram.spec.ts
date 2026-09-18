@@ -477,8 +477,8 @@ test("mixed occurrence union reveals numeric, legacy shape and marker together w
 
 
 test("wheel zoom preserves the artwork point under the cursor", async ({ page }) => {
-  await page.goto("http://localhost:3101");
-  const drawing = page.locator("figure img");
+  await page.goto(`${base}/figures/fig-filters-1-1`);
+  const drawing = page.locator("figure img").first();
   const before = await drawing.boundingBox();
   const point = { x: before!.x + before!.width * .6, y: before!.y + before!.height * .65 };
   await page.mouse.move(point.x, point.y);
