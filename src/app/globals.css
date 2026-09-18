@@ -309,3 +309,20 @@ textarea {
     justify-self: end;
   }
 }
+
+/* Quote exports use normal paged flow and omit the surrounding portal. */
+@media print {
+  body:has([data-quote-doc]) { background: white; }
+  body:has([data-quote-doc]) *:has([data-quote-doc]) { display: contents !important; }
+  body:has([data-quote-doc]) *:not(:has([data-quote-doc])):not([data-quote-doc]):not([data-quote-doc] *) {
+    display: none !important;
+  }
+  body:has([data-quote-doc]) [data-quote-doc] {
+    position: static; width: 100%; max-width: none;
+    margin: 0; padding: 0; border: 0; box-shadow: none;
+    color: black; background: white;
+  }
+  [data-quote-doc] thead { display: table-header-group; }
+  [data-quote-doc] tr { break-inside: avoid; }
+  [data-quote-doc] p { overflow-wrap: anywhere; }
+}

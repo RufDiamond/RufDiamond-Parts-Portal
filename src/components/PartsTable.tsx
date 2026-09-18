@@ -139,7 +139,6 @@ export function PartsTable({
 
   return (
     <div ref={scroller} className={styles.scroller}>
-      <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
       <table className={styles.table}>
         <thead>
           <tr className={styles.head}>
@@ -242,7 +241,7 @@ export function PartsTable({
                         checked={requestedPartIds.has(part.id)}
                         onChange={() => onToggleRequested?.(part.id)}
                         onClick={(event) => event.stopPropagation()}
-                        aria-label={`Add ${part.partNumber} to the cart`}
+                        aria-label={`Select ${part.partNumber} on the drawing`}
                       />
                     </td>
                   ) : null}
@@ -320,6 +319,7 @@ export function PartsTable({
           )}
         </tbody>
       </table>
+      <ZeroPriceNotice prices={rows.map(row => row.part.listPrice)} />
     </div>
   );
 }

@@ -130,3 +130,8 @@
   margin: 0;
   font-style: italic;
 }
+
+@media print {
+  .keepTogether { break-inside: avoid; }
+  .noteTitle, .sectionTitle { break-after: avoid; }
+}

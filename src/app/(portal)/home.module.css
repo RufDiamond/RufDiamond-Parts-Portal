@@ -16,12 +16,14 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: 2cqw;
-  padding: 2.4cqw;
+  gap: clamp(10px, 1.2vw, 20px);
+  padding: clamp(12px, 1.4vw, 24px);
   width: 100%;
   min-height: 100%;
-  background-image: url("/home/grid.jpg");
-  background-size: cover;
+  background-image: linear-gradient(#ffffff12 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff12 1px, transparent 1px),
+    radial-gradient(ellipse at center, #292929, #0d0d0d);
+  background-size: 26px 26px, 26px 26px, 100% 100%;
   background-position: center;
   background-color: #0d0d0d;
 }
@@ -30,15 +32,15 @@
 .column {
   display: grid;
   align-content: start;
-  gap: 2cqw;
+  gap: clamp(10px, 1.2vw, 20px);
 }
 
 .card {
   display: grid;
   align-content: center;
   gap: 1cqw;
-  padding: 2cqw;
-  min-height: 11cqw;
+  padding: clamp(12px, 1.25vw, 22px);
+  min-height: 0;
   border: 1px solid var(--deck-panel);
   border-radius: 1cqw;
   color: var(--deck-on-dark);
@@ -59,7 +61,7 @@ a.card:hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  column-gap: 2cqw;
+  column-gap: clamp(10px, 1.2vw, 20px);
 }
 
 /* Cards whose icon leads. */
@@ -75,7 +77,7 @@ a.card:hover {
 
 .title {
   margin: 0;
-  font: var(--weight-bold) 2.05cqw / 1.15 var(--font-ui);
+  font: var(--weight-bold) clamp(18px, 1.7vw, 28px) / 1.15 var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.01em;
 }
@@ -93,7 +95,7 @@ a.card:hover {
 
 .text {
   margin: 0;
-  font: italic var(--weight-regular) 1.32cqw / 1.35 var(--font-ui);
+  font: italic var(--weight-regular) clamp(12px, 1.12vw, 18px) / 1.35 var(--font-ui);
   color: var(--deck-on-dark);
 }
 
@@ -127,11 +129,11 @@ a.card:hover {
 .social {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  column-gap: 2cqw;
+  column-gap: clamp(10px, 1.2vw, 20px);
 }
 
 .promo {
-  width: 13cqw;
+  width: clamp(85px, 9vw, 145px);
   height: auto;
   object-fit: contain;
 }
@@ -207,7 +209,7 @@ a.card:hover {
 
 .newsHeadline {
   margin: 0;
-  font: italic var(--weight-regular) 1.32cqw / 1.3 var(--font-ui);
+  font: italic var(--weight-regular) clamp(12px, 1.12vw, 18px) / 1.3 var(--font-ui);
 }
 
 /* ── Narrow screens ───────────────────────────────────────────────────
@@ -270,4 +272,18 @@ a.card:hover {
 .socialLinkPending {
   opacity: 0.45;
   cursor: default;
+}
+
+@media (min-width: 901px) {
+  .stage { height: calc(100dvh - 118px); min-height: 510px; align-items: stretch; border-radius: 12px; }
+  .column { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
+  .card { background: #171717df; }
+  .icon { width: clamp(60px, 7vw, 112px); max-height: 75px; }
+  .iconSmall { width: clamp(44px, 4.5vw, 72px); max-height: 60px; }
+  .socialIcon { width: 34px; height: 34px; }
+  .socialIconWide { width: 42px; }
+  .news { gap: 10px; }
+  .newsList { gap: 8px; }
+  .newsItem { grid-template-columns: 80px minmax(0, 1fr); gap: 12px; }
+  .newsThumb, .newsThumbTall { height: 48px; }
 }

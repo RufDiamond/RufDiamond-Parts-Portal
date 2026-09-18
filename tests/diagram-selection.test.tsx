@@ -79,9 +79,13 @@ test("label, component, and table focus converge; selecting a part also ticks it
   fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(regions()[0].getAttribute("aria-pressed")).toBe("false");
   expect(regions()[1].getAttribute("aria-pressed")).toBe("false");
-  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
-  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(true);
+  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(false);
+  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(false);
+  fireEvent.click(tableRows()[0]);
+  fireEvent.click(tableRows()[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
+  expect(screen.getByRole("button", { name: /Check cart · 2/ })).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(screen.getByRole("button", { name: /Check cart · 2/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
   const full = screen.getByRole("dialog");
@@ -199,3 +203,18 @@ test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,
     assertValidation(screen.getByRole("dialog").querySelector("figure")!);
   },
 );
+
+ test("checkbox, diagram deselection, and fullscreen clear share one selection", async () => {
+  const { container } = render(workspace(await fixture()));
+  const boxes = screen.getAllByRole("checkbox", { name: "Add A to the cart" }) as HTMLInputElement[];
+  fireEvent.click(boxes[0]);
+  const marker = within(container.querySelector("figure")!).getAllByRole("button", {name:/Callout 13: A/})[0];
+  expect(marker.getAttribute("aria-pressed")).toBe("true");
+  expect(boxes.every(box => box.checked)).toBe(true);
+  fireEvent.click(marker);
+  expect(boxes.every(box => !box.checked)).toBe(true);
+  fireEvent.click(boxes[0]);
+  fireEvent.click(screen.getByRole("button", {name:"Illustration full screen"}));
+  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {name:"Clear selection"}));
+  expect(boxes.every(box => !box.checked)).toBe(true);
+});

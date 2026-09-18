@@ -27,7 +27,7 @@
   background: var(--deck-table-head);
   border: 1px solid var(--rule);
   font: var(--weight-semibold) var(--text-2xs) / 1.2 var(--font-ui);
-  text-align: left;
+  text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   white-space: nowrap;

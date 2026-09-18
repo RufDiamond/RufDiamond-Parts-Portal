@@ -48,7 +48,8 @@
 
 .documents {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 900px);
+  justify-content: center;
   gap: var(--space-4);
   align-items: start;
 }
@@ -77,6 +78,8 @@
 
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   justify-content: center;
   padding: var(--space-2) 0 var(--space-6);
 }

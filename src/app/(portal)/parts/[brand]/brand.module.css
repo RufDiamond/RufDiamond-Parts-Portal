@@ -51,7 +51,7 @@
   display: grid;
   align-content: space-between;
   gap: 4px;
-  padding: var(--space-2);
+  padding: 6px;
   border: 1px solid var(--deck-panel);
   background: none;
   color: var(--deck-on-dark);
@@ -80,7 +80,7 @@
    * fixed height: on a short laptop they give way, on a tall monitor they take
    * the room.
    */
-  max-height: clamp(86px, 14vh, 140px);
+  max-height: clamp(110px, 19vh, 190px);
   overflow: hidden;
 }
 
@@ -115,7 +115,7 @@
 
 .searches {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
 
@@ -177,3 +177,10 @@
   padding: var(--space-4);
   border: 1px solid var(--deck-panel);
 }
+
+.tile, .gridPanel, .search, .empty { border-radius: 12px; }
+.photo { border-radius: 8px; }
+.input, .go { border-radius: 6px; }
+
+.photoImg { transform: scale(1.28) translateY(-4%); }
+.photo[data-wide] .photoImg { transform: translateY(-4%); }

@@ -91,19 +91,20 @@ export function FigureWorkspace({
   const { lines } = useRequest();
   const addition = useRequestAddition(figure.id);
 
-  const { selectedPartIds: quotePartIds, toggle: toggleQuote, ensure: ensureQuoted, hoveredPartId, setHoveredPartId } =
+  const { hoveredPartId, setHoveredPartId } =
     useSelection({ rows, callouts });
   const { selection, activation, selectedPartIds, selectPart, clear } = useDiagramSelection({
     figureId: figure.id, rows,
     releaseKey: `${variant.catalogRevision}/${drawing?.id}/${drawing?.version}/${drawing?.storagePath}/${reviewOnly}`,
   });
 
-  // Selecting a marker/row also ticks that part for the cart so Add to cart /
-  // Request a quote have something to take. Clearing highlight leaves ticks.
-  useEffect(() => {
-    if (reviewOnly) return;
-    for (const partId of selectedPartIds) ensureQuoted(partId);
-  }, [ensureQuoted, reviewOnly, selectedPartIds]);
+  // One selection drives the drawing, table checkboxes and pending cart addition.
+  // Parts already added to the request live independently in RequestContext.
+  const toggleQuote = (partId: string) => {
+    const row = rows.find((item) => item.part.id === partId);
+    if (row) selectPart(row.figurePart.id, "table");
+  };
+  const clearSelection = () => { clear(); setHoveredPartId(null); };
 
   const markers = useMemo(
     () => buildDrawingMarkers(rows, callouts),
@@ -142,11 +143,11 @@ export function FigureWorkspace({
       rows
         .filter(
           (row) =>
-            quotePartIds.has(row.part.id) &&
+            selectedPartIds.has(row.part.id) &&
             !requestedPartIds.has(row.part.id),
         )
         .map((row) => ({ part: row.part, qty: row.figurePart.qty ?? 1 })),
-    [rows, quotePartIds, requestedPartIds],
+    [rows, selectedPartIds, requestedPartIds],
   );
 
   const addSelectedToCart = (openQuote = false) => {
@@ -279,20 +280,6 @@ export function FigureWorkspace({
       />
 
       <div className={styles.controls}>
-        {!detail.release && <p className={styles.previewNotice}>
-          {reviewOnly ? (
-            <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
-          ) : (
-            <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
-          )}
-        </p>}
-        {previewNotice ? (
-          <p role="status" className={styles.previewNotice}>
-            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
-            open the full illustration.
-          </p>
-        ) : null}
-
         <div className={styles.toolbar}>
         <div className={styles.pager}>
           <button
@@ -392,10 +379,10 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
-        <button type="button" className={styles.button} onClick={() => setRevealRequest((value) => value + 1)} disabled={selectedPartIds.size === 0}>
-          Show selected part
+        <button type="button" className={styles.button} title="Bring all selected parts into view on the drawing" onClick={() => setRevealRequest((value) => value + 1)} disabled={selectedPartIds.size === 0}>
+          Show selection in drawing
         </button>
-        <button type="button" className={styles.button} onClick={clear} disabled={selectedPartIds.size === 0}>
+        <button type="button" className={styles.button} onClick={clearSelection} disabled={selectedPartIds.size === 0}>
           Clear selection
         </button>
 
@@ -423,7 +410,7 @@ export function FigureWorkspace({
           onClick={() => { void addSelectedToCart(); }}
           disabled={reviewOnly || addition.pending || pending.length === 0}
           title={
-            quotePartIds.size === 0
+            selectedPartIds.size === 0
               ? "Tick a part first"
               : pending.length === 0
                 ? "Everything ticked is already on the cart"
@@ -650,7 +637,7 @@ export function FigureWorkspace({
                 hoveredPartId={hoveredPartId}
                 onSelectPart={selectPart}
                 onHoverPart={setHoveredPartId}
-                requestedPartIds={quotePartIds}
+                requestedPartIds={selectedPartIds}
                 onToggleRequested={reviewOnly ? undefined : toggleQuote}
                 quantityReports={quantityReports}
               />
@@ -658,6 +645,23 @@ export function FigureWorkspace({
           </div>
         </div>
       )}
+
+      <footer className={styles.notices}>
+        {!detail.release && <p className={styles.previewNotice}>
+          {reviewOnly ? (
+            <>Read-only marker review. Select references to check their positions; ordering and exports are disabled. <Link href={`/figures/${figure.id}`}>Return to ordinary catalogue</Link></>
+          ) : (
+            <>Check proposed positions and unresolved drawing references. <Link href={`/review/figures/${figure.id}`}>Open marker review</Link> (unapproved; not for ordering).</>
+          )}
+        </p>}
+        {previewNotice ? (
+          <p role="status" className={styles.previewNotice}>
+            {previewNotice} For crowded labels, use <strong>Zoom in</strong> or
+            open the full illustration.
+          </p>
+        ) : null}
+
+      </footer>
 
       {cartComingSoon ? (
         <ComingSoon
@@ -685,7 +689,7 @@ export function FigureWorkspace({
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
           onSelectPart={selectPart}
-          onClearSelection={clear}
+          onClearSelection={clearSelection}
           onHoverPart={setHoveredPartId}
           trail={`Model image > ${machineLabel} > ${system.name} > ${figure.name}`}
           date={new Date().toLocaleDateString("en-CA", {

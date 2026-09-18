@@ -2,7 +2,7 @@
 
 import { quantitySelectionMessage, type QuantityOccurrenceReport } from "@/lib/quantity-occurrences";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
 import { DiagramRegions } from "./DiagramRegions";
 import { layoutSelectedMarkers, type DiagramRegionDocument } from "@/lib/drawing";
@@ -164,14 +164,42 @@ export function DrawingViewer({
    */
   const sheet = useRef<HTMLDivElement>(null);
   const drawing = useRef<HTMLDivElement>(null);
+  const wheelAnchor = useRef<{ x: number; y: number; u: number; v: number } | null>(null);
+  useLayoutEffect(() => {
+    const anchor = wheelAnchor.current;
+    wheelAnchor.current = null;
+    const box = sheet.current;
+    const area = drawing.current;
+    if (!box || !area) return;
+    if (!anchor) { area.style.marginLeft = ""; return; }
+    const bounds = box.getBoundingClientRect();
+    const padding = parseFloat(getComputedStyle(box).paddingLeft) || 0;
+    const plate = area.getBoundingClientRect();
+    // Letterboxed artwork can move within the unused horizontal space too.
+    const free = Math.max(0, box.clientWidth - padding * 2 - plate.width);
+    area.style.marginLeft = `${Math.max(0, Math.min(free,
+      anchor.x - anchor.u * plate.width - bounds.left - box.clientLeft - padding))}px`;
+    const positioned = area.getBoundingClientRect();
+    box.scrollLeft += positioned.left + anchor.u * positioned.width - anchor.x;
+    box.scrollTop += positioned.top + anchor.v * positioned.height - anchor.y;
+  }, [zoom, src]);
   useEffect(() => {
     const element = drawing.current;
     if (!element || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(() => {
       const rect = element.getBoundingClientRect();
+      const box = sheet.current;
+      if (box && element.style.marginLeft) {
+        // A wheel anchor can leave an offset in letterboxed space. That space
+        // changes on resize, so never retain a margin beyond the new bounds.
+        const padding = parseFloat(getComputedStyle(box).paddingLeft) || 0;
+        const free = Math.max(0, box.clientWidth - padding * 2 - rect.width);
+        element.style.marginLeft = `${Math.min(parseFloat(element.style.marginLeft), free)}px`;
+      }
       setDisplaySize({ width: rect.width, height: rect.height });
     });
     observer.observe(element);
+    if (sheet.current) observer.observe(sheet.current);
     return () => observer.disconnect();
   }, [src]);
 
@@ -272,7 +300,14 @@ export function DrawingViewer({
     if (!box || !area || !src || !onZoomChange) return;
 
     const onWheel = (event: WheelEvent) => {
-      handleDrawingWheel(event, area, zoom, onZoomChange);
+      handleDrawingWheel(event, area, zoom, (nextZoom) => {
+        if (nextZoom === zoom) return;
+        const plate = area.getBoundingClientRect();
+        wheelAnchor.current = { x: event.clientX, y: event.clientY,
+          u: (event.clientX - plate.left) / plate.width,
+          v: (event.clientY - plate.top) / plate.height };
+        onZoomChange(nextZoom);
+      });
     };
 
     box.addEventListener("wheel", onWheel, { passive: false });
@@ -458,6 +493,8 @@ export function DrawingViewer({
       </div>
       {quantityReports && selectedPartIds.size > 0 ? (
         <div className={styles.selectionSummary} role="status" aria-live="polite">
+          <strong>Selected part locations</strong>
+          <p>Drawing coverage only; request quantities are unchanged.</p>
           {Array.from(quantityReports.values()).filter((report) => selectedPartIds.has(report.partId)).map((report) => (
             <div key={report.figurePartId} data-review={report.needsReview || undefined}>
               {quantitySelectionMessage(report)}

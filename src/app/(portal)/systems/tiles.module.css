@@ -144,3 +144,5 @@
   font: var(--type-body-sm);
   color: var(--deck-on-dark);
 }
+
+.filterIcon { max-width: 90%; max-height: 98px; }

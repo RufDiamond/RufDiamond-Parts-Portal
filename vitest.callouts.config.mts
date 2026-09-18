@@ -26,6 +26,7 @@ export default defineConfig({
       "tests/customer-additions.test.tsx",
       "tests/customer-money.test.tsx",
       "tests/customer-request.test.tsx",
+      "tests/quote-document.test.tsx",
       "tests/customer-privacy.test.ts",
       "tests/customer-packaging.test.ts",
       "tests/backend-api.test.ts",

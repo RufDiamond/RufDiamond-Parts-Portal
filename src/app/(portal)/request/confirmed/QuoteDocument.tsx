@@ -161,7 +161,7 @@ export function QuoteDocument({
         explicit that the section is omitted otherwise, not left blank.
       */}
       {details.shipping ? (
-        <>
+        <section className={styles.keepTogether}>
           <h3 className={`${styles.noteTitle} ${styles.shippingTitle}`}>
             Shipping cost estimate
           </h3>
@@ -181,9 +181,10 @@ export function QuoteDocument({
               </>
             ) : null}
           </p>
-        </>
+        </section>
       ) : null}
 
+      <footer className={styles.keepTogether}>
       <p className={styles.close}>
         Thank you for your attention. We look forward to receiving your
         quotation and availability confirmation.
@@ -193,6 +194,7 @@ export function QuoteDocument({
         <br />
         <strong>RUF DIAMOND TEAM</strong>
       </p>
+      </footer>
     </article>
   );
 }

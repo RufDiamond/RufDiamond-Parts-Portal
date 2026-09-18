@@ -127,20 +127,10 @@ export function PortalShell({ children, date }: PortalShellProps) {
 
   return (
     <div className={styles.shell}>
-      {/*
-        * The supplied header artwork, used as given: emblem, wordmark and
-        * flag in one piece. It runs across the head of the rail and on into
-        * the header, as the deck has it.
-        */}
       <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
-        <Image
-          src="/brand/header-logo.png"
-          alt="RUF Diamond"
-          width={900}
-          height={298}
-          className={styles.brandMark}
-          priority
-        />
+        <Image src="/brand/login-emblem.png" alt="" width={789} height={1118} className={styles.brandEmblem} priority />
+        <Image src="/brand/login-wordmark.png" alt="RUF Diamond" width={894} height={316} className={styles.brandWordmark} priority />
+        <span className={styles.brandFlag}><Image src="/brand/flag-ca.png" alt="Canada" width={240} height={134} priority /></span>
       </Link>
 
       <nav className={styles.rail} aria-label="Portal sections">
@@ -149,7 +139,7 @@ export function PortalShell({ children, date }: PortalShellProps) {
             {group.map((item) => {
               const body = (
                 <>
-                  <span className={styles.railIconBox}>
+                  <span className={styles.railIconBox} data-icon={item.id}>
                     <Image
                       src={`/nav/${item.icon}.png`}
                       alt=""

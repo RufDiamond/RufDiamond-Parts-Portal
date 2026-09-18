@@ -42,7 +42,7 @@
    */
   flex: 1 1 auto;
   min-height: 220px;
-  background-image: var(--grid-10);
+  background-image: none;
   background-color: var(--surface-drawing);
   background-size: var(--grid-size) var(--grid-size);
   border: var(--border-thin);
@@ -144,7 +144,7 @@
   width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
   aspect-ratio: var(--ratio, 3 / 2);
   margin: 0 auto;
-  transition: width 120ms ease-out;
+  /* Immediate resizing lets scroll correction preserve the cursor anchor. */
 }
 
 @media (prefers-reduced-motion: reduce) {

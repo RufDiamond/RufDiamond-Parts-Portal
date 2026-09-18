@@ -32,7 +32,7 @@ function App() {
   return <><h1>Isolated synthetic tall PNG (not catalogue content)</h1>
     <button onClick={() => setZoom(ZOOM_STEPS[Math.min(4, ZOOM_STEPS.indexOf(zoom)+1)])}>Zoom in</button>
     <button onClick={() => setZoom(ZOOM_STEPS[Math.max(0, ZOOM_STEPS.indexOf(zoom)-1)])}>Zoom out</button>
-    <button onClick={() => setRequest((n) => n+1)}>Show selected part</button><button onClick={focus.clear}>Clear selection</button>
+    <button onClick={() => setRequest((n) => n+1)}>Show selection in drawing</button><button onClick={focus.clear}>Clear selection</button>
     <div style={{ display:"grid", gridTemplateColumns:"500px 600px", height:500 }}>
       <DrawingViewer label="Synthetic tall PNG" src={src} width={400} height={1000} document={doc}
         markers={mixed ? [

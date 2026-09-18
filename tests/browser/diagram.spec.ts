@@ -142,11 +142,11 @@ test("fullscreen text actions wrap and retain keyboard selection controls on a n
   await page.goto(base + "/figures/fig-cabin-6-1");
   await figure(page).getByRole("button", { name: /^Callout 2:/ }).first().click();
   await page.getByRole("button", { name: "Illustration full screen", exact: true }).click();
-  const desktopAction = page.getByRole("dialog").getByRole("button", { name: "Show selected part", exact: true });
+  const desktopAction = page.getByRole("dialog").getByRole("button", { name: "Show selection in drawing", exact: true });
   expect(await desktopAction.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(36);
   await page.setViewportSize({ width: 360, height: 760 });
   const dialog = page.getByRole("dialog");
-  const show = dialog.getByRole("button", { name: "Show selected part", exact: true });
+  const show = dialog.getByRole("button", { name: "Show selection in drawing", exact: true });
   const clear = dialog.getByRole("button", { name: "Clear selection", exact: true });
   const dimensions = await show.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, parentWidth: el.parentElement!.getBoundingClientRect().width, parentScroll: el.parentElement!.scrollWidth }));
   expect(dimensions.height).toBeGreaterThanOrEqual(36);
@@ -313,7 +313,7 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
     await label.click(); await page.mouse.move(0,0);
     await expect(label).toHaveAttribute("aria-pressed","true");
     for (let i=0;i<4;i++) await page.getByRole("button", {name:"Zoom in",exact:true}).click();
-    await page.getByRole("button", {name:"Show selected part",exact:true}).click();
+    await page.getByRole("button", {name:"Show selection in drawing",exact:true}).click();
     await settled(page);
     await page.getByRole("button", { name:"Clear selection", exact:true }).click();
     await expect(label).toHaveAttribute("aria-pressed","false");
@@ -335,7 +335,7 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   await page.getByRole("button", { name:"Zoom in", exact:true }).click();
   await settled(page);
   measurements.push({ state:"zoom", ...await geometry(figure(page)) });
-  await page.getByRole("button", { name:"Show selected part", exact:true }).click();
+  await page.getByRole("button", { name:"Show selection in drawing", exact:true }).click();
   await settled(page);
   await page.getByRole("button", { name:"Illustration full screen", exact:true }).click();
   const full = page.getByRole("dialog").locator("figure");
@@ -345,7 +345,7 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   await page.getByRole("dialog").getByRole("button", { name:"Zoom in", exact:true }).click();
   await settled(page);
   measurements.push({ state:"fullscreen zoom", ...await geometry(full) });
-  await page.getByRole("dialog").getByRole("button", { name:"Show selected part", exact:true }).click();
+  await page.getByRole("dialog").getByRole("button", { name:"Show selection in drawing", exact:true }).click();
   await page.setViewportSize({ width:1280, height:900 });
   await settled(page);
   measurements.push({ state:"fullscreen resized", ...await geometry(full) });
@@ -400,7 +400,7 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   measurements.push({ state:"synthetic tall revealed zoom", ...await geometry(scope) });
   // Explicit reveal also restores a deliberately displaced viewport at 4x.
   await sheet.evaluate((el) => { el.scrollTop=0;el.scrollLeft=0; });
-  await page.getByRole("button", { name:"Show selected part", exact:true }).click();
+  await page.getByRole("button", { name:"Show selection in drawing", exact:true }).click();
   await expect.poll(() => sheet.evaluate((el) => el.scrollTop)).toBeGreaterThan(500);
   expect(await zoom(scope)).toBe(4);
   await page.locator('tr[data-figure-part-id="row-1"]').click();
@@ -473,4 +473,40 @@ test("mixed occurrence union reveals numeric, legacy shape and marker together w
   await expect(scope.locator('path[data-callout-id="c0"]')).toHaveCount(0);
   await info.attach("mixed-geometry.json", { body:JSON.stringify(await geometry(scope)), contentType:"application/json" });
   await info.attach("mixed-occurrences.png", { body:await page.screenshot(), contentType:"image/png" });
+});
+
+
+test("wheel zoom preserves the artwork point under the cursor", async ({ page }) => {
+  await page.goto("http://localhost:3101");
+  const drawing = page.locator("figure img");
+  const before = await drawing.boundingBox();
+  const point = { x: before!.x + before!.width * .6, y: before!.y + before!.height * .65 };
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.wheel(0, -120);
+  await expect.poll(async () => (await drawing.boundingBox())!.height).toBeGreaterThan(before!.height * 1.4);
+  await expect.poll(async () => {
+    const after = (await drawing.boundingBox())!;
+    return Math.abs(after.y + after.height * .65 - point.y);
+  }).toBeLessThan(2);
+  const after = (await drawing.boundingBox())!;
+  expect(Math.abs(after.x + after.width * .6 - point.x)).toBeLessThan(2);
+});
+
+test("letterboxed wheel offset is clamped when fullscreen is resized", async ({ page }) => {
+  await page.setViewportSize({ width:1920, height:500 });
+  await page.goto(base + '/figures/fig-cabin-6-1');
+  await page.getByRole('button', {name:'Illustration full screen',exact:true}).click();
+  const drawing = page.getByRole('dialog').locator('figure img');
+  const rect = (await drawing.boundingBox())!;
+  await page.mouse.move(rect.x + rect.width * .3, rect.y + rect.height * .3);
+  await page.mouse.wheel(0,-120);
+  await expect.poll(() => drawing.locator('..').evaluate(el => parseFloat((el as HTMLElement).style.marginLeft) || 0)).toBeGreaterThan(50);
+  await page.setViewportSize({width:650,height:900});
+  await expect.poll(() => drawing.locator('..').evaluate(el => {
+    const area = el as HTMLElement;
+    const sheet = area.parentElement!;
+    const padding = parseFloat(getComputedStyle(sheet).paddingLeft);
+    const free = Math.max(0,sheet.clientWidth - 2*padding - area.getBoundingClientRect().width);
+    return (parseFloat(area.style.marginLeft) || 0) - free;
+  })).toBeLessThanOrEqual(1);
 });

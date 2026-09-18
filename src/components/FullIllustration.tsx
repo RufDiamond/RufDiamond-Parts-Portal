@@ -103,7 +103,7 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
-            <button type="button" className={`${styles.action} ${styles.textAction}`} disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)}>Show selected part</button>
+            <button type="button" className={`${styles.action} ${styles.textAction}`} disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)} title="Bring all selected parts into view on the drawing">Show selection in drawing</button>
             {onClearSelection ? <button type="button" className={`${styles.action} ${styles.textAction}`} onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
