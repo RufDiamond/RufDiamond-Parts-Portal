@@ -105,6 +105,13 @@
   object-fit: contain;
 }
 
+.tile[data-system="filters"] .icon,
+a[href*="sys-filters"] .icon {
+  max-width: 84%;
+  max-height: 108px;
+  transform: scale(1.15);
+}
+
 /* A figure tile shows its plate rather than an icon. */
 .plate {
   width: 100%;
@@ -145,4 +152,3 @@
   color: var(--deck-on-dark);
 }
 
-.filterIcon { max-width: 90%; max-height: 98px; }
