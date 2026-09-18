@@ -173,10 +173,13 @@ export function DrawingViewer({
       return;
     }
     const bounds = box.getBoundingClientRect();
-    const padding = parseFloat(getComputedStyle(box).paddingLeft) || 0;
+    const style = getComputedStyle(box);
+    const padding = parseFloat(style.paddingLeft) || 0;
+    const paddingTop = parseFloat(style.paddingTop) || 0;
     const plate = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     // Letterboxed artwork can move within the unused horizontal space too.
     const free = Math.max(0, box.clientWidth - padding * 2 - plate.width);
+    const verticalFree = Math.max(0, box.clientHeight - paddingTop * 2 - plate.height);
     area.style.marginLeft = `${Math.max(0, Math.min(free,
       anchor.x - anchor.u * plate.width - bounds.left - box.clientLeft - padding))}px`;
     area.style.marginTop = "";
@@ -186,7 +189,8 @@ export function DrawingViewer({
     const scrolled = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     // A tall viewport may have no vertical overflow yet. Shift by the
     // unconsumed remainder so the real artwork point still stays anchored.
-    area.style.marginTop = `${anchor.y - scrolled.top - anchor.v * scrolled.height}px`;
+    area.style.marginTop = `${Math.max(0, Math.min(verticalFree,
+      anchor.y - scrolled.top - anchor.v * scrolled.height))}px`;
   }, [zoom, src]);
   useEffect(() => {
     const element = drawing.current;
@@ -194,12 +198,22 @@ export function DrawingViewer({
     const observer = new ResizeObserver(() => {
       const rect = element.getBoundingClientRect();
       const box = sheet.current;
-      if (box && element.style.marginLeft) {
+      if (box && (element.style.marginLeft || element.style.marginTop)) {
         // A wheel anchor can leave an offset in letterboxed space. That space
         // changes on resize, so never retain a margin beyond the new bounds.
-        const padding = parseFloat(getComputedStyle(box).paddingLeft) || 0;
+        const style = getComputedStyle(box);
+        const padding = parseFloat(style.paddingLeft) || 0;
+        const paddingTop = parseFloat(style.paddingTop) || 0;
         const free = Math.max(0, box.clientWidth - padding * 2 - rect.width);
-        element.style.marginLeft = `${Math.min(parseFloat(element.style.marginLeft), free)}px`;
+        const verticalFree = Math.max(0, box.clientHeight - paddingTop * 2 - rect.height);
+        if (element.style.marginLeft) {
+          element.style.marginLeft = `${Math.max(0,
+            Math.min(parseFloat(element.style.marginLeft), free))}px`;
+        }
+        if (element.style.marginTop) {
+          element.style.marginTop = `${Math.max(0,
+            Math.min(parseFloat(element.style.marginTop), verticalFree))}px`;
+        }
       }
       setDisplaySize({ width: rect.width, height: rect.height });
     });

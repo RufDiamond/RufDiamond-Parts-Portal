@@ -680,7 +680,7 @@ export function FigureWorkspace({
           markers={markers}
           document={regions}
           selectionActivation={activation}
-          previewNotice={previewNotice}
+          previewNotice={reviewOnly ? previewNotice : null}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
           onSelectPart={selectPart}
