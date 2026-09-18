@@ -80,14 +80,16 @@
    * fixed height: on a short laptop they give way, on a tall monitor they take
    * the room.
    */
-  max-height: clamp(110px, 19vh, 190px);
+  max-height: clamp(140px, 24vh, 220px);
   overflow: hidden;
+  border-radius: 8px;
 }
 
 .photoImg {
-  width: 100%;
-  height: 100%;
+  width: 108%;
+  height: 108%;
   object-fit: contain;
+  object-position: center;
 }
 
 .photoNone {
@@ -179,8 +181,4 @@
 }
 
 .tile, .gridPanel, .search, .empty { border-radius: 12px; }
-.photo { border-radius: 8px; }
 .input, .go { border-radius: 6px; }
-
-.photoImg { transform: scale(1.28) translateY(-4%); }
-.photo[data-wide] .photoImg { transform: translateY(-4%); }
