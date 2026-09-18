@@ -10,7 +10,7 @@ Source: the user's compiled notes from Andres's September 16 review and earlier 
 | Text/icons tighter; less gap from rail | Reduced rail, card and content spacing. |
 | Larger logo; flag aligned to wordmark | Existing emblem, wordmark and flag assets laid out separately; no raster artwork regenerated. |
 | Fat Truck, IronHorse, quote, technical icons | Increased their displayed scale and normalized icon boxes. |
-| Biome | First choice in the UI font stack when locally installed; no licensed webfont exists in the repo or standard Mac font folders. Current fallback remains until a licensed font is supplied. Not marked complete. |
+| Biome | Biome is the first name in --font-ui. No licensed webfont is in the repo. Andres must supply the Biome file before the portal can show it on his computer. Not complete. |
 | Title larger and to the side | Left-aligned beside the brand with responsive size. |
 | Yellow cursor outline | Existing RUF cursor is applied by website CSS automatically. No customer installation is needed. No guessed change to the cursor artwork. |
 | Sharper centre grid | Resolution-independent CSS grid on home. |
