@@ -141,6 +141,7 @@
  */
 .stage {
   position: relative;
+  flex-shrink: 0;
   width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
   aspect-ratio: var(--ratio, 3 / 2);
   margin: 0 auto;

@@ -170,6 +170,7 @@ export function DrawingViewer({
     if (!anchor) {
       area.style.marginLeft = "";
       area.style.marginTop = "";
+      area.style.marginBottom = "";
       return;
     }
     const bounds = box.getBoundingClientRect();
@@ -183,14 +184,23 @@ export function DrawingViewer({
     area.style.marginLeft = `${Math.max(0, Math.min(free,
       anchor.x - anchor.u * plate.width - bounds.left - box.clientLeft - padding))}px`;
     area.style.marginTop = "";
+    area.style.marginBottom = "";
     const positioned = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     box.scrollLeft += positioned.left + anchor.u * positioned.width - anchor.x;
     box.scrollTop += positioned.top + anchor.v * positioned.height - anchor.y;
     const scrolled = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
-    // A tall viewport may have no vertical overflow yet. Shift by the
-    // unconsumed remainder so the real artwork point still stays anchored.
-    area.style.marginTop = `${Math.max(0, Math.min(verticalFree,
-      anchor.y - scrolled.top - anchor.v * scrolled.height))}px`;
+    const error = anchor.y - (scrolled.top + anchor.v * scrolled.height);
+    // A tall panel may have no overflow yet. Space below the plate makes the
+    // upward shift scrollable, so the top of the drawing stays reachable.
+    if (error < -0.5) {
+      const shift = -error;
+      const room = Math.max(0, box.clientHeight - area.offsetHeight + shift);
+      area.style.marginBottom = `${room}px`;
+      const shifted = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
+      box.scrollTop += shifted.top + anchor.v * shifted.height - anchor.y;
+    } else if (error > 0.5) {
+      area.style.marginTop = `${Math.min(error, verticalFree)}px`;
+    }
   }, [zoom, src]);
   useEffect(() => {
     const element = drawing.current;
