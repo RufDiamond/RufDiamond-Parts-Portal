@@ -638,7 +638,7 @@ export function FigureWorkspace({
                 onHoverPart={setHoveredPartId}
                 requestedPartIds={selectedPartIds}
                 onToggleRequested={reviewOnly ? undefined : toggleQuote}
-                quantityReports={quantityReports}
+                quantityReports={reviewOnly ? quantityReports : undefined}
               />
             )}
           </div>

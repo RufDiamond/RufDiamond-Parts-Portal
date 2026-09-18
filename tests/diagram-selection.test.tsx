@@ -179,13 +179,21 @@ test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instance
 });
 
 test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,status:"Needs Review"}])(
-  "Quantity 4 with $found physical instances displays $status without duplicating its row",
+  "Quantity 4 with $found physical instances displays $status only in marker review",
   async ({found,status}) => {
     const detail = await fixture();
     detail.rows = [detail.rows[0]];
     detail.rows[0].figurePart.qty = 4;
     detail.callouts = Array.from({length:found},(_,i)=>({...detail.callouts[0],id:`physical-${i}`,x:10+i*10,y:20}));
-    const {container} = render(workspace(detail));
+    const customer = render(workspace(detail));
+    expect(customer.container.querySelectorAll("tbody tr")).toHaveLength(1);
+    expect(within(customer.container.querySelector("tbody tr") as HTMLElement).queryByText(status)).toBeNull();
+    customer.unmount();
+
+    const {container} = render(
+      <MachineProvider><RequestProvider><FigureWorkspace detail={detail} usage={{}} sheet="1" index={0} total={1}
+        previousId={null} nextId={null} firstId={null} lastId={null} reviewOnly /></RequestProvider></MachineProvider>,
+    );
     const rows = container.querySelectorAll("tbody tr");
     expect(rows).toHaveLength(1);
     expect(within(rows[0] as HTMLElement).getByText(status)).toBeTruthy();
