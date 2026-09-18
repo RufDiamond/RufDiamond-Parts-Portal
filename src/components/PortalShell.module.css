@@ -290,7 +290,7 @@
   .brandFlag { width: 84px; height: 47px; }
 }
 
-.railIconBox[data-icon="fat-truck"] img,
 .railIconBox[data-icon="ironhorse"] img,
 .railIconBox[data-icon="quote"] img,
-.railIconBox[data-icon="technical"] img { transform: scale(1.18); }
+.railIconBox[data-icon="technical"] img { transform: scale(1.35); }
+.railIconBox[data-icon="fat-truck"] img { transform: scale(1.08); }
