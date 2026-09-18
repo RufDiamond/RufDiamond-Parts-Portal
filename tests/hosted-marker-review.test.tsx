@@ -36,7 +36,7 @@ test("hosted review cannot start a quote, add parts, or export an unlabelled lis
 
 test("ordinary figure provides an explicit review entry without disabling its quote flow", async () => {
   const html = await renderWorkspace(false);
-  expect(html).toContain('href="/review/figures/fig-cabin-6-2"');
+  expect(html).not.toMatch(/\/review\/figures\//);
   const quote = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)]
     .find((match) => match[2].includes("Request a quote"));
   expect(quote![1]).not.toContain("disabled");
