@@ -531,7 +531,6 @@ export function FigureWorkspace({
               note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
               markers={markers}
               document={regions}
-              quantityReports={quantityReports}
               selectionActivation={activation}
               revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
@@ -683,7 +682,6 @@ export function FigureWorkspace({
           note={figure.depictionMode==="table-only"?`Reviewed table-only parts list — ${figure.name}. No assembly illustration applies.`:`Assembly drawing not supplied — ${figure.name}`}
           markers={markers}
           document={regions}
-          quantityReports={quantityReports}
           selectionActivation={activation}
           previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}

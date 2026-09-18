@@ -51,10 +51,6 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
           shape.getAttribute("aria-label")?.includes(`: ${row.part.partNumber} — `);
         expect(shape.getAttribute("aria-pressed"),`${figureId}/${audit.figurePartId} contour`).toBe(belongs ? "true" : "false");
       }
-      const validation = within(figure).getByRole("status").textContent!;
-      expect(validation).toContain(`Expected quantity: ${audit.qty}`);
-      expect(validation).toContain(`Instances found: ${audit.found}`);
-      if (audit.found !== audit.qty) expect(validation).toContain("Status: Needs Review");
     };
     assertGroup(container.querySelector("figure")!);
     if (fullscreenRows.has(audit.figurePartId)) {

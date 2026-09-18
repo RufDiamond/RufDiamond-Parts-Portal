@@ -64,23 +64,23 @@ test("label, component, and table focus converge; selecting a part also ticks it
   expect(tableRows()[1].hasAttribute("data-active")).toBe(false);
   expect(regions()[0].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[2].getAttribute("aria-pressed")).toBe("true");
-  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
+  expect((screen.getAllByRole("checkbox", { name: "Select A on the drawing" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(tableRows()[1]);
   expect(regions()[1].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[0].getAttribute("aria-pressed")).toBe("true");
   expect(regions()[2].getAttribute("aria-pressed")).toBe("true");
-  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(true);
+  expect((screen.getAllByRole("checkbox", { name: "Select B on the drawing" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.keyDown(regions()[0], { key: "Enter" });
   fireEvent.keyDown(regions()[0], { key: " " });
   fireEvent.mouseLeave(figure);
   expect(tableRows()[0].getAttribute("data-active")).toBe("true");
   expect(tableRows()[1].getAttribute("data-active")).toBe("true");
-  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(true);
+  expect((screen.getAllByRole("checkbox", { name: "Select A on the drawing" })[0] as HTMLInputElement).checked).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(regions()[0].getAttribute("aria-pressed")).toBe("false");
   expect(regions()[1].getAttribute("aria-pressed")).toBe("false");
-  expect((screen.getAllByRole("checkbox", { name: "Add A to the cart" })[0] as HTMLInputElement).checked).toBe(false);
-  expect((screen.getAllByRole("checkbox", { name: "Add B to the cart" })[0] as HTMLInputElement).checked).toBe(false);
+  expect((screen.getAllByRole("checkbox", { name: "Select A on the drawing" })[0] as HTMLInputElement).checked).toBe(false);
+  expect((screen.getAllByRole("checkbox", { name: "Select B on the drawing" })[0] as HTMLInputElement).checked).toBe(false);
   fireEvent.click(tableRows()[0]);
   fireEvent.click(tableRows()[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
@@ -172,7 +172,6 @@ test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instance
     expect(markers).toHaveLength(qty);
     for (const marker of markers) { expect(marker.getAttribute("aria-pressed")).toBe("true"); expect(marker.textContent).toBe("13"); }
     expect(scope.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(qty);
-    expect(within(scope).getByRole("status").textContent).toContain(`All ${qty} instances highlighted`);
   };
   assertSelected(container.querySelector("figure")!);
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
@@ -191,22 +190,18 @@ test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,
     expect(rows).toHaveLength(1);
     expect(within(rows[0] as HTMLElement).getByText(status)).toBeTruthy();
     fireEvent.click(rows[0]);
-    const assertValidation = (scope:HTMLElement) => {
-      const message = within(scope).getByRole("status").textContent!;
-      expect(message).toContain("Expected quantity: 4");
-      expect(message).toContain(`Instances found: ${found}`);
-      expect(message).toContain(`Status: ${status}`);
+    const assertHighlights = (scope:HTMLElement) => {
       expect(scope.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(found);
     };
-    assertValidation(container.querySelector("figure")!);
+    assertHighlights(container.querySelector("figure")!);
     fireEvent.click(screen.getByRole("button",{name:"Illustration full screen"}));
-    assertValidation(screen.getByRole("dialog").querySelector("figure")!);
+    assertHighlights(screen.getByRole("dialog").querySelector("figure")!);
   },
 );
 
  test("checkbox, diagram deselection, and fullscreen clear share one selection", async () => {
   const { container } = render(workspace(await fixture()));
-  const boxes = screen.getAllByRole("checkbox", { name: "Add A to the cart" }) as HTMLInputElement[];
+  const boxes = screen.getAllByRole("checkbox", { name: "Select A on the drawing" }) as HTMLInputElement[];
   fireEvent.click(boxes[0]);
   const marker = within(container.querySelector("figure")!).getAllByRole("button", {name:/Callout 13: A/})[0];
   expect(marker.getAttribute("aria-pressed")).toBe("true");

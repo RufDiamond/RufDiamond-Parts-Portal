@@ -109,12 +109,12 @@ it.each([false,true])("keeps figure quote selection independent of unspecified i
   render(<MachineProvider persist={false}><RequestProvider apiSession={session}><Status /><FigureWorkspace detail={detail} usage={{}} sheet="1" index={0} total={1} previousId={null} nextId={null} firstId={null} lastId={null} /></RequestProvider></MachineProvider>);
   await screen.findByText("Committed 0");
   if(unspecified)expect(screen.getByText("Unspecified")).toBeTruthy();
-  fireEvent.click(screen.getByRole("checkbox", { name: "Add P to the cart" }));
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select P on the drawing" }));
   fireEvent.click(screen.getByRole("button", { name: "Request a quote" }));
   expect(screen.getByRole("button", { name: "Request a quote" }).getAttribute("aria-pressed")).toBe("false");
   await act(async () => complete(new Response(null, { status: 409 })));
   expect(screen.getByRole("alert")).toBeTruthy();
-  expect((screen.getByRole("checkbox", { name: "Add P to the cart" }) as HTMLInputElement).checked).toBe(true);
+  expect((screen.getByRole("checkbox", { name: "Select P on the drawing" }) as HTMLInputElement).checked).toBe(true);
   fireEvent.click(screen.getByRole("button", { name: "Request a quote" }));
   await act(async () => complete(response()));
   await waitFor(() => expect(screen.getByRole("button", { name: "Request a quote" }).getAttribute("aria-pressed")).toBe("true"));

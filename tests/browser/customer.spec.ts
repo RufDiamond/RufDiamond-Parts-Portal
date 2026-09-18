@@ -12,7 +12,7 @@ test("unchanged authority preserves mounted quote notes, exclusions and machine 
   await page.getByRole("button", { name: /Fat Truck Synthetic machine/ }).click();
   await page.getByRole("link", { name: /Synthetic system/ }).click();
   await page.getByRole("link", { name: /Synthetic plate/ }).click();
-  await page.getByRole("checkbox", { name: "Add SYN-PART to the cart" }).check();
+  await page.getByRole("checkbox", { name: "Select SYN-PART on the drawing" }).check();
   await page.getByRole("button", { name: "Request a quote", exact: true }).click();
   await page.getByRole("button", { name: "Add comment", exact: true }).click();
   await page.getByRole("textbox", { name: "Comment on SYN-PART" }).fill("Keep the line note");
