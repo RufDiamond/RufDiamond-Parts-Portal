@@ -82,7 +82,7 @@
    */
   max-height: clamp(140px, 24vh, 220px);
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .photoImg {
@@ -90,6 +90,16 @@
   height: 108%;
   object-fit: contain;
   object-position: center;
+  /*
+   * The vehicles are not centred in their own files — every one sits low, with
+   * more empty frame above than below (ink centre averages 54.5% of the file
+   * height against a true centre of 50%). Centring the file therefore leaves
+   * the truck visibly low in the tile, so it is lifted back by that bias. The
+   * bias is not identical across the seven files (52.6%-57.5%), so this is the
+   * mean: it lands every vehicle within about 5px of the tile's centre rather
+   * than all of them low.
+   */
+  transform: translateY(-7.5%);
 }
 
 .photoNone {
@@ -181,4 +191,5 @@
 }
 
 .tile, .gridPanel, .search, .empty { border-radius: 12px; }
-.input, .go { border-radius: 6px; }
+/* The rail cards set the house radius at 12px; these follow it. */
+.input, .go { border-radius: 12px; }

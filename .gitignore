@@ -51,3 +51,6 @@ next-env.d.ts
 /tmp/
 .playwright-mcp/
 vercel-*.png
+
+# Test runs can drop a generated quote here.
+quote-request-*.pdf

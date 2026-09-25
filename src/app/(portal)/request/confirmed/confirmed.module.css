@@ -113,3 +113,20 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Only shown if the download failed; light panel on the dark shell, so it
+   states its own colour rather than inheriting white. */
+.pdfError {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--danger, #b3261e);
+  font: var(--type-body-sm);
+}
+
+/* The download button and the error are portal controls, not part of the
+   document the customer prints. */
+@media print {
+  .pdfError { display: none; }
+}

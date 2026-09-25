@@ -23,6 +23,8 @@
    * without growing this drives it into the first rail button.
    */
   --brand-band: 128px;
+  /* Icon size in the rail. The nine buttons leave enough room below to grow. */
+  --rail-icon: clamp(32px, 5.6vh, 46px);
 }
 
 /* ── Rail ─────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@
   display: grid;
   place-items: center;
   width: 100%;
-  height: clamp(28px, 4.8vh, 40px);
+  height: var(--rail-icon);
   overflow: hidden;
 }
 
@@ -101,19 +103,23 @@
   background: transparent;
 }
 
-/* Intrinsic sizing with a ceiling: a percentage height against a grid item
-   does not resolve reliably here, and the icons overran their labels. */
+/*
+ * A definite box rather than intrinsic sizing. With `width: auto; height: auto`
+ * each icon sized itself from its own file, so the differing transparent
+ * margins came straight through and no two icons matched. Sizing the box
+ * instead and letting `object-fit: contain` letterbox each icon into it gives
+ * every one the same height, whatever its aspect, and reserves the space
+ * before the image has loaded so the rail does not shift as they arrive.
+ */
 .railIcon {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: clamp(28px, 4.8vh, 40px);
+  width: 100%;
+  height: var(--rail-icon);
   object-fit: contain;
 }
 
 /* The product-line photographs are landscape and need the extra width. */
 .railIconWide {
-  max-height: clamp(28px, 4.8vh, 40px);
+  height: var(--rail-icon);
 }
 
 .railLabel {
@@ -161,10 +167,11 @@
 }
 
 .title {
-  /* The title sits beside the brand, with the date at the far right. */
+  /* Pushed to the right of its column, so it ends beside the date pill rather
+     than starting next to the brand. */
   grid-column: 1;
   margin: 0;
-  justify-self: start;
+  justify-self: end;
   font: var(--weight-bold) clamp(24px, 2.35vw, 40px) / 1.05 var(--font-ui);
   letter-spacing: 0.01em;
   text-transform: uppercase;
@@ -302,7 +309,11 @@
   .shell { --brand-band: 101px; }
 }
 
-.railIconBox[data-icon="quote"] img,
-.railIconBox[data-icon="technical"] img { transform: scale(1.35); }
-.railIconBox[data-icon="ironhorse"] img { transform: scale(1.15); }
-.railIconBox[data-icon="fat-truck"] img { transform: scale(1.08); }
+/*
+ * No per-icon scaling. These nine used to be nudged individually because each
+ * file carried a different amount of transparent margin — fat-truck's artwork
+ * filled 70% of its height, order-status 71%, so the same box rendered them at
+ * visibly different sizes. The files are trimmed to their ink now, so one
+ * height sizes them all alike. agilis is the exception by nature: at 2.2:1 it
+ * reaches the rail's width before it reaches this height.
+ */

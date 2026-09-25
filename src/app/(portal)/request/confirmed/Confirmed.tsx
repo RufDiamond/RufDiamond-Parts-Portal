@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { EmptyState } from "@/components";
 import { useRequest } from "@/state/RequestContext";
 import type { PartUsageSummary } from "@/types/catalog";
 import { QuoteDocument } from "./QuoteDocument";
+import { downloadQuotePdf } from "./quote-pdf";
 import styles from "./confirmed.module.css";
 
 export interface ConfirmedProps {
@@ -14,6 +16,8 @@ export interface ConfirmedProps {
 /** Customer copy of the quote request. Internal routing is not a customer action. */
 export function Confirmed({ usage }: ConfirmedProps) {
   const { lastConfirmation, confirmationHydrated, submissionAvailable } = useRequest();
+  const [savingPdf, setSavingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState("");
   if (!submissionAvailable) return <main><h1>Quote submission unavailable</h1><p>The request service is not connected. No request has been submitted.</p><Link href="/request">Return to saved parts</Link></main>;
 
   if (!confirmationHydrated) {
@@ -56,7 +60,6 @@ export function Confirmed({ usage }: ConfirmedProps) {
 
       <p className={styles.lead}>
         Your quote request copy. Pricing and availability will be confirmed by RUF Diamond.
-        To save a PDF, choose Save as PDF in the print dialog.
       </p>
 
       <div className={styles.documents}>
@@ -72,11 +75,36 @@ export function Confirmed({ usage }: ConfirmedProps) {
 
       <div className={styles.actions}>
         <button type="button" className={styles.primary} onClick={() => window.print()}>Print</button>
-        <button type="button" className={styles.primary} onClick={() => window.print()}>Save PDF</button>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={savingPdf}
+          onClick={async () => {
+            setSavingPdf(true);
+            setPdfError("");
+            try {
+              await downloadQuotePdf(lastConfirmation, usage);
+            } catch {
+              /* Said out loud rather than swallowed: a button that looks like
+                 it worked and produced no file is worse than an error. */
+              setPdfError("The PDF could not be generated. Use Print and choose Save as PDF.");
+            } finally {
+              setSavingPdf(false);
+            }
+          }}
+        >
+          {savingPdf ? "Saving…" : "Save PDF"}
+        </button>
         <Link href="/systems" className={styles.primary}>
           Start a new request
         </Link>
       </div>
+
+      {pdfError && (
+        <p className={styles.pdfError} role="alert">
+          {pdfError}
+        </p>
+      )}
     </div>
   );
 }
