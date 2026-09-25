@@ -128,9 +128,8 @@ export function PortalShell({ children, date }: PortalShellProps) {
   return (
     <div className={styles.shell}>
       <Link href="/" className={styles.brand} aria-label="RUF Diamond home">
-        <Image src="/brand/login-emblem.png" alt="" width={789} height={1118} className={styles.brandEmblem} priority />
-        <Image src="/brand/login-wordmark.png" alt="RUF Diamond" width={894} height={316} className={styles.brandWordmark} priority />
-        <span className={styles.brandFlag}><Image src="/brand/flag-ca.png" alt="Canada" width={240} height={134} priority /></span>
+        {/* Mark, wordmark and flag arrive as one supplied lockup. */}
+        <Image src="/brand/header-logo-with-flag.png" alt="RUF Diamond" width={930} height={360} className={styles.brandMark} priority />
       </Link>
 
       <nav className={styles.rail} aria-label="Portal sections">
