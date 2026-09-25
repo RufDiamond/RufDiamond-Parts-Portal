@@ -1,0 +1,131 @@
+/*
+ * Language field — login screen.
+ *
+ * Sized in the same `--u` unit the rest of the login screen uses (declared on
+ * `.screen` in signin.module.css), so the control scales with the deck rather
+ * than drifting against the fields above it.
+ */
+
+.wrap {
+  position: relative;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(0.6 * var(--u));
+  width: 100%;
+  /* Matches `.input` in signin.module.css — deck: 5.64% of page height. */
+  height: calc(3.17 * var(--u));
+  min-height: 28px;
+  padding: 0 calc(0.8 * var(--u));
+  border: 1px solid var(--deck-panel);
+  border-radius: 5px;
+  background: var(--paper);
+  /*
+   * A light control on a dark screen inherits the shell's white text unless it
+   * says otherwise, which paints white on white.
+   */
+  color: var(--ink);
+  font: var(--weight-regular) calc(1.1458 * var(--u)) / 1 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Nothing chosen yet: the deck shows a prompt, not a value. */
+.unset .value {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: -2px;
+}
+
+.value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chevron {
+  flex: none;
+  width: calc(0.75 * var(--u));
+  height: calc(0.75 * var(--u));
+  min-width: 6px;
+  min-height: 6px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  /* Sits on the glyph's optical centre once rotated. */
+  margin-top: calc(-0.3 * var(--u));
+  transform: rotate(45deg);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 0.3 * var(--u));
+  right: 0;
+  left: 0;
+  z-index: 5;
+  max-height: calc(19 * var(--u));
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid var(--deck-panel);
+  border-radius: 5px;
+  background: var(--paper);
+  color: var(--ink);
+  list-style: none;
+}
+
+/* Flipped when the screen's clipped bottom edge is too close to open into. */
+.menuUp {
+  top: auto;
+  bottom: calc(100% + 0.3 * var(--u));
+}
+
+.option {
+  padding: calc(0.65 * var(--u)) calc(0.8 * var(--u));
+  font: var(--weight-regular) calc(1.1458 * var(--u)) / 1.2 var(--font-ui);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.option[aria-selected="true"] {
+  font-weight: var(--weight-bold);
+}
+
+/*
+ * One highlight, driven by the keyboard's position and kept in step by
+ * `onPointerEnter` — a separate CSS `:hover` would let the mouse light one row
+ * while the arrow keys light another.
+ */
+.active {
+  background: var(--select);
+  color: var(--select-on);
+}
+
+@media (max-width: 820px) {
+  .control {
+    height: 40px;
+    padding: 0 var(--space-3);
+    font: var(--type-body-sm);
+  }
+
+  .chevron {
+    width: 7px;
+    height: 7px;
+    margin-top: -3px;
+  }
+
+  .menu {
+    max-height: 240px;
+  }
+
+  .option {
+    padding: var(--space-2) var(--space-3);
+    font: var(--type-body-sm);
+  }
+}

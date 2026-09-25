@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import styles from "./signin.module.css";
+import { LanguageSelect } from "./LanguageSelect";
 import { signInCustomer, resetCustomerNavigation } from "@/state/customer-session";
 
 /**
@@ -15,21 +16,27 @@ import { signInCustomer, resetCustomerNavigation } from "@/state/customer-sessio
  * API mode signs in through the same-origin authenticated backend proxy.
  * The explicitly local fixture demo retains its walkthrough entry.
  */
+const LANGUAGES = [
+  { value: "en-CA", label: "English (Canada)" },
+  { value: "fr-CA", label: "Français (Canada)" },
+];
+
 export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: boolean }) {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [language, setLanguage] = useState("en-CA");
+  const [language, setLanguage] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   return (
     <main className={styles.screen}>
+      {/* The supplied mark, used exactly as delivered. */}
       <Image
-        src="/brand/login-emblem.png"
+        src="/brand/rufdiamond-logo.png"
         alt=""
-        width={700}
-        height={1326}
+        width={801}
+        height={957}
         className={styles.emblem}
         priority
       />
@@ -45,13 +52,14 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
             priority
           />
           <Image
-            src="/brand/flag-ca.png"
+            src="/brand/flag.png"
             alt="Canada"
-            width={60}
-            height={40}
+            width={698}
+            height={379}
             className={styles.flag}
           />
           <span className={styles.dateBlock}>
+            <span className={styles.date}>{date}</span>
             <Image
               src="/brand/calendar-light.png"
               alt=""
@@ -59,7 +67,6 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
               height={200}
               className={styles.calendar}
             />
-            <span className={styles.date}>{date}</span>
           </span>
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>
         </header>
@@ -75,8 +82,11 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
           }}
         >
           <p className={styles.formTitle}>Account access</p>
-          {!apiMode && <p>Local fixture demo</p>}
-          {error && <p role="alert">{error}</p>}
+          {error && (
+            <p className={styles.error} role="alert">
+              {error}
+            </p>
+          )}
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="username">
@@ -114,10 +124,10 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
               Forgot Password <span aria-hidden="true">&gt;&gt;&gt;</span>
             </a>
             <Image
-              src="/brand/lock.png"
+              src="/brand/icon-lock.png"
               alt=""
-              width={40}
-              height={40}
+              width={256}
+              height={256}
               className={styles.linkIcon}
             />
           </p>
@@ -126,26 +136,31 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
             <label className={styles.label} htmlFor="language">
               Language:
             </label>
-            <select
+            <LanguageSelect
               id="language"
-              className={styles.select}
               value={language}
-              onChange={(event) => setLanguage(event.target.value)}
-            >
-              <option value="en-CA">English (Canada)</option>
-              <option value="fr-CA">Français (Canada)</option>
-            </select>
+              onChange={setLanguage}
+              placeholder="Please select your preferred language."
+              options={LANGUAGES}
+            />
           </div>
 
           <button type="submit" className={styles.submit} disabled={busy}>
             Sign in
           </button>
 
-          <p className={styles.linkRow}>
+          <p className={`${styles.linkRow} ${styles.requestRow}`}>
             <a className={styles.link} href="#request-account">
               Request a user account here{" "}
               <span aria-hidden="true">&gt;&gt;&gt;</span>
             </a>
+            <Image
+              src="/brand/icon-account.png"
+              alt=""
+              width={256}
+              height={256}
+              className={styles.linkIcon}
+            />
           </p>
         </form>
       </div>
