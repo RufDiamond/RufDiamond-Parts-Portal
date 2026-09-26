@@ -3,12 +3,15 @@ import { afterEach, expect, test, vi } from 'vitest';
 import { waitFor } from '@testing-library/react';
 import { cleanup, render, screen, fireEvent } from '@testing-library/react';
 import { Confirmed } from '@/app/(portal)/request/confirmed/Confirmed';
-const confirmation = {
+import type { RequestConfirmation } from '@/state/RequestContext';
+const confirmation: RequestConfirmation = {
   reference: 'TEST-123', submittedAt: '2026-09-17T12:00:00Z', companyName: 'Test customer', currency: 'CAD',
   details: {brand:'Fat Truck', serial:'Test serial', comments:{}, generalComment:'Test note', shipping:null},
   lines: [{partId:'p1',partNumberSnapshot:'P-1',descriptionSnapshot:'Test part',qty:2}], totals:{}, discountRate:0,
 };
-const downloadSpy = vi.hoisted(() => vi.fn(async () => {}));
+const downloadSpy = vi.hoisted(() =>
+  vi.fn<(confirmation: unknown, usage: unknown) => Promise<void>>(async () => {}),
+);
 vi.mock('@/app/(portal)/request/confirmed/quote-pdf', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   downloadQuotePdf: downloadSpy,
