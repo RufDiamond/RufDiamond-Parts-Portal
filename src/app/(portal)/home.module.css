@@ -16,8 +16,8 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
-  gap: clamp(10px, 1.2vw, 20px);
-  padding: clamp(8px, 0.85vw, 14px);
+  gap: clamp(8px, 0.95vw, 15px);
+  padding: clamp(6px, 0.7vw, 11px);
   width: 100%;
   min-height: 100%;
   /*
@@ -38,7 +38,7 @@
 .column {
   display: grid;
   align-content: start;
-  gap: clamp(10px, 1.2vw, 20px);
+  gap: clamp(8px, 0.95vw, 15px);
 }
 
 .card {
@@ -281,7 +281,15 @@ a.card:hover {
 }
 
 @media (min-width: 901px) {
-  .stage { height: calc(100dvh - 118px); min-height: 510px; align-items: stretch; border-radius: 12px; }
+  /*
+   * Exactly the room the shell leaves: the window, less the band the brand
+   * mark occupies and the 8px the content panel keeps below itself. It was a
+   * hardcoded 118px, which silently stopped matching the moment the band grew
+   * for a larger mark and put the home page 10px past the bottom of the
+   * screen. Deriving it means the one-screen rule survives the next change to
+   * the mark.
+   */
+  .stage { height: calc(100dvh - var(--brand-band, 120px) - 8px); min-height: 510px; align-items: stretch; border-radius: 12px; }
   .column { grid-template-rows: auto auto minmax(0, 1fr); align-content: stretch; }
   .card { background: #171717df; }
   .icon { width: clamp(60px, 7vw, 112px); max-height: 75px; }

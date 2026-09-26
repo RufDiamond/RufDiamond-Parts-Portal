@@ -11,13 +11,14 @@ export function Pending({
 }: {
   eyebrow: string;
   title: string;
-  children: React.ReactNode;
+  /* Optional: these screens carry no customer-facing copy yet. */
+  children?: React.ReactNode;
 }) {
   return (
     <section className={styles.pending}>
       <p className={styles.eyebrow}>{eyebrow}</p>
       <h2 className={styles.title}>{title}</h2>
-      <p className={styles.body}>{children}</p>
+      {children ? <p className={styles.body}>{children}</p> : null}
     </section>
   );
 }

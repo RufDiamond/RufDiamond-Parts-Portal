@@ -22,7 +22,7 @@
    * positioned over both rather than laid out in either. Growing the mark
    * without growing this drives it into the first rail button.
    */
-  --brand-band: 128px;
+  --brand-band: 120px;
   /* Icon size in the rail. The nine buttons leave enough room below to grow. */
   --rail-icon: clamp(32px, 5.6vh, 46px);
 }
@@ -302,7 +302,7 @@
 .brand { display: block; }
 /* `display: block` — as an inline image it sits on a baseline, and the
    descender space under it made the link 5.5px taller than the artwork. */
-.brandMark { display: block; width: 279px; height: 108px; object-fit: contain; }
+.brandMark { display: block; width: 258px; height: 100px; object-fit: contain; }
 
 @media (max-width: 600px) {
   .brandMark { width: 209px; height: 81px; }

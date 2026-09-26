@@ -18,6 +18,12 @@
 .title {
   margin: 0;
   font: var(--type-h2);
+  /*
+   * Stated, not inherited. This is a light panel sitting on the dark portal
+   * shell, so without a colour of its own the heading takes the shell's white
+   * and disappears into the panel.
+   */
+  color: var(--text-primary);
 }
 
 .body {
