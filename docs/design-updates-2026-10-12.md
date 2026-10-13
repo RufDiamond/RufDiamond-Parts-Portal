@@ -155,6 +155,24 @@ Each is built the way described, pending confirmation.
 18. **Account code.** The Customer column shows a short code (e.g. "SAV").
     Where does each account's code come from?
 
+### Raised while building the Order Request (13 Oct)
+
+19. **PO and VIN required?** Built: both are required. The VIN list is the
+    account's own machine serials, plus "Other…" to type one.
+20. **Scheduled orders skip the carrier.** Built per p65: Regular and Urgent
+    choose a carrier; a scheduled order does not, and RUF Diamond arranges it.
+    Confirm. (The reminder to the administrator and the early note to the
+    factory need the order service; nothing is sent yet.)
+21. **Saved addresses and serial numbers.** The form starts filled from the
+    account's shipping address, billing address and machine serials. Who keeps
+    those up to date — RUF Diamond, or the customer from their profile? If the
+    customer edits an address during an order, should it be saved back?
+22. **Taxes.** The order shows totals before tax, as the cart does. Is tax added
+    on RUF Diamond's invoice, outside the portal?
+23. **Quote or order from the same cart.** A cart can now go either to Request
+    a Quote or to Checkout. Can a customer order catalogue parts directly at
+    list price without a quote, or must every order start from a quotation?
+
 ---
 
 ## What already exists in the code
@@ -174,6 +192,14 @@ Each is built the way described, pending confirmation.
   Price. Quoted lines go on the cart at the quoted price with their quote
   number. In API mode the page says it is not available yet, since no quote
   service exists.
+- **Built (screens 5 and 6):** the Order Request at `/checkout`
+  (`src/app/(portal)/checkout/`), reached from Checkout on the cart. Five
+  sections unlock in turn and turn green when complete; all stay editable,
+  and a change that leaves a later section incomplete flags it (p69). The
+  review shows the order terms with Back / Submit. Rules are in
+  `src/lib/checkout.ts`; the account's addresses and serials come from
+  `src/data/account-profile.server.ts`. Submitting records the order in the
+  browser only and says so on screen — there is no order service yet.
 - `/request` has the quote request with the optional shipping estimate, and the
   quote document with Print / Save PDF.
 - **Backend:** there is no quote, order, cart, address or notification service

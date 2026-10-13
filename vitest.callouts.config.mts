@@ -26,6 +26,7 @@ export default defineConfig({
       "tests/customer-additions.test.tsx",
       "tests/cart.test.tsx",
       "tests/quote-status.test.tsx",
+      "tests/checkout.test.tsx",
       "tests/customer-money.test.tsx",
       "tests/customer-request.test.tsx",
       "tests/quote-document.test.tsx",

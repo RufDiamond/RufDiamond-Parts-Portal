@@ -122,7 +122,7 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
 
           <div className={styles.links}>
             <Link
-              href="/request"
+              href="/checkout"
               className={styles.checkout}
               aria-disabled={lines.length === 0 || undefined}
               onClick={(event) => { if (lines.length === 0) event.preventDefault(); else setOpen(false); }}
