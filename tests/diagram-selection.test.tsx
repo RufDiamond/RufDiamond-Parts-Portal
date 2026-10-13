@@ -84,6 +84,9 @@ test("label, component, and table focus converge; selecting a part also ticks it
   fireEvent.click(tableRows()[0]);
   fireEvent.click(tableRows()[1]);
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
+  const confirm = screen.getByRole("dialog", { name: "Confirm parts to add to the cart" });
+  fireEvent.click(within(confirm).getByRole("button", { name: "Add to cart" }));
+  fireEvent.click(within(await screen.findByRole("dialog", { name: "Parts Portal" })).getByRole("button", { name: "OK" }));
   expect(screen.getByRole("button", { name: /Check cart · 2/ })).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: "Clear selection" }));
   expect(screen.getByRole("button", { name: /Check cart · 2/ })).toBeTruthy();

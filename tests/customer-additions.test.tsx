@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { RequestProvider, useRequest } from "@/state/RequestContext";
 import { SearchResults } from "@/app/(portal)/search/SearchResults";
@@ -40,6 +40,7 @@ it("announces success and clears selection only after the addition commits", asy
   render(tree()); await screen.findByText("Committed 0");
   fireEvent.click(screen.getByRole("checkbox", { name: "Select P" }));
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
+  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Add to cart" }));
   expect(screen.queryByText(/added to the cart/)).toBeNull();
   await act(async () => complete(response()));
   await screen.findByText(/added to the cart/);

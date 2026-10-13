@@ -28,8 +28,9 @@ covers the customer side only. These are built or needed and have no design:
 **Customer**
 | Screen | Note |
 |---|---|
-| Quote Status | Nav button exists; slide 3 describes a quote history table; no screen drawn |
-| Order Status | Nav button exists; slide 56 describes it in prose; no screen drawn |
+| Quote Status | **Designed 12 Oct** — admin and customer tables, see `docs/design-updates-2026-10-12.md` |
+| Cart and Order Request | **Designed 12 Oct** — cart pop-up, mini-cart, order wizard, order confirmation |
+| Order Status | Still no screen drawn — the 12 Oct deck has a divider slide and a blank page |
 | Technical Info | Deck states this is phase two |
 | Sign-in / account | Nothing in the deck, but profiles, saved carts and order history all require it |
 

@@ -24,6 +24,7 @@ export default defineConfig({
       "tests/customer-session.test.ts",
       "tests/customer-boundary-state.test.tsx",
       "tests/customer-additions.test.tsx",
+      "tests/cart.test.tsx",
       "tests/customer-money.test.tsx",
       "tests/customer-request.test.tsx",
       "tests/quote-document.test.tsx",

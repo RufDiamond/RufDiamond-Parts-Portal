@@ -1,0 +1,164 @@
+/* Add to cart confirmation — 12 Oct deck, p62–63. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(38, 38, 38, 0.6);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(820px, 100%);
+  max-height: calc(100vh - 2 * var(--space-4));
+  padding: var(--space-4);
+  border: 1px solid var(--deck-panel);
+  border-radius: 8px;
+  background: var(--paper);
+  /* White panel on a dark shell: state the ink. */
+  color: var(--ink);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.title {
+  margin: 0;
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.primary,
+.secondary {
+  min-height: 36px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: 4px;
+  font: var(--weight-bold) var(--text-sm) / 1.2 var(--font-ui);
+  text-transform: uppercase;
+  cursor: var(--cursor-pointer);
+}
+
+.primary {
+  border: 1px solid var(--select);
+  background: var(--select);
+  color: var(--select-on);
+}
+
+.primary:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--ink);
+}
+
+.secondary {
+  border: 1px solid var(--deck-button-edge);
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--graphite);
+}
+
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.scroll {
+  overflow: auto;
+  border: 1px solid var(--rule);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--weight-regular) var(--text-sm) / 1.35 var(--font-ui);
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--deck-table-head);
+  color: var(--ink);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-xs);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--rule);
+  background: var(--deck-select-row);
+}
+
+.table tfoot th,
+.table tfoot td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--rule);
+  background: var(--paper);
+  font-weight: var(--weight-semibold);
+  text-align: right;
+}
+
+.total th,
+.total td {
+  font-weight: var(--weight-bold);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.qty {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.money {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.note {
+  margin: 0;
+  color: var(--graphite);
+  font: var(--weight-regular) var(--text-xs) / 1.4 var(--font-ui);
+}
+
+/* The "added" confirmation — p63: a titled box, a sentence, OK. */
+.done {
+  width: min(420px, 100%);
+  align-items: center;
+  text-align: center;
+}
+
+.doneTitle {
+  align-self: stretch;
+  margin: 0;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--rule);
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+  text-align: left;
+}
+
+.doneBody {
+  margin: var(--space-2) 0;
+  font: var(--weight-regular) var(--text-base) / 1.5 var(--font-ui);
+}

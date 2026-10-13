@@ -12,7 +12,8 @@ import {
   type CSSProperties,
 } from "react";
 import {
-  ComingSoon,
+  AddToCartDialog,
+  CheckCart,
   CroppedPart,
   DrawingViewer,
   FullIllustration,
@@ -88,7 +89,7 @@ export function FigureWorkspace({
   const { figure, drawing, system, variant, rows, callouts } = detail;
   const releasedDrawing = useReleasedDrawing(detail);
   const { selectedModel } = useMachine();
-  const { lines } = useRequest();
+  const { lines, currency, discountRate } = useRequest();
   const addition = useRequestAddition(figure.id);
 
   const { hoveredPartId, setHoveredPartId } =
@@ -167,8 +168,8 @@ export function FigureWorkspace({
    * what the zoom control already does.
    */
   const [fullScreen, setFullScreen] = useState(false);
-  /* Check cart has no screen behind it yet — see clients.md. */
-  const [cartComingSoon, setCartComingSoon] = useState(false);
+  /* Add to cart confirms quantities and prices first — 12 Oct deck, p62. */
+  const [confirmingCart, setConfirmingCart] = useState(false);
 
   /*
    * The quote view opens IN PLACE of the plate and the parts list — slides 48
@@ -407,7 +408,7 @@ export function FigureWorkspace({
         <button
           type="button"
           className={styles.button}
-          onClick={() => { void addSelectedToCart(); }}
+          onClick={() => { if (!reviewOnly) setConfirmingCart(true); }}
           disabled={reviewOnly || addition.pending || pending.length === 0}
           title={
             selectedPartIds.size === 0
@@ -445,17 +446,11 @@ export function FigureWorkspace({
           Print
         </button>
 
-        <button
-          type="button"
-          className={styles.button}
-          onClick={() => { if (!reviewOnly) setCartComingSoon(true); }}
+        <CheckCart
+          buttonClassName={styles.button}
+          iconClassName={styles.buttonIcon}
           disabled={reviewOnly}
-          title="The cart screen has not been built yet"
-        >
-          <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
-            className={styles.buttonIcon} />
-          Check cart · {lines.length}
-        </button>
+        />
         </div>
       </div>
 
@@ -659,15 +654,14 @@ export function FigureWorkspace({
         ) : null}
       </footer>
 
-      {cartComingSoon ? (
-        <ComingSoon
-          title="Check cart — coming soon"
-          onClose={() => setCartComingSoon(false)}
-        >
-          The cart screen has not been designed yet. Use{" "}
-          <strong>Request a quote</strong> to review what you have gathered and
-          send it to RUF Diamond.
-        </ComingSoon>
+      {confirmingCart && !reviewOnly ? (
+        <AddToCartDialog
+          parts={pending}
+          currency={pending[0]?.part.currency ?? currency}
+          discountRate={discountRate}
+          onConfirm={(parts) => addition.add(parts)}
+          onClose={() => setConfirmingCart(false)}
+        />
       ) : null}
 
       {fullScreen ? (

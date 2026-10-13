@@ -4,9 +4,9 @@ import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ComingSoon, EmptyState } from "@/components";
+import { AddToCartDialog, CheckCart, EmptyState } from "@/components";
 import { formatFigureRef, formatPrice } from "@/lib/format";
-import { useRequest } from "@/state/RequestContext";
+import { useRequest, type RequestPartInput } from "@/state/RequestContext";
 import { useRequestAddition } from "@/state/useRequestAddition";
 import type { PartUsageRow } from "@/types/catalog";
 import styles from "./search.module.css";
@@ -37,7 +37,7 @@ const NONE = "—";
  */
 export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) {
   const router = useRouter();
-  const { lines } = useRequest();
+  const { lines, currency, discountRate } = useRequest();
   const addition = useRequestAddition(JSON.stringify([query, mode, brand]));
 
   /*
@@ -106,10 +106,11 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
    * The ticks clear on success: they are a shortlist for one action, and
    * leaving them set invites a second click that silently does nothing.
    */
-  const addTickedToCart = (openQuote = false) => {
-    const additions = tickedParts
+  const newAdditions = () =>
+    tickedParts
       .filter((part) => !onCart.has(part.id))
       .map((part) => ({ part, qty: 1 }));
+  const addTickedToCart = (openQuote = false, additions: RequestPartInput[] = newAdditions()) => {
     return addition.add(additions, () => {
       if (additions.length) { setAdded(additions.length); setTicked(new Set()); }
       if (openQuote) router.push("/request");
@@ -134,7 +135,8 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
     else router.back();
   };
 
-  const [cartComingSoon, setCartComingSoon] = useState(false);
+  /* Add to cart confirms quantities and prices first — 12 Oct deck, p62. */
+  const [confirming, setConfirming] = useState<RequestPartInput[] | null>(null);
   const [term, setTerm] = useState(query);
   const research = () => {
     const next = term.trim();
@@ -196,7 +198,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
         <button
           type="button"
           className={styles.button}
-          onClick={() => { void addTickedToCart(); }}
+          onClick={() => setConfirming(newAdditions())}
           disabled={addition.pending || toAdd === 0}
           title={
             tickedParts.length === 0
@@ -225,16 +227,7 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
           Email
         </button>
 
-        <button
-          type="button"
-          className={styles.button}
-          onClick={() => setCartComingSoon(true)}
-          title="The cart screen has not been built yet"
-        >
-          <Image src="/toolbar/check-cart.png" alt="" width={40} height={40}
-            className={styles.buttonIcon} />
-          Check cart · {lines.length}
-        </button>
+        <CheckCart buttonClassName={styles.button} iconClassName={styles.buttonIcon} />
 
         <button
           type="button"
@@ -367,15 +360,14 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
         )}
       </div>
 
-      {cartComingSoon ? (
-        <ComingSoon
-          title="Check cart — coming soon"
-          onClose={() => setCartComingSoon(false)}
-        >
-          The cart screen has not been designed yet. Use{" "}
-          <strong>Request a quote</strong> to review what you have gathered and
-          send it to RUF Diamond.
-        </ComingSoon>
+      {confirming ? (
+        <AddToCartDialog
+          parts={confirming}
+          currency={confirming[0]?.part.currency ?? currency}
+          discountRate={discountRate}
+          onConfirm={(parts) => addTickedToCart(false, parts)}
+          onClose={() => setConfirming(null)}
+        />
       ) : null}
 
       {rows.length > 0 ? (
