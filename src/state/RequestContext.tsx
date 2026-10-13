@@ -24,6 +24,11 @@ export interface RequestPartInput {
   part: Part;
   /** Defaults to 1. */
   qty?: number;
+  /**
+   * Set when the part comes from a quotation (Quote Status, p59). Its price is
+   * the one RUF Diamond quoted, so the account discount does not apply again.
+   */
+  quoteNo?: string;
 }
 
 export interface RequestTotals {
@@ -120,9 +125,10 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function toLine(part: Part, qty: number): OrderLine {
+function toLine(part: Part, qty: number, quoteNo?: string): OrderLine {
   return {
     partId: part.id,
+    ...(quoteNo ? { quoteNo } : {}),
     partNumberSnapshot: part.partNumber,
     descriptionSnapshot: part.description,
     qty,
@@ -141,18 +147,18 @@ export function requestReducer(
       if (additions.length === 0) return state;
 
       const lines = [...state.lines];
-      for (const { part, qty = 1 } of additions) {
+      for (const { part, qty = 1, quoteNo } of additions) {
         const index = lines.findIndex((line) => line.partId === part.id);
         if (index === -1) {
           // Snapshot the part as it reads today; later catalogue edits must
           // not rewrite a request already in progress.
-          lines.push(toLine(part, qty));
+          lines.push(toLine(part, qty, quoteNo));
         } else {
           const existing = lines[index];
           const nextQty = existing.qty + qty;
           // API additions have just been revalidated. Do not preserve a stale
           // release snapshot or an old price that is now omitted by scope.
-          lines[index] = part.releasePartId ? toLine(part, nextQty) : {
+          lines[index] = part.releasePartId ? toLine(part, nextQty, quoteNo) : {
             ...existing,
             qty: nextQty,
             ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * nextQty) }),
@@ -279,7 +285,9 @@ export function computeTotals(
   if (lines.some(line => line.lineTotal === undefined)) return {};
   const listTotal = round2(lines.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0));
   const rate = Math.min(1, Math.max(0, discountRate));
-  const discountApplied = round2(listTotal * rate);
+  // A quoted price is already the price offered; only list prices are discounted.
+  const discountable = lines.reduce((sum, line) => sum + (line.quoteNo ? 0 : line.lineTotal ?? 0), 0);
+  const discountApplied = round2(discountable * rate);
 
   return {
     listTotal,

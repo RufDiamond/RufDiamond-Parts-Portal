@@ -25,6 +25,11 @@
   text-align: left;
 }
 
+.menu[data-placement="above"] {
+  top: auto;
+  bottom: calc(100% + var(--space-2));
+}
+
 .empty {
   margin: 0;
   color: var(--graphite);

@@ -211,6 +211,8 @@ export interface OrderLine {
   descriptionSnapshot: string;
   qty: number;
   unitPriceSnapshot?: number | string;
+  /** The quotation this line's price came from, when it came from one. */
+  quoteNo?: string;
   lineTotal?: number;
 }
 

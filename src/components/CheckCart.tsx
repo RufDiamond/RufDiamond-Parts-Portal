@@ -14,6 +14,8 @@ export interface CheckCartProps {
   buttonClassName: string;
   iconClassName: string;
   disabled?: boolean;
+  /** Where the cart opens — "above" when the button sits at the foot of a screen. */
+  placement?: "below" | "above";
 }
 
 /**
@@ -21,7 +23,7 @@ export interface CheckCartProps {
  * p64. Each line can be stepped or removed in place; Your Cart opens the full
  * list and Checkout carries on to the order.
  */
-export function CheckCart({ buttonClassName, iconClassName, disabled = false }: CheckCartProps) {
+export function CheckCart({ buttonClassName, iconClassName, disabled = false, placement = "below" }: CheckCartProps) {
   const { lines, currency, updateQty, removeLine, clear } = useRequest();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -61,7 +63,7 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false }: 
       </button>
 
       {open ? (
-        <div className={styles.menu} role="dialog" aria-label="Cart">
+        <div className={styles.menu} data-placement={placement} role="dialog" aria-label="Cart">
           {lines.length === 0 ? (
             <p className={styles.empty}>Your cart is empty.</p>
           ) : (

@@ -1,0 +1,217 @@
+/*
+ * Quote Status, customer view — 12 Oct deck, p59.
+ *
+ * The same frame as the search results: one dark bar of actions, then a white
+ * surface holding the price notice and a wide table that scrolls inside it.
+ * Rows are tinted by availability the way the deck colours them.
+ */
+
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 6px;
+  min-height: 0;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+}
+
+.title {
+  margin: 0 var(--space-3) 0 0;
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-md) / 1.2 var(--font-ui);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.pager {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-right: var(--space-2);
+}
+
+.pageOf {
+  padding: 0 var(--space-2);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-xs) / 1 var(--font-ui);
+  white-space: nowrap;
+}
+
+/* Same grey plate as the figure and search toolbars. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--deck-button-edge);
+  border-radius: 4px;
+  background: var(--deck-button);
+  color: var(--deck-on-dark);
+  font: var(--weight-bold) var(--text-2xs) / 1 var(--font-ui);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: var(--cursor-pointer);
+  transition: var(--transition-state);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--graphite);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.buttonIcon {
+  width: auto;
+  height: 18px;
+  object-fit: contain;
+}
+
+.home {
+  border-color: var(--deck-accent-edge);
+  background: var(--deck-accent);
+}
+
+.home:hover {
+  background: var(--deck-accent-hover);
+}
+
+.surface {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: var(--space-2);
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: var(--paper);
+  /* White surface on a dark shell: state the ink. */
+  color: var(--ink);
+}
+
+.notice {
+  margin: 0;
+  font: var(--weight-regular) var(--text-xs) / 1.45 var(--font-ui);
+}
+
+.error {
+  margin: 0;
+  color: var(--select);
+  font: var(--weight-semibold) var(--text-xs) / 1.4 var(--font-ui);
+}
+
+.scroller {
+  min-height: 0;
+  overflow: auto;
+}
+
+.table {
+  /* Seventeen columns: scroll sideways rather than crush the text ones. */
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font: var(--weight-regular) var(--text-2xs) / 1.3 var(--font-ui);
+  color: var(--ink);
+}
+
+.head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--space-2);
+  border: 1px solid var(--rule);
+  background: var(--deck-accent);
+  color: var(--paper);
+  font-weight: var(--weight-bold);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.row td {
+  padding: var(--space-2);
+  white-space: nowrap;
+  border: 1px solid var(--rule);
+  vertical-align: middle;
+}
+
+/* Availability tints, as the deck colours its rows. */
+.row[data-available="yes"] td {
+  background: #d9f2d0;
+}
+
+.row[data-available="partial"] td {
+  background: #fff2b3;
+}
+
+.row[data-available="no"] td {
+  background: #fbd3d3;
+}
+
+.tick,
+.center {
+  text-align: center;
+}
+
+.checkbox {
+  width: 13px;
+  height: 13px;
+  accent-color: var(--select);
+  cursor: var(--cursor-pointer);
+}
+
+.checkbox:disabled {
+  cursor: default;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.row .text {
+  min-width: 160px;
+  max-width: 240px;
+  white-space: normal;
+}
+
+.num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.money {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.awaiting {
+  color: var(--graphite);
+  font-style: italic;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3px;
+}
+
+@media print {
+  .bar,
+  .actions {
+    display: none;
+  }
+}

@@ -56,10 +56,11 @@ export function AddToCartDialog({
 
   const lines = useMemo<OrderLine[]>(
     () =>
-      items.map(({ part }) => {
+      items.map(({ part, quoteNo }) => {
         const count = qty[part.id] ?? 1;
         return {
           partId: part.id,
+          ...(quoteNo ? { quoteNo } : {}),
           partNumberSnapshot: part.partNumber,
           descriptionSnapshot: part.description,
           qty: count,
@@ -82,7 +83,7 @@ export function AddToCartDialog({
   const confirm = async () => {
     setStatus("adding");
     const committed = await onConfirm(
-      items.map(({ part }) => ({ part, qty: qty[part.id] ?? 1 })),
+      items.map((item) => ({ ...item, qty: qty[item.part.id] ?? 1 })),
     );
     setStatus(committed ? "added" : "confirming");
   };

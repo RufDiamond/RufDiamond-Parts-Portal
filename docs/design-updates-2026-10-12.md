@@ -129,6 +129,32 @@ Divider slide only; the following page is blank. **Still no design.**
 10. **Order Status** — still needs a design.
 11. **Linked images** — toolbar icons and logo are missing from the export again.
 
+### Raised while building Quote Status (13 Oct)
+
+Each is built the way described, pending confirmation.
+
+12. **When does the customer see the response?** Built: only after the
+    administrator sets *Notify Customer* to YES. Until then the line reads
+    "Awaiting RUF Diamond's response".
+13. **Discount on quoted prices.** Built: a quoted Customer Price is final, so
+    the account discount is not applied to it again in the cart. List-price
+    parts in the same cart still get the discount.
+14. **Which lines can be ordered?** Built: Available = YES or PARTIAL, within
+    the 30 days. NO (back-ordered) lines cannot be added. Should a customer be
+    able to order a back-ordered part and wait for it?
+15. **After 30 days.** Built: the line shows "Expired" and cannot be added to
+    the cart. Should the customer instead be able to ask for a re-quote from
+    that line?
+16. **"Add to Cart?" column.** Built as a record of the customer's decision:
+    "Yes" once the line is on the cart, otherwise "No". Is that what it means,
+    or should it stay "Yes" after the order is placed (for the tracking
+    described on p59)?
+17. **Quantity.** The confirmation lets the customer change the quoted
+    quantity before adding. Allowed, or must quoted lines be ordered at the
+    quoted quantity?
+18. **Account code.** The Customer column shows a short code (e.g. "SAV").
+    Where does each account's code come from?
+
 ---
 
 ## What already exists in the code
@@ -141,6 +167,13 @@ Divider slide only; the following page is blank. **Still no design.**
   the drop-down (`src/components/CheckCart.tsx`). The Discount line uses the
   account's existing `discountRate`. Checkout leads to `/request` until the
   Order Request page exists.
+- **Built (screen 2):** customer Quote Status at `/quotes`
+  (`src/app/(portal)/quotes/`), on sample records in
+  `src/data/quote-status.server.ts`. The customer view is built on the server
+  by `toCustomerQuoteLines` (`src/lib/quote-status.ts`) and carries no Factory
+  Price. Quoted lines go on the cart at the quoted price with their quote
+  number. In API mode the page says it is not available yet, since no quote
+  service exists.
 - `/request` has the quote request with the optional shipping estimate, and the
   quote document with Print / Save PDF.
 - **Backend:** there is no quote, order, cart, address or notification service
