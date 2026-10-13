@@ -192,7 +192,10 @@ export function QuoteDocument({
       <p className={styles.signoff}>
         Respectfully,
         <br />
-        <strong>RUF DIAMOND TEAM</strong>
+        {/* The dealer's copy is signed by the dealer — 12 Oct deck, p53
+            ("USER / DEALER NAME"). No user name is held yet, so the dealer
+            alone signs until accounts carry one. */}
+        <strong>{factory ? "RUF DIAMOND TEAM" : (confirmation.companyName ?? PENDING).toUpperCase()}</strong>
       </p>
       </footer>
     </article>

@@ -169,7 +169,14 @@ Each is built the way described, pending confirmation.
     customer edits an address during an order, should it be saved back?
 22. **Taxes.** The order shows totals before tax, as the cart does. Is tax added
     on RUF Diamond's invoice, outside the portal?
-23. **Quote or order from the same cart.** A cart can now go either to Request
+23. **Signature on the dealer's quote copy.** Done: the dealer copy is signed
+    with the dealer's name (p53). The deck also puts the user's name above it,
+    but accounts don't hold a user name yet. The factory copy — the only one
+    customers currently see, per the 17 Sep review — still signs "RUF DIAMOND
+    TEAM", since its signature runs off the slide. Confirm the factory copy is
+    unchanged.
+
+24. **Quote or order from the same cart.** A cart can now go either to Request
     a Quote or to Checkout. Can a customer order catalogue parts directly at
     list price without a quote, or must every order start from a quotation?
 
