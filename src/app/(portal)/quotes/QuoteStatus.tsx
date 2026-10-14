@@ -179,7 +179,9 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
                             added ? "Already on the cart"
                               : line.expired ? "This price has expired — request a new quote"
                                 : !response ? "Awaiting RUF Diamond's response"
-                                  : !line.orderable ? "This line cannot be ordered as quoted" : undefined
+                                  : !line.orderable ? "This line cannot be ordered as quoted"
+                                    : response.available === "no" ? "On back order: the factory ships it as soon as it is available"
+                                      : response.available === "partial" ? "Partly in stock: the rest is back-ordered and ships when available" : undefined
                           }
                         />
                       </td>

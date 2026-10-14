@@ -42,7 +42,9 @@ export function toCustomerQuoteLines(
       const canOrder =
         released &&
         !expired &&
-        (record.available === "yes" || record.available === "partial") &&
+        // Any availability can be ordered: what the factory lacks goes on back
+        // order and ships when it arrives (14 Oct).
+        record.available !== null &&
         record.customerPrice !== null &&
         partNumber !== null &&
         description !== null &&

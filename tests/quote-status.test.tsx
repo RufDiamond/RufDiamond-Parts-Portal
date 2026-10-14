@@ -32,11 +32,12 @@ it("hides the response until the administrator notifies the customer", () => {
   expect(line("qs-0007-1").orderable).toBeNull();
 });
 
-it("orders available and partial lines at the quoted price, and nothing else", () => {
+it("orders available, partial and back-ordered lines at the quoted price", () => {
   expect(line("qs-0006-1").orderable).toMatchObject({ partNumber: "19-00368", qty: 4, unitPrice: "19.18" });
   expect(line("qs-0006-1").response?.totalPrice).toBe("76.72");
   expect(line("qs-0006-2").orderable).not.toBeNull();
-  expect(line("qs-0006-3").orderable).toBeNull(); // not available
+  // Back-ordered parts can be ordered too; they ship when the factory has them.
+  expect(line("qs-0006-3").orderable).toMatchObject({ partNumber: "51-00045", unitPrice: "8000.00" });
   // A line the factory added carries its own part number and no catalogue part.
   expect(line("qs-0006-4").orderable).toMatchObject({ partNumber: "98-00041", catalogPartId: null });
 });
@@ -64,7 +65,7 @@ function Cart() {
 it("adds ticked quoted lines to the cart at the quoted price", async () => {
   render(<RequestProvider><QuoteStatus lines={lines()} /><Cart /></RequestProvider>);
   expect((screen.getByRole("checkbox", { name: "Select 19-00511 from RD-00007" }) as HTMLInputElement).disabled).toBe(true);
-  expect((screen.getByRole("checkbox", { name: "Select 51-00045 from RD-00006" }) as HTMLInputElement).disabled).toBe(true);
+  expect((screen.getByRole("checkbox", { name: "Select 51-00045 from RD-00006" }) as HTMLInputElement).disabled).toBe(false);
   expect(screen.getByText("Awaiting RUF Diamond’s response")).toBeTruthy();
 
   fireEvent.click(screen.getByRole("checkbox", { name: "Select 19-00368 from RD-00006" }));
