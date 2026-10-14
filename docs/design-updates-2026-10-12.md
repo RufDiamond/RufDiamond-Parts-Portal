@@ -119,15 +119,18 @@ Divider slide only; the following page is blank. **Still no design.**
    order offers three named carriers. Should the quote request use the carriers
    too?
 5. **Schedule orders.** Does the shipping method still apply? p65 says carriers
-   apply to Regular and Urgent only.
+   apply to Regular and Urgent only. **Decided 13 Oct:** no — a scheduled order
+   skips the carrier (see 20).
 6. **"None of the boxes are mutually exclusive"** (p69, Note 2) — which boxes?
-   Order type reads as choose-one.
+   Order type reads as choose-one. **Still open — for the supervisor / RUF.**
 7. **Numbering.** Quote numbers `RD-00001`, order numbers `00001` — one sequence
    each, across all brands?
 8. **Notify Customer** — email, an in-portal message, or both?
 9. **Search by Description** — restore it (p80) or keep it removed?
 10. **Order Status** — still needs a design.
 11. **Linked images** — toolbar icons and logo are missing from the export again.
+    **Decided 13 Oct:** keep using the icons and logo already in the portal; no
+    re-export needed.
 
 ### Raised while building Quote Status (13 Oct)
 
@@ -150,8 +153,8 @@ Each is built the way described, pending confirmation.
     or should it stay "Yes" after the order is placed (for the tracking
     described on p59)?
 17. **Quantity.** The confirmation lets the customer change the quoted
-    quantity before adding. Allowed, or must quoted lines be ordered at the
-    quoted quantity?
+    quantity before adding. **Decided 13 Oct:** allowed — the customer picks the
+    quantity. Already built this way.
 18. **Account code.** The Customer column shows a short code (e.g. "SAV").
     Where does each account's code come from?
 
@@ -161,7 +164,7 @@ Each is built the way described, pending confirmation.
     account's own machine serials, plus "Other…" to type one.
 20. **Scheduled orders skip the carrier.** Built per p65: Regular and Urgent
     choose a carrier; a scheduled order does not, and RUF Diamond arranges it.
-    Confirm. (The reminder to the administrator and the early note to the
+    **Decided 13 Oct:** confirmed. (The reminder to the administrator and the early note to the
     factory need the order service; nothing is sent yet.)
 21. **Saved addresses and serial numbers.** The form starts filled from the
     account's shipping address, billing address and machine serials. Who keeps
