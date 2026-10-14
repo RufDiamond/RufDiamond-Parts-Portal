@@ -1,4 +1,4 @@
-import type { Address, OrderDraft, OrderType, ShippingMethod } from "@/types/checkout";
+import type { Address, OrderDraft, OrderType, SavedAddresses, ShippingMethod } from "@/types/checkout";
 
 /** The five sections of the Order Request, in the order they unlock (p65–76). */
 export const SECTIONS = ["type", "detail", "shipping", "addresses", "instructions"] as const;
@@ -27,17 +27,22 @@ export const emptyAddress = (): Address => ({
   province: "", country: "Canada", postalCode: "", email: "", phone: "",
 });
 
-export const emptyDraft = (): OrderDraft => ({
-  orderType: null, scheduleDate: "", poNumber: "", vinChoice: "", vinOther: "",
-  shippingMethod: null, shipping: emptyAddress(), billingSameAsShipping: false,
-  billing: emptyAddress(), instructions: "",
+/**
+ * A fresh order. The addresses start from the ones last saved; on a first
+ * order they start empty and "Save this new address" is ticked, so the next
+ * order is filled in (14 Oct).
+ */
+export const emptyDraft = (saved: SavedAddresses = { shipping: null, billing: null }): OrderDraft => ({
+  orderType: null, scheduleDate: "", poNumber: "", vin: "",
+  shippingMethod: null, shipping: saved.shipping ?? emptyAddress(), billingSameAsShipping: false,
+  billing: saved.billing ?? emptyAddress(), saveShipping: !saved.shipping, saveBilling: !saved.billing,
+  instructions: "",
 });
 
 /** p65: carriers apply to Regular and Urgent orders; a scheduled order is arranged by RUF Diamond. */
 export const needsShippingMethod = (draft: OrderDraft) => draft.orderType !== "schedule";
 
-export const vinOf = (draft: OrderDraft) =>
-  (draft.vinChoice === "other" ? draft.vinOther : draft.vinChoice).trim();
+export const vinOf = (draft: OrderDraft) => draft.vin.trim();
 
 export const billingOf = (draft: OrderDraft) =>
   draft.billingSameAsShipping ? draft.shipping : draft.billing;
@@ -76,8 +81,10 @@ export function sectionProblem(section: Section, draft: OrderDraft, today: strin
       }
       return null;
     case "detail":
+      // Both required (14 Oct): without the PO an invoice can be refused; without
+      // the VIN the right parts for that build cannot be confirmed.
       if (!draft.poNumber.trim()) return "Enter your PO number.";
-      if (!vinOf(draft)) return draft.vinChoice === "other" ? "Enter the serial number." : "Choose the serial number.";
+      if (!vinOf(draft)) return "Enter the VIN / serial number of the machine.";
       return null;
     case "shipping":
       return needsShippingMethod(draft) && !draft.shippingMethod ? "Choose a shipping method." : null;
@@ -140,3 +147,38 @@ export const ORDER_TERMS: { title: string; parts: { text: string; strong?: boole
     parts: [{ text: "If one or more items are on back order, Ruf Diamond reserves the right to ship available items separately to minimize delays." }],
   },
 ];
+
+const SAVED_ADDRESSES_KEY = "rdpp:saved-addresses:v1";
+
+/**
+ * Saved addresses are kept per account in this browser until accounts are
+ * stored by the API. Storage failing simply means starting from empty.
+ */
+export function readSavedAddresses(companyId: string): SavedAddresses {
+  try {
+    const value = JSON.parse(localStorage.getItem(`${SAVED_ADDRESSES_KEY}:${companyId}`) ?? "null") as Partial<SavedAddresses> | null;
+    const valid = (address: unknown): Address | null =>
+      address && typeof address === "object" && addressProblem({ ...emptyAddress(), ...(address as Address) }) === null
+        ? { ...emptyAddress(), ...(address as Address) }
+        : null;
+    return { shipping: valid(value?.shipping), billing: valid(value?.billing) };
+  } catch {
+    return { shipping: null, billing: null };
+  }
+}
+
+/** Record the addresses the customer ticked "Save this new address" for. */
+export function saveAddressesFrom(companyId: string, draft: OrderDraft): void {
+  const current = readSavedAddresses(companyId);
+  const next: SavedAddresses = {
+    shipping: draft.saveShipping ? draft.shipping : current.shipping,
+    billing: draft.billingSameAsShipping
+      ? (draft.saveShipping ? draft.shipping : current.billing)
+      : (draft.saveBilling ? draft.billing : current.billing),
+  };
+  try {
+    localStorage.setItem(`${SAVED_ADDRESSES_KEY}:${companyId}`, JSON.stringify(next));
+  } catch {
+    // Saving is a convenience; the order itself is unaffected.
+  }
+}

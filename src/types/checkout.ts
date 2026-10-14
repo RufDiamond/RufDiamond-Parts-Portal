@@ -25,23 +25,23 @@ export interface OrderDraft {
   /** ISO date; only read when the order type is "schedule". */
   scheduleDate: string;
   poNumber: string;
-  /** A serial from the account's fleet, or "other" to type one. */
-  vinChoice: string;
-  vinOther: string;
+  /** Typed by the customer on every order (14 Oct): no list to pick from without checking. */
+  vin: string;
   shippingMethod: ShippingMethod | null;
   shipping: Address;
   /** True: billing is the shipping address (p72, "Shipping Address is same as billing Address"). */
   billingSameAsShipping: boolean;
   billing: Address;
+  /** "Save this new address" — offered whenever an address is being entered (14 Oct). */
+  saveShipping: boolean;
+  saveBilling: boolean;
   instructions: string;
 }
 
-/** What the account already has on file, offered so the form starts filled. */
-export interface AccountProfile {
-  /** Serial numbers of the account's machines, for the VIN list (p67). */
-  serials: string[];
-  shipping: Address;
-  billing: Address;
+/** The addresses the account last chose to save; the next order starts from these. */
+export interface SavedAddresses {
+  shipping: Address | null;
+  billing: Address | null;
 }
 
 export interface SubmittedOrder {

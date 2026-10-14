@@ -5,11 +5,12 @@ import { useEffect, useMemo, useReducer, useState } from "react";
 import { EmptyState } from "@/components";
 import {
   ORDER_TERMS, ORDER_TYPES, PROVINCES, SECTIONS, SHIPPING_METHODS, addressProblem, billingOf,
-  emptyDraft, formatOrderNo, needsShippingMethod, sectionProblem, vinOf, type Section,
+  emptyDraft, formatOrderNo, needsShippingMethod, readSavedAddresses, saveAddressesFrom, sectionProblem, vinOf,
+  type Section,
 } from "@/lib/checkout";
 import { formatAmount } from "@/lib/format";
 import { computeTotals, useRequest } from "@/state/RequestContext";
-import type { AccountProfile, Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
+import type { Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
 import styles from "./checkout.module.css";
 
 export const DRAFT_STORAGE_KEY = "rdpp:order-draft:v1";
@@ -64,7 +65,7 @@ interface Saved {
 }
 
 type SavedAction =
-  | { type: "hydrate"; stored: { draft: OrderDraft; reached: number } | null; submitted: SubmittedOrder | null }
+  | { type: "hydrate"; stored: { draft: OrderDraft; reached: number } | null; fresh: OrderDraft; submitted: SubmittedOrder | null }
   | { type: "update"; patch: Partial<OrderDraft> }
   | { type: "reach"; index: number }
   | { type: "submitted"; order: SubmittedOrder | null }
@@ -77,7 +78,10 @@ function savedReducer(state: Saved, action: SavedAction): Saved {
         ...state,
         hydrated: true,
         submitted: action.submitted,
-        ...(action.stored ? { draft: action.stored.draft, reached: Math.min(action.stored.reached, SECTIONS.length - 1) } : {}),
+        // A draft saved by an older version may lack newer fields; fill them in.
+        ...(action.stored
+          ? { draft: { ...action.fresh, ...action.stored.draft }, reached: Math.min(action.stored.reached, SECTIONS.length - 1) }
+          : { draft: action.fresh }),
       };
     case "update":
       return { ...state, draft: { ...state.draft, ...action.patch } };
@@ -155,11 +159,13 @@ function AddressForm({ kind, address, onChange }: {
  * a later section wrong turns that section orange again with the reason (p69).
  * The last step is the review with the order terms, then Submit.
  */
-export function Checkout({ profile, today }: { profile: AccountProfile; today: string }) {
-  const { lines, currency, discountRate, clear, linesHydrated } = useRequest();
+export function Checkout({ today }: { today: string }) {
+  const { lines, currency, discountRate, clear, linesHydrated, company } = useRequest();
+  const companyId = company?.id ?? "guest";
 
-  const fresh = () => ({ ...emptyDraft(), shipping: profile.shipping, billing: profile.billing });
-  const [saved, dispatch] = useReducer(savedReducer, undefined, () => ({ draft: fresh(), reached: 0, submitted: null, hydrated: false }));
+  /** A new order, starting from the addresses this account last saved. */
+  const fresh = () => emptyDraft(readSavedAddresses(companyId));
+  const [saved, dispatch] = useReducer(savedReducer, undefined, () => ({ draft: emptyDraft(), reached: 0, submitted: null, hydrated: false }));
   const { draft, reached, submitted, hydrated } = saved;
   const [tried, setTried] = useState<ReadonlySet<Section>>(new Set());
   const [editing, setEditing] = useState({ shipping: false, billing: false });
@@ -168,8 +174,8 @@ export function Checkout({ profile, today }: { profile: AccountProfile; today: s
 
   // A refresh mid-order must not lose what was typed. Read after mount.
   useEffect(() => {
-    dispatch({ type: "hydrate", stored: read(DRAFT_STORAGE_KEY), submitted: read<SubmittedOrder>(ORDER_STORAGE_KEY) });
-  }, []);
+    dispatch({ type: "hydrate", stored: read(DRAFT_STORAGE_KEY), fresh: emptyDraft(readSavedAddresses(companyId)), submitted: read<SubmittedOrder>(ORDER_STORAGE_KEY) });
+  }, [companyId]);
   useEffect(() => {
     if (hydrated && !submitted) write(DRAFT_STORAGE_KEY, { draft, reached });
   }, [hydrated, submitted, draft, reached]);
@@ -203,6 +209,7 @@ export function Checkout({ profile, today }: { profile: AccountProfile; today: s
       totals,
     };
     write(ORDER_STORAGE_KEY, order);
+    saveAddressesFrom(companyId, draft);
     write(DRAFT_STORAGE_KEY, null);
     clear();
     dispatch({ type: "submitted", order });
@@ -415,19 +422,10 @@ export function Checkout({ profile, today }: { profile: AccountProfile; today: s
             </label>
             <label className={styles.field} htmlFor="vin">
               <span>VIN No.:</span>
-              <select id="vin" value={draft.vinChoice} onChange={(event) => update({ vinChoice: event.target.value })}>
-                <option value="">Select your equipment&rsquo;s serial number</option>
-                {profile.serials.map((serial) => <option key={serial} value={serial}>{serial}</option>)}
-                <option value="other">Other…</option>
-              </select>
+              <input id="vin" value={draft.vin} placeholder="Please enter VIN No." autoComplete="off"
+                onChange={(event) => update({ vin: event.target.value.toUpperCase() })} />
             </label>
-            {draft.vinChoice === "other" ? (
-              <label className={styles.field} htmlFor="vin-other">
-                <span>Serial No.:</span>
-                <input id="vin-other" value={draft.vinOther} placeholder="Please enter VIN No."
-                  onChange={(event) => update({ vinOther: event.target.value })} />
-              </label>
-            ) : null}
+            <p className={styles.hint}>Type the serial number of the machine these parts are for. Some parts differ by VIN.</p>
           </div>
         )) : null}
 
@@ -461,7 +459,14 @@ export function Checkout({ profile, today }: { profile: AccountProfile; today: s
               <div key={kind} className={styles.addressCard}>
                 <h3 className={styles.addressTitle}>{kind === "shipping" ? "Shipping Address" : "Billing Address"}</h3>
                 {showForm ? (
-                  <AddressForm kind={kind} address={address} onChange={(next) => update({ [kind]: next })} />
+                  <>
+                    <AddressForm kind={kind} address={address} onChange={(next) => update({ [kind]: next })} />
+                    <label className={styles.same}>
+                      <input type="checkbox" checked={kind === "shipping" ? draft.saveShipping : draft.saveBilling}
+                        onChange={(event) => update(kind === "shipping" ? { saveShipping: event.target.checked } : { saveBilling: event.target.checked })} />
+                      Save this new address
+                    </label>
+                  </>
                 ) : (
                   <p className={styles.address}><AddressLines address={address} /></p>
                 )}
