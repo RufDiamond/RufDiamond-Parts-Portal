@@ -26,12 +26,13 @@ export interface BrandPartsProps {
 
 /**
  * A product line's landing screen, per slide 10: pick a model from the photo
- * grid, or go straight in by part number.
+ * grid, or go straight in by part number or description (slides 16–27).
  */
 export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
   const router = useRouter();
   const { setMachine } = useMachine();
   const [partNo, setPartNo] = useState("");
+  const [description, setDescription] = useState("");
 
   /** Choosing a model sets the machine, then opens its systems. */
   const open = (entry: BrandModel) => {
@@ -41,11 +42,11 @@ export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
     router.push(`/systems?variantId=${encodeURIComponent(variant.id)}`);
   };
 
-  const search = (value: string) => {
+  const search = (mode: "part" | "description", value: string) => {
     const q = value.trim();
     if (!q) return;
     router.push(
-      `/search?mode=part&q=${encodeURIComponent(q)}&brand=${slug}`,
+      `/search?mode=${mode}&q=${encodeURIComponent(q)}&brand=${slug}`,
     );
   };
 
@@ -109,7 +110,7 @@ export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
           className={styles.search}
           onSubmit={(e) => {
             e.preventDefault();
-            search(partNo);
+            search("part", partNo);
           }}
         >
           <label className={styles.label} htmlFor="by-part">
@@ -134,7 +135,34 @@ export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
           </div>
         </form>
 
-
+        <form
+          className={styles.search}
+          onSubmit={(e) => {
+            e.preventDefault();
+            search("description", description);
+          }}
+        >
+          <label className={styles.label} htmlFor="by-description">
+            Search by Description
+          </label>
+          <div className={styles.field}>
+            <input
+              id="by-description"
+              className={styles.input}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="air filter"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className={styles.go}
+              aria-label="Search by description"
+            >
+              <Icon name="arrow-right" size="md" />
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

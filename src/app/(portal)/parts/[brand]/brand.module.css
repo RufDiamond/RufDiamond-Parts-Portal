@@ -127,7 +127,8 @@
 
 .searches {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  /* Part number and description side by side, as slides 16 and 22 draw them. */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: var(--space-3);
 }
 
