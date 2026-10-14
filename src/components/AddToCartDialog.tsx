@@ -176,14 +176,19 @@ export function AddToCartDialog({
             </tbody>
             {priced ? (
               <tfoot>
-                <tr>
-                  <th scope="row" colSpan={4}>Subtotal ({currency})</th>
-                  <td className={styles.money}>{formatAmount(totals.listTotal, currency)}</td>
-                </tr>
-                <tr>
-                  <th scope="row" colSpan={4}>Discount</th>
-                  <td className={styles.money}>{formatAmount(totals.discountApplied, currency)}</td>
-                </tr>
+                {/* Individual customers have no discount, so no discount line (14 Oct). */}
+                {discountRate > 0 ? (
+                  <>
+                    <tr>
+                      <th scope="row" colSpan={4}>Subtotal ({currency})</th>
+                      <td className={styles.money}>{formatAmount(totals.listTotal, currency)}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row" colSpan={4}>Discount ({Math.round(discountRate * 100)}%)</th>
+                      <td className={styles.money}>{formatAmount(totals.discountApplied, currency)}</td>
+                    </tr>
+                  </>
+                ) : null}
                 <tr className={styles.total}>
                   <th scope="row" colSpan={4}>Total</th>
                   <td className={styles.money}>{formatAmount(totals.netTotal, currency)}</td>

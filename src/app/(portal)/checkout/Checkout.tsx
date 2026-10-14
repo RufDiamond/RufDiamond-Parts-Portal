@@ -276,8 +276,11 @@ export function Checkout({ profile, today }: { profile: AccountProfile; today: s
               </tbody>
               {money ? (
                 <tfoot>
-                  <tr><th scope="row" colSpan={5}>Subtotal ({currency})</th><td className={styles.money}>$ {formatAmount(shownTotals.listTotal, currency)}</td></tr>
-                  <tr><th scope="row" colSpan={5}>Discount</th><td className={styles.money}>$ {formatAmount(shownTotals.discountApplied, currency)}</td></tr>
+                  {/* No discount line for an account without one — individual customers (14 Oct). */}
+                  {shownTotals.discountApplied ? <>
+                    <tr><th scope="row" colSpan={5}>Subtotal ({currency})</th><td className={styles.money}>$ {formatAmount(shownTotals.listTotal, currency)}</td></tr>
+                    <tr><th scope="row" colSpan={5}>Discount</th><td className={styles.money}>$ {formatAmount(shownTotals.discountApplied, currency)}</td></tr>
+                  </> : null}
                   <tr className={styles.total}><th scope="row" colSpan={5}>Total</th><td className={styles.money}>$ {formatAmount(shownTotals.netTotal, currency)}</td></tr>
                 </tfoot>
               ) : null}

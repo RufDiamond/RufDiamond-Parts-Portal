@@ -20,7 +20,7 @@ export interface QuoteStatusRecord {
   quoteNo: string;
   /** ISO date the request was submitted — prices run 30 days from here. */
   requestDate: string;
-  /** Account code shown in the Customer column, e.g. "SAV". */
+  /** The account's company name, shown in full in the Customer column (14 Oct). */
   customer: string;
   user: string;
   /**

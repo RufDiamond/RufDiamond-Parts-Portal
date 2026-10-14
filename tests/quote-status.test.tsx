@@ -2,6 +2,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
+import { DEMO_COMPANY } from "@/data/accounts";
 import { fixtureQuoteRecords } from "@/data/quote-status.server";
 import { toCustomerQuoteLines } from "@/lib/quote-status";
 import { computeTotals, RequestProvider, useRequest } from "@/state/RequestContext";
@@ -11,7 +12,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => { cleanup(); sessionStorage.clear(); });
 
 const TODAY = "2026-10-13";
-const lines = () => toCustomerQuoteLines(fixtureQuoteRecords, "co-placeholder", TODAY);
+const lines = () => toCustomerQuoteLines(fixtureQuoteRecords, DEMO_COMPANY.id, TODAY);
 const line = (id: string) => lines().find((item) => item.id === id)!;
 
 it("shows only the account's own lines, newest request first", () => {
@@ -44,7 +45,7 @@ it("expires prices 30 days after the request date", () => {
   expect(line("qs-0003-1").priceValidUntil).toBe("2026-10-02");
   expect(line("qs-0003-1").expired).toBe(true);
   expect(line("qs-0003-1").orderable).toBeNull();
-  expect(toCustomerQuoteLines(fixtureQuoteRecords, "co-placeholder", "2026-10-02").find((item) => item.id === "qs-0003-1")!.expired).toBe(false);
+  expect(toCustomerQuoteLines(fixtureQuoteRecords, DEMO_COMPANY.id, "2026-10-02").find((item) => item.id === "qs-0003-1")!.expired).toBe(false);
 });
 
 it("does not discount a quoted price a second time", () => {

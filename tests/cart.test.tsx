@@ -81,3 +81,11 @@ it("closes the drop-down on Escape", async () => {
   fireEvent.keyDown(window, { key: "Escape" });
   expect(screen.queryByRole("dialog", { name: "Cart" })).toBeNull();
 });
+
+it("shows no discount line to an account without a discount", () => {
+  render(<AddToCartDialog parts={[{ part: heater, qty: 1 }]} currency="CAD" discountRate={0} onConfirm={async () => true} onClose={() => {}} />);
+  const foot = screen.getByRole("dialog").querySelector("tfoot") as HTMLElement;
+  expect(within(foot).queryByText(/Discount/)).toBeNull();
+  expect(within(foot).queryByText(/Subtotal/)).toBeNull();
+  expect(within(foot).getByText("559.93")).toBeTruthy();
+});

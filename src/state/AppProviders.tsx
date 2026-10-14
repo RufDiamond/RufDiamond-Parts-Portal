@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Company } from "@/types/catalog";
+import { DEMO_COMPANY } from "@/data/accounts";
 import { MachineProvider } from "./MachineContext";
 import { RequestProvider } from "./RequestContext";
 import { SessionBoundary } from "./SessionBoundary";
@@ -9,19 +10,11 @@ import { scopeKey } from "./customer-session";
 import type { MeResponse } from "@rufdiamond/contracts";
 
 /**
- * Local fixture demo account only. Connected pages receive the current
- * authenticated company and never use this value as an API fallback.
+ * Local fixture demo account only (a dealer, so its 10% shows). Connected
+ * pages receive the current authenticated company and never use this value
+ * as an API fallback.
  */
-const PLACEHOLDER_COMPANY: Company = {
-  id: "co-placeholder",
-  name: "Red Lake Mine",
-  type: "dealer",
-  // 10% is the dealer rate the client uses, and the reference's default.
-  discountRate: 0.1,
-  // The address the deck itself types on slide 52, so the default-address
-  // button has something real to fill until accounts exist.
-  defaultShippingAddress: "62 Smelter Road, Coniston, Ontario, Canada P0M 1M0",
-};
+const PLACEHOLDER_COMPANY: Company = DEMO_COMPANY;
 
 /**
  * Client state for the whole portal.

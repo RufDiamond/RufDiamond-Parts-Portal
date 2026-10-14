@@ -185,7 +185,7 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
                       </td>
                       <td className={styles.mono}>{formatDate(line.requestDate)}</td>
                       <td className={styles.mono}>{line.quoteNo}</td>
-                      <td>{line.customer}</td>
+                      <td className={styles.text}>{line.customer}</td>
                       <td>{line.user}</td>
                       <td className={styles.mono}>{line.partNumber ?? NONE}</td>
                       <td className={styles.text}>{line.description ?? NONE}</td>
