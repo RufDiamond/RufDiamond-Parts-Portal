@@ -492,6 +492,36 @@ test("wheel zoom preserves the artwork point under the cursor", async ({ page })
   expect(Math.abs(after.x + after.width * .6 - point.x)).toBeLessThan(2);
 });
 
+test("expanded fullscreen wheel zoom keeps the artwork point under the cursor", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto(`${base}/figures/fig-cabin-6-1`);
+  await page.getByRole("button", { name: "Illustration full screen", exact: true }).click();
+  const drawing = page.getByRole("dialog").locator("figure img");
+  const before = await drawing.boundingBox();
+  const point = { x: before!.x + before!.width * 0.6, y: before!.y + before!.height * 0.65 };
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.wheel(0, -120);
+  await expect.poll(async () => (await drawing.boundingBox())!.height).toBeGreaterThan(before!.height * 1.4);
+  await page.mouse.wheel(0, -120);
+  await expect.poll(async () => (await drawing.boundingBox())!.height).toBeGreaterThan(before!.height * 1.8);
+  await expect.poll(async () => {
+    const after = (await drawing.boundingBox())!;
+    return Math.hypot(after.x + after.width * 0.6 - point.x, after.y + after.height * 0.65 - point.y);
+  }).toBeLessThan(2);
+  // Top of the plate must remain reachable after the cursor-anchored shift.
+  const topGap = await page.getByRole("dialog").evaluate(() => {
+    const figure = document.querySelector("[role=dialog] figure");
+    const sheet = figure?.children[1] as HTMLElement | undefined;
+    const image = figure?.querySelector("img");
+    if (!sheet || !image) return null;
+    sheet.scrollTop = 0;
+    sheet.scrollLeft = 0;
+    return image.getBoundingClientRect().top - sheet.getBoundingClientRect().top;
+  });
+  expect(topGap).not.toBeNull();
+  expect(topGap!).toBeGreaterThanOrEqual(-1);
+});
+
 test("letterboxed wheel offset is clamped when fullscreen is resized", async ({ page }) => {
   await page.setViewportSize({ width:1920, height:500 });
   await page.goto(base + '/figures/fig-cabin-6-1');

@@ -190,12 +190,17 @@ export function DrawingViewer({
     box.scrollTop += positioned.top + anchor.v * positioned.height - anchor.y;
     const scrolled = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
     const error = anchor.y - (scrolled.top + anchor.v * scrolled.height);
-    // A tall panel may have no overflow yet. Space below the plate makes the
-    // upward shift scrollable, so the top of the drawing stays reachable.
+    // Empty sheet space below a letterboxed plate (common in the expanded
+    // fullscreen panel) is not scrollable content. Fill that gap first, then
+    // add any shortfall against the real max scroll (padding included). Using
+    // only `clientHeight - offsetHeight + shift` under-counts once the plate
+    // already overflows, and using only the shortfall fails while it still fits.
     if (error < -0.5) {
       const shift = -error;
-      const room = Math.max(0, box.clientHeight - area.offsetHeight + shift);
-      area.style.marginBottom = `${room}px`;
+      const free = Math.max(0, box.clientHeight - area.offsetHeight);
+      const maxScroll = Math.max(0, box.scrollHeight - box.clientHeight);
+      const additional = Math.max(0, box.scrollTop + shift - maxScroll);
+      area.style.marginBottom = `${free + additional}px`;
       const shifted = area.querySelector("img")?.getBoundingClientRect() ?? area.getBoundingClientRect();
       box.scrollTop += shifted.top + anchor.v * shifted.height - anchor.y;
     } else if (error > 0.5) {
