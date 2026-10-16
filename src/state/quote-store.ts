@@ -157,7 +157,7 @@ const pendingSeen = new Map<string, ReturnType<typeof setTimeout>>();
  * first mount; marking in a plain cleanup cleared the notices before the
  * customer had seen them, and took the rail counter with them.
  */
-export function useMarkNoticesSeenOnLeave(companyId: string) {
+export function useMarkNoticesSeenOnLeave(companyId: string, onLeave?: () => void) {
   useEffect(() => {
     const pending = pendingSeen.get(companyId);
     if (pending !== undefined) {
@@ -168,9 +168,10 @@ export function useMarkNoticesSeenOnLeave(companyId: string) {
       pendingSeen.set(companyId, setTimeout(() => {
         pendingSeen.delete(companyId);
         markNoticesSeen(companyId);
+        onLeave?.();
       }, 0));
     };
-  }, [companyId]);
+  }, [companyId, onLeave]);
 }
 
 /** "2026-10-14" in Ontario, where the parts are quoted from. */

@@ -2,18 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EmptyState } from "@/components";
 import { downloadCsv } from "@/lib/adminCsv";
 import { formatAmount } from "@/lib/format";
 import {
   adminTotal,
-  factoryAddedLine,
   missingBeforeNotify,
   responseDays,
   sortAdminRecords,
 } from "@/lib/quote-status";
-import { mergeQuoteRecords, notifyCustomers, saveQuoteRecords, useStoredQuoteRecords } from "@/state/quote-store";
+import { apiLineToRecord, createQuoteApi } from "@/state/quote-api";
+import { useCustomerSession } from "@/state/SessionBoundary";
 import type { Availability, QuoteStatusRecord } from "@/types/quotes";
 import base from "../quotes.module.css";
 import styles from "./admin.module.css";
@@ -23,7 +23,6 @@ const NONE = "—";
 const LINES = ["Fat Truck", "IronHorse", "Agilis"] as const;
 const AVAILABLE: Record<Availability, string> = { yes: "Yes", partial: "Partial", no: "No" };
 
-/** "11-Jun-2026", as the deck prints dates. */
 function formatDate(iso: string | null): string {
   if (!iso) return NONE;
   const date = new Date(`${iso}T00:00:00Z`);
@@ -31,7 +30,6 @@ function formatDate(iso: string | null): string {
   return `${String(date.getUTCDate()).padStart(2, "0")}-${month}-${date.getUTCFullYear()}`;
 }
 
-/** A price as typed, made a two-place decimal string, or null when cleared or not a price. */
 function toPrice(raw: string): string | null {
   const trimmed = raw.trim().replace(/[$,\s]/g, "");
   if (trimmed === "") return null;
@@ -44,11 +42,6 @@ function toQty(raw: string): number | null {
   return raw.trim() !== "" && Number.isInteger(value) && value > 0 ? value : null;
 }
 
-/**
- * A cell the administrator types into. Kept uncontrolled and saved when the
- * field is left (or on Enter), not on every keystroke: each save rewrites the
- * stored quotes and redraws both Quote Status screens.
- */
 function EditCell({ value, label, kind = "text", onSave }: {
   value: string;
   label: string;
@@ -57,7 +50,6 @@ function EditCell({ value, label, kind = "text", onSave }: {
 }) {
   return (
     <input
-      // Re-mount when the stored value changes elsewhere (another tab, a reset).
       key={value}
       defaultValue={value}
       aria-label={label}
@@ -92,19 +84,36 @@ function toCsv(records: QuoteStatusRecord[]): string {
 
 /**
  * Quote Status as RUF Diamond's administrator sees it — 12 Oct deck, p58.
- *
- * Every account's quote lines, newest request first. A request arrives here
- * blank; the administrator types in the factory's quotation, then ticks the
- * lines that are ready and presses Notify Customer, which releases them to
- * the customer's own Quote Status as one notice per quote (14 Oct, answer 3).
- *
- * Factory Price is the tenth column, straight after Qty (14 Oct, answer 1).
- * It is on this screen only: the customer's lines are built from a type that
- * has no Factory Price at all.
+ * Persists through the quote API when the session has `orders.quote`.
  */
 export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; today: string }) {
-  const stored = useStoredQuoteRecords();
-  const all = useMemo(() => sortAdminRecords(mergeQuoteRecords(seed, stored)), [seed, stored]);
+  const session = useCustomerSession();
+  const api = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
+  const [all, setAll] = useState(() => sortAdminRecords(seed));
+  const [loading, setLoading] = useState(Boolean(api));
+  const [message, setMessage] = useState<{ kind: "done" | "error"; text: string } | null>(null);
+
+  const reload = useCallback(async () => {
+    if (!api) {
+      setAll(sortAdminRecords(seed));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const page = await api.listAdmin();
+      setAll(sortAdminRecords(page.items.map(apiLineToRecord)));
+    } catch (error) {
+      setMessage({ kind: "error", text: error instanceof Error ? error.message : "Could not load quotes." });
+      setAll(sortAdminRecords(seed));
+    } finally {
+      setLoading(false);
+    }
+  }, [api, seed]);
+
+  useEffect(() => {
+    void reload();
+  }, [reload]);
 
   const [line, setLine] = useState<(typeof LINES)[number] | "all">("all");
   const records = line === "all" ? all : all.filter((record) => record.productLine === line);
@@ -124,13 +133,32 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
     });
   const selected = all.filter((record) => ticked.has(record.id));
 
-  const [message, setMessage] = useState<{ kind: "done" | "error"; text: string } | null>(null);
-
-  const save = (record: QuoteStatusRecord, patch: Partial<QuoteStatusRecord>) => {
-    saveQuoteRecords([{ ...record, ...patch }]);
+  const save = async (record: QuoteStatusRecord, patch: Partial<QuoteStatusRecord>) => {
+    if (!api || record.version == null) {
+      setAll((current) => sortAdminRecords(current.map((row) => (row.id === record.id ? { ...row, ...patch } : row))));
+      return;
+    }
+    try {
+      const updated = await api.patchLine(record.id, {
+        version: record.version,
+        available: patch.available !== undefined ? patch.available : undefined,
+        estAvailability: patch.estAvailability !== undefined ? patch.estAvailability : undefined,
+        newPartNumber: patch.newPartNumber !== undefined ? patch.newPartNumber : undefined,
+        newDescription: patch.newDescription !== undefined ? patch.newDescription : undefined,
+        newQty: patch.newQty !== undefined ? patch.newQty : undefined,
+        factoryPrice: patch.factoryPrice !== undefined ? patch.factoryPrice : undefined,
+        customerPrice: patch.customerPrice !== undefined ? patch.customerPrice : undefined,
+        comments: patch.comments !== undefined ? patch.comments : undefined,
+        responseDate: patch.responseDate !== undefined ? patch.responseDate : undefined,
+      });
+      setAll((current) => sortAdminRecords(current.map((row) => (row.id === record.id ? apiLineToRecord(updated) : row))));
+    } catch (error) {
+      setMessage({ kind: "error", text: error instanceof Error ? error.message : "Save failed." });
+      await reload();
+    }
   };
 
-  const notify = () => {
+  const notify = async () => {
     const unready = selected
       .map((record) => ({ record, missing: missingBeforeNotify(record) }))
       .filter(({ missing }) => missing.length > 0);
@@ -143,25 +171,48 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
       });
       return;
     }
-    const notices = notifyCustomers(selected, today);
-    setTicked(new Set());
-    setMessage({
-      kind: "done",
-      text: `Notified ${notices
-        .map((notice) => `${notice.customer} about ${notice.quoteNo} (${notice.lineIds.length} ${notice.lineIds.length === 1 ? "line" : "lines"})`)
-        .join(", ")}. One notice per quote. The customer sees it in the portal; no email is sent from this demonstration yet.`,
-    });
+    if (!api) {
+      setMessage({ kind: "error", text: "Sign in with a RUF Diamond quote capability to notify customers." });
+      return;
+    }
+    try {
+      const { notices } = await api.notify({ lineIds: selected.map((record) => record.id) });
+      setTicked(new Set());
+      await reload();
+      setMessage({
+        kind: "done",
+        text: `Notified ${notices
+          .map((notice) => `${notice.customer} about ${notice.quoteNo} (${notice.lineIds.length} ${notice.lineIds.length === 1 ? "line" : "lines"})`)
+          .join(", ")}. One notice and email per quote.`,
+      });
+    } catch (error) {
+      setMessage({ kind: "error", text: error instanceof Error ? error.message : "Notify failed." });
+    }
   };
 
-  /** All ticked lines belong to one quote, so a factory line knows where it goes. */
   const oneQuote =
     selected.length > 0 &&
     selected.every((record) => record.quoteNo === selected[0].quoteNo && record.companyId === selected[0].companyId);
 
-  const addFactoryLine = () => {
-    const added = factoryAddedLine(selected[0], new Set(all.map((record) => record.id)));
-    saveQuoteRecords([added]);
-    setMessage({ kind: "done", text: `Added a factory line to ${added.quoteNo}. Fill in its part, price and availability.` });
+  const addFactoryLine = async () => {
+    if (!api || !oneQuote) return;
+    const base = selected[0];
+    try {
+      const added = await api.addFactoryLine({
+        quoteNo: base.quoteNo,
+        companyId: base.companyId,
+        productLine: base.productLine,
+        newPartNumber: "TBD",
+        newDescription: "Factory-added line",
+        newQty: 1,
+        available: "yes",
+        comments: "",
+      });
+      setAll((current) => sortAdminRecords([...current, apiLineToRecord(added)]));
+      setMessage({ kind: "done", text: `Added a factory line to ${added.quoteNo}. Fill in its part, price and availability.` });
+    } catch (error) {
+      setMessage({ kind: "error", text: error instanceof Error ? error.message : "Could not add factory line." });
+    }
   };
 
   const email = () => {
@@ -182,20 +233,14 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
     <div className={base.screen}>
       <div className={base.bar}>
         <h1 className={base.title}>Quote Status — RUF Diamond</h1>
-        <nav className={styles.lines} aria-label="Product line">
-          {(["all", ...LINES] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={`${base.button} ${line === value ? styles.lineActive : ""}`}
-              aria-pressed={line === value}
-              onClick={() => { setLine(value); setPage(0); }}
-            >
-              {value === "all" ? "All" : value}
-            </button>
-          ))}
-        </nav>
         <span className={base.spacer} />
+        <label className={styles.filter}>
+          <span>Product line</span>
+          <select value={line} onChange={(event) => { setLine(event.target.value as typeof line); setPage(0); }}>
+            <option value="all">All</option>
+            {LINES.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
         <nav className={base.pager} aria-label="Pages">
           <button type="button" className={base.button} onClick={() => setPage(0)} disabled={page === 0} aria-label="First page">«</button>
           <button type="button" className={base.button} onClick={() => setPage(page - 1)} disabled={page === 0} aria-label="Previous page">‹</button>
@@ -210,9 +255,11 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
           <Image src="/toolbar/email.png" alt="" width={40} height={28} className={base.buttonIcon} />
           Email
         </button>
-        <button type="button" className={base.button} onClick={() => window.print()}>
-          <Image src="/toolbar/print.png" alt="" width={40} height={40} className={base.buttonIcon} />
-          Print
+        <button type="button" className={base.button} onClick={() => void notify()} disabled={selected.length === 0}>
+          Notify Customer
+        </button>
+        <button type="button" className={base.button} onClick={() => void addFactoryLine()} disabled={!oneQuote}>
+          Add factory line
         </button>
         <Link href="/quotes" className={base.button}>Customer view</Link>
         <Link href="/" className={`${base.button} ${base.home}`}>Home</Link>
@@ -220,26 +267,20 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
 
       <div className={base.surface}>
         <p className={base.notice}>
-          Requests arrive here blank. Enter the factory&rsquo;s quotation on each line, tick the lines that are ready, then
-          press <strong>Notify Customer</strong>: the customer is told once per quote, however many lines it releases.
           Factory Price is shown on this screen only.
+          {api ? " Changes save to the quote service." : " Sign in with quote capability to persist."}
         </p>
+        {loading ? <p className={base.loading}>Loading quotes…</p> : null}
+        {message ? <p role={message.kind === "error" ? "alert" : "status"} className={message.kind === "error" ? base.error : base.done}>{message.text}</p> : null}
 
-        {message ? (
-          <p role={message.kind === "error" ? "alert" : "status"} className={message.kind === "error" ? base.error : base.done}>
-            {message.text}
-          </p>
-        ) : <span />}
-
-        {records.length === 0 ? (
-          <EmptyState title="No quote requests" description="Quote requests customers submit are listed here." />
+        {records.length === 0 && !loading ? (
+          <EmptyState title="No quote lines" description="Customer quote requests appear here for the factory reply." />
         ) : (
           <div className={base.scroller}>
             <table className={`${base.table} ${styles.table}`}>
               <thead className={base.head}>
                 <tr>
                   <th scope="col">Select</th>
-                  <th scope="col">No.</th>
                   <th scope="col">Date Request</th>
                   <th scope="col">Quote No.</th>
                   <th scope="col">Customer</th>
@@ -258,121 +299,74 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
                   <th scope="col">Unit Price (CAD)</th>
                   <th scope="col">Total Price (CAD)</th>
                   <th scope="col">Comments</th>
-                  <th scope="col">Notify Customer</th>
-                  <th scope="col">Model</th>
-                  <th scope="col">Serial Number</th>
-                  <th scope="col">System</th>
-                  <th scope="col">Page</th>
-                  <th scope="col">Assembly Name</th>
+                  <th scope="col">Notify</th>
                 </tr>
               </thead>
               <tbody>
-                {visible.map((record, index) => {
-                  const part = record.requested?.partNumber ?? record.newPartNumber ?? "factory line";
-                  const total = adminTotal(record);
-                  const days = responseDays(record);
-                  return (
-                    <tr key={record.id} className={base.row} data-available={record.available ?? undefined}>
-                      <td className={base.tick}>
-                        <input
-                          type="checkbox"
-                          className={base.checkbox}
-                          checked={ticked.has(record.id)}
-                          onChange={() => toggle(record.id)}
-                          aria-label={`Select ${part} from ${record.quoteNo}`}
-                        />
-                      </td>
-                      <td className={base.num}>{page * PAGE_SIZE + index + 1}</td>
-                      <td className={base.mono}>{formatDate(record.requestDate)}</td>
-                      <td className={base.mono}>{record.quoteNo}</td>
-                      <td className={base.text}>{record.customer}</td>
-                      <td>{record.user}</td>
-                      <td className={base.mono}>{record.requested?.partNumber ?? <em className={styles.added}>Added by factory</em>}</td>
-                      <td className={base.text}>{record.requested?.description ?? NONE}</td>
-                      <td className={base.num}>{record.requested?.qty ?? NONE}</td>
-                      <td className={base.money}>
-                        <EditCell value={record.factoryPrice ?? ""} kind="price" label={`Factory price for ${part}`}
-                          onSave={(raw) => save(record, { factoryPrice: toPrice(raw) })} />
-                      </td>
-                      <td className={base.mono}>{formatDate(record.responseDate)}</td>
-                      <td className={base.num}>{days ?? NONE}</td>
-                      <td className={base.center}>
-                        <select
-                          className={styles.cellInput}
-                          aria-label={`Availability of ${part}`}
-                          value={record.available ?? ""}
-                          onChange={(event) => save(record, { available: (event.target.value || null) as Availability | null })}
-                        >
-                          <option value="">—</option>
-                          <option value="yes">Yes</option>
-                          <option value="partial">Partial</option>
-                          <option value="no">No</option>
-                        </select>
-                      </td>
-                      <td>
-                        <input
-                          type="date"
-                          className={styles.cellInput}
-                          aria-label={`Estimated availability of ${part}`}
-                          value={record.estAvailability ?? ""}
-                          onChange={(event) => save(record, { estAvailability: event.target.value || null })}
-                        />
-                      </td>
-                      <td>
-                        <EditCell value={record.newPartNumber ?? ""} label={`New part number for ${part}`}
-                          onSave={(raw) => save(record, { newPartNumber: raw.trim() || null })} />
-                      </td>
-                      <td>
-                        <EditCell value={record.newDescription ?? ""} label={`New description for ${part}`}
-                          onSave={(raw) => save(record, { newDescription: raw.trim() || null })} />
-                      </td>
-                      <td className={base.num}>
-                        <EditCell value={record.newQty === null ? "" : String(record.newQty)} kind="qty" label={`New quantity for ${part}`}
-                          onSave={(raw) => save(record, { newQty: toQty(raw) })} />
-                      </td>
-                      <td className={base.money}>
-                        <EditCell value={record.customerPrice ?? ""} kind="price" label={`Unit price for ${part}`}
-                          onSave={(raw) => save(record, { customerPrice: toPrice(raw) })} />
-                      </td>
-                      <td className={base.money}>{total ? `$${formatAmount(total, "CAD")}` : NONE}</td>
-                      <td>
-                        <EditCell value={record.comments} label={`Comments on ${part}`}
-                          onSave={(raw) => save(record, { comments: raw.trim() })} />
-                      </td>
-                      <td className={base.center}>{record.notifyCustomer ? "Yes" : "No"}</td>
-                      <td>{record.model}</td>
-                      <td className={base.mono}>{record.serialNumber}</td>
-                      <td>{record.system}</td>
-                      <td>{record.figure}</td>
-                      <td>{record.assemblyName}</td>
-                    </tr>
-                  );
-                })}
+                {visible.map((record) => (
+                  <tr key={record.id}>
+                    <td>
+                      <input type="checkbox" checked={ticked.has(record.id)} onChange={() => toggle(record.id)}
+                        aria-label={`Select ${record.quoteNo}`} disabled={record.notifyCustomer} />
+                    </td>
+                    <td>{formatDate(record.requestDate)}</td>
+                    <td>{record.quoteNo}</td>
+                    <td>{record.customer}</td>
+                    <td>{record.user}</td>
+                    <td>{record.requested?.partNumber ?? NONE}</td>
+                    <td>{record.requested?.description ?? NONE}</td>
+                    <td>{record.requested?.qty ?? NONE}</td>
+                    <td>
+                      <EditCell value={record.factoryPrice ?? ""} label="Factory price" kind="price"
+                        onSave={(raw) => void save(record, { factoryPrice: toPrice(raw) })} />
+                    </td>
+                    <td>
+                      <EditCell value={record.responseDate ?? today} label="Response date"
+                        onSave={(raw) => void save(record, { responseDate: raw.trim() || null })} />
+                    </td>
+                    <td>{responseDays(record) ?? NONE}</td>
+                    <td>
+                      <select aria-label="Available" value={record.available ?? ""}
+                        onChange={(event) => void save(record, { available: (event.target.value || null) as Availability | null })}>
+                        <option value="">—</option>
+                        {(Object.keys(AVAILABLE) as Availability[]).map((key) => (
+                          <option key={key} value={key}>{AVAILABLE[key]}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <EditCell value={record.estAvailability ?? ""} label="Est. availability"
+                        onSave={(raw) => void save(record, { estAvailability: raw.trim() || null })} />
+                    </td>
+                    <td>
+                      <EditCell value={record.newPartNumber ?? ""} label="New part number"
+                        onSave={(raw) => void save(record, { newPartNumber: raw.trim() || null })} />
+                    </td>
+                    <td>
+                      <EditCell value={record.newDescription ?? ""} label="New description"
+                        onSave={(raw) => void save(record, { newDescription: raw.trim() || null })} />
+                    </td>
+                    <td>
+                      <EditCell value={record.newQty == null ? "" : String(record.newQty)} label="New qty" kind="qty"
+                        onSave={(raw) => void save(record, { newQty: toQty(raw) })} />
+                    </td>
+                    <td>
+                      <EditCell value={record.customerPrice ?? ""} label="Customer unit price" kind="price"
+                        onSave={(raw) => void save(record, { customerPrice: toPrice(raw) })} />
+                    </td>
+                    <td>{record.customerPrice && (record.newQty ?? record.requested?.qty) != null
+                      ? formatAmount(adminTotal(record)!, "CAD") : NONE}</td>
+                    <td>
+                      <EditCell value={record.comments} label="Comments"
+                        onSave={(raw) => void save(record, { comments: raw })} />
+                    </td>
+                    <td>{record.notifyCustomer ? "Yes" : "No"}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
-
-        <div className={base.actions}>
-          <button
-            type="button"
-            className={`${base.button} ${styles.notify}`}
-            onClick={notify}
-            disabled={selected.length === 0}
-            title={selected.length === 0 ? "Tick the lines that are ready" : undefined}
-          >
-            Notify Customer{selected.length > 0 ? ` · ${selected.length}` : ""}
-          </button>
-          <button
-            type="button"
-            className={base.button}
-            onClick={addFactoryLine}
-            disabled={!oneQuote}
-            title={oneQuote ? `Add a line the factory quoted to ${selected[0].quoteNo}` : "Tick a line of the quote the factory added a part to"}
-          >
-            Add factory line
-          </button>
-        </div>
       </div>
     </div>
   );

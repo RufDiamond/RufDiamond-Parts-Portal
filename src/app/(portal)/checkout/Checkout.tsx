@@ -9,7 +9,9 @@ import {
   type Section,
 } from "@/lib/checkout";
 import { formatAmount } from "@/lib/format";
+import { createQuoteApi } from "@/state/quote-api";
 import { computeTotals, useRequest } from "@/state/RequestContext";
+import { useCustomerSession } from "@/state/SessionBoundary";
 import type { Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
 import styles from "./checkout.module.css";
 
@@ -160,8 +162,12 @@ function AddressForm({ kind, address, onChange }: {
  * The last step is the review with the order terms, then Submit.
  */
 export function Checkout({ today }: { today: string }) {
+  const session = useCustomerSession();
+  const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
   const { lines, currency, discountRate, clear, linesHydrated, company } = useRequest();
-  const companyId = company?.id ?? "guest";
+  const companyId = company?.id ?? session?.companyId ?? "guest";
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   /** A new order, starting from the addresses this account last saved. */
   const fresh = () => emptyDraft(readSavedAddresses(companyId));
@@ -199,10 +205,43 @@ export function Checkout({ today }: { today: string }) {
     dispatch({ type: "reach", index: index + 1 });
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (SECTIONS.some((section) => problems[section]) || lines.length === 0) return;
+    setSubmitError(null);
+    let orderNo = nextOrderNo();
+    if (quoteApi) {
+      setSubmitting(true);
+      try {
+        if (!draft.orderType) throw new Error("Choose an order type before submitting.");
+        const result = await quoteApi.submitCommerceOrder({
+          orderType: draft.orderType,
+          scheduleDate: draft.orderType === "schedule" ? draft.scheduleDate || null : null,
+          poNumber: draft.poNumber.trim(),
+          vin: vinOf(draft),
+          shippingMethod: draft.orderType === "schedule" ? null : draft.shippingMethod,
+          shipping: draft.shipping,
+          billing: billingOf(draft),
+          instructions: draft.instructions,
+          currency,
+          lines: lines.map((line) => ({
+            partNumber: line.partNumberSnapshot,
+            description: line.descriptionSnapshot,
+            qty: line.qty,
+            unitPrice: Number(line.unitPriceSnapshot ?? 0).toFixed(2),
+            catalogPartId: /^[0-9a-f-]{36}$/i.test(line.partId) ? line.partId : null,
+            quoteNo: line.quoteNo ?? null,
+          })),
+        });
+        orderNo = result.reference;
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error.message : "Order submit failed.");
+        setSubmitting(false);
+        return;
+      }
+      setSubmitting(false);
+    }
     const order: SubmittedOrder = {
-      orderNo: nextOrderNo(),
+      orderNo,
       submittedAt: new Date().toISOString(),
       draft,
       lines,
@@ -322,7 +361,10 @@ export function Checkout({ today }: { today: string }) {
             ) : (
               <>
                 <button type="button" className={styles.back} onClick={() => setView("form")}>Back</button>
-                <button type="button" className={styles.submit} onClick={submit}>Submit</button>
+                {submitError ? <p role="alert">{submitError}</p> : null}
+                <button type="button" className={styles.submit} onClick={() => void submit()} disabled={submitting}>
+                  {submitting ? "Submitting…" : "Submit"}
+                </button>
               </>
             )}
           </div>

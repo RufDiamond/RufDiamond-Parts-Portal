@@ -16,6 +16,7 @@ import { registerCatalogReviewRoutes } from "./modules/catalog-review/routes.js"
 import { createS3ImportStorage, type ImportSourceStorage } from "./modules/imports/source-storage.js";
 import type { DrawingScanner, DrawingStorage } from "./modules/drawings/storage.js";
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
+import { registerQuoteRoutes } from "./modules/quotes/routes.js";
 import { registerAuth } from "./plugins/auth.js";
 import { registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
 import { registerRequestContext } from "./plugins/request-context.js";
@@ -63,6 +64,7 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   registerImportRoutes(app, config, database.db, dependencies.importStorage ?? ownedImportStorage!, dependencies.importScanner ?? createClamdImportScanner(config.drawingScanner), now);
   registerCatalogReviewRoutes(app,config,database.db,dependencies.importStorage ?? ownedImportStorage!,now);
   registerCatalogRoutes(app, database.db, dependencies.drawingStorage ?? ownedStorage!);
+  registerQuoteRoutes(app, config, database.db, now);
   registerErrorHandler(app);
   registerNotFoundHandler(app);
 

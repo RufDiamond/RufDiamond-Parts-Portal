@@ -237,6 +237,8 @@ export function PortalShell({ children, date }: PortalShellProps) {
             />
             <span className={styles.date}>{date}</span>
             {session?.scopes.environment === "draft" && ["publish.draft.view", "catalog.figure.view"].every(key => session.capabilities.includes(key)) && <Link href="/admin">Draft administration</Link>}
+            {session?.capabilities.includes("orders.quote") && <Link href="/quotes/admin">Quote admin</Link>}
+            {session?.capabilities.includes("users.all.manage") && <Link href="/admin/discounts">Dealer discounts</Link>}
             <SignOutButton />
           </span>
         </header>

@@ -15,6 +15,7 @@
     "lint": "eslint",
     "test:callout-preview": "vitest run --config vitest.callouts.config.mts",
     "test:diagram-browser": "playwright test --config playwright.diagram.config.ts",
+    "test:quote-browser": "playwright test --config playwright.quote.config.ts",
     "test:contracts": "npm test -w @rufdiamond/contracts",
     "test:api": "npm test -w @rufdiamond/api",
     "test:web": "npm test -w @rufdiamond/web",

@@ -3,12 +3,14 @@ import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { EmptyState, Icon } from "@/components";
 import { formatFigureRef } from "@/lib/format";
 import { useMachine } from "@/state/MachineContext";
+import { createQuoteApi } from "@/state/quote-api";
 import { registerQuoteRequest } from "@/state/quote-store";
 import { useRequest } from "@/state/RequestContext";
+import { useCustomerSession } from "@/state/SessionBoundary";
 import type { PartUsageSummary } from "@/types/catalog";
 import styles from "./quote.module.css";
 
@@ -100,19 +102,59 @@ export function QuoteRequest({
   const [method, setMethod] = useState<ShippingMethod | null>(null);
 
   const savedAddress = company?.defaultShippingAddress ?? null;
+  const session = useCustomerSession();
+  const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = () => {
-    const confirmation = submit({
+  const onSubmit = async () => {
+    setSubmitError(null);
+    const details = {
       comments,
       generalComment: general,
-      // Omitted entirely unless an estimate was asked for — slide 53 drops the
-      // whole shipping section from the documents in that case.
       shipping: estimating ? { address: address.trim(), method } : null,
       brand: productLine,
       serial: selectedVariant?.label ?? null,
-    });
+    };
+    if (quoteApi && includedLines.length > 0) {
+      setSubmitting(true);
+      try {
+        const place = (partId: string) => usage[partId];
+        const result = await quoteApi.submitQuote({
+          productLine: "Fat Truck",
+          shipping: details.shipping
+            ? { address: details.shipping.address, method: (details.shipping.method ?? "standard") as "standard" | "expedited" }
+            : null,
+          generalComment: general,
+          lines: includedLines.map((line) => {
+            const at = place(line.partId);
+            return {
+              partId: /^[0-9a-f-]{36}$/i.test(line.partId) ? line.partId : null,
+              partNumber: line.partNumberSnapshot,
+              description: line.descriptionSnapshot,
+              qty: line.qty,
+              model: at?.modelName?.toUpperCase(),
+              serialNumber: at?.serial ?? undefined,
+              system: at?.systemName?.toUpperCase(),
+              figure: at?.groupNo ? `FIG ${at.groupNo}` : undefined,
+              assemblyName: at?.assemblyName?.toUpperCase(),
+            };
+          }),
+        });
+        const confirmation = submit(details, result.quoteNo);
+        if (confirmation) {
+          registerQuoteRequest(confirmation, company?.id ?? session?.companyId ?? "guest", usage);
+        }
+        router.push("/request/confirmed");
+      } catch (error) {
+        setSubmitError(error instanceof Error ? error.message : "Quote submit failed.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+    const confirmation = submit(details);
     if (!confirmation) return;
-    // The request now waits in Quote Status for the factory's answer (p54).
     registerQuoteRequest(confirmation, company?.id ?? "guest", usage);
     router.push("/request/confirmed");
   };
@@ -155,6 +197,7 @@ export function QuoteRequest({
     <div className={styles.screen}>
       {!submissionAvailable && <p role="status">Quote submission is unavailable while the request service is not connected. No request will be sent.</p>}
       {requestError && <p role="alert">{requestError}</p>}
+      {submitError && <p role="alert">{submitError}</p>}
       <ZeroPriceNotice prices={lines.map(line => line.unitPriceSnapshot)} />
       {embedded ? null : (
       <div className={styles.bar}>
@@ -418,15 +461,15 @@ export function QuoteRequest({
         <button
           type="button"
           className={styles.primary}
-          onClick={onSubmit}
-          disabled={!submissionAvailable || includedLines.length === 0}
+          onClick={() => void onSubmit()}
+          disabled={!submissionAvailable || includedLines.length === 0 || submitting}
           title={
             includedLines.length === 0
               ? "Tick at least one part"
               : "Send this request to RUF Diamond"
           }
         >
-          Submit quote request
+          {submitting ? "Submitting…" : "Submit quote request"}
         </button>
       </div>
     </div>

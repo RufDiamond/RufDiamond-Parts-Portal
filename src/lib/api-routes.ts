@@ -26,6 +26,16 @@ const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; p
   { path: new RegExp(`^admin/figures/${uuid}/diagram-mapping/revisions/${uuid}$`), method: "GET" },
   { path: new RegExp(`^admin/figures/${uuid}/drawing$`), method: "GET" },
   { path: new RegExp(`^admin/figures/${uuid}/drawing-uploads(?:/${uuid}/finalize)?$`), method: "POST", bytes: 4096 },
+  { path: /^quotes$/, method: "POST", bytes: 65536 },
+  { path: /^quotes\/mine$/, method: "GET" },
+  { path: /^quotes\/notices\/seen$/, method: "POST", bytes: 4096 },
+  { path: /^commerce-orders$/, method: "POST", bytes: 65536 },
+  { path: /^admin\/quotes$/, method: "GET", query: ["productLine"] },
+  { path: new RegExp(`^admin/quotes/${uuid}$`), method: "PATCH", bytes: 16384 },
+  { path: /^admin\/quotes\/notify$/, method: "POST", bytes: 16384 },
+  { path: /^admin\/quotes\/factory-lines$/, method: "POST", bytes: 16384 },
+  { path: new RegExp(`^admin/companies/${uuid}/discount$`), method: "GET" },
+  { path: new RegExp(`^admin/companies/${uuid}/discount$`), method: "PATCH", bytes: 4096 },
 ];
 
 /** Raw path validation precedes URL normalization. No URLs, encoded path separators or aliases. */
@@ -42,6 +52,7 @@ export function allowedApiRoute(path: string, method: string) {
     if (key === "limit" && !/^(?:[1-9]|[1-9][0-9]|100)$/.test(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (key === "before" && (!/^[1-9][0-9]*$/.test(value) || Number(value) > 2147483647)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (key === "mode" && !["any", "part", "description"].includes(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
+    if (key === "productLine" && !["Fat Truck", "IronHorse", "Agilis"].includes(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (["releaseId", "drawingFileId"].includes(key) && !new RegExp(`^${uuid}$`).test(value)) throw new CatalogApiError(400, "INVALID_API_QUERY");
     if (key === "figureVersion" && (!/^[1-9][0-9]*$/.test(value) || Number(value) > 2147483647)) throw new CatalogApiError(400, "INVALID_API_QUERY");
   }

@@ -54,6 +54,8 @@ export interface QuoteStatusRecord {
   /** Figure reference, e.g. "FIG 3.1". */
   figure: string;
   assemblyName: string;
+  /** Optimistic concurrency token from the quote API. Absent on seed/demo rows. */
+  version?: number;
 }
 
 /** One line of the customer's Quote Status table (p59). */

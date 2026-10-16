@@ -67,7 +67,11 @@ export default function HomePage() {
               className={styles.iconSmall}
             />
             <p className={styles.text}>
-              You may also access the PDF Parts Catalogues here.
+              You may also access the{" "}
+              <a href="mailto:parts@rufdiamond.com?subject=PDF%20Parts%20Catalogue%20request">
+                PDF Parts Catalogues
+              </a>{" "}
+              here — email parts@rufdiamond.com for the current Fat Truck package until the public files are published.
             </p>
           </div>
         </div>
@@ -148,7 +152,9 @@ export default function HomePage() {
           <div className={styles.withIcon}>
             <p className={styles.text}>
               Please review these important recommendations before submitting
-              your parts request.
+              your parts request. For urgent needs, email{" "}
+              <a href="mailto:parts@rufdiamond.com">parts@rufdiamond.com</a> with
+              VIN, part numbers, quantities, and a short description.
             </p>
             <Image
               src="/home/icon-warning.png"
@@ -166,7 +172,15 @@ export default function HomePage() {
           <h2 className={styles.title}>Ruf Diamond brochures</h2>
           <div className={styles.withIcon}>
             <p className={styles.text}>
-              You may also access general information about our equipment.
+              You may also access general information about our equipment via{" "}
+              <a href="https://www.rufdiamond.com" target="_blank" rel="noreferrer">
+                rufdiamond.com
+              </a>{" "}
+              or request brochures from{" "}
+              <a href="mailto:parts@rufdiamond.com?subject=Brochure%20request">
+                parts@rufdiamond.com
+              </a>
+              .
             </p>
             <Image
               src="/home/icon-brochure.png"

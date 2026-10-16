@@ -2,13 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddToCartDialog, CheckCart, EmptyState } from "@/components";
 import { downloadCsv } from "@/lib/adminCsv";
 import { formatAmount } from "@/lib/format";
 import { PRICE_VALIDITY_DAYS, mergeCustomerLines } from "@/lib/quote-status";
-import { requestNewQuote, useMarkNoticesSeenOnLeave, useQuoteNotices, useStoredQuoteRecords } from "@/state/quote-store";
+import { createQuoteApi } from "@/state/quote-api";
+import { requestNewQuote, useMarkNoticesSeenOnLeave, useQuoteNotices, useStoredQuoteRecords, type QuoteNotice } from "@/state/quote-store";
 import { buildReference, useRequest, type RequestPartInput } from "@/state/RequestContext";
+import { useCustomerSession } from "@/state/SessionBoundary";
 import { useRequestAddition } from "@/state/useRequestAddition";
 import type { Part } from "@/types/catalog";
 import type { Availability, CustomerQuoteLine } from "@/types/quotes";
@@ -66,28 +68,103 @@ function toCsv(lines: CustomerQuoteLine[]): string {
  * and added to the cart at the quoted price; the record stays here either way.
  */
 export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuoteLine[]; today: string }) {
+  const session = useCustomerSession();
+  const canAdmin = Boolean(session?.capabilities.includes("orders.quote"));
+  const api = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
   const { lines: cart, currency, discountRate, company } = useRequest();
   const addition = useRequestAddition("quote-status");
-  const companyId = company?.id ?? "guest";
+  const companyId = company?.id ?? session?.companyId ?? "guest";
 
-  // What RUF Diamond has entered, and what this customer has asked since, laid
-  // over the server's lines (the demonstration's quote service).
   const stored = useStoredQuoteRecords();
-  const lines = useMemo(
-    () => mergeCustomerLines(serverLines, Object.values(stored), companyId, today),
-    [serverLines, stored, companyId, today],
-  );
+  const localNotices = useQuoteNotices();
+  const [apiLines, setApiLines] = useState<CustomerQuoteLine[] | null>(null);
+  const [apiNotices, setApiNotices] = useState<QuoteNotice[] | null>(null);
 
-  /** Lines released since the customer last looked: highlighted until they leave the page. */
-  const notices = useQuoteNotices();
+  const reload = useCallback(async () => {
+    if (!api) {
+      setApiLines(null);
+      setApiNotices(null);
+      return;
+    }
+    try {
+      const page = await api.listMine();
+      setApiLines(page.items.map((item) => {
+        const qty = item.response?.newQty ?? item.qty;
+        const partNumber = item.response?.newPartNumber ?? item.partNumber;
+        const description = item.response?.newDescription ?? item.description;
+        const unitPrice = item.response?.unitPrice ?? null;
+        const released = item.response !== null;
+        const canOrder = Boolean(released && !item.expired && unitPrice && partNumber && description && qty && qty > 0);
+        return {
+          ...item,
+          requote: released && item.expired && partNumber && description && qty
+            ? {
+                productLine: "Fat Truck" as const,
+                partNumber,
+                description,
+                qty,
+                catalogPartId: null,
+                model: "—",
+                serialNumber: "—",
+                system: "—",
+                figure: "—",
+                assemblyName: "—",
+              }
+            : null,
+          orderable: canOrder
+            ? { partNumber: partNumber!, description: description!, qty: qty!, unitPrice: unitPrice!, catalogPartId: null }
+            : null,
+        };
+      }));
+      setApiNotices(page.notices);
+    } catch {
+      setApiLines(null);
+      setApiNotices(null);
+    }
+  }, [api]);
+
+  useEffect(() => { void reload(); }, [reload]);
+
+  const lines = useMemo(() => {
+    if (apiLines) return apiLines;
+    return mergeCustomerLines(serverLines, Object.values(stored), companyId, today);
+  }, [apiLines, serverLines, stored, companyId, today]);
+
+  const notices = apiNotices ?? localNotices;
   const fresh = useMemo(
     () => new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).flatMap((notice) => notice.lineIds)),
     [notices, companyId],
   );
-  useMarkNoticesSeenOnLeave(companyId);
+  useMarkNoticesSeenOnLeave(companyId, api ? () => { void api.markNoticesSeen(); } : undefined);
 
   const [requested, setRequested] = useState<string | null>(null);
-  const requote = (line: CustomerQuoteLine) => {
+  const requote = async (line: CustomerQuoteLine) => {
+    if (api && line.requote) {
+      try {
+        const result = await api.submitQuote({
+          productLine: line.requote.productLine,
+          shipping: null,
+          generalComment: "Re-quote of expired line",
+          lines: [{
+            partId: line.requote.catalogPartId,
+            partNumber: line.requote.partNumber,
+            description: line.requote.description,
+            qty: line.requote.qty,
+            model: line.requote.model,
+            serialNumber: line.requote.serialNumber,
+            system: line.requote.system,
+            figure: line.requote.figure,
+            assemblyName: line.requote.assemblyName,
+          }],
+        });
+        setRequested(`New quote ${result.quoteNo} requested for ${line.requote.partNumber}. It will appear here when RUF Diamond responds.`);
+        await reload();
+        return;
+      } catch (error) {
+        setRequested(error instanceof Error ? error.message : "Could not request a new quote.");
+        return;
+      }
+    }
     const record = requestNewQuote(line, buildReference(new Date(), Math.random()), companyId);
     setRequested(`New quote ${record.quoteNo} requested for ${record.requested?.partNumber}. It will appear here when RUF Diamond responds.`);
   };
@@ -147,10 +224,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
           <Image src="/toolbar/print.png" alt="" width={40} height={40} className={styles.buttonIcon} />
           Print
         </button>
-        {/* The demonstration has no staff sign-in, so the administrator's side is
-            one click away for whoever is showing it. This screen only renders
-            in the demonstration — a connected account gets "Not available yet". */}
-        <Link href="/quotes/admin" className={styles.button}>RUF Diamond view</Link>
+        {canAdmin ? <Link href="/quotes/admin" className={styles.button}>RUF Diamond view</Link> : null}
         <Link href="/" className={`${styles.button} ${styles.home}`}>Home</Link>
       </div>
 
@@ -245,7 +319,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
                       )}
                       <td className={styles.center}>
                         {added ? "Yes" : line.requote ? (
-                          <button type="button" className={styles.requote} onClick={() => requote(line)}
+                          <button type="button" className={styles.requote} onClick={() => void requote(line)}
                             title="This price has expired. Ask RUF Diamond for a new quotation.">
                             Request new quote
                           </button>

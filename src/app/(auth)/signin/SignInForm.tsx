@@ -120,7 +120,11 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
           </div>
 
           <p className={styles.linkRow}>
-            <a className={styles.link} href="#forgot">
+            <a
+              className={styles.link}
+              href="mailto:parts@rufdiamond.com?subject=Password%20reset%20request"
+              title="Email parts@rufdiamond.com to reset your password"
+            >
               Forgot Password <span aria-hidden="true">&gt;&gt;&gt;</span>
             </a>
             <Image
@@ -150,7 +154,11 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
           </button>
 
           <p className={`${styles.linkRow} ${styles.requestRow}`}>
-            <a className={styles.link} href="#request-account">
+            <a
+              className={styles.link}
+              href="mailto:parts@rufdiamond.com?subject=Request%20a%20parts%20portal%20account"
+              title="Email parts@rufdiamond.com to request an account"
+            >
               Request a user account here{" "}
               <span aria-hidden="true">&gt;&gt;&gt;</span>
             </a>

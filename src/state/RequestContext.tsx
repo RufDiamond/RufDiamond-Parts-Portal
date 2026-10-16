@@ -428,7 +428,7 @@ export interface RequestContextValue extends RequestTotals {
   removeLine: (partId: string) => void;
   clear: () => void;
   /** Empties the list into a confirmation. Null when there is nothing to send. */
-  submit: (details: RequestDetails) => RequestConfirmation | null;
+  submit: (details: RequestDetails, reference?: string) => RequestConfirmation | null;
 }
 
 const RequestContext = createContext<RequestContextValue | null>(null);
@@ -591,15 +591,14 @@ function RequestProviderState({
   );
 
   const submit = useCallback(
-    (details: RequestDetails): RequestConfirmation | null => {
+    (details: RequestDetails, reference?: string): RequestConfirmation | null => {
     if (apiKey) return null;
     // Nothing ticked is nothing to send, even with parts on the list.
     if (includedLines.length === 0) return null;
 
     const confirmation: RequestConfirmation = {
-      // Generated in the handler, never during render, so the server and the
-      // client never disagree on it.
-      reference: buildReference(new Date(), Math.random()),
+      // Prefer a server-allocated quote number when the quote API answered.
+      reference: reference ?? buildReference(new Date(), Math.random()),
       details,
       submittedAt: new Date().toISOString(),
       lines: includedLines,

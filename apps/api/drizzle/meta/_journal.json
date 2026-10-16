@@ -73,6 +73,7 @@
       "breakpoints": true
     },
     { "idx": 10, "version": "7", "when": 1788940000000, "tag": "0011_canonical_import_lineage", "breakpoints": true },
-    { "idx": 11, "version": "7", "when": 1788940000001, "tag": "0012_catalog_source_reviews", "breakpoints": true }
+    { "idx": 11, "version": "7", "when": 1788940000001, "tag": "0012_catalog_source_reviews", "breakpoints": true },
+    { "idx": 12, "version": "7", "when": 1789500000000, "tag": "0013_quote_commerce", "breakpoints": true }
   ]
 }

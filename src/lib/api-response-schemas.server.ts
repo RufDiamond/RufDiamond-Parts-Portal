@@ -8,6 +8,8 @@ import {
   DrawingDeliverySchema, DrawingUploadIntentSchema, DrawingAttachmentSchema,
   PublicationQueuePageSchema, PublishResultSchema,
   DraftFigurePageSchema, DraftFigureMetadataSchema,SourceReviewDetailSchema,
+  QuoteLinePageSchema, CustomerQuotePageSchema, QuoteLineSchema, SubmitQuoteResultSchema,
+  SubmitCommerceOrderResultSchema, CompanyDiscountResultSchema, QuoteNoticeSchema,
 } from "@rufdiamond/contracts";
 import { CatalogApiError } from "./api-error";
 
@@ -50,7 +52,15 @@ export function apiResponseSchema(pathWithQuery: string, method: string, status:
     else if (suffix === "approve") schema = MappingRevisionSchema;
     else if (suffix === "revisions") schema = MappingHistorySchema;
     else if (path.includes("/revisions/")) schema = MappingHistoricalDocumentSchema;
-  }
+  } else if (path === "quotes") { schema = SubmitQuoteResultSchema; expectedStatus = 201; }
+  else if (path === "quotes/mine") schema = CustomerQuotePageSchema;
+  else if (path === "quotes/notices/seen") schema = Type.Object({ ok: Type.Literal(true) }, { additionalProperties: false });
+  else if (path === "commerce-orders") { schema = SubmitCommerceOrderResultSchema; expectedStatus = 201; }
+  else if (path === "admin/quotes") schema = QuoteLinePageSchema;
+  else if (path === "admin/quotes/notify") schema = Type.Object({ notices: Type.Array(QuoteNoticeSchema) }, { additionalProperties: false });
+  else if (path === "admin/quotes/factory-lines") { schema = QuoteLineSchema; expectedStatus = 201; }
+  else if (/^admin\/quotes\/[^/]+$/.test(path)) schema = QuoteLineSchema;
+  else if (/^admin\/companies\/[^/]+\/discount$/.test(path)) schema = CompanyDiscountResultSchema;
   if (!schema || status !== expectedStatus) throw new CatalogApiError(502, "INVALID_UPSTREAM_RESPONSE");
   return schema;
 }
