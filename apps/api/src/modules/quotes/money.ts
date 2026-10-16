@@ -1,6 +1,6 @@
 /** Fixed-scale decimal arithmetic. Prices use 4 decimal places; money totals use 2. */
 
-const pow10 = (scale: number) => 10n ** BigInt(scale);
+const pow10 = (scale: number) => BigInt(10) ** BigInt(scale);
 
 export function parseDecimal(value: string, scale = 4): bigint {
   if (!/^-?\d+(\.\d+)?$/.test(value)) throw new TypeError("Invalid decimal");
@@ -12,7 +12,7 @@ export function parseDecimal(value: string, scale = 4): bigint {
 }
 
 export function formatDecimal(value: bigint, scale = 4): string {
-  const negative = value < 0n;
+  const negative = value < BigInt(0);
   const absolute = negative ? -value : value;
   const base = pow10(scale);
   const fraction = (absolute % base).toString().padStart(scale, "0");
@@ -23,11 +23,11 @@ export function formatDecimal(value: bigint, scale = 4): string {
 export function roundDecimal(value: bigint, fromScale: number, toScale: number): bigint {
   if (toScale >= fromScale) return value * pow10(toScale - fromScale);
   const factor = pow10(fromScale - toScale);
-  const negative = value < 0n;
+  const negative = value < BigInt(0);
   const absolute = negative ? -value : value;
   const quotient = absolute / factor;
   const remainder = absolute % factor;
-  const rounded = remainder * 2n >= factor ? quotient + 1n : quotient;
+  const rounded = remainder * BigInt(2) >= factor ? quotient + BigInt(1) : quotient;
   return negative ? -rounded : rounded;
 }
 

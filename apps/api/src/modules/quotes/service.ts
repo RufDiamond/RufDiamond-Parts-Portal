@@ -594,8 +594,8 @@ export function createQuoteService(database: Database, now: () => Date = () => n
             throw new AppError("SHIPPING_METHOD_REQUIRED", 400, "Regular and urgent orders require a shipping method.");
           }
           const priced = await priceOrderLines(tx, actor, auth.companyId, input.lines, now());
-          const listTotal = priced.reduce((sum, line) => sum + parseDecimal(line.listExtended, 2), 0n);
-          const netTotalUnits = priced.reduce((sum, line) => sum + parseDecimal(line.lineTotal, 2), 0n);
+          const listTotal = priced.reduce((sum, line) => sum + parseDecimal(line.listExtended, 2), BigInt(0));
+          const netTotalUnits = priced.reduce((sum, line) => sum + parseDecimal(line.lineTotal, 2), BigInt(0));
           const discountApplied = listTotal - netTotalUnits;
           const reference = await nextReference(tx, "commerce_order_reference_seq");
           const [order] = await tx.insert(commerceOrder).values({
