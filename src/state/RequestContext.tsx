@@ -29,6 +29,9 @@ export interface RequestPartInput {
    * the one RUF Diamond quoted, so the account discount does not apply again.
    */
   quoteNo?: string;
+  quoteLineId?: string;
+  quoteLineVersion?: number;
+  releaseId?: string;
 }
 
 export interface RequestTotals {
@@ -125,10 +128,12 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function toLine(part: Part, qty: number, quoteNo?: string): OrderLine {
+function toLine(part: Part, qty: number, quoteNo?: string, source?: { quoteLineId?: string; quoteLineVersion?: number; releaseId?: string }): OrderLine {
   return {
     partId: part.id,
     ...(quoteNo ? { quoteNo } : {}),
+    ...(source?.quoteLineId ? { quoteLineId: source.quoteLineId, quoteLineVersion: source.quoteLineVersion } : {}),
+    ...(source?.releaseId ? { releaseId: source.releaseId } : {}),
     partNumberSnapshot: part.partNumber,
     descriptionSnapshot: part.description,
     qty,
@@ -147,18 +152,19 @@ export function requestReducer(
       if (additions.length === 0) return state;
 
       const lines = [...state.lines];
-      for (const { part, qty = 1, quoteNo } of additions) {
+      for (const { part, qty = 1, quoteNo, quoteLineId, quoteLineVersion, releaseId } of additions) {
         const index = lines.findIndex((line) => line.partId === part.id);
+        const source = { quoteLineId, quoteLineVersion, releaseId: releaseId ?? part.contributingReleases?.[0]?.releaseId };
         if (index === -1) {
           // Snapshot the part as it reads today; later catalogue edits must
           // not rewrite a request already in progress.
-          lines.push(toLine(part, qty, quoteNo));
+          lines.push(toLine(part, qty, quoteNo, source));
         } else {
           const existing = lines[index];
           const nextQty = existing.qty + qty;
           // API additions have just been revalidated. Do not preserve a stale
           // release snapshot or an old price that is now omitted by scope.
-          lines[index] = part.releasePartId ? toLine(part, nextQty, quoteNo) : {
+          lines[index] = part.releasePartId ? toLine(part, nextQty, quoteNo, source) : {
             ...existing,
             qty: nextQty,
             ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * nextQty) }),

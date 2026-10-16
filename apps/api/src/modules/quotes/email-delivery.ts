@@ -13,8 +13,12 @@ export interface QuoteEmailPort {
   deliver(message: QuoteEmailMessage): Promise<void>;
 }
 
-const FACTORY_INBOX = process.env.QUOTE_FACTORY_EMAIL ?? "factory@rufdiamond.com";
-const RUF_PARTS_INBOX = process.env.QUOTE_RUF_EMAIL ?? "parts@rufdiamond.com";
+function factoryInbox(): string {
+  return process.env.QUOTE_FACTORY_EMAIL ?? "";
+}
+function rufInbox(): string {
+  return process.env.QUOTE_RUF_EMAIL ?? "";
+}
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -26,9 +30,19 @@ function text(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
 
-/** Dual quote docs on submit: factory + RUF (PPT p53). */
+function requireSending(): void {
+  if (process.env.QUOTE_EMAIL_SENDING !== "enabled") {
+    throw new Error("QUOTE_EMAIL_SENDING_DISABLED");
+  }
+}
+
+/** Dual quote docs on submit: factory inbox and RUF inbox. Order mail is separate. */
 export function createQuoteSubmittedDelivery(port: QuoteEmailPort): OutboxDelivery {
   return async (message: DeliveryMessage) => {
+    requireSending();
+    const factory = factoryInbox();
+    const ruf = rufInbox();
+    if (!factory || !ruf) throw new Error("QUOTE_SUBMIT_RECIPIENTS_UNRESOLVED");
     const payload = asRecord(message.payload);
     const quoteNo = text(payload.quoteNo, "unknown");
     const companyName = text(payload.companyName, "Customer");
@@ -42,7 +56,7 @@ export function createQuoteSubmittedDelivery(port: QuoteEmailPort): OutboxDelive
     ].join("\n");
     await port.deliver({
       kind: "quote.submitted",
-      to: [FACTORY_INBOX, RUF_PARTS_INBOX],
+      to: [factory, ruf],
       subject: `Quote request ${quoteNo} — ${companyName}`,
       body,
       providerIdempotencyKey: message.providerIdempotencyKey,
@@ -51,22 +65,24 @@ export function createQuoteSubmittedDelivery(port: QuoteEmailPort): OutboxDelive
   };
 }
 
-/** Notify Customer: portal notice already stored; also email the customer account. */
-export function createQuoteNotifiedDelivery(port: QuoteEmailPort & {
-  resolveCustomerEmails?: (companyId: string) => Promise<string[]>;
-}): OutboxDelivery {
+/**
+ * Notify Customer mail. Recipients must already be an explicit authorized list
+ * on the payload. An empty list fails. The RUF inbox is not a fallback.
+ * Real sending stays off until QUOTE_EMAIL_SENDING=enabled.
+ */
+export function createQuoteNotifiedDelivery(port: QuoteEmailPort): OutboxDelivery {
   return async (message: DeliveryMessage) => {
+    requireSending();
     const payload = asRecord(message.payload);
     const quoteNo = text(payload.quoteNo, "unknown");
-    const companyId = text(payload.companyId);
     const customerName = text(payload.customerName, "Customer");
-    const recipients = port.resolveCustomerEmails && companyId
-      ? await port.resolveCustomerEmails(companyId)
-      : [RUF_PARTS_INBOX];
-    const to = recipients.length > 0 ? recipients : [RUF_PARTS_INBOX];
+    const recipients = Array.isArray(payload.authorizedRecipients)
+      ? payload.authorizedRecipients.filter((value): value is string => typeof value === "string" && value.includes("@"))
+      : [];
+    if (recipients.length === 0) throw new Error("QUOTE_NOTIFY_RECIPIENTS_UNRESOLVED");
     await port.deliver({
       kind: "quote.notified",
-      to,
+      to: recipients,
       subject: `Your quote ${quoteNo} is ready`,
       body: [
         `Hello ${customerName},`,
@@ -82,11 +98,14 @@ export function createQuoteNotifiedDelivery(port: QuoteEmailPort & {
 
 export function createCommerceOrderSubmittedDelivery(port: QuoteEmailPort): OutboxDelivery {
   return async (message: DeliveryMessage) => {
+    requireSending();
+    const ruf = rufInbox();
+    if (!ruf) throw new Error("ORDER_RECIPIENTS_UNRESOLVED");
     const payload = asRecord(message.payload);
     const reference = text(payload.reference, "unknown");
     await port.deliver({
       kind: "commerce-order.submitted",
-      to: [RUF_PARTS_INBOX],
+      to: [ruf],
       subject: `Order ${reference} submitted`,
       body: [
         `Commerce order ${reference} was submitted.`,

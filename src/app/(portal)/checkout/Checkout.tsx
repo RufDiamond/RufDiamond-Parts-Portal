@@ -223,14 +223,25 @@ export function Checkout({ today }: { today: string }) {
           billing: billingOf(draft),
           instructions: draft.instructions,
           currency,
-          lines: lines.map((line) => ({
-            partNumber: line.partNumberSnapshot,
-            description: line.descriptionSnapshot,
-            qty: line.qty,
-            unitPrice: Number(line.unitPriceSnapshot ?? 0).toFixed(2),
-            catalogPartId: /^[0-9a-f-]{36}$/i.test(line.partId) ? line.partId : null,
-            quoteNo: line.quoteNo ?? null,
-          })),
+          lines: lines.map((line) => {
+            if (line.quoteLineId) {
+              return {
+                kind: "quote" as const,
+                quoteLineId: line.quoteLineId,
+                ...(line.quoteLineVersion ? { expectedVersion: line.quoteLineVersion } : {}),
+                qty: line.qty,
+              };
+            }
+            if (!line.releaseId || !line.releasePartId) {
+              throw new Error("Reload the catalogue part before ordering. Its release is not on this line.");
+            }
+            return {
+              kind: "catalogue" as const,
+              releaseId: line.releaseId,
+              releasePartId: line.releasePartId,
+              qty: line.qty,
+            };
+          }),
         });
         orderNo = result.reference;
       } catch (error) {

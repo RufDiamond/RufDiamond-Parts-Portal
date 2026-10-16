@@ -123,9 +123,17 @@ export const commerceOrderLine = pgTable("commerce_order_line", {
   lineTotal: money("line_total").notNull(),
   catalogPartId: uuid("catalog_part_id").references(() => part.id),
   quoteNo: text("quote_no"),
+  priceSource: text("price_source", { enum: ["quote", "catalogue"] }),
+  quoteLineId: uuid("quote_line_id").references(() => quoteLine.id),
+  releaseId: uuid("release_id"),
+  releasePartId: uuid("release_part_id"),
+  listPriceSnapshot: numeric("list_price_snapshot", { precision: 14, scale: 4 }),
+  discountRateSnapshot: numeric("discount_rate_snapshot", { precision: 14, scale: 6 }),
   ...mutable(),
 }, (t) => [
   index("commerce_order_line_order").on(t.orderId),
+  index("commerce_order_line_quote").on(t.quoteLineId),
   versionCheck(t),
   check("commerce_order_line_qty", sql`${t.qty} > 0`),
+  check("commerce_order_line_source", sql`${t.priceSource} IS NULL OR ${t.priceSource} IN ('quote','catalogue')`),
 ]);

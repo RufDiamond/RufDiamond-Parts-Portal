@@ -45,7 +45,7 @@ function toCartPart(line: CustomerQuoteLine): RequestPartInput {
     supersededByPartId: null,
     requires: [],
   };
-  return { part, qty: order.qty, quoteNo: line.quoteNo };
+  return { part, qty: order.qty, quoteNo: line.quoteNo, quoteLineId: line.id };
 }
 
 function toCsv(lines: CustomerQuoteLine[]): string {

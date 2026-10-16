@@ -18,15 +18,20 @@ import {
   commerceOrder,
   commerceOrderLine,
   company,
+  publicationRelease,
   quoteLine,
   quoteNotice,
+  releasePart,
 } from "../../db/schema/index.js";
 import { AppError } from "../../plugins/error-handler.js";
 import { writeAuditLog, type MutationContext } from "../audit/repository.js";
 import { loadAuthorization, requireCapability } from "../authorization/policy.js";
+import { captureScope } from "../catalog/scope.js";
 import { mappingTransaction } from "../diagram-mapping/repository.js";
 import { canonicalJsonHash, withIdempotency } from "../outbox/idempotency.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
+import { applyDiscount, formatDecimal, lineTotal, parseDecimal } from "./money.js";
+import { missingBeforeNotify } from "./notify-ready.js";
 
 export type QuoteActor = { userId: string; requestId: string };
 
@@ -135,8 +140,138 @@ async function companyRow(tx: Transaction, companyId: string) {
   return row;
 }
 
-function money(value: number): string {
-  return value.toFixed(2);
+type PricedLine = {
+  partNumber: string;
+  description: string;
+  qty: number;
+  unitPrice: string;
+  lineTotal: string;
+  listExtended: string;
+  catalogPartId: string | null;
+  quoteNo: string | null;
+  priceSource: "quote" | "catalogue";
+  quoteLineId: string | null;
+  releaseId: string | null;
+  releasePartId: string | null;
+  listPriceSnapshot: string | null;
+  discountRateSnapshot: string | null;
+};
+
+async function priceOrderLines(
+  tx: Transaction,
+  actor: QuoteActor,
+  companyId: string,
+  lines: SubmitCommerceOrderInput["lines"],
+  now: Date,
+): Promise<PricedLine[]> {
+  const quoteQty = new Map<string, { qty: number; expectedVersion?: number }>();
+  for (const line of lines) {
+    if (line.kind !== "quote") continue;
+    const current = quoteQty.get(line.quoteLineId);
+    quoteQty.set(line.quoteLineId, {
+      qty: (current?.qty ?? 0) + line.qty,
+      expectedVersion: line.expectedVersion ?? current?.expectedVersion,
+    });
+  }
+  const quotePrices = new Map<string, PricedLine>();
+  for (const [id, demand] of quoteQty) {
+    const [row] = await tx.select().from(quoteLine).where(eq(quoteLine.id, id)).limit(1).for("update");
+    if (!row || row.companyId !== companyId) throw new AppError("QUOTE_LINE_NOT_FOUND", 404, "Quote line was not found.");
+    if (demand.expectedVersion !== undefined && row.version !== demand.expectedVersion) {
+      throw new AppError("STALE_QUOTE_LINE", 412, "Reload the quote before ordering.");
+    }
+    if (!row.notifyCustomer) throw new AppError("QUOTE_NOT_RELEASED", 422, "This quote has not been released.");
+    const validUntil = addDays(String(row.requestDate), 30);
+    if (ontarioToday(now) > validUntil) throw new AppError("QUOTE_EXPIRED", 422, "This quote has expired.");
+    const missing = missingBeforeNotify({
+      available: row.available,
+      customerPrice: row.customerPrice,
+      newQty: row.newQty,
+      requestedQty: row.requested?.qty ?? null,
+      requested: row.requested,
+      newPartNumber: row.newPartNumber,
+      newDescription: row.newDescription,
+    });
+    if (missing.length || !row.customerPrice) throw new AppError("QUOTE_NOT_ORDERABLE", 422, "This quote line cannot be ordered.");
+    const quotedQty = row.newQty ?? row.requested?.qty ?? 0;
+    if (demand.qty > quotedQty) {
+      throw new AppError("QUOTE_QUANTITY_PENDING", 422, "Ordering more than the quoted quantity is waiting on RUF confirmation.");
+    }
+    const partNumber = row.newPartNumber ?? row.requested?.partNumber;
+    const description = row.newDescription ?? row.requested?.description;
+    if (!partNumber || !description) throw new AppError("QUOTE_NOT_ORDERABLE", 422, "This quote line cannot be ordered.");
+    const unit = parseDecimal(row.customerPrice, 4);
+    quotePrices.set(id, {
+      partNumber,
+      description,
+      qty: demand.qty,
+      unitPrice: formatDecimal(unit, 4),
+      lineTotal: lineTotal(unit, demand.qty),
+      listExtended: lineTotal(unit, demand.qty),
+      catalogPartId: row.catalogPartId,
+      quoteNo: row.quoteNo,
+      priceSource: "quote",
+      quoteLineId: row.id,
+      releaseId: null,
+      releasePartId: null,
+      listPriceSnapshot: formatDecimal(unit, 4),
+      discountRateSnapshot: null,
+    });
+  }
+
+  const catalogueLines = lines.filter((line) => line.kind === "catalogue");
+  const cataloguePriced: PricedLine[] = [];
+  if (catalogueLines.length) {
+    const scope = await captureScope(tx, actor, "orders.submit");
+    const allowed = new Set(scope.releases.map((release) => release.releaseId));
+    const releaseIds = [...new Set(catalogueLines.map((line) => line.releaseId))];
+    if (releaseIds.some((id) => !allowed.has(id)) || new Set(releaseIds).size !== 1) {
+      throw new AppError("RELEASE_NOT_AUTHORIZED", 404, "That catalogue release is not available.");
+    }
+    const [account] = await tx.select({ discountRate: company.discountRate }).from(company).where(eq(company.id, companyId)).limit(1);
+    const discountRate = account?.discountRate ?? "0";
+    for (const line of catalogueLines) {
+      const [part] = await tx.select().from(releasePart).where(and(
+        eq(releasePart.releaseId, line.releaseId),
+        eq(releasePart.id, line.releasePartId),
+      )).limit(1);
+      const [release] = await tx.select({ status: publicationRelease.status }).from(publicationRelease).where(eq(publicationRelease.id, line.releaseId)).limit(1);
+      if (!part || !part.listPrice || Number(part.listPrice) <= 0 || release?.status !== "active") {
+        throw new AppError("CATALOGUE_PRICE_UNAVAILABLE", 422, "That catalogue part has no orderable price in this release.");
+      }
+      const list = parseDecimal(part.listPrice, 4);
+      const net = applyDiscount(list, discountRate, 4);
+      cataloguePriced.push({
+        partNumber: part.partNumber,
+        description: part.description,
+        qty: line.qty,
+        unitPrice: formatDecimal(net, 4),
+        lineTotal: lineTotal(net, line.qty),
+        listExtended: lineTotal(list, line.qty),
+        catalogPartId: part.workingId,
+        quoteNo: null,
+        priceSource: "catalogue",
+        quoteLineId: null,
+        releaseId: line.releaseId,
+        releasePartId: part.id,
+        listPriceSnapshot: formatDecimal(list, 4),
+        discountRateSnapshot: discountRate,
+      });
+    }
+  }
+
+  const merged: PricedLine[] = [];
+  const seenQuote = new Set<string>();
+  for (const line of lines) {
+    if (line.kind === "quote") {
+      if (seenQuote.has(line.quoteLineId)) continue;
+      seenQuote.add(line.quoteLineId);
+      merged.push(quotePrices.get(line.quoteLineId)!);
+    } else {
+      merged.push(cataloguePriced.find((priced) => priced.releasePartId === line.releasePartId && priced.qty === line.qty)!);
+    }
+  }
+  return merged;
 }
 
 export function createQuoteService(database: Database, now: () => Date = () => new Date()) {
@@ -313,10 +448,24 @@ export function createQuoteService(database: Database, now: () => Date = () => n
           if (rows.length !== input.lineIds.length) {
             throw new AppError("QUOTE_LINE_NOT_FOUND", 404, "One or more quote lines were not found.");
           }
+          const unready: string[] = [];
           for (const row of rows) {
             if (auth.accountIds !== "all" && !auth.accountIds.includes(row.companyId)) {
               throw new AppError("FORBIDDEN", 403, "Out of account scope.");
             }
+            const missing = missingBeforeNotify({
+              available: row.available,
+              customerPrice: row.customerPrice,
+              newQty: row.newQty,
+              requestedQty: row.requested?.qty ?? null,
+              requested: row.requested,
+              newPartNumber: row.newPartNumber,
+              newDescription: row.newDescription,
+            });
+            if (missing.length) unready.push(`${row.quoteNo}: ${missing.join(", ")}`);
+          }
+          if (unready.length) {
+            throw new AppError("QUOTE_LINE_NOT_READY", 422, `Not notified. Fill these in first — ${unready.join("; ")}.`);
           }
           await tx.update(quoteLine).set({
             notifyCustomer: true,
@@ -444,18 +593,10 @@ export function createQuoteService(database: Database, now: () => Date = () => n
           if (input.orderType !== "schedule" && !input.shippingMethod) {
             throw new AppError("SHIPPING_METHOD_REQUIRED", 400, "Regular and urgent orders require a shipping method.");
           }
-          let listTotal = 0;
-          for (const line of input.lines) {
-            listTotal += Number(line.unitPrice) * line.qty;
-          }
-          if (!Number.isFinite(listTotal) || listTotal < 0) {
-            throw new AppError("INVALID_ORDER_TOTAL", 400, "Order totals are invalid.");
-          }
-          // Quoted unit prices are final (decision B); dealer discount applies only to catalogue list lines.
-          // Clients send the already-discounted catalogue unit prices, so we do not re-apply discountRate here.
-          const discountRate = "0";
-          const discountApplied = money(0);
-          const netTotal = money(listTotal);
+          const priced = await priceOrderLines(tx, actor, auth.companyId, input.lines, now());
+          const listTotal = priced.reduce((sum, line) => sum + parseDecimal(line.listExtended, 2), 0n);
+          const netTotalUnits = priced.reduce((sum, line) => sum + parseDecimal(line.lineTotal, 2), 0n);
+          const discountApplied = listTotal - netTotalUnits;
           const reference = await nextReference(tx, "commerce_order_reference_seq");
           const [order] = await tx.insert(commerceOrder).values({
             companyId: auth.companyId,
@@ -470,30 +611,36 @@ export function createQuoteService(database: Database, now: () => Date = () => n
             billingAddress: input.billing,
             instructions: input.instructions,
             currency: input.currency,
-            listTotal: money(listTotal),
-            discountRate,
-            discountApplied,
-            netTotal,
+            listTotal: formatDecimal(listTotal, 2),
+            discountRate: "0",
+            discountApplied: formatDecimal(discountApplied, 2),
+            netTotal: formatDecimal(netTotalUnits, 2),
             status: "submitted",
             submittedAt: now(),
           }).returning();
-          for (const line of input.lines) {
+          for (const line of priced) {
             await tx.insert(commerceOrderLine).values({
               orderId: order.id,
               partNumber: line.partNumber,
               description: line.description,
               qty: line.qty,
               unitPrice: line.unitPrice,
-              lineTotal: money(Number(line.unitPrice) * line.qty),
+              lineTotal: line.lineTotal,
               catalogPartId: line.catalogPartId,
               quoteNo: line.quoteNo,
+              priceSource: line.priceSource,
+              quoteLineId: line.quoteLineId,
+              releaseId: line.releaseId,
+              releasePartId: line.releasePartId,
+              listPriceSnapshot: line.listPriceSnapshot,
+              discountRateSnapshot: line.discountRateSnapshot,
             });
           }
           await writeAuditLog(tx, mutation, {
             objectType: "commerce_order",
             objectId: order.id,
             before: null,
-            after: { reference, lineCount: input.lines.length, netTotal },
+            after: { reference, lineCount: input.lines.length, netTotal: formatDecimal(netTotalUnits, 2) },
           });
           await enqueueOutboxEvent(tx, {
             eventType: "commerce-order.submitted.email",
@@ -504,7 +651,7 @@ export function createQuoteService(database: Database, now: () => Date = () => n
               reference,
               companyId: auth.companyId,
               customerPo: input.poNumber,
-              netTotal,
+              netTotal: formatDecimal(netTotalUnits, 2),
               currency: input.currency,
             },
             deduplicationKey: `commerce-order.submitted:${reference}`,

@@ -207,17 +207,30 @@ export type PatchQuoteLineInput = Static<typeof PatchQuoteLineInputSchema>;
 export type NotifyQuoteInput = Static<typeof NotifyQuoteInputSchema>;
 export type AddFactoryQuoteLineInput = Static<typeof AddFactoryQuoteLineInputSchema>;
 
-export const CommerceOrderLineInputSchema = Type.Object(
+export const QuotedOrderLineInputSchema = Type.Object(
   {
-    partNumber: Type.String({ minLength: 1, maxLength: 120 }),
-    description: Type.String({ minLength: 1, maxLength: 500 }),
+    kind: Type.Literal("quote"),
+    quoteLineId: Type.String({ format: "uuid" }),
+    expectedVersion: Type.Optional(Type.Integer({ minimum: 1 })),
     qty: QuantitySchema,
-    unitPrice: Type.String({ pattern: "^\\d+(\\.\\d{1,4})?$" }),
-    catalogPartId: Type.Union([Type.String({ format: "uuid" }), Type.Null()]),
-    quoteNo: Type.Union([Type.String({ maxLength: 40 }), Type.Null()]),
   },
   { additionalProperties: false },
 );
+
+export const CatalogueOrderLineInputSchema = Type.Object(
+  {
+    kind: Type.Literal("catalogue"),
+    releaseId: Type.String({ format: "uuid" }),
+    releasePartId: Type.String({ format: "uuid" }),
+    qty: QuantitySchema,
+  },
+  { additionalProperties: false },
+);
+
+export const CommerceOrderLineInputSchema = Type.Union([
+  QuotedOrderLineInputSchema,
+  CatalogueOrderLineInputSchema,
+]);
 
 export const AddressDtoSchema = Type.Object(
   {
