@@ -131,11 +131,17 @@ CREATE TABLE commerce_order_line (
 
 CREATE INDEX commerce_order_line_order ON commerce_order_line (order_id);
 
--- Runtime grants: mirror least-privilege pattern from prior migrations when roles exist.
+-- Runtime grants: local disposable role and staging `rufdiamond_runtime` when present.
 DO $$
+DECLARE
+  runtime text;
 BEGIN
-  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'ruf_app') THEN
-    GRANT SELECT, INSERT, UPDATE ON quote_line, quote_notice, commerce_order, commerce_order_line TO ruf_app;
-    GRANT USAGE, SELECT ON SEQUENCE quote_reference_seq, commerce_order_reference_seq TO ruf_app;
-  END IF;
+  FOREACH runtime IN ARRAY ARRAY['ruf_app', 'rufdiamond_runtime'] LOOP
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = runtime) THEN
+      EXECUTE format('GRANT SELECT, INSERT, UPDATE ON quote_line, quote_notice, commerce_order, commerce_order_line TO %I', runtime);
+      EXECUTE format('GRANT USAGE, SELECT ON SEQUENCE quote_reference_seq, commerce_order_reference_seq TO %I', runtime);
+      -- Dealer discount admin (users.all.manage) patches company.discount_rate.
+      EXECUTE format('GRANT UPDATE (discount_rate, updated_at, version) ON TABLE company TO %I', runtime);
+    END IF;
+  END LOOP;
 END $$;
