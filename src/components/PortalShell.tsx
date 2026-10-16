@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMachine } from "@/state/MachineContext";
-import type { ReactNode } from "react";
+import { useQuoteNotices } from "@/state/quote-store";
+import { useRequestCompany } from "@/state/RequestContext";
+import { useMemo, type ReactNode } from "react";
 import styles from "./PortalShell.module.css";
 import { SignOutButton, useCustomerSession } from "@/state/SessionBoundary";
 
@@ -121,6 +123,19 @@ export function PortalShell({ children, date }: PortalShellProps) {
   const session = useCustomerSession();
   const pathname = usePathname() ?? "/";
   const { selectedModel } = useMachine();
+  const company = useRequestCompany();
+
+  /*
+   * Quotes RUF Diamond has answered that this account has not opened yet
+   * (14 Oct, answer 8). Counted per quote rather than per line, so a reply
+   * covering five parts reads as one thing to look at, not five.
+   */
+  const notices = useQuoteNotices();
+  const answeredQuotes = useMemo(() => {
+    const companyId = company?.id ?? "guest";
+    return new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).map((notice) => notice.quoteNo)).size;
+  }, [notices, company]);
+
   const lineHref = selectedModel
     ? (LINE_TO_HREF[selectedModel.productLineId] ?? null)
     : null;
@@ -150,6 +165,14 @@ export function PortalShell({ children, date }: PortalShellProps) {
                     />
                   </span>
                   <span className={styles.railLabel}>{item.label}</span>
+                  {item.id === "quote" && answeredQuotes > 0 ? (
+                    <span className={styles.railBadge}>
+                      <span aria-hidden="true">{answeredQuotes}</span>
+                      <span className={styles.railBadgeText}>
+                        {answeredQuotes === 1 ? "1 quote answered" : `${answeredQuotes} quotes answered`}
+                      </span>
+                    </span>
+                  ) : null}
                 </>
               );
 

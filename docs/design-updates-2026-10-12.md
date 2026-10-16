@@ -185,6 +185,63 @@ Each is built the way described, pending confirmation.
 
 ---
 
+## Supervisor's answers — 14 October 2026
+
+Received 14 Oct at 7:23 pm EDT. The supervisor's numbering follows the
+fifteen questions sent on 14 Oct; the bracket gives the matching question
+above.
+
+| # | Question | Answer | In the portal |
+|---|---|---|---|
+| 1 | Factory Price on the admin screen (Q2) | Add it straight after Qty — the tenth column | **Done.** `/quotes/admin`, column 10 |
+| 2 | Search by Description (Q9) | Must be enabled; slides 22–27 | **Done** (`a31e536`) |
+| 3 | When the customer sees the reply (Q12) | Blank until the factory PDF arrives; admin enters it and presses Notify Customer | **Done.** A submitted request appears blank in Quote Status; Notify Customer releases it |
+| 4 | Ordering a back-ordered part (Q14) | Yes — order any quantity; what's missing goes on back order | **Done** (`acda8c7`) |
+| 5 | After 30 days (Q15) | Customer can request a new quotation | **Done.** "Request new quote" on expired lines |
+| 6 | Discount on quoted prices (Q13) | Discount applied once, at the end; dealers only; full prices shown until ordering | **Part done** — see follow-up B |
+| 7 | Customer codes (Q18) | Show the full company name instead | **Done** (`09dd7a6`) |
+| 8 | How the customer is told (Q8) | Both: in the portal, and by email | **Portal done** (New badge, counter on the Quote Status button). **Email needs a mail service** |
+| 9 | PO and VIN required (Q19) | Mandatory — invoices are refused without a PO; parts differ by VIN | Already built |
+| 10 | Addresses and serials (Q21) | Enter the address the first time, "Save this new address", newest saved fills in; serial typed every order | **Done** (`aa35a5d`) |
+| 11 | Tax (Q22) | RUF handles tax on its invoice, outside the portal | Already built |
+| 12 | Ordering without a quote (Q24) | Yes — that is how the portal should work | Already built |
+| 13 | Numbering (Q7) | FT-/IH-/BP- per brand if simple; otherwise one sequence | **Open** — see follow-up C |
+| 14 | Dealer discount (Q1) | 10% for the five dealers; must be able to set it for a new dealer | **Dealers done** (`09dd7a6`). Setting it needs an admin screen — follow-up F |
+| 15 | The p69 note (Q6) | Changing one field must not clear the others | Already built |
+
+Not covered by the reply, still open: Q3 (two PO numbers), Q4 (carriers on
+the quote request), Q10 (Order Status design), Q16 (what "Add to Cart?"
+records), Q23 (signature on the factory copy).
+
+### Follow-ups sent back on 14 Oct
+
+- **A. One notice per quote.** Built as proposed: Notify Customer releases the
+  ticked lines and produces one notice per quote, however many lines. Awaiting
+  confirmation.
+- **B. Discount on quoted prices.** Open. The dealer discount currently comes
+  off catalogue prices only, not quoted ones. Should a part quoted at $500
+  cost a dealer $450?
+- **C. Order numbers per brand.** Open. Which number does an order with two
+  brands' parts get — split per brand, or one sequence? Is BP right for Agilis?
+  Do quotes take the prefixes too?
+- **D. Order Status.** Open. Needs a design and its list of statuses.
+- **E. Portal notification.** Built as proposed: a red counter on the Quote
+  Status button, and answered lines marked New until the customer leaves the
+  page. Awaiting confirmation.
+- **F. Setting a dealer's discount.** Open. Needs an admin screen for accounts.
+
+### Built for the local demonstration only
+
+There is no quote, notification or mail service behind the API. The quote
+requests a customer submits and what the administrator enters against them
+are kept in the browser (`src/state/quote-store.ts`), and nothing is emailed.
+The administrator's screen has **no staff sign-in** yet: it is reachable from
+"RUF Diamond view" on the customer's Quote Status in the demonstration, and
+must move behind an administrator session before real customers use the
+portal, because it shows Factory Price.
+
+---
+
 ## What already exists in the code
 
 - Rail already matches (Home, Fat Truck, IronHorse, Agilis, Quote Status, Order
@@ -195,6 +252,12 @@ Each is built the way described, pending confirmation.
   the drop-down (`src/components/CheckCart.tsx`). The Discount line uses the
   account's existing `discountRate`. Checkout leads to `/request` until the
   Order Request page exists.
+- **Built (screen 1):** the administrator's Quote Status at `/quotes/admin`
+  (`src/app/(portal)/quotes/admin/`): every account's lines, newest first,
+  filterable by product line, with Factory Price as the tenth column. Each
+  line is filled in on the table; Notify Customer releases the ticked lines,
+  one notice per quote; Add factory line records a part the factory quoted
+  that was never asked for. Rules are in `src/lib/quote-status.ts`.
 - **Built (screen 2):** customer Quote Status at `/quotes`
   (`src/app/(portal)/quotes/`), on sample records in
   `src/data/quote-status.server.ts`. The customer view is built on the server

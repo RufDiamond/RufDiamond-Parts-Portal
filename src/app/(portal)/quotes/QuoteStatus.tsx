@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AddToCartDialog, CheckCart, EmptyState } from "@/components";
 import { downloadCsv } from "@/lib/adminCsv";
 import { formatAmount } from "@/lib/format";
 import { PRICE_VALIDITY_DAYS, mergeCustomerLines } from "@/lib/quote-status";
-import { markNoticesSeen, requestNewQuote, useQuoteNotices, useStoredQuoteRecords } from "@/state/quote-store";
+import { requestNewQuote, useMarkNoticesSeenOnLeave, useQuoteNotices, useStoredQuoteRecords } from "@/state/quote-store";
 import { buildReference, useRequest, type RequestPartInput } from "@/state/RequestContext";
 import { useRequestAddition } from "@/state/useRequestAddition";
 import type { Part } from "@/types/catalog";
@@ -84,7 +84,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
     () => new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).flatMap((notice) => notice.lineIds)),
     [notices, companyId],
   );
-  useEffect(() => () => markNoticesSeen(companyId), [companyId]);
+  useMarkNoticesSeenOnLeave(companyId);
 
   const [requested, setRequested] = useState<string | null>(null);
   const requote = (line: CustomerQuoteLine) => {
@@ -147,6 +147,10 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
           <Image src="/toolbar/print.png" alt="" width={40} height={40} className={styles.buttonIcon} />
           Print
         </button>
+        {/* The demonstration has no staff sign-in, so the administrator's side is
+            one click away for whoever is showing it. This screen only renders
+            in the demonstration — a connected account gets "Not available yet". */}
+        <Link href="/quotes/admin" className={styles.button}>RUF Diamond view</Link>
         <Link href="/" className={`${styles.button} ${styles.home}`}>Home</Link>
       </div>
 

@@ -672,6 +672,15 @@ function RequestProviderState({
   );
 }
 
+/**
+ * The company the portal is priced for, or null outside a RequestProvider.
+ * For the portal chrome, which only needs to know whose account it is and
+ * should not depend on the request state being mounted to draw itself.
+ */
+export function useRequestCompany(): Company | null {
+  return useContext(RequestContext)?.company ?? null;
+}
+
 export function useRequest(): RequestContextValue {
   const value = useContext(RequestContext);
   if (!value) {

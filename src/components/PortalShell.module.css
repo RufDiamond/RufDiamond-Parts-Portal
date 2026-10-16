@@ -56,6 +56,8 @@
 }
 
 .railItem {
+  /* Anchors the answered-quotes counter to the button's corner. */
+  position: relative;
   display: grid;
   justify-items: center;
   align-content: start;
@@ -317,3 +319,31 @@
  * height sizes them all alike. agilis is the exception by nature: at 2.2:1 it
  * reaches the rail's width before it reaches this height.
  */
+
+/*
+ * Answered quotes the account has not opened yet, on the Quote Status button.
+ * Sits on the button rather than inside the icon box, which clips its overflow.
+ */
+.railBadge {
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--select);
+  color: var(--select-on);
+  font: var(--weight-bold) 11px / 20px var(--font-ui);
+  text-align: center;
+}
+
+/* Read aloud, not shown: the number alone means nothing to a screen reader. */
+.railBadgeText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

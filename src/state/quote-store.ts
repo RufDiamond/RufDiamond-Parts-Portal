@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import type { PartUsageSummary } from "@/types/catalog";
 import type { CustomerQuoteLine, QuoteStatusRecord } from "@/types/quotes";
 import type { RequestConfirmation } from "./RequestContext";
@@ -144,6 +144,33 @@ export function markNoticesSeen(companyId: string) {
   const notices = readJson<QuoteNotice[]>(NOTICES_KEY, []);
   if (!notices.some((notice) => notice.companyId === companyId && !notice.seen)) return;
   writeJson(NOTICES_KEY, notices.map((notice) => notice.companyId === companyId ? { ...notice, seen: true } : notice));
+}
+
+const pendingSeen = new Map<string, ReturnType<typeof setTimeout>>();
+
+/**
+ * Mark the account's notices seen when the customer leaves Quote Status, so
+ * what was answered stays marked New for the whole visit.
+ *
+ * The mark is deferred a tick and cancelled if the page mounts again at once.
+ * React's development double-mount runs every cleanup straight after the
+ * first mount; marking in a plain cleanup cleared the notices before the
+ * customer had seen them, and took the rail counter with them.
+ */
+export function useMarkNoticesSeenOnLeave(companyId: string) {
+  useEffect(() => {
+    const pending = pendingSeen.get(companyId);
+    if (pending !== undefined) {
+      clearTimeout(pending);
+      pendingSeen.delete(companyId);
+    }
+    return () => {
+      pendingSeen.set(companyId, setTimeout(() => {
+        pendingSeen.delete(companyId);
+        markNoticesSeen(companyId);
+      }, 0));
+    };
+  }, [companyId]);
 }
 
 /** "2026-10-14" in Ontario, where the parts are quoted from. */

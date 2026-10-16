@@ -78,3 +78,25 @@ it("lines released since the customer last looked are marked New", () => {
   expect(screen.getByText("New")).toBeTruthy();
   expect(screen.getByText(/RUF Diamond has answered 1 quoted line/)).toBeTruthy();
 });
+
+it("keeps New marked while the customer is on the page, even under React's development double-mount", async () => {
+  const records = submitted("RD-00100", ["11-00001"]).map((record) => ({ ...record, available: "yes" as const, customerPrice: "40.00" }));
+  saveQuoteRecords(records);
+  notifyCustomers(records, TODAY);
+  const seen = () => JSON.parse(localStorage.getItem("rdpp:quote-notices:v1")!)[0].seen;
+
+  // StrictMode mounts, unmounts and remounts at once, as `next dev` does.
+  const view = render(
+    <React.StrictMode>
+      <RequestProvider company={DEMO_COMPANY}><QuoteStatus lines={serverLines()} today={TODAY} /></RequestProvider>
+    </React.StrictMode>,
+  );
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  expect(seen()).toBe(false);
+  expect(screen.getByText("New")).toBeTruthy();
+
+  // Leaving the page is what marks them seen.
+  view.unmount();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  expect(seen()).toBe(true);
+});

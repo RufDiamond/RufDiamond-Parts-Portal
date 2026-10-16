@@ -1,0 +1,62 @@
+/*
+ * Administrator's Quote Status — what differs from the customer's table, which
+ * supplies the rest (../quotes.module.css).
+ */
+
+.table td {
+  /* Inputs set the row height; keep the read-only cells from floating. */
+  height: 34px;
+}
+
+.lines {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: var(--space-3);
+}
+
+.lineActive,
+.lineActive:hover:not(:disabled) {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Inputs sit on the white table, so they state their own ink. */
+.cellInput {
+  width: 100%;
+  min-width: 84px;
+  padding: 3px 6px;
+  border: 1px solid var(--deck-panel);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.cellInput:focus-visible {
+  outline: 2px solid var(--select);
+  outline-offset: -1px;
+}
+
+.cellText {
+  min-width: 160px;
+}
+
+.cellNumber {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.added {
+  color: var(--text-muted);
+}
+
+.notify {
+  background: var(--select);
+  border-color: var(--select);
+  color: var(--select-on);
+}
+
+.notify:hover:not(:disabled) {
+  background: var(--select);
+  filter: brightness(0.92);
+}

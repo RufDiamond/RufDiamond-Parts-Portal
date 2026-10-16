@@ -124,3 +124,76 @@ export function mergeCustomerLines(
   ].sort((a, b) =>
     b.requestDate.localeCompare(a.requestDate) || a.quoteNo.localeCompare(b.quoteNo) || a.id.localeCompare(b.id));
 }
+
+/* ── The administrator's side (p58) ─────────────────────────────────────── */
+
+/** Whole days from the request to the factory's answer, or null before it arrives. */
+export function responseDays(record: QuoteStatusRecord): number | null {
+  if (!record.responseDate) return null;
+  const from = Date.parse(`${record.requestDate}T00:00:00Z`);
+  const to = Date.parse(`${record.responseDate}T00:00:00Z`);
+  return Math.round((to - from) / 86_400_000);
+}
+
+/** The quantity a line is priced on: what the factory quoted, else what was asked. */
+export function quotedQty(record: QuoteStatusRecord): number | null {
+  return record.newQty ?? record.requested?.qty ?? null;
+}
+
+/** Customer price × quoted quantity, as the Total Price column shows it. */
+export function adminTotal(record: QuoteStatusRecord): string | null {
+  const qty = quotedQty(record);
+  return record.customerPrice !== null && qty !== null ? times(record.customerPrice, qty) : null;
+}
+
+/**
+ * What still has to be filled in before a line can be released to the
+ * customer. Empty when it is ready. A back-ordered line is still released —
+ * it needs a price like any other, because the customer can order it (14 Oct).
+ */
+export function missingBeforeNotify(record: QuoteStatusRecord): string[] {
+  const missing: string[] = [];
+  if (record.available === null) missing.push("Available");
+  if (record.customerPrice === null) missing.push("Unit Price");
+  if (quotedQty(record) === null) missing.push("New Qty");
+  if (record.requested === null && (!record.newPartNumber || !record.newDescription)) {
+    missing.push("New Part No. and New Description");
+  }
+  return missing;
+}
+
+/**
+ * A line the factory put on its quotation that the customer never asked for
+ * (p58, the row under row 3). It belongs to the same request as `base`.
+ */
+export function factoryAddedLine(base: QuoteStatusRecord, existingIds: ReadonlySet<string>): QuoteStatusRecord {
+  let n = 1;
+  while (existingIds.has(`${base.quoteNo}-F${n}`)) n += 1;
+  return {
+    ...base,
+    id: `${base.quoteNo}-F${n}`,
+    requested: null,
+    catalogPartId: null,
+    responseDate: null,
+    available: null,
+    estAvailability: null,
+    newPartNumber: null,
+    newDescription: null,
+    newQty: null,
+    factoryPrice: null,
+    customerPrice: null,
+    comments: "",
+    notifyCustomer: false,
+  };
+}
+
+/** Every customer's lines, newest request first; one request's lines keep their order. */
+export function sortAdminRecords(records: QuoteStatusRecord[]): QuoteStatusRecord[] {
+  return records
+    .map((record, index) => ({ record, index }))
+    .sort((a, b) =>
+      b.record.requestDate.localeCompare(a.record.requestDate) ||
+      b.record.quoteNo.localeCompare(a.record.quoteNo) ||
+      a.index - b.index)
+    .map(({ record }) => record);
+}

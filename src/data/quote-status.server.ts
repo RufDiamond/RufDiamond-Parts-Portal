@@ -87,3 +87,13 @@ export async function getCustomerQuoteStatus(): Promise<CustomerQuoteLine[] | nu
   if (isApiMode()) return null;
   return toCustomerQuoteLines(fixtureQuoteRecords, FIXTURE_COMPANY_ID, today());
 }
+
+/**
+ * Every account's quote lines, for RUF Diamond's administrator (p58), or null
+ * where no quote service exists yet. Includes the Factory Price, so it must
+ * only ever reach the administrator's screen.
+ */
+export async function getAdminQuoteRecords(): Promise<QuoteStatusRecord[] | null> {
+  if (isApiMode()) return null;
+  return fixtureQuoteRecords;
+}
