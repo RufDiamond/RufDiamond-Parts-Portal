@@ -75,6 +75,21 @@ export function toCustomerQuoteLines(
           : null,
         priceValidUntil,
         expired,
+        requote:
+          released && expired && partNumber !== null && description !== null && qty !== null
+            ? {
+                productLine: record.productLine,
+                partNumber,
+                description,
+                qty,
+                catalogPartId: partNumber === record.requested?.partNumber ? record.catalogPartId : null,
+                model: record.model,
+                serialNumber: record.serialNumber,
+                system: record.system,
+                figure: record.figure,
+                assemblyName: record.assemblyName,
+              }
+            : null,
         orderable: canOrder
           ? {
               partNumber: partNumber!,
@@ -90,4 +105,22 @@ export function toCustomerQuoteLines(
           : null,
       };
     });
+}
+
+/**
+ * The server's lines for the account with the browser-held quote records laid
+ * over them (the local demonstration's quote service), newest request first.
+ */
+export function mergeCustomerLines(
+  serverLines: CustomerQuoteLine[],
+  stored: QuoteStatusRecord[],
+  companyId: string,
+  today: string,
+): CustomerQuoteLine[] {
+  const replaced = new Set(stored.map((record) => record.id));
+  return [
+    ...serverLines.filter((line) => !replaced.has(line.id)),
+    ...toCustomerQuoteLines(stored, companyId, today),
+  ].sort((a, b) =>
+    b.requestDate.localeCompare(a.requestDate) || a.quoteNo.localeCompare(b.quoteNo) || a.id.localeCompare(b.id));
 }

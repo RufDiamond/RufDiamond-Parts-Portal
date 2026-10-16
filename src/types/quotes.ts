@@ -80,6 +80,22 @@ export interface CustomerQuoteLine {
   /** ISO date: requestDate + 30 days. */
   priceValidUntil: string;
   expired: boolean;
+  /**
+   * What a fresh quote for this line would ask for. Set once an answered line
+   * has expired, so the customer can request a new quotation (14 Oct).
+   */
+  requote: {
+    productLine: QuoteStatusRecord["productLine"];
+    partNumber: string;
+    description: string;
+    qty: number;
+    catalogPartId: string | null;
+    model: string;
+    serialNumber: string;
+    system: string;
+    figure: string;
+    assemblyName: string;
+  } | null;
   /** What would go on the cart. Null when the line cannot be ordered as it stands. */
   orderable: {
     partNumber: string;

@@ -7,6 +7,7 @@ import { useState } from "react";
 import { EmptyState, Icon } from "@/components";
 import { formatFigureRef } from "@/lib/format";
 import { useMachine } from "@/state/MachineContext";
+import { registerQuoteRequest } from "@/state/quote-store";
 import { useRequest } from "@/state/RequestContext";
 import type { PartUsageSummary } from "@/types/catalog";
 import styles from "./quote.module.css";
@@ -110,7 +111,10 @@ export function QuoteRequest({
       brand: productLine,
       serial: selectedVariant?.label ?? null,
     });
-    if (confirmation) router.push("/request/confirmed");
+    if (!confirmation) return;
+    // The request now waits in Quote Status for the factory's answer (p54).
+    registerQuoteRequest(confirmation, company?.id ?? "guest", usage);
+    router.push("/request/confirmed");
   };
 
   if (!linesHydrated) {

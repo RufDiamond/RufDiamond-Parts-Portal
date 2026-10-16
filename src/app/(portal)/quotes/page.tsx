@@ -8,5 +8,6 @@ export default async function QuotesPage() {
   // No quote service exists behind the connected API yet; say so rather than
   // showing sample quotes to a real account.
   if (lines === null) return <Pending eyebrow="Not available yet" title="Quote status" />;
-  return <QuoteStatus lines={lines} />;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Toronto" });
+  return <QuoteStatus lines={lines} today={today} />;
 }

@@ -63,7 +63,7 @@ function Cart() {
 }
 
 it("adds ticked quoted lines to the cart at the quoted price", async () => {
-  render(<RequestProvider><QuoteStatus lines={lines()} /><Cart /></RequestProvider>);
+  render(<RequestProvider><QuoteStatus lines={lines()} today={TODAY} /><Cart /></RequestProvider>);
   expect((screen.getByRole("checkbox", { name: "Select 19-00511 from RD-00007" }) as HTMLInputElement).disabled).toBe(true);
   expect((screen.getByRole("checkbox", { name: "Select 51-00045 from RD-00006" }) as HTMLInputElement).disabled).toBe(false);
   expect(screen.getByText("Awaiting RUF Diamond’s response")).toBeTruthy();

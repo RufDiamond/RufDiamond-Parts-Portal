@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AddToCartDialog, CheckCart, EmptyState } from "@/components";
 import { downloadCsv } from "@/lib/adminCsv";
 import { formatAmount } from "@/lib/format";
-import { PRICE_VALIDITY_DAYS } from "@/lib/quote-status";
-import { useRequest, type RequestPartInput } from "@/state/RequestContext";
+import { PRICE_VALIDITY_DAYS, mergeCustomerLines } from "@/lib/quote-status";
+import { markNoticesSeen, requestNewQuote, useQuoteNotices, useStoredQuoteRecords } from "@/state/quote-store";
+import { buildReference, useRequest, type RequestPartInput } from "@/state/RequestContext";
 import { useRequestAddition } from "@/state/useRequestAddition";
 import type { Part } from "@/types/catalog";
 import type { Availability, CustomerQuoteLine } from "@/types/quotes";
@@ -64,9 +65,32 @@ function toCsv(lines: CustomerQuoteLine[]): string {
  * what RUF Diamond has answered. Lines that can be ordered as quoted are ticked
  * and added to the cart at the quoted price; the record stays here either way.
  */
-export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
-  const { lines: cart, currency, discountRate } = useRequest();
+export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuoteLine[]; today: string }) {
+  const { lines: cart, currency, discountRate, company } = useRequest();
   const addition = useRequestAddition("quote-status");
+  const companyId = company?.id ?? "guest";
+
+  // What RUF Diamond has entered, and what this customer has asked since, laid
+  // over the server's lines (the demonstration's quote service).
+  const stored = useStoredQuoteRecords();
+  const lines = useMemo(
+    () => mergeCustomerLines(serverLines, Object.values(stored), companyId, today),
+    [serverLines, stored, companyId, today],
+  );
+
+  /** Lines released since the customer last looked: highlighted until they leave the page. */
+  const notices = useQuoteNotices();
+  const fresh = useMemo(
+    () => new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).flatMap((notice) => notice.lineIds)),
+    [notices, companyId],
+  );
+  useEffect(() => () => markNoticesSeen(companyId), [companyId]);
+
+  const [requested, setRequested] = useState<string | null>(null);
+  const requote = (line: CustomerQuoteLine) => {
+    const record = requestNewQuote(line, buildReference(new Date(), Math.random()), companyId);
+    setRequested(`New quote ${record.quoteNo} requested for ${record.requested?.partNumber}. It will appear here when RUF Diamond responds.`);
+  };
 
   const pages = Math.max(1, Math.ceil(lines.length / PAGE_SIZE));
   const [page, setPage] = useState(0);
@@ -134,6 +158,12 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
         </p>
 
         {addition.error ? <p role="alert" className={styles.error}>{addition.error}</p> : null}
+        {requested ? <p role="status" className={styles.done}>{requested}</p> : null}
+        {fresh.size > 0 ? (
+          <p role="status" className={styles.done}>
+            RUF Diamond has answered {fresh.size} quoted {fresh.size === 1 ? "line" : "lines"}, marked New below.
+          </p>
+        ) : null}
 
         {lines.length === 0 ? (
           <EmptyState title="No quote requests yet" description="Quote requests you submit will be listed here with RUF Diamond's response." />
@@ -166,7 +196,7 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
                   const response = line.response;
                   const added = onCart.has(cartId(line));
                   return (
-                    <tr key={line.id} className={styles.row} data-available={response?.available ?? undefined}>
+                    <tr key={line.id} className={styles.row} data-available={response?.available ?? undefined} data-new={fresh.has(line.id) || undefined}>
                       <td className={styles.tick}>
                         <input
                           type="checkbox"
@@ -186,7 +216,10 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
                         />
                       </td>
                       <td className={styles.mono}>{formatDate(line.requestDate)}</td>
-                      <td className={styles.mono}>{line.quoteNo}</td>
+                      <td className={styles.mono}>
+                        {line.quoteNo}
+                        {fresh.has(line.id) ? <span className={styles.newBadge}>New</span> : null}
+                      </td>
                       <td className={styles.text}>{line.customer}</td>
                       <td>{line.user}</td>
                       <td className={styles.mono}>{line.partNumber ?? NONE}</td>
@@ -207,7 +240,12 @@ export function QuoteStatus({ lines }: { lines: CustomerQuoteLine[] }) {
                         <td colSpan={8} className={styles.awaiting}>Awaiting RUF Diamond&rsquo;s response</td>
                       )}
                       <td className={styles.center}>
-                        {added ? "Yes" : line.expired && response ? "Expired" : response ? "No" : NONE}
+                        {added ? "Yes" : line.requote ? (
+                          <button type="button" className={styles.requote} onClick={() => requote(line)}
+                            title="This price has expired. Ask RUF Diamond for a new quotation.">
+                            Request new quote
+                          </button>
+                        ) : response ? "No" : NONE}
                       </td>
                     </tr>
                   );
