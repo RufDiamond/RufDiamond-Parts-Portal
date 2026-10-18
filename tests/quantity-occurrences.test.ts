@@ -285,6 +285,14 @@ test("nearby selected pointers remain separate without changing physical coordin
   expect(layoutSelectedMarkers(markers, new Set(), 500, 300).size).toBe(0);
 });
 
+test("a lone top-edge callout stays on its source point (no fake second leader)", () => {
+  // Filters Ref. 1 sits near y=5%. Display height ~298px puts that under the
+  // old 18px edge pad, which used to shove the badge and draw a second leader.
+  const markers = [{ id: "co-1-1-0001", partId: "prt-36-00304", number: 1, x: 33.6, y: 5.0 }];
+  const positions = layoutSelectedMarkers(markers, new Set(["prt-36-00304"]), 530, 298);
+  expect(positions.get("co-1-1-0001")).toEqual({ x: 33.6, y: 5.0 });
+});
+
 test("zero quantity with no occurrences needs no physical mapping", () => {
   expect(reportQuantityOccurrences([row({ id: "fp-4", qty: 0 })], [])[0])
     .toMatchObject({ expected: 0, detected: 0, status: "match", needsReview: false });

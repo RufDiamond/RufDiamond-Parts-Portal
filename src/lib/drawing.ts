@@ -69,7 +69,7 @@ export function buildDrawingMarkers(
   return markers;
 }
 
-/** Spread selected labels in display pixels; source anchors never move. */
+/** Spread colliding selected labels in display pixels; source anchors stay put. */
 export function layoutSelectedMarkers(
   markers: readonly DrawingMarker[], selectedPartIds: ReadonlySet<string>, width: number, height: number,
 ): Map<string, { x: number; y: number }> {
@@ -77,22 +77,37 @@ export function layoutSelectedMarkers(
   if (width <= 0 || height <= 0) return positions;
   const placed: { x: number; y: number }[] = [];
   const gap = 40;
+  const collides = (candidate: { x: number; y: number }) =>
+    placed.some((other) => Math.abs(other.x - candidate.x) < gap && Math.abs(other.y - candidate.y) < gap);
+
   for (const marker of markers) {
     if (!selectedPartIds.has(marker.partId)) continue;
     const anchor = { x: marker.x * width / 100, y: marker.y * height / 100 };
+    // Keep the printed/source point unless another selected label already sits
+    // there. Edge padding must not shove a lone top/side callout and invent a
+    // second leader (e.g. Filters Ref. 1 at y≈5%).
     let position = anchor;
-    search: for (let radius = 0; radius <= markers.length; radius++) {
-      for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
-        if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
-        const candidate = { x: anchor.x + dx * gap, y: anchor.y + dy * gap };
-        if (candidate.x < 18 || candidate.x > width - 18 || candidate.y < 18 || candidate.y > height - 18) continue;
-        if (placed.some((other) => Math.abs(other.x - candidate.x) < gap && Math.abs(other.y - candidate.y) < gap)) continue;
-        position = candidate;
-        break search;
+    let displaced = false;
+    if (collides(anchor)) {
+      search: for (let radius = 1; radius <= markers.length; radius++) {
+        for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
+          const candidate = { x: anchor.x + dx * gap, y: anchor.y + dy * gap };
+          if (candidate.x < 18 || candidate.x > width - 18 || candidate.y < 18 || candidate.y > height - 18) continue;
+          if (collides(candidate)) continue;
+          position = candidate;
+          displaced = true;
+          break search;
+        }
       }
     }
     placed.push(position);
-    positions.set(marker.id, { x: position.x / width * 100, y: position.y / height * 100 });
+    positions.set(
+      marker.id,
+      displaced
+        ? { x: position.x / width * 100, y: position.y / height * 100 }
+        : { x: marker.x, y: marker.y },
+    );
   }
   return positions;
 }
