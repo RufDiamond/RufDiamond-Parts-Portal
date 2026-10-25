@@ -473,14 +473,14 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await info.attach("synthetic-tall.png", { body:await page.screenshot(), contentType:"image/png" });
 });
 
-test("mixed occurrence union reveals all components with one selected reference", async ({ page }, info) => {
+test("mixed occurrence union reveals all components and every original reference", async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion:"reduce" });
   await page.goto("http://localhost:3101/?mixed");
   const scope = figure(page);
   await expect(scope.locator("img")).toBeVisible();
   for (let i=0;i<4;i++) await page.getByRole("button", { name:"Zoom in", exact:true }).click();
   await page.locator('tr[data-figure-part-id="row-39"]').click();
-  await expect(scope.locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(1);
+  await expect(scope.locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(3);
   await expect.poll(() => scope.evaluate((root) => {
     const image=root.querySelector("img")!;
     const sheet=image.parentElement!.parentElement!;

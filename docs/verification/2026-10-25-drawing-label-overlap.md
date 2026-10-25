@@ -122,3 +122,40 @@ both mapped Bumper components or all 16 mapped Wheel screws. Deselecting retains
 one reference. Screenshots and counts are retained in
 `output/verification/2026-10-25-one-label-default/`. Independent code review found
 no actionable issues. Public deployment verification follows the push.
+
+## Superseding clarification: keep every occurrence reference visible
+
+The user subsequently clarified: “Every number visible normally; one highlighted
+when selected.” This supersedes the preceding one-visible-reference rule.
+Every occurrence keeps its original numbered label before, during and after
+selection. Only one label per selected part number receives the active color;
+all associated mapped components highlight together. The other occurrence
+labels remain visible, clickable and keyboard accessible. There is no banner.
+
+Rendering, display leaders, collision layout and minimum canvas sizing again
+use the complete marker list. The temporary focus transfer for replacing a
+representative label is removed because each original label now retains its
+keyed DOM node. Shared part-number resolution across numeric, legacy and
+marker-only occurrences remains. Artwork, source geometry, catalogue data,
+component identities, API and mail configuration are unchanged.
+
+The regression first failed with two references instead of three. The corrected
+viewer passes all 419 frontend tests across 39 files, including the 268-row
+quantity audit across 40 figures, mixed formats, alternate source identities,
+keyboard focus, deselection and fullscreen. Production build and changed-file
+lint pass. Independent read-only code review found no actionable issues.
+All 182 browser checks passed in one clean run (3.5 minutes): all 45 figures at
+desktop/tablet/mobile sizes, 44 native interaction checks, and three shell/privacy
+checks. Every rendered reference can still be activated; label counts stay
+unchanged through selection/deselection, with one selection-colored label.
+Evidence: `output/restored-occurrence-references/results.json`.
+
+Local visual checks confirm all 10 Bumper references and 58 Wheel references
+remain present. Selecting 4 keeps both Bumper labels or all 16 Wheel labels,
+colors one label, and highlights both Bumper components or all 16 Wheel screws.
+Each of those 18 components was individually activated, and deselection through
+an alternate label was verified. Screenshots/counts are retained in
+`output/verification/2026-10-25-restored-occurrence-references/`. The standalone
+capture waits for the existing color transition before counting red labels.
+The frontend harness emits existing duplicate-key warnings in a shared-identity
+fixture; all assertions pass. Public deployment verification follows the push.

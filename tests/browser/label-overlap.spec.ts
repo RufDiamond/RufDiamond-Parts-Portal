@@ -51,33 +51,24 @@ for (const screen of [
       await expect.poll(() => image.evaluate(el => (el as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
       await expect.poll(() => collisions(figure), {message:`${entry.id} initial fit`}).toEqual([]);
       const ids = await figure.locator("button[data-callout-id]").evaluateAll(els => els.map(el=>el.getAttribute("data-callout-id")!));
-      const partNumbers = await figure.locator("button[data-callout-id]").evaluateAll(
-        elements => elements.map(el => el.getAttribute("title")!.split(" — ")[0]),
-      );
-      expect(new Set(partNumbers).size).toBe(partNumbers.length);
       if (entry.id !== "fig-cabin-6-13") expect(ids.length).toBeGreaterThan(0);
       const clicked = screen.name === "desktop" ? ids : ids.filter((_,i)=>i===0 || i===Math.floor(ids.length/2) || i===ids.length-1);
       for (const id of clicked) {
         const marker=figure.locator(`button[data-callout-id="${id}"]`);
-        const partNumber = (await marker.getAttribute("title"))!.split(" — ")[0];
         if (screen.name === "desktop") await marker.click();
         else await marker.tap(); // Exercise actual touch targets.
         await page.mouse.move(0,0);
-        const selectedLabel = figure.locator('button[data-callout-id][aria-pressed="true"]');
-        await expect(selectedLabel).toHaveCount(1);
-        expect(await figure.locator('button[data-callout-id]').evaluateAll(
-          (elements, number) => elements.filter(el => el.getAttribute("title")?.startsWith(`${number} — `)).length,
-          partNumber,
-        )).toBe(1);
+        await expect(marker).toHaveAttribute("aria-pressed","true");
+        await expect(figure.locator("button[data-callout-id]")).toHaveCount(ids.length);
         await expect(page.locator("tr[data-active]").first()).toBeAttached();
         await expect.poll(() => highlightedReferences(figure)).toBe(1);
         await expect(figure.getByRole("group", { name: "Selected parts" })).toHaveCount(0);
         await expect.poll(() => collisions(figure)).toEqual([]);
-        if (screen.name === "desktop") await selectedLabel.click();
-        else await selectedLabel.tap();
+        if (screen.name === "desktop") await marker.click();
+        else await marker.tap();
         await page.mouse.move(0,0);
         await expect(marker).toHaveAttribute("aria-pressed","false");
-        await expect(figure.locator('button[data-callout-id]')).toHaveCount(ids.length);
+        await expect(figure.locator("button[data-callout-id]")).toHaveCount(ids.length);
       }
       const fitWidth = await image.evaluate(el => el.getBoundingClientRect().width);
       await page.getByRole("button",{name:"Zoom in",exact:true}).click();
