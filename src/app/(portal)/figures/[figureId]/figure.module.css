@@ -201,7 +201,7 @@
   flex-direction: column;
 }
 
-/* Keep selection strips within the panel. DrawingViewer's internal stage
+/* Keep the viewer within the panel. DrawingViewer's internal stage
    reserves the width needed for reference targets and scrolls independently. */
 .plate > figure {
   min-width: 0;

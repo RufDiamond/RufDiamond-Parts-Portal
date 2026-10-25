@@ -49,3 +49,31 @@ Final follow-up verification: all 419 frontend tests across 39 files passed with
 The stronger mobile regression exposed a genuine ancestor clipping bug: `.plate > figure` forced a 360-pixel minimum on narrower panels. Removing that outer minimum lets the strip wrap inside the panel while the internal drawing stage preserves its density floor and scrolls. The regression failed before the CSS correction and passed afterwards. The image-overlap helper also now checks the visible image clipped by its scroll viewport, rather than the offscreen portion of a zoomed image.
 
 Final full-browser evidence: `output/single-selection-final/results.json`. Focused 12-case final matrix: `output/selected-badge-metadata-final/results.json`. Public verification follows deployment of this change.
+
+## Correction: retain the in-drawing selection labels
+
+The user rejected the added strip above the artwork. It has been removed from
+the normal and fullscreen viewers, along with its row metadata and styling.
+One existing reference label per selected catalogue part number now receives
+the selected color in the drawing. Every original reference remains present,
+clickable and keyboard accessible, with the same shared pressed state. All
+mapped component fills retain their existing selection behavior. The label
+spacing repair and narrow-panel sizing remain in place; no source geometry,
+catalogue records, API code, migration or mail configuration is changed.
+
+Two focused regressions first failed because both reference labels were red.
+They now pass, including shared part identities, different identities sharing
+a part number, multiple selections, hover, fullscreen and deselection from an
+unhighlighted reference. The quantity audit also checks exactly one highlighted
+reference for every mapped multi-quantity selection across its 40 figures.
+
+Verification: 416 frontend tests passed in 39 files; production build, changed
+TypeScript/TSX lint with zero warnings and whitespace checks passed. Thirteen
+local browser checks passed, including Filters 1.1, Bumper 2.1 and Wheel 5.1 at
+desktop/tablet/mobile, real component activation, zoom, fullscreen and the
+customer/admin shell. Browser assertions check actual reference background
+colors and absence of the added strip. Local evidence is in
+`output/inline-reference-local/results.json`. Hosted checks follow the push.
+
+For current migration/API status, see
+[the separate migration release](2026-10-25-discount-migration-deployment.md).

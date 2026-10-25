@@ -9,6 +9,7 @@ import { RequestProvider } from "@/state/RequestContext";
 import chassis from "../tools/callouts/review/quantity-chassis-audit.json";
 import cabin from "../tools/callouts/review/quantity-cabin-audit.json";
 import engine from "../tools/callouts/review/quantity-engine-electric-audit.json";
+import markerStyles from "@/components/CalloutMarker.module.css";
 
 vi.mock("next/navigation", () => ({useRouter:()=>({push:vi.fn()})}));
 afterEach(cleanup);
@@ -39,12 +40,11 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
     const samePart = detail.rows.filter(r=>r.part.id===row.part.id);
     const expectedPointers = samePart.reduce((n,r)=>n+audited.find(a=>a.figurePartId===r.figurePart.id)!.found,0);
     const assertGroup = (figure:HTMLElement) => {
-      const badges = figure.querySelectorAll('button[data-selected-part-number]');
-      expect(badges).toHaveLength(1);
-      expect(badges[0].getAttribute("data-selected-part-number")).toBe(row.part.partNumber);
       const markers = Array.from(figure.querySelectorAll('button[data-callout-id]'));
       const selected = markers.filter(m=>m.getAttribute("aria-pressed")==="true");
       expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers);
+      expect(selected.filter(marker => marker.classList.contains(markerStyles.active)),
+        `${figureId}/${audit.figurePartId} highlighted reference`).toHaveLength(expectedPointers > 0 ? 1 : 0);
       for (const marker of selected) {
         expect(marker.getAttribute("aria-label")).toContain(`: ${row.part.partNumber} — `);
         expect(samePart.flatMap(r=>r.calloutNumbers).map(String)).toContain(marker.textContent);
