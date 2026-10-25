@@ -4,8 +4,10 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 export const migrationsFolder = fileURLToPath(new URL("../../drizzle", import.meta.url));
+export const expectedMigrationCount = JSON.parse(readFileSync(new URL("../../drizzle/meta/_journal.json", import.meta.url), "utf8")).entries.length as number;
 
 export async function closePostgresPool(pool: Pool): Promise<void> {
   const expectedRemovals = pool.totalCount;

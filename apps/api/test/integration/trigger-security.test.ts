@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool, type PoolClient } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { closePostgresPool, migrationsFolder, startPostgres } from "../helpers/postgres.js";
+import { closePostgresPool, expectedMigrationCount, migrationsFolder, startPostgres } from "../helpers/postgres.js";
 
 const securityTriggerFunctions = [
   "protect_canonical_import_normalization",
@@ -123,7 +123,7 @@ describe("snapshot trigger security", () => {
       const oldHistory = (await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows;
       await migrate(drizzle(upgradePool), { migrationsFolder });
       await migrate(drizzle(upgradePool), { migrationsFolder });
-      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(12);
+      expect((await upgradePool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(expectedMigrationCount);
       expect((await upgradePool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 6)).toEqual(oldHistory);
     } finally {
       await closePostgresPool(upgradePool);
