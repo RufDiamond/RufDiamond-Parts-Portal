@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import React from "react";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { DEMO_COMPANY } from "@/data/accounts";
 import { fixtureQuoteRecords } from "@/data/quote-status.server";
-import { factoryAddedLine, missingBeforeNotify, responseDays, toCustomerQuoteLines } from "@/lib/quote-status";
-import { mergeQuoteRecords, notifyCustomers } from "@/state/quote-store";
+import { factoryAddedLine, missingBeforeNotify, responseDays } from "@/lib/quote-status";
+import { notifyCustomers } from "@/state/quote-store";
 import { RequestProvider } from "@/state/RequestContext";
 import { AdminQuoteStatus } from "@/app/(portal)/quotes/admin/AdminQuoteStatus";
 import { PortalShell } from "@/components/PortalShell";
@@ -13,12 +13,51 @@ import type { QuoteStatusRecord } from "@/types/quotes";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/state/MachineContext", () => ({ useMachine: () => ({ selectedModel: null }) }));
-vi.mock("@/state/SessionBoundary", () => ({ useCustomerSession: () => null, SignOutButton: () => null }));
-afterEach(() => { cleanup(); localStorage.clear(); sessionStorage.clear(); });
+
+/*
+ * Signed out (the local demonstration) unless a test signs a staff member in.
+ * With a session the screen talks to the quote API; the API is faked here so
+ * these tests check what the screen sends, not the database behind it.
+ */
+const auth = vi.hoisted(() => ({ session: null as null | { csrfToken: string } }));
+vi.mock("@/state/SessionBoundary", () => ({ useCustomerSession: () => auth.session, SignOutButton: () => null }));
+
+const api = vi.hoisted(() => ({
+  listAdmin: vi.fn(),
+  patchLine: vi.fn(),
+  notify: vi.fn(),
+  addFactoryLine: vi.fn(),
+}));
+vi.mock("@/state/quote-api", async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  createQuoteApi: () => api,
+}));
+
+afterEach(() => {
+  cleanup(); localStorage.clear(); sessionStorage.clear();
+  auth.session = null;
+  for (const fn of Object.values(api)) fn.mockReset();
+});
 
 const TODAY = "2026-10-13";
 const stored = (): Record<string, QuoteStatusRecord> => JSON.parse(localStorage.getItem("rdpp:quote-records:v1") ?? "{}");
 const renderAdmin = () => render(<AdminQuoteStatus seed={fixtureQuoteRecords} today={TODAY} />);
+
+/** The API's lines are the fixture records with a version for optimistic locking. */
+const apiLines = () => fixtureQuoteRecords.map((record) => ({ ...record, version: 1 }));
+
+function signInStaff() {
+  auth.session = { csrfToken: "test" };
+  api.listAdmin.mockResolvedValue({ items: apiLines() });
+  // Remembers every save, as the real service does, so later edits build on earlier ones.
+  const lines = new Map(apiLines().map((line) => [line.id, line]));
+  api.patchLine.mockImplementation(async (id: string, input: Record<string, unknown>) => {
+    const changes = Object.fromEntries(Object.entries(input).filter(([key, value]) => key !== "version" && value !== undefined));
+    const next = { ...lines.get(id)!, ...changes, version: lines.get(id)!.version + 1 };
+    lines.set(id, next);
+    return next;
+  });
+}
 
 it("puts Factory Price tenth, straight after Qty (14 Oct, answer 1)", () => {
   renderAdmin();
@@ -28,6 +67,32 @@ it("puts Factory Price tenth, straight after Qty (14 Oct, answer 1)", () => {
   expect(headings[10]).toBe("Response Date");
   // The deck's p58 columns are all there, plus the one the supervisor asked for.
   expect(headings).toHaveLength(26);
+  expect(headings[1]).toBe("No.");
+  expect(headings[20]).toBe("Notify Customer");
+  expect(headings.slice(21)).toEqual(["Model", "Serial Number", "System", "Page", "Assembly Name"]);
+});
+
+it("shows the machine's serial number on every line — parts differ by VIN (14 Oct, answer 9)", () => {
+  renderAdmin();
+  expect(screen.getAllByText("99FT3W251004").length).toBe(fixtureQuoteRecords.length);
+});
+
+it("names every row's fields by their part, so rows can be told apart", () => {
+  renderAdmin();
+  const names = screen.getAllByRole("textbox", { name: /^Factory price for / }).map((input) => input.getAttribute("aria-label"));
+  expect(names).toContain("Factory price for 19-00511");
+  expect(names).toContain("Factory price for 98-00041");
+  // Lines of the same quote are distinguishable too.
+  expect(screen.getByRole("checkbox", { name: "Select 19-00368 from RD-00006" })).toBeTruthy();
+  expect(screen.getByRole("checkbox", { name: "Select 62-00184 from RD-00006" })).toBeTruthy();
+});
+
+it("colours each row by availability, as the deck does", () => {
+  renderAdmin();
+  const row = (part: string) => screen.getByRole("checkbox", { name: new RegExp(`^Select ${part} from RD-00006$`) }).closest("tr")!;
+  expect(row("19-00368").dataset.available).toBe("yes");
+  expect(row("62-00184").dataset.available).toBe("partial");
+  expect(row("51-00045").dataset.available).toBe("no");
 });
 
 it("lists every account's lines, not only the demonstration account's", () => {
@@ -39,44 +104,56 @@ it("lists every account's lines, not only the demonstration account's", () => {
 it("will not release a line that has not been filled in", () => {
   renderAdmin();
   fireEvent.click(screen.getByRole("checkbox", { name: "Select 19-00511 from RD-00007" }));
-  fireEvent.click(screen.getByRole("button", { name: /Notify Customer · 1/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Notify Customer" }));
   expect(screen.getByRole("alert").textContent).toMatch(/RD-00007 19-00511: Available, Unit Price/);
   expect(stored()["qs-0007-1"]).toBeUndefined();
 });
 
-it("fill in, notify, and the customer sees the answer (14 Oct, answer 3)", () => {
+it("in the demonstration, without a staff sign-in, Notify Customer says so instead of releasing", async () => {
   renderAdmin();
   fireEvent.change(screen.getByRole("combobox", { name: "Availability of 19-00511" }), { target: { value: "yes" } });
   const price = screen.getByRole("textbox", { name: "Unit price for 19-00511" });
-  fireEvent.change(price, { target: { value: "$12.5" } });
+  fireEvent.change(price, { target: { value: "12.5" } });
   fireEvent.blur(price);
-  const factory = screen.getByRole("textbox", { name: "Factory price for 19-00511" });
-  fireEvent.change(factory, { target: { value: "9.80" } });
-  fireEvent.blur(factory);
-
-  // Typed, but not yet released: the customer still sees nothing.
-  const before = toCustomerQuoteLines(mergeQuoteRecords(fixtureQuoteRecords, stored()), DEMO_COMPANY.id, TODAY);
-  expect(before.find((line) => line.id === "qs-0007-1")?.response).toBeNull();
-
   fireEvent.click(screen.getByRole("checkbox", { name: "Select 19-00511 from RD-00007" }));
-  fireEvent.click(screen.getByRole("button", { name: /Notify Customer · 1/ }));
-  expect(screen.getByRole("status").textContent).toMatch(/Notified Savage Equipment about RD-00007 \(1 line\)\. One notice per quote/);
-
-  const after = toCustomerQuoteLines(mergeQuoteRecords(fixtureQuoteRecords, stored()), DEMO_COMPANY.id, TODAY);
-  const line = after.find((item) => item.id === "qs-0007-1")!;
-  expect(line.response).toMatchObject({ available: "yes", unitPrice: "12.50", totalPrice: "125.00" });
-  // The factory's price stays on the administrator's side.
-  expect(JSON.stringify(after)).not.toContain("9.80");
-  expect(stored()["qs-0007-1"]).toMatchObject({ notifyCustomer: true, responseDate: TODAY, factoryPrice: "9.80" });
+  fireEvent.click(screen.getByRole("button", { name: "Notify Customer" }));
+  expect((await screen.findByRole("alert")).textContent).toMatch(/Sign in with a RUF Diamond quote capability/);
 });
 
-it("adds a line the factory quoted that the customer never asked for", () => {
+it("saves each field to the quote service and notifies through it (14 Oct, answers 1 and 3)", async () => {
+  signInStaff();
+  api.notify.mockResolvedValue({ notices: [{ customer: "Savage Equipment", quoteNo: "RD-00007", lineIds: ["qs-0007-1"] }] });
   renderAdmin();
-  fireEvent.click(screen.getByRole("checkbox", { name: "Select 19-00368 from RD-00006" }));
-  const before = screen.getAllByText("Added by factory").length;
+  await waitFor(() => expect(api.listAdmin).toHaveBeenCalled());
+
+  fireEvent.change(await screen.findByRole("combobox", { name: "Availability of 19-00511" }), { target: { value: "yes" } });
+  await waitFor(() => expect(api.patchLine).toHaveBeenCalledWith("qs-0007-1", expect.objectContaining({ available: "yes" })));
+
+  const factory = screen.getByRole("textbox", { name: "Factory price for 19-00511" });
+  fireEvent.change(factory, { target: { value: "$9.8" } });
+  fireEvent.blur(factory);
+  await waitFor(() => expect(api.patchLine).toHaveBeenCalledWith("qs-0007-1", expect.objectContaining({ factoryPrice: "9.80" })));
+
+  const price = screen.getByRole("textbox", { name: "Unit price for 19-00511" });
+  fireEvent.change(price, { target: { value: "12.5" } });
+  fireEvent.blur(price);
+  await waitFor(() => expect(api.patchLine).toHaveBeenCalledWith("qs-0007-1", expect.objectContaining({ customerPrice: "12.50" })));
+
+  fireEvent.click(screen.getByRole("checkbox", { name: "Select 19-00511 from RD-00007" }));
+  fireEvent.click(screen.getByRole("button", { name: "Notify Customer" }));
+  await waitFor(() => expect(api.notify).toHaveBeenCalledWith({ lineIds: ["qs-0007-1"] }));
+  expect((await screen.findByRole("status")).textContent).toMatch(/Notified Savage Equipment about RD-00007 \(1 line\)\. One notice and email per quote/);
+});
+
+it("adds a line the factory quoted to the request it belongs to", async () => {
+  signInStaff();
+  api.addFactoryLine.mockResolvedValue({ ...apiLines()[1], id: "qs-0006-f1", requested: null, newPartNumber: "TBD" });
+  renderAdmin();
+  await waitFor(() => expect(api.listAdmin).toHaveBeenCalled());
+  fireEvent.click(await screen.findByRole("checkbox", { name: "Select 19-00368 from RD-00006" }));
   fireEvent.click(screen.getByRole("button", { name: "Add factory line" }));
-  expect(screen.getAllByText("Added by factory")).toHaveLength(before + 1);
-  expect(stored()["RD-00006-F1"]).toMatchObject({ quoteNo: "RD-00006", requested: null, companyId: DEMO_COMPANY.id });
+  await waitFor(() => expect(api.addFactoryLine).toHaveBeenCalledWith(
+    expect.objectContaining({ quoteNo: "RD-00006", companyId: DEMO_COMPANY.id })));
 });
 
 it("needs a part number and description before a factory line can be released", () => {

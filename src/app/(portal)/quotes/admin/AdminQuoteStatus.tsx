@@ -255,6 +255,10 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
           <Image src="/toolbar/email.png" alt="" width={40} height={28} className={base.buttonIcon} />
           Email
         </button>
+        <button type="button" className={base.button} onClick={() => window.print()}>
+          <Image src="/toolbar/print.png" alt="" width={40} height={40} className={base.buttonIcon} />
+          Print
+        </button>
         <button type="button" className={base.button} onClick={() => void notify()} disabled={selected.length === 0}>
           Notify Customer
         </button>
@@ -281,6 +285,7 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
               <thead className={base.head}>
                 <tr>
                   <th scope="col">Select</th>
+                  <th scope="col">No.</th>
                   <th scope="col">Date Request</th>
                   <th scope="col">Quote No.</th>
                   <th scope="col">Customer</th>
@@ -299,16 +304,31 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
                   <th scope="col">Unit Price (CAD)</th>
                   <th scope="col">Total Price (CAD)</th>
                   <th scope="col">Comments</th>
-                  <th scope="col">Notify</th>
+                  <th scope="col">Notify Customer</th>
+                  {/* Where the part sits on the machine. Serial Number matters most:
+                      parts differ by VIN, so the person quoting needs it (14 Oct, answer 9). */}
+                  <th scope="col">Model</th>
+                  <th scope="col">Serial Number</th>
+                  <th scope="col">System</th>
+                  <th scope="col">Page</th>
+                  <th scope="col">Assembly Name</th>
                 </tr>
               </thead>
               <tbody>
-                {visible.map((record) => (
-                  <tr key={record.id}>
-                    <td>
+                {visible.map((record, index) => {
+                  /*
+                   * Names each control by its part, not just its column. Every row
+                   * has the same eight fields, so "Factory price" alone gives a
+                   * screen reader — or a test — no way to tell one row from the next.
+                   */
+                  const part = record.requested?.partNumber ?? record.newPartNumber ?? "factory line";
+                  return (
+                  <tr key={record.id} className={base.row} data-available={record.available ?? undefined}>
+                    <td className={base.tick}>
                       <input type="checkbox" checked={ticked.has(record.id)} onChange={() => toggle(record.id)}
-                        aria-label={`Select ${record.quoteNo}`} disabled={record.notifyCustomer} />
+                        aria-label={`Select ${part} from ${record.quoteNo}`} disabled={record.notifyCustomer} />
                     </td>
+                    <td className={base.num}>{page * PAGE_SIZE + index + 1}</td>
                     <td>{formatDate(record.requestDate)}</td>
                     <td>{record.quoteNo}</td>
                     <td>{record.customer}</td>
@@ -317,16 +337,16 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
                     <td>{record.requested?.description ?? NONE}</td>
                     <td>{record.requested?.qty ?? NONE}</td>
                     <td>
-                      <EditCell value={record.factoryPrice ?? ""} label="Factory price" kind="price"
+                      <EditCell value={record.factoryPrice ?? ""} label={`Factory price for ${part}`} kind="price"
                         onSave={(raw) => void save(record, { factoryPrice: toPrice(raw) })} />
                     </td>
                     <td>
-                      <EditCell value={record.responseDate ?? today} label="Response date"
+                      <EditCell value={record.responseDate ?? today} label={`Response date for ${part}`}
                         onSave={(raw) => void save(record, { responseDate: raw.trim() || null })} />
                     </td>
                     <td>{responseDays(record) ?? NONE}</td>
                     <td>
-                      <select aria-label="Available" value={record.available ?? ""}
+                      <select aria-label={`Availability of ${part}`} value={record.available ?? ""}
                         onChange={(event) => void save(record, { available: (event.target.value || null) as Availability | null })}>
                         <option value="">—</option>
                         {(Object.keys(AVAILABLE) as Availability[]).map((key) => (
@@ -335,34 +355,40 @@ export function AdminQuoteStatus({ seed, today }: { seed: QuoteStatusRecord[]; t
                       </select>
                     </td>
                     <td>
-                      <EditCell value={record.estAvailability ?? ""} label="Est. availability"
+                      <EditCell value={record.estAvailability ?? ""} label={`Estimated availability of ${part}`}
                         onSave={(raw) => void save(record, { estAvailability: raw.trim() || null })} />
                     </td>
                     <td>
-                      <EditCell value={record.newPartNumber ?? ""} label="New part number"
+                      <EditCell value={record.newPartNumber ?? ""} label={`New part number for ${part}`}
                         onSave={(raw) => void save(record, { newPartNumber: raw.trim() || null })} />
                     </td>
                     <td>
-                      <EditCell value={record.newDescription ?? ""} label="New description"
+                      <EditCell value={record.newDescription ?? ""} label={`New description for ${part}`}
                         onSave={(raw) => void save(record, { newDescription: raw.trim() || null })} />
                     </td>
                     <td>
-                      <EditCell value={record.newQty == null ? "" : String(record.newQty)} label="New qty" kind="qty"
+                      <EditCell value={record.newQty == null ? "" : String(record.newQty)} label={`New quantity for ${part}`} kind="qty"
                         onSave={(raw) => void save(record, { newQty: toQty(raw) })} />
                     </td>
                     <td>
-                      <EditCell value={record.customerPrice ?? ""} label="Customer unit price" kind="price"
+                      <EditCell value={record.customerPrice ?? ""} label={`Unit price for ${part}`} kind="price"
                         onSave={(raw) => void save(record, { customerPrice: toPrice(raw) })} />
                     </td>
                     <td>{record.customerPrice && (record.newQty ?? record.requested?.qty) != null
                       ? formatAmount(adminTotal(record)!, "CAD") : NONE}</td>
                     <td>
-                      <EditCell value={record.comments} label="Comments"
+                      <EditCell value={record.comments} label={`Comments on ${part}`}
                         onSave={(raw) => void save(record, { comments: raw })} />
                     </td>
                     <td>{record.notifyCustomer ? "Yes" : "No"}</td>
+                    <td>{record.model}</td>
+                    <td>{record.serialNumber}</td>
+                    <td>{record.system}</td>
+                    <td>{record.figure}</td>
+                    <td>{record.assemblyName}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
