@@ -22,7 +22,9 @@ The browser sweep explicitly accepts two existing catalogue source gaps: Cabin 6
 
 ## Deployment
 
-Pending. Local verification is separate from public verification.
+Published commit `73024fb932fb25c06c33bee97121aa2b65f597c1` to `feature/frontend-setup`. The public HTML now contains the new drawing-size property, and a fresh Chrome load visibly separates Bumper Ref. 3/4. All 9 live checks passed: Bumper 2.1 and Wheel 5.1 at desktop/tablet/mobile (actual clicks/taps, zoom, fullscreen), customer quote/checkout shell, sign-in links, and unauthenticated admin price protection.
+
+Live JSON evidence: `output/overlap-live/results.json`. Live screenshots: `output/verification/2026-10-25-overlap/live-{desktop,tablet,mobile}-bumper-fullscreen.png`. Local full-run evidence: `output/overlap-e2e/results.json`; corrected interaction rerun: `output/overlap-diagram-final-2/results.json`.
 
 ## Separate production gaps
 
