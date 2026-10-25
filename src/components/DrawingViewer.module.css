@@ -135,14 +135,16 @@
  *
  * At 1x it is CONTAINED — the smaller of the frame's width and the width its
  * own proportions allow in the frame's height — so the whole drawing is in
- * view with no scrollbar. Each step multiplies that, and because the box
- * really grows, the frame scrolls instead of cropping. Markers are placed in
+ * view. Dense plates retain a minimum size so labels and touch targets fit;
+ * those plates scroll inside the sheet even at 1x. Each zoom step grows the
+ * canvas, and the frame scrolls instead of cropping. Markers are placed in
  * percentages of this box, so they stay on their targets throughout.
  */
 .stage {
   position: relative;
   flex-shrink: 0;
   width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
+  min-width: calc(var(--minimum-label-width, 0px) * var(--zoom, 1));
   aspect-ratio: var(--ratio, 3 / 2);
   margin: 0 auto;
   /* Immediate resizing lets scroll correction preserve the cursor anchor. */
@@ -228,7 +230,46 @@
   pointer-events: none;
 }
 .instanceLeaders line {
-  stroke: var(--select);
+  stroke: var(--ink);
   stroke-width: 1.5px;
   vector-effect: non-scaling-stroke;
 }
+.instanceLeaders line[data-selected] {
+  stroke: var(--select);
+}
+
+
+/* Selection labels occupy their own wrapping strip above the artwork. */
+.selectedParts {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+  max-height: min(25vh, 180px);
+  overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-thin);
+  border-bottom: 0;
+  background: var(--paper);
+}
+
+.selectedPartBadge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  max-width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--select);
+  background: var(--select);
+  color: var(--select-on);
+  font: var(--weight-semibold) var(--text-xs) / 1.5 var(--font-sans);
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: var(--cursor-pointer);
+}
+
+.selectedPartBadge strong { font-family: var(--font-mono); }
+.selectedPartBadge:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.selectedPartBadge:disabled { cursor: default; }

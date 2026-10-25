@@ -34,7 +34,7 @@ test("task10c source openings exclude clicks in both Bumper plates and the four 
     await page.goto(`${base}/review/figures/${check.figure}`);
     await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
     const dialog=page.getByRole("dialog"), scope=dialog.locator("figure");
-    await scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)}).click();
+    await scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)}).first().click();
     await page.mouse.move(0,0);
     await expect(dialog.getByText(/unapproved.*not for ordering/i)).toBeVisible();
     await page.screenshot({path:info.outputPath(`${check.figure}-ref${check.ref}-overlay.png`)});
@@ -44,7 +44,7 @@ test("task10c source openings exclude clicks in both Bumper plates and the four 
       return {x:Math.round(p.x),y:Math.round(p.y)};
     },check.hole);
     await page.mouse.click(p.x,p.y);await page.mouse.move(0,0);
-    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)})).toHaveAttribute("aria-pressed","false");
+    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${check.ref}:`)}).first()).toHaveAttribute("aria-pressed","false");
     await page.getByRole("button",{name:"Close the illustration"}).click();
   }
 });
@@ -77,22 +77,25 @@ for (const entry of [
     test.setTimeout(90000);
     await page.goto(`${base}/review/figures/${entry.figure}`);
     for (const ref of entry.refs) {
-      const label=figure(page).getByRole("button",{name:new RegExp(`^Callout ${ref}:`)});
-      if ("crowdedFitLabels" in entry) {
-        // Fixed-size labels overlap at embedded fit scale; verify the keyboard
-        // equivalent here and an actual native label click in fullscreen below.
-        await label.focus(); await page.keyboard.press("Enter");
-      } else await label.click({timeout:7000});
+      const clear = page.getByRole("button", {name:"Clear selection", exact:true});
+      if (await clear.isEnabled()) await clear.click();
+      const label=figure(page).getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).first();
+      // Crowded fit labels must remain independently clickable with a mouse.
+      await label.click({timeout:7000});
       await page.mouse.move(0,0);
-      const row=page.locator("tr[data-figure-part-id][data-active]").first();
-      await expect(row).toBeVisible();
+      const selectedRow=page.locator("tr[data-figure-part-id][data-active]").first();
+      await expect(selectedRow).toBeVisible();
+      const rowId=await selectedRow.getAttribute("data-figure-part-id");
+      const row=page.locator(`tr[data-figure-part-id="${rowId}"]`);
+      await row.click();await page.mouse.move(0,0);
+      await expect(label).toHaveAttribute("aria-pressed","false");
       await row.click();await page.mouse.move(0,0);
       await expect(label).toHaveAttribute("aria-pressed","true");
       await page.getByRole("button",{name:"Illustration full screen",exact:true}).click();
       const dialog=page.getByRole("dialog"),scope=dialog.locator("figure");
       if ("crowdedFitLabels" in entry) {
         await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
-        await scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).click({timeout:7000});
+        await scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).first().click({timeout:7000});
         await page.mouse.move(0,0);
       }
       await page.screenshot({path:info.outputPath(`${entry.figure}-ref${ref}-overlay.png`)});
@@ -106,7 +109,7 @@ for (const entry of [
       await page.mouse.click(p!.x,p!.y);await page.mouse.move(0,0);
       const chooser=page.getByRole("group",{name:"Choose overlapping component"});
       if(await chooser.count()) await chooser.getByRole("button",{name:new RegExp(`^Ref ${ref} `)}).click();
-      await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)})).toHaveAttribute("aria-pressed","true");
+      await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).first()).toHaveAttribute("aria-pressed","true");
       await page.getByRole("button",{name:"Close the illustration"}).click();
     }
   });
@@ -130,7 +133,7 @@ test("task10c roof truss region pieces each select the same exact source part", 
     await page.mouse.click(p.x,p.y);await page.mouse.move(0,0);
     const chooser=page.getByRole("group",{name:"Choose overlapping component"});
     if(await chooser.count())await chooser.getByRole("button",{name:new RegExp(`^Ref ${ref} `)}).click();
-    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)})).toHaveAttribute("aria-pressed","true");
+    await expect(scope.getByRole("button",{name:new RegExp(`^Callout ${ref}:`)}).first()).toHaveAttribute("aria-pressed","true");
     await page.screenshot({path:info.outputPath(`truss-ref${ref}-region${index}-native.png`)});
     await dialog.getByRole("button",{name:"Clear selection",exact:true}).click();
     await page.getByRole("button",{name:"Close the illustration"}).click();
@@ -282,7 +285,22 @@ async function componentPoint(scope:Locator, ref?:number, allowOverlap=false) {
 async function wheels(page:Page, scope:Locator) {
   for (const target of ["image", "label", ...(await scope.locator("svg[data-diagram-regions] path").count() ? ["component"] : [])]) {
     for (const direction of [-120,120]) {
-      if (target === "image") await scope.locator("img").hover({ position:{ x:10, y:10 } });
+      if (target === "image") {
+        // Displaced labels may occupy the old hard-coded (10,10) point.
+        // Find an actual uncovered image pixel, then deliver native input.
+        const point = await scope.locator("img").evaluate(image => {
+          const r = image.getBoundingClientRect();
+          const viewport = image.parentElement!.parentElement!.getBoundingClientRect();
+          for (let y=Math.max(r.top,viewport.top,0)+4;y<Math.min(r.bottom,viewport.bottom,innerHeight)-4;y+=8) {
+            for (let x=Math.max(r.left,viewport.left,0)+4;x<Math.min(r.right,viewport.right,innerWidth)-4;x+=8) {
+              if (document.elementFromPoint(x,y) === image) return {x,y};
+            }
+          }
+          return null;
+        });
+        expect(point, "an uncovered drawing pixel for native wheel input").not.toBeNull();
+        await page.mouse.move(point!.x, point!.y);
+      }
       else if (target === "label") await scope.getByRole("button", { name:/^Callout/ }).first().hover();
       else {
         const point = await componentPoint(scope);
@@ -311,6 +329,8 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   if (fixture.name.startsWith("task10c")) {
     await figure(page).screenshot({ path:info.outputPath("source-overlay.png") });
     await label.click(); await page.mouse.move(0,0);
+    await expect(label).toHaveAttribute("aria-pressed","false");
+    await label.click(); await page.mouse.move(0,0);
     await expect(label).toHaveAttribute("aria-pressed","true");
     for (let i=0;i<4;i++) await page.getByRole("button", {name:"Zoom in",exact:true}).click();
     await page.getByRole("button", {name:"Show selection in drawing",exact:true}).click();
@@ -325,7 +345,9 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
     const chooser = page.getByRole("group", {name:"Choose overlapping component"});
     if (await chooser.count()) await chooser.getByRole("button").first().click();
     for (const selected of await figure(page).getByRole("button", {name:point!.label,exact:true}).all()) await expect(selected).toHaveAttribute("aria-pressed","true");
+    await page.getByRole("button", { name:"Clear selection", exact:true }).click();
     await label.click(); await page.mouse.move(0,0);
+    await expect(label).toHaveAttribute("aria-pressed","true");
     const zoomOut = page.getByRole("button", {name:"Zoom out",exact:true});
     for (let i=0;i<4 && await zoomOut.isEnabled();i++) await zoomOut.click();
     await settled(page);
@@ -394,6 +416,7 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await expect.poll(() => zoom(scope)).toBe(4);
   const sheet = stage(scope).locator("..");
   await sheet.evaluate((el) => { el.scrollTop=0;el.scrollLeft=0; });
+  await page.getByRole("button", { name:"Clear selection", exact:true }).click();
   await row.click();
   await expect.poll(() => sheet.evaluate((el) => el.scrollTop)).toBeGreaterThan(500);
   expect(await zoom(scope)).toBe(4);
@@ -405,10 +428,10 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   expect(await zoom(scope)).toBe(4);
   await page.locator('tr[data-figure-part-id="row-1"]').click();
   await expect.poll(() => zoom(scope)).toBe(1);
-  await expect.poll(() => scope.locator('path[data-selected]').evaluate((path) => {
+  await expect.poll(() => scope.locator('path[data-selected]').evaluateAll((paths) => paths.length > 0 && paths.every(path => {
     const rect=path.getBoundingClientRect();const sheet=path.closest("svg")!.parentElement!.parentElement!;const box=sheet.getBoundingClientRect();
     return rect.left>=box.left-1 && rect.top>=box.top-1 && rect.right<=box.right+1 && rect.bottom<=box.bottom+1;
-  })).toBe(true);
+  }))).toBe(true);
   await page.getByRole("button", { name:"Clear selection", exact:true }).click();
   await page.getByRole("button", { name:"Zoom in", exact:true }).click();
   await settled(page);
@@ -450,7 +473,7 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await info.attach("synthetic-tall.png", { body:await page.screenshot(), contentType:"image/png" });
 });
 
-test("mixed occurrence union reveals numeric, legacy shape and marker together without counting lower-priority fallbacks", async ({ page }, info) => {
+test("mixed occurrence union reveals numeric, legacy shape and every selected label together", async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion:"reduce" });
   await page.goto("http://localhost:3101/?mixed");
   const scope = figure(page);
@@ -462,14 +485,16 @@ test("mixed occurrence union reveals numeric, legacy shape and marker together w
     const sheet=image.parentElement!.parentElement!;
     const viewport=sheet.getBoundingClientRect();
     const elements=[root.querySelector('svg[data-diagram-regions] path[data-selected]'),
-      root.querySelector('path[data-callout-id="mixed-legacy"]'), root.querySelector('button[data-callout-id="mixed-marker"]')];
+      root.querySelector('path[data-callout-id="mixed-legacy"]'), root.querySelector('button[data-callout-id="mixed-marker"]'),
+      root.querySelector('button[data-callout-id="c0"]')];
     return elements.every((element) => {
       if (!element) return false;
       const box=element.getBoundingClientRect();
       return box.top>=viewport.top-1 && box.left>=viewport.left-1 && box.bottom<=viewport.bottom+1 && box.right<=viewport.right+1;
     });
   })).toBe(true);
-  expect(await zoom(scope)).toBe(4);
+  // The source label at y=10% and its component at y=80–90% must both fit.
+  expect(await zoom(scope)).toBe(1);
   await expect(scope.locator('path[data-callout-id="c0"]')).toHaveCount(0);
   await info.attach("mixed-geometry.json", { body:JSON.stringify(await geometry(scope)), contentType:"application/json" });
   await info.attach("mixed-occurrences.png", { body:await page.screenshot(), contentType:"image/png" });

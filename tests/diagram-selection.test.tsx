@@ -8,6 +8,8 @@ import { RequestProvider } from "@/state/RequestContext";
 import { resolveDiagramSelection, useDiagramSelection } from "@/state/useDiagramSelection";
 import type { FigureDetail } from "@/types/catalog";
 import userEvent from "@testing-library/user-event";
+import { DrawingViewer, type DrawingMarker } from "@/components/DrawingViewer";
+import markerStyles from "@/components/CalloutMarker.module.css";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => {
@@ -175,6 +177,10 @@ test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instance
     expect(markers).toHaveLength(qty);
     for (const marker of markers) { expect(marker.getAttribute("aria-pressed")).toBe("true"); expect(marker.textContent).toBe("13"); }
     expect(scope.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(qty);
+    const badges = scope.querySelectorAll('button[data-selected-part-number]');
+    expect(badges).toHaveLength(1);
+    expect(badges[0].getAttribute("data-selected-part-number")).toBe("A");
+    expect(badges[0].textContent).toContain(`${qty} occurrence${qty === 1 ? "" : "s"}`);
   };
   assertSelected(container.querySelector("figure")!);
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
@@ -228,4 +234,127 @@ test("customer figure hides marker-review notices", async () => {
   fireEvent.click(screen.getByRole("button", {name:"Illustration full screen"}));
   fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", {name:"Clear selection"}));
   expect(boxes.every(box => !box.checked)).toBe(true);
+});
+
+
+test("one selected part badge covers different original references, stays outside artwork, and deselects the whole part", async () => {
+  const detail = await fixture();
+  detail.callouts[2].number = 27;
+  detail.rows[2].calloutNumbers = [27];
+  const {container} = render(workspace(detail));
+  const rows = container.querySelectorAll("tbody tr");
+  fireEvent.click(rows[2]);
+  fireEvent.click(rows[1]); // A and B share Ref 13 but require separate badges.
+  const figure = container.querySelector("figure")!;
+  const badges = figure.querySelectorAll('button[data-selected-part-number]');
+  expect(Array.from(badges, badge => badge.getAttribute("data-selected-part-number"))).toEqual(["A", "B"]);
+  const badge = within(figure).getByRole("button", {name:"Deselect part A"});
+  expect(badge.textContent).toContain("Ref 13, 27");
+  expect(badge.textContent).toContain("2 occurrences");
+  // The strip is a sibling before the scrolling drawing, never an overlay.
+  const strip = within(figure).getByRole("group", {name:"Selected parts"});
+  const stage = figure.querySelector("img")!.parentElement!;
+  expect(stage.contains(strip)).toBe(false);
+  expect(strip.nextElementSibling?.contains(stage)).toBe(true);
+  const markers = figure.querySelectorAll('button[data-callout-id][aria-pressed="true"]');
+  expect(markers).toHaveLength(3);
+  for (const marker of markers) {
+    fireEvent.mouseEnter(marker);
+    expect(marker.classList.contains(markerStyles.active)).toBe(false);
+    expect(marker.hasAttribute("data-multi-instance")).toBe(false);
+  }
+  expect(figure.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(3);
+  const user = userEvent.setup();
+  badge.focus();
+  await user.keyboard("{Enter}");
+  expect(rows[0].hasAttribute("data-active")).toBe(false);
+  expect(rows[2].hasAttribute("data-active")).toBe(false);
+  expect(rows[1].getAttribute("data-active")).toBe("true");
+  expect(figure.querySelectorAll('button[data-selected-part-number]')).toHaveLength(1);
+  expect(figure.querySelectorAll('button[data-callout-id]')).toHaveLength(3);
+  fireEvent.click(screen.getByRole("button", {name:"Illustration full screen"}));
+  const full = screen.getByRole("dialog");
+  expect(full.querySelectorAll('button[data-selected-part-number]')).toHaveLength(1);
+  fireEvent.click(within(full).getByRole("button", {name:"Clear selection"}));
+  expect(full.querySelectorAll('button[data-selected-part-number]')).toHaveLength(0);
+  fireEvent.click(within(full).getByRole("button", {name:"Close the illustration"}));
+  expect(figure.querySelectorAll('button[data-selected-part-number]')).toHaveLength(0);
+});
+
+test("deduplicates actual part numbers even across part IDs and removes every selected identity through the badge", async () => {
+  const detail = await fixture();
+  detail.rows[2].part.id = "part-c";
+  detail.rows[2].figurePart.partId = "part-c";
+  detail.rows[2].part.partNumber = "A";
+  const {container} = render(workspace(detail));
+  const rows = container.querySelectorAll("tbody tr");
+  fireEvent.click(rows[0]);
+  fireEvent.click(rows[1]);
+  fireEvent.click(rows[2]);
+  const figure = container.querySelector("figure")!;
+  expect(figure.querySelectorAll('button[data-selected-part-number]')).toHaveLength(2);
+  const badge = within(figure).getByRole("button", {name:"Deselect part A"});
+  expect(badge.textContent).toContain("2 occurrences");
+  fireEvent.click(badge);
+  expect(rows[0].hasAttribute("data-active")).toBe(false);
+  expect(rows[2].hasAttribute("data-active")).toBe(false);
+  expect(rows[1].getAttribute("data-active")).toBe("true");
+});
+
+test("synthetic legacy markers retain all component fills and use part identity when part-number metadata is unavailable", () => {
+  const markers: DrawingMarker[] = [
+    {id:"left",number:7,partId:"fixture-part",x:10,y:20,maskPath:"M 1 1 L 5 1 L 5 5 Z"},
+    {id:"right",number:8,partId:"fixture-part",x:70,y:20,maskPath:"M 60 1 L 65 1 L 65 5 Z"},
+  ];
+  const toggle = vi.fn();
+  const {container} = render(<DrawingViewer label="Fixture" src="/fixture.png" width={100} height={100}
+    markers={markers} selectedPartIds={new Set(["fixture-part"])} hoveredPartId="fixture-part" onTogglePart={toggle} />);
+  expect(container.querySelectorAll('path[data-legacy-selected]')).toHaveLength(2);
+  expect(container.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(2);
+  expect(container.querySelectorAll('button[data-selected-part-number]')).toHaveLength(1);
+  const badge = screen.getByRole("button", {name:"Deselect part fixture-part"});
+  expect(badge.textContent).toContain("Ref 7, 8");
+  fireEvent.click(badge);
+  expect(toggle).toHaveBeenCalledExactlyOnceWith("fixture-part");
+});
+
+
+test("selected rows without positioned markers have a source-reference badge in normal and fullscreen views", async () => {
+  const detail = await fixture();
+  detail.rows = detail.rows.slice(0, 2);
+  detail.rows[0].calloutNumbers = ["NOT SHOWN"];
+  detail.callouts = [detail.callouts[1]];
+  const {container} = render(workspace(detail));
+  const rows = container.querySelectorAll("tbody tr");
+  fireEvent.click(rows[0]);
+  fireEvent.click(rows[1]);
+  const figure = container.querySelector("figure")!;
+  expect(figure.querySelectorAll('button[data-selected-part-number]')).toHaveLength(2);
+  const badge = within(figure).getByRole("button", {name:"Deselect part A"});
+  expect(badge.textContent).toContain("Ref NOT SHOWN");
+  expect(badge.textContent).toContain("No mapped highlight");
+  expect(badge.textContent).not.toContain("0 occurrences");
+  expect(figure.querySelectorAll('button[data-callout-id]')).toHaveLength(1);
+  expect(figure.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(1);
+  fireEvent.click(screen.getByRole("button", {name:"Illustration full screen"}));
+  const full = screen.getByRole("dialog");
+  expect(full.querySelectorAll('button[data-selected-part-number]')).toHaveLength(2);
+  fireEvent.click(within(full).getByRole("button", {name:"Deselect part A"}));
+  expect(full.querySelectorAll('button[data-selected-part-number]')).toHaveLength(1);
+  fireEvent.click(within(full).getByRole("button", {name:"Close the illustration"}));
+  expect(rows[0].hasAttribute("data-active")).toBe(false);
+  expect(rows[1].getAttribute("data-active")).toBe("true");
+  expect(figure.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(1);
+});
+
+test("unpositioned Cabin 6.13 selection has a removable badge without inventing drawing mappings", async () => {
+  const detail = structuredClone((await getFigureDetail("fig-cabin-6-13"))!);
+  const {container} = render(workspace(detail));
+  fireEvent.click(container.querySelector("tbody tr")!);
+  const figure = container.querySelector("figure")!;
+  const badge = within(figure).getByRole("button", {name:`Deselect part ${detail.rows[0].part.partNumber}`});
+  expect(badge.textContent).toContain("No mapped highlight");
+  expect(figure.querySelectorAll('button[data-callout-id], path[role="button"]')).toHaveLength(0);
+  fireEvent.click(badge);
+  expect(figure.querySelectorAll('button[data-selected-part-number]')).toHaveLength(0);
 });

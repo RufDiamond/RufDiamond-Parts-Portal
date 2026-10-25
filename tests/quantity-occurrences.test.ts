@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildDrawingMarkers, layoutSelectedMarkers } from "@/lib/drawing";
+import { buildDrawingMarkers, layoutDrawingMarkers, minimumDrawingWidth } from "@/lib/drawing";
 import { applyCalloutPreview } from "@/lib/callout-preview";
 import {
   expandCalloutsForQuantity,
@@ -272,28 +272,74 @@ test("three source locations for Quantity four remain visible and flagged for re
 });
 
 
-test("nearby selected pointers remain separate without changing physical coordinates", () => {
+test("nearby physical-instance labels remain separate without changing physical coordinates", () => {
   const markers = [0,1,2,3].map((i) => ({ id: `m-${i}`, partId: "part-1", number: 4, x: 50, y: 50 + i }));
   const before = structuredClone(markers);
-  const positions = layoutSelectedMarkers(markers, new Set(["part-1"]), 500, 300);
+  const positions = layoutDrawingMarkers(markers, 500, 300);
   expect(markers).toEqual(before);
   expect(positions.size).toBe(4);
   const placed = Array.from(positions.values());
   for (let i = 0; i < placed.length; i++) for (let j = i + 1; j < placed.length; j++) {
-    expect(Math.abs(placed[i].x - placed[j].x) * 5 >= 36 || Math.abs(placed[i].y - placed[j].y) * 3 >= 36).toBe(true);
+    expect(Math.abs(placed[i].x - placed[j].x) * 5 >= 35.99 || Math.abs(placed[i].y - placed[j].y) * 3 >= 35.99).toBe(true);
   }
-  expect(layoutSelectedMarkers(markers, new Set(), 500, 300).size).toBe(0);
+  expect(layoutDrawingMarkers(markers, 500, 300)).toEqual(positions);
+});
+
+test("unselected labels are separated before the first click, including different parts", () => {
+  // The live Bumper 2.1 right-hand washer/nut labels are only about 16px apart.
+  const markers = [
+    { id: "washer", partId: "washer", number: 3, x: 83, y: 36 },
+    { id: "nut", partId: "nut", number: 4, x: 80, y: 34 },
+  ];
+  const before = structuredClone(markers);
+  const layout = layoutDrawingMarkers(markers, 530, 298);
+  expect(layout.size).toBe(2);
+  const a = layout.get("washer")!, b = layout.get("nut")!;
+  expect(Math.abs(a.x-b.x)*5.3 >= 32 || Math.abs(a.y-b.y)*2.98 >= 32).toBe(true);
+  expect(markers).toEqual(before);
 });
 
 test("a lone top-edge callout stays on its source point (no fake second leader)", () => {
   // Filters Ref. 1 sits near y=5%. Display height ~298px puts that under the
   // old 18px edge pad, which used to shove the badge and draw a second leader.
   const markers = [{ id: "co-1-1-0001", partId: "prt-36-00304", number: 1, x: 33.6, y: 5.0 }];
-  const positions = layoutSelectedMarkers(markers, new Set(["prt-36-00304"]), 530, 298);
+  const positions = layoutDrawingMarkers(markers, 530, 298);
   expect(positions.get("co-1-1-0001")).toEqual({ x: 33.6, y: 5.0 });
 });
 
 test("zero quantity with no occurrences needs no physical mapping", () => {
   expect(reportQuantityOccurrences([row({ id: "fp-4", qty: 0 })], [])[0])
     .toMatchObject({ expected: 0, detected: 0, status: "match", needsReview: false });
+});
+
+
+test("dense wheel labels still separate when anchor-relative search exhausts the canvas", async () => {
+  const { getFigureDetail } = await import("@/data/repository");
+  const { loadCalloutPreview } = await import("@/data/callout-preview.server");
+  const source = (await getFigureDetail("fig-tire-wheel-5-1"))!;
+  const { detail } = await loadCalloutPreview(source, "hosted-review");
+  const markers = buildDrawingMarkers(detail.rows, detail.callouts);
+  expect(markers.length).toBeGreaterThan(50);
+  const placed = [...layoutDrawingMarkers(markers, 500, 281.25).values()];
+  for (let i=0;i<placed.length;i++) for (let j=i+1;j<placed.length;j++) {
+    expect(Math.abs(placed[i].x-placed[j].x)*5 >= 35.99 || Math.abs(placed[i].y-placed[j].y)*2.8125 >= 35.99).toBe(true);
+  }
+});
+
+
+test.each([36, 48])("dense canvases reserve enough space for %ipx label targets", (gap) => {
+  for (const count of [2, 38, 49, 58, 100]) for (const ratio of [0.75, 1, 16/9, 3]) {
+    const width = minimumDrawingWidth(count, ratio, gap);
+    const height = width / ratio;
+    expect(Math.floor((width + 0.001)/gap)*Math.floor((height + 0.001)/gap)).toBeGreaterThanOrEqual(count);
+    const markers = Array.from({length:count}, (_, i) => ({id:`m-${i}`, partId:`p-${i}`, number:i, x:50, y:50}));
+    const positions = [...layoutDrawingMarkers(markers,width,height,gap).values()];
+    for (let i=0;i<count;i++) {
+      expect(positions[i].x).toBeGreaterThanOrEqual(0);
+      expect(positions[i].x).toBeLessThanOrEqual(100);
+      expect(positions[i].y).toBeGreaterThanOrEqual(0);
+      expect(positions[i].y).toBeLessThanOrEqual(100);
+      for (let j=i+1;j<count;j++) expect(Math.abs(positions[i].x-positions[j].x)*width/100 >= gap-0.01 || Math.abs(positions[i].y-positions[j].y)*height/100 >= gap-0.01).toBe(true);
+    }
+  }
 });

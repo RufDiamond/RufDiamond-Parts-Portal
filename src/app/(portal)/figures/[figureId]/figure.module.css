@@ -201,17 +201,10 @@
   flex-direction: column;
 }
 
-/*
- * The drawing stops shrinking at a readable size and the panel scrolls
- * instead. Pulling the handle left used to crush the plate towards nothing,
- * since the image is object-fit: contain and simply got smaller; past this
- * floor the panel offers scrollbars and the drawing stays legible.
- */
-/* The VIEWER, not every child: this also caught the absolutely positioned
-   callout notice and inflated it to 300px, painting a translucent white block
-   across the lower half of the panel. */
+/* Keep selection strips within the panel. DrawingViewer's internal stage
+   reserves the width needed for reference targets and scrolls independently. */
 .plate > figure {
-  min-width: 360px;
+  min-width: 0;
   min-height: 260px;
 }
 

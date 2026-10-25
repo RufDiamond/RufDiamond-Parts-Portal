@@ -6,6 +6,7 @@ import {
   DrawingViewer,
   ZOOM_STEPS,
   type DrawingMarker,
+  type DrawingSelectionRow,
 } from "./DrawingViewer";
 import styles from "./FullIllustration.module.css";
 import type { DiagramRegionDocument } from "@/lib/drawing";
@@ -25,6 +26,7 @@ export interface FullIllustrationProps {
   onClearSelection?: () => void;
   previewNotice?: string | null;
   selectedPartIds?: ReadonlySet<string>;
+  selectedRows?: readonly DrawingSelectionRow[];
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
@@ -55,6 +57,7 @@ export function FullIllustration({
   onClearSelection,
   previewNotice = null,
   selectedPartIds,
+  selectedRows,
   hoveredPartId,
   onTogglePart,
   onHoverPart,
@@ -183,6 +186,7 @@ export function FullIllustration({
             selectionActivation={selectionActivation}
             revealRequest={revealRequest}
             selectedPartIds={selectedPartIds}
+            selectedRows={selectedRows}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}
             onHoverPart={onHoverPart}
