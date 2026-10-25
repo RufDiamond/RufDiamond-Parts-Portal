@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { CalloutMarker } from "./CalloutMarker";
 import { DiagramRegions } from "./DiagramRegions";
-import { layoutSelectedMarkers, type DiagramRegionDocument } from "@/lib/drawing";
+import { layoutDrawingMarkers, minimumDrawingWidth, type DiagramRegionDocument } from "@/lib/drawing";
 import type { SelectDiagramPart, SelectionActivation } from "@/state/useDiagramSelection";
 import { DIAGRAM_ZOOM_STEPS, revealDelta, revealZoom, type ViewportRect } from "@/lib/diagram-viewport";
 import styles from "./DrawingViewer.module.css";
@@ -121,7 +121,16 @@ export function DrawingViewer({
   onZoomChange,
 }: DrawingViewerProps) {
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
-  const labelPositions = layoutSelectedMarkers(markers, selectedPartIds, displaySize.width, displaySize.height);
+  const [labelGap, setLabelGap] = useState(36);
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const pointer = window.matchMedia("(pointer: coarse)");
+    const update = () => setLabelGap(pointer.matches ? 48 : 36);
+    update();
+    pointer.addEventListener("change", update);
+    return () => pointer.removeEventListener("change", update);
+  }, []);
+  const labelPositions = layoutDrawingMarkers(markers, displaySize.width, displaySize.height, labelGap);
   const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
   const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
   const outlined = markers.filter(
@@ -420,6 +429,7 @@ export function DrawingViewer({
           style={
             {
               "--zoom": zoom,
+              "--minimum-label-width": `${minimumDrawingWidth(markers.length, width && height ? width / height : 1, labelGap)}px`,
               "--ratio": width && height ? width / height : 999,
             } as CSSProperties
           }
@@ -485,10 +495,11 @@ export function DrawingViewer({
         ) : null}
 
         <svg className={styles.instanceLeaders} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {markers.filter((marker) => selectedPartIds.has(marker.partId)).map((marker) => {
+          {markers.map((marker) => {
             const position = labelPositions.get(marker.id);
             if (!position || (position.x === marker.x && position.y === marker.y)) return null;
-            return <line key={marker.id} x1={marker.x} y1={marker.y} x2={position.x} y2={position.y} />;
+            return <line key={marker.id} data-callout-id={marker.id} data-selected={selectedPartIds.has(marker.partId) || undefined}
+              x1={marker.x} y1={marker.y} x2={position.x} y2={position.y} />;
           })}
         </svg>
         {markers.map((marker) => (

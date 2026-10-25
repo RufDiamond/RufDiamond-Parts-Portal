@@ -135,14 +135,16 @@
  *
  * At 1x it is CONTAINED — the smaller of the frame's width and the width its
  * own proportions allow in the frame's height — so the whole drawing is in
- * view with no scrollbar. Each step multiplies that, and because the box
- * really grows, the frame scrolls instead of cropping. Markers are placed in
+ * view. Dense plates retain a minimum size so labels and touch targets fit;
+ * those plates scroll inside the sheet even at 1x. Each zoom step grows the
+ * canvas, and the frame scrolls instead of cropping. Markers are placed in
  * percentages of this box, so they stay on their targets throughout.
  */
 .stage {
   position: relative;
   flex-shrink: 0;
   width: calc(min(100cqw, 100cqh * var(--ratio, 999)) * var(--zoom, 1));
+  min-width: calc(var(--minimum-label-width, 0px) * var(--zoom, 1));
   aspect-ratio: var(--ratio, 3 / 2);
   margin: 0 auto;
   /* Immediate resizing lets scroll correction preserve the cursor anchor. */
@@ -228,7 +230,10 @@
   pointer-events: none;
 }
 .instanceLeaders line {
-  stroke: var(--select);
+  stroke: var(--ink);
   stroke-width: 1.5px;
   vector-effect: non-scaling-stroke;
+}
+.instanceLeaders line[data-selected] {
+  stroke: var(--select);
 }

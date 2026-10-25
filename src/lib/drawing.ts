@@ -69,45 +69,61 @@ export function buildDrawingMarkers(
   return markers;
 }
 
-/** Spread colliding selected labels in display pixels; source anchors stay put. */
-export function layoutSelectedMarkers(
-  markers: readonly DrawingMarker[], selectedPartIds: ReadonlySet<string>, width: number, height: number,
+/** Enough space for a complete grid when a dense drawing needs to scroll. */
+export function minimumDrawingWidth(count: number, ratio: number, gap = 36): number {
+  if (count < 2 || ratio <= 0) return 0;
+  let width = Infinity;
+  for (let columns = 1; columns <= count; columns++) {
+    width = Math.min(width, Math.max(columns * gap, Math.ceil(count / columns) * gap * ratio));
+  }
+  return Math.ceil(width);
+}
+
+/** Separate all labels in display pixels, independently of selection.
+ * Source coordinates remain the endpoints of leaders, never rewritten data.
+ */
+export function layoutDrawingMarkers(
+  markers: readonly DrawingMarker[], width: number, height: number, gap = 36,
 ): Map<string, { x: number; y: number }> {
   const positions = new Map<string, { x: number; y: number }>();
   if (width <= 0 || height <= 0) return positions;
+  const columns = Math.max(1, Math.floor((width + 0.001) / gap));
+  const rows = Math.max(1, Math.floor((height + 0.001) / gap));
+  const grid = Array.from({ length: columns * Math.max(rows, Math.ceil(markers.length / columns)) }, (_, i) => ({
+    x: gap / 2 + (i % columns) * gap,
+    y: gap / 2 + Math.floor(i / columns) * gap,
+  }));
   const placed: { x: number; y: number }[] = [];
-  const gap = 40;
-  const collides = (candidate: { x: number; y: number }) =>
-    placed.some((other) => Math.abs(other.x - candidate.x) < gap && Math.abs(other.y - candidate.y) < gap);
-
+  const collides = (candidate: { x: number; y: number }) => placed.some(other =>
+    Math.abs(other.x - candidate.x) < gap - 0.001 && Math.abs(other.y - candidate.y) < gap - 0.001);
+  const nearest = (anchor: { x: number; y: number }, candidates: typeof grid) =>
+    candidates.reduce((best, candidate) =>
+      (candidate.x-anchor.x)**2 + (candidate.y-anchor.y)**2 < (best.x-anchor.x)**2 + (best.y-anchor.y)**2 ? candidate : best);
+  let repack = false;
   for (const marker of markers) {
-    if (!selectedPartIds.has(marker.partId)) continue;
     const anchor = { x: marker.x * width / 100, y: marker.y * height / 100 };
-    // Keep the printed/source point unless another selected label already sits
-    // there. Edge padding must not shove a lone top/side callout and invent a
-    // second leader (e.g. Filters Ref. 1 at y≈5%).
     let position = anchor;
-    let displaced = false;
     if (collides(anchor)) {
-      search: for (let radius = 1; radius <= markers.length; radius++) {
-        for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) {
-          if (Math.max(Math.abs(dx), Math.abs(dy)) !== radius) continue;
-          const candidate = { x: anchor.x + dx * gap, y: anchor.y + dy * gap };
-          if (candidate.x < 18 || candidate.x > width - 18 || candidate.y < 18 || candidate.y > height - 18) continue;
-          if (collides(candidate)) continue;
-          position = candidate;
-          displaced = true;
-          break search;
-        }
-      }
+      const free = grid.filter(candidate => !collides(candidate));
+      if (!free.length) { repack = true; break; }
+      position = nearest(anchor, free);
     }
     placed.push(position);
-    positions.set(
-      marker.id,
-      displaced
-        ? { x: position.x / width * 100, y: position.y / height * 100 }
-        : { x: marker.x, y: marker.y },
-    );
+    positions.set(marker.id, position === anchor ? { x: marker.x, y: marker.y } : {
+      x: position.x / width * 100, y: position.y / height * 100,
+    });
+  }
+  // Arbitrary anchors can block several grid cells each. Repack every label
+  // only when preserving those anchors prevents a complete placement.
+  if (repack) {
+    positions.clear();
+    const free = [...grid];
+    for (const marker of markers) {
+      const anchor = { x: marker.x * width / 100, y: marker.y * height / 100 };
+      const position = nearest(anchor, free);
+      free.splice(free.indexOf(position), 1);
+      positions.set(marker.id, { x: position.x / width * 100, y: position.y / height * 100 });
+    }
   }
   return positions;
 }
