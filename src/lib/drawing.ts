@@ -59,6 +59,7 @@ export function buildDrawingMarkers(
       x: callout.x!,
       y: callout.y!,
       partId: row.part.id,
+      partNumber: row.part.partNumber,
       // Absent wherever the part's outline could not be recovered from the
       // flat plate, which is the common case. Highlighting degrades to the
       // marker alone rather than failing.

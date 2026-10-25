@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { FigureWorkspace } from "@/app/(portal)/figures/[figureId]/FigureWorkspace";
 import { getFigureDetail } from "@/data/repository";
 import { loadCalloutPreview } from "@/data/callout-preview.server";
@@ -39,6 +39,9 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
     const samePart = detail.rows.filter(r=>r.part.id===row.part.id);
     const expectedPointers = samePart.reduce((n,r)=>n+audited.find(a=>a.figurePartId===r.figurePart.id)!.found,0);
     const assertGroup = (figure:HTMLElement) => {
+      const badges = figure.querySelectorAll('button[data-selected-part-number]');
+      expect(badges).toHaveLength(1);
+      expect(badges[0].getAttribute("data-selected-part-number")).toBe(row.part.partNumber);
       const markers = Array.from(figure.querySelectorAll('button[data-callout-id]'));
       const selected = markers.filter(m=>m.getAttribute("aria-pressed")==="true");
       expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers);

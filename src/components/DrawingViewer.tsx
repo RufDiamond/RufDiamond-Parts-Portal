@@ -17,12 +17,22 @@ export interface DrawingMarker {
   y: number;
   /** Which part this marker points at. Several markers may share a part. */
   partId: string;
+  /** Catalogue identity for the single selected-part badge. Optional for synthetic markers. */
+  partNumber?: string;
   /**
    * The part's own artwork as an SVG path in the same 0-100 space, when it
    * could be recovered from the plate. Selecting the part fills this shape.
    */
   maskPath?: string;
   label?: string;
+}
+
+/** Source rows identify selections even when no drawing location is mapped. */
+export interface DrawingSelectionRow {
+  figurePartId: string;
+  partId: string;
+  partNumber: string;
+  references: readonly (number | string)[];
 }
 
 export interface DrawingViewerProps {
@@ -48,10 +58,12 @@ export interface DrawingViewerProps {
   /** Incremented by the explicit Show selected part action. */
   revealRequest?: number;
   /**
-   * Selected parts. EVERY marker carrying one of these part ids goes solid —
-   * a part fitted in two places lights in both — and the rest recede.
+   * Selected parts. Every physical component carrying one of these part ids
+   * lights together. Original reference buttons retain shared pressed state;
+   * one badge per catalogue part number identifies selection above the plate.
    */
   selectedPartIds?: ReadonlySet<string>;
+  selectedRows?: readonly DrawingSelectionRow[];
   hoveredPartId?: string | null;
   onTogglePart?: (partId: string) => void;
   onHoverPart?: (partId: string | null) => void;
@@ -114,6 +126,7 @@ export function DrawingViewer({
   selectionActivation,
   revealRequest = 0,
   selectedPartIds = NO_SELECTION,
+  selectedRows,
   hoveredPartId = null,
   onTogglePart,
   onHoverPart,
@@ -139,7 +152,10 @@ export function DrawingViewer({
   const isLit = (partId: string) => selectedPartIds.has(partId) || partId === hoveredPartId;
 
   const markerState = (partId: string) => {
-    if (isLit(partId)) {
+    // Selection is identified once in the strip. Hover/focus must not bring
+    // back repeated red reference boxes for an already-selected part.
+    if (selectedPartIds.has(partId)) return "default" as const;
+    if (partId === hoveredPartId) {
       return "active" as const;
     }
     // Once something is selected, everything else steps back.
@@ -149,6 +165,33 @@ export function DrawingViewer({
     counts.set(marker.partId, (counts.get(marker.partId) ?? 0) + 1);
     return counts;
   }, new Map<string, number>());
+
+  const selectedParts = new Map<string, {
+    refs: Set<string>; occurrences: number;
+    targets: Map<string, { partId: string; figurePartId?: string }>;
+  }>();
+  for (const row of selectedRows ?? []) {
+    if (!selectedPartIds.has(row.partId)) continue;
+    const group = selectedParts.get(row.partNumber) ?? { refs: new Set<string>(), occurrences: 0, targets: new Map() };
+    for (const reference of row.references) group.refs.add(String(reference));
+    group.targets.set(row.partId, row);
+    selectedParts.set(row.partNumber, group);
+  }
+  for (const marker of markers) {
+    if (!selectedPartIds.has(marker.partId)) continue;
+    const partNumber = marker.partNumber ?? selectedRows?.find(row => row.partId === marker.partId)?.partNumber ?? numericDocument?.occurrences.find(
+      occurrence => occurrence.calloutId === marker.id,
+    )?.partNumber ?? marker.partId;
+    const group = selectedParts.get(partNumber) ?? { refs: new Set<string>(), occurrences: 0, targets: new Map() };
+    group.refs.add(String(marker.number));
+    group.occurrences += 1;
+    // One callback per part identity, even when the part has several source
+    // rows. A catalogue number can also be shared by distinct selected IDs.
+    if (!group.targets.has(marker.partId) || (!group.targets.get(marker.partId)?.figurePartId && marker.figurePartId)) {
+      group.targets.set(marker.partId, marker);
+    }
+    selectedParts.set(partNumber, group);
+  }
 
   /*
    * The frame no longer carries the drawing's aspect ratio. It used to, which
@@ -403,6 +446,27 @@ export function DrawingViewer({
         {count ? <span className={styles.count}>{count}</span> : null}
       </div>
 
+      {selectedParts.size ? (
+        <div className={styles.selectedParts} role="group" aria-label="Selected parts">
+          {Array.from(selectedParts, ([partNumber, group]) => (
+            <button key={partNumber} type="button" className={styles.selectedPartBadge}
+              data-selected-part-number={partNumber} aria-label={`Deselect part ${partNumber}`} aria-pressed="true"
+              disabled={!onTogglePart && !Array.from(group.targets.values()).some(marker => onSelectPart && marker.figurePartId)}
+              onClick={() => {
+                for (const marker of group.targets.values()) {
+                  if (onSelectPart && marker.figurePartId) onSelectPart(marker.figurePartId, "label");
+                  else onTogglePart?.(marker.partId);
+                }
+              }}>
+              <strong>{partNumber}</strong>
+              <span>{group.refs.size ? `Ref ${Array.from(group.refs).join(", ")} · ` : ""}{group.occurrences
+                ? `${group.occurrences} occurrence${group.occurrences === 1 ? "" : "s"}`
+                : "No mapped highlight"}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
       <div
         ref={sheet}
         className={`${styles.sheet} ${zoom > 1 ? styles.sheetZoomed : ""} ${
@@ -516,12 +580,6 @@ export function DrawingViewer({
               selectedPartIds.has(marker.partId)
                 ? `${marker.label ?? `Callout ${marker.number}`} (${instanceCountByPart.get(marker.partId)} instances selected)`
                 : marker.label
-            }
-            dataMultiInstance={
-              selectedPartIds.has(marker.partId) &&
-              (instanceCountByPart.get(marker.partId) ?? 0) > 1
-                ? true
-                : undefined
             }
             onActivate={
               onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")

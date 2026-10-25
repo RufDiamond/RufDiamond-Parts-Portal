@@ -112,6 +112,10 @@ export function FigureWorkspace({
     [rows, callouts],
   );
   const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
+  const selectedDrawingRows = useMemo(() => rows.filter(row => selectedPartIds.has(row.part.id)).map(row => ({
+    figurePartId: row.figurePart.id, partId: row.part.id, partNumber: row.part.partNumber,
+    references: row.calloutNumbers,
+  })), [rows, selectedPartIds]);
   const quantityReports = useMemo(() => {
     const reports = reportQuantityOccurrences(
       rows,
@@ -529,6 +533,7 @@ export function FigureWorkspace({
               selectionActivation={activation}
               revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
+              selectedRows={selectedDrawingRows}
               hoveredPartId={hoveredPartId}
               onSelectPart={selectPart}
               onHoverPart={setHoveredPartId}
@@ -676,6 +681,7 @@ export function FigureWorkspace({
           selectionActivation={activation}
           previewNotice={reviewOnly ? previewNotice : null}
           selectedPartIds={selectedPartIds}
+          selectedRows={selectedDrawingRows}
           hoveredPartId={hoveredPartId}
           onSelectPart={selectPart}
           onClearSelection={clearSelection}
