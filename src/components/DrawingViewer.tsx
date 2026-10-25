@@ -49,8 +49,8 @@ export interface DrawingViewerProps {
   /** Incremented by the explicit Show selected part action. */
   revealRequest?: number;
   /**
-   * Every selected component lights together. One existing reference label per
-   * selected part number goes solid; the other references remain clickable.
+   * One existing reference is shown per part number. Every selected component
+   * lights together, while its single reference label goes solid.
    */
   selectedPartIds?: ReadonlySet<string>;
   hoveredPartId?: string | null;
@@ -131,7 +131,6 @@ export function DrawingViewer({
     pointer.addEventListener("change", update);
     return () => pointer.removeEventListener("change", update);
   }, []);
-  const labelPositions = layoutDrawingMarkers(markers, displaySize.width, displaySize.height, labelGap);
   const numericDocument = src && document && width === document.imageWidth && height === document.imageHeight ? document : undefined;
   const numericIds = new Set(numericDocument?.occurrences.filter((item) => item.regions.length).map((item) => item.calloutId));
   const outlined = markers.filter(
@@ -139,14 +138,24 @@ export function DrawingViewer({
   );
   const isLit = (partId: string) => selectedPartIds.has(partId) || partId === hoveredPartId;
 
-  const partNumberFor = (marker: DrawingMarker) => marker.partNumber ??
-    numericDocument?.occurrences.find(occurrence => occurrence.calloutId === marker.id)?.partNumber ?? marker.partId;
+  const partNumberByPartId = new Map(numericDocument?.occurrences.map(occurrence => [occurrence.partId, occurrence.partNumber]));
+  for (const marker of markers) {
+    if (marker.partNumber) partNumberByPartId.set(marker.partId, marker.partNumber);
+  }
+  const partNumberFor = (marker: DrawingMarker) => partNumberByPartId.get(marker.partId) ?? marker.partId;
   const selectedLabelByPartNumber = new Map<string, string>();
   for (const marker of markers) {
     if (!selectedPartIds.has(marker.partId)) continue;
     const partNumber = partNumberFor(marker);
     if (!selectedLabelByPartNumber.has(partNumber)) selectedLabelByPartNumber.set(partNumber, marker.id);
   }
+  const visibleLabelByPartNumber = new Map(selectedLabelByPartNumber);
+  for (const marker of markers) {
+    const partNumber = partNumberFor(marker);
+    if (!visibleLabelByPartNumber.has(partNumber)) visibleLabelByPartNumber.set(partNumber, marker.id);
+  }
+  const visibleMarkers = markers.filter(marker => visibleLabelByPartNumber.get(partNumberFor(marker)) === marker.id);
+  const labelPositions = layoutDrawingMarkers(visibleMarkers, displaySize.width, displaySize.height, labelGap);
   const markerState = (marker: DrawingMarker) => {
     const selectedLabel = selectedLabelByPartNumber.get(partNumberFor(marker));
     if (selectedLabel !== undefined) {
@@ -182,6 +191,26 @@ export function DrawingViewer({
    */
   const sheet = useRef<HTMLDivElement>(null);
   const drawing = useRef<HTMLDivElement>(null);
+  const pendingLabelFocus = useRef<{ partNumber: string; markerId: string } | null>(null);
+  const activateMarker = (marker: DrawingMarker) => {
+    if (drawing.current?.ownerDocument.activeElement?.getAttribute("data-callout-id") === marker.id) {
+      pendingLabelFocus.current = { partNumber: partNumberFor(marker), markerId: marker.id };
+    }
+    if (onSelectPart && marker.figurePartId) onSelectPart(marker.figurePartId, "label");
+    else onTogglePart?.(marker.partId);
+  };
+  useLayoutEffect(() => {
+    const pending = pendingLabelFocus.current;
+    pendingLabelFocus.current = null;
+    const area = drawing.current;
+    if (!pending || !area) return;
+    const active = area.ownerDocument.activeElement;
+    if (active !== area.ownerDocument.body && active?.getAttribute("data-callout-id") !== pending.markerId) return;
+    // Selecting another source identity can replace the representative label.
+    const representative = visibleMarkers.find(marker => partNumberFor(marker) === pending.partNumber);
+    Array.from(area.querySelectorAll<HTMLButtonElement>("button[data-callout-id]"))
+      .find(button => button.dataset.calloutId === representative?.id)?.focus({ preventScroll: true });
+  });
   const wheelAnchor = useRef<{ x: number; y: number; u: number; v: number } | null>(null);
   useLayoutEffect(() => {
     const anchor = wheelAnchor.current;
@@ -442,7 +471,7 @@ export function DrawingViewer({
           style={
             {
               "--zoom": zoom,
-              "--minimum-label-width": `${minimumDrawingWidth(markers.length, width && height ? width / height : 1, labelGap)}px`,
+              "--minimum-label-width": `${minimumDrawingWidth(visibleMarkers.length, width && height ? width / height : 1, labelGap)}px`,
               "--ratio": width && height ? width / height : 999,
             } as CSSProperties
           }
@@ -508,14 +537,14 @@ export function DrawingViewer({
         ) : null}
 
         <svg className={styles.instanceLeaders} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {markers.map((marker) => {
+          {visibleMarkers.map((marker) => {
             const position = labelPositions.get(marker.id);
             if (!position || (position.x === marker.x && position.y === marker.y)) return null;
             return <line key={marker.id} data-callout-id={marker.id} data-selected={selectedPartIds.has(marker.partId) || undefined}
               x1={marker.x} y1={marker.y} x2={position.x} y2={position.y} />;
           })}
         </svg>
-        {markers.map((marker) => (
+        {visibleMarkers.map((marker) => (
           <CalloutMarker
             key={marker.id}
             occurrenceId={marker.id}
@@ -537,8 +566,7 @@ export function DrawingViewer({
                 : undefined
             }
             onActivate={
-              onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")
-                : onTogglePart ? () => onTogglePart(marker.partId) : undefined
+              (onSelectPart && marker.figurePartId) || onTogglePart ? () => activateMarker(marker) : undefined
             }
             onHoverChange={
               onHoverPart

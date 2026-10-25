@@ -77,3 +77,48 @@ colors and absence of the added strip. Local evidence is in
 
 For current migration/API status, see
 [the separate migration release](2026-10-25-discount-migration-deployment.md).
+
+## Final clarification: one visible reference at all times
+
+The user confirmed that each part number should have one visible reference
+before, during and after selection. Repeated overlay labels and their
+display-only leaders are omitted in every state. The single reference stays
+inside the drawing. Every mapped numeric region and legacy mask remains
+present, selectable and linked to the existing part selection. Source artwork,
+coordinates, part associations and approval state remain unchanged.
+
+Layout and minimum canvas width reserve space only for the displayed labels.
+This removes the crowding and unused width caused by quantity-expanded labels.
+Known part numbers are resolved across numeric, legacy and marker-only
+occurrences sharing a part identity. Focus is retained on the visible reference
+if selection replaces its source identity. Normal and fullscreen views share
+the same behavior. No additional banner is introduced.
+
+The default-view regression first failed with three references where two were
+expected (one per distinct part number). It now passes and checks selection
+through another physical component. Mixed-format grouping also has a regression:
+numeric, legacy and marker-only occurrences of the same part share one label,
+while both mapped component regions stay present. The quantity audit checks one
+reference per mapped part before and after selection across 40 figures, with
+unchanged component counts. The final frontend suite passes 419 tests in 39
+files. Production build, changed-file lint with zero warnings and whitespace
+checks pass. Earlier selected-only test runs were interrupted when this broader
+default-view requirement was confirmed; the final browser run uses the updated
+requirement throughout.
+
+Final browser coverage includes 182 distinct checks: 177 passed in the full
+run, and the remaining five passed after the fullscreen test moved the pointer
+away from labels before counting selected colors. Those five initially counted
+a transient hover on another part as a second selection; no production change
+was needed. All 45 figures were checked at desktop, tablet and mobile sizes,
+alongside 44 native interaction cases and three shell/privacy cases. Evidence:
+`output/one-reference-default-verified/results.json` and
+`output/one-reference-default-fullscreen-final/results.json`. Optional browser
+tracing was disabled after earlier trace writes exhausted available disk space.
+
+Local visual checks confirm references 1–7 appear once each on Bumper 2.1 and
+Wheel 5.1 before selection. Selecting reference 4 leaves one label and highlights
+both mapped Bumper components or all 16 mapped Wheel screws. Deselecting retains
+one reference. Screenshots and counts are retained in
+`output/verification/2026-10-25-one-label-default/`. Independent code review found
+no actionable issues. Public deployment verification follows the push.

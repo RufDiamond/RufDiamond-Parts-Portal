@@ -9,6 +9,7 @@ import { resolveDiagramSelection, useDiagramSelection } from "@/state/useDiagram
 import type { FigureDetail } from "@/types/catalog";
 import userEvent from "@testing-library/user-event";
 import markerStyles from "@/components/CalloutMarker.module.css";
+import { DrawingViewer } from "@/components/DrawingViewer";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(() => {
@@ -138,9 +139,9 @@ test.each([false, true])("keeps one highlighted drawing reference for repeated p
   if (separateIdentities) fireEvent.click(rows[2]);
   const assertDrawing = (figure: HTMLElement) => {
     const references = Array.from(figure.querySelectorAll<HTMLButtonElement>("button[data-callout-id]"));
-    expect(references).toHaveLength(3);
+    expect(references).toHaveLength(2);
     const selected = references.filter(marker => marker.getAttribute("aria-pressed") === "true");
-    expect(selected).toHaveLength(2);
+    expect(selected).toHaveLength(1);
     expect(selected.filter(marker => marker.classList.contains(markerStyles.active))).toHaveLength(1);
     expect(figure.querySelectorAll('path[role="button"][aria-pressed="true"]')).toHaveLength(2);
     expect(within(figure).queryByRole("group", { name: "Selected parts" })).toBeNull();
@@ -148,9 +149,9 @@ test.each([false, true])("keeps one highlighted drawing reference for repeated p
   };
   const figure = container.querySelector("figure")!;
   const selected = assertDrawing(figure);
-  fireEvent.mouseEnter(selected[1]);
+  fireEvent.mouseEnter(selected[0]);
   assertDrawing(figure);
-  fireEvent.mouseLeave(selected[1]);
+  fireEvent.mouseLeave(selected[0]);
   fireEvent.click(screen.getByRole("button", { name: "Illustration full screen" }));
   assertDrawing(screen.getByRole("dialog").querySelector("figure")!);
   fireEvent.click(screen.getByRole("button", { name: "Close the illustration" }));
@@ -158,10 +159,61 @@ test.each([false, true])("keeps one highlighted drawing reference for repeated p
   expect(Array.from(figure.querySelectorAll("button[data-callout-id]"))
     .filter(marker => marker.classList.contains(markerStyles.active))).toHaveLength(2);
   if (!separateIdentities) {
-    fireEvent.click(selected[1]);
+    fireEvent.click(selected[0]);
     expect(figure.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(1);
     expect(figure.querySelectorAll('path[role="button"][aria-pressed="true"]')).toHaveLength(1);
   }
+});
+
+test("one reference per part remains visible before and after selecting any matching component", async () => {
+  const { container } = render(workspace(await fixture()));
+  const figure = container.querySelector("figure")!;
+  const references = () => Array.from(figure.querySelectorAll<HTMLButtonElement>("button[data-callout-id]"));
+  expect(references()).toHaveLength(2);
+  fireEvent.click(figure.querySelectorAll('path[role="button"]')[2]);
+  expect(references()).toHaveLength(2);
+  const selected = references().filter(marker => marker.getAttribute("aria-pressed") === "true");
+  expect(selected).toHaveLength(1);
+  expect(figure.querySelectorAll('path[role="button"][aria-pressed="true"]')).toHaveLength(2);
+  fireEvent.click(figure.querySelectorAll('path[role="button"]')[2]);
+  expect(references()).toHaveLength(2);
+  expect(references().every(marker => marker.getAttribute("aria-pressed") === "false")).toBe(true);
+});
+
+test("numeric, legacy and marker-only occurrences share the same known part number", () => {
+  const props = {
+    label: "Mixed drawing", src: "/mixed.png", width: 100, height: 100,
+    markers: [
+      { id: "numeric", partId: "shared", figurePartId: "row", number: 4, x: 10, y: 10 },
+      { id: "legacy", partId: "shared", figurePartId: "row", number: 4, x: 70, y: 70, maskPath: "M60 60 L80 60 L80 80 Z" },
+      { id: "marker-only", partId: "shared", figurePartId: "row", number: 4, x: 90, y: 10 },
+    ],
+    document: { imageWidth: 100, imageHeight: 100, occurrences: [{
+      calloutId: "numeric", figurePartId: "row", partId: "shared", partNumber: "P-4", refNo: "4",
+      regions: [{ id: "region", outer: [[10,10],[20,10],[20,20]] as [number, number][], holes: [] }],
+    }] },
+  };
+  const view = render(<DrawingViewer {...props} selectedPartIds={new Set(["shared"])} />);
+  expect(view.container.querySelectorAll("button[data-callout-id]")).toHaveLength(1);
+  expect(view.container.querySelectorAll("path[data-selected],path[data-legacy-selected]")).toHaveLength(2);
+  view.rerender(<DrawingViewer {...props} selectedPartIds={new Set()} />);
+  expect(view.container.querySelectorAll("button[data-callout-id]")).toHaveLength(1);
+  expect(view.container.querySelectorAll("path[data-selected],path[data-legacy-selected]")).toHaveLength(0);
+});
+
+test("deselecting an alternate identity keeps focus on the surviving reference for that part number", async () => {
+  const detail = await fixture();
+  detail.rows[2].part.id = "part-c";
+  detail.rows[2].figurePart.partId = "part-c";
+  const { container } = render(workspace(detail));
+  fireEvent.click(container.querySelectorAll("tbody tr")[2]);
+  const figure = container.querySelector("figure")!;
+  const reference = within(figure).getByRole("button", { name: /^Callout 13: A/ });
+  await userEvent.click(reference);
+  const restored = within(figure).getByRole("button", { name: /^Callout 13: A/ });
+  expect(restored.getAttribute("aria-pressed")).toBe("false");
+  expect(document.activeElement).toBe(restored);
+  expect(figure.querySelectorAll("button[data-callout-id]")).toHaveLength(2);
 });
 
 test.each(["fig-cabin-6-1", "fig-filters-1-1"])("legacy %s keeps supplied markers and read-only masks", async (id) => {
@@ -211,7 +263,7 @@ test.each([1, 2, 3, 4, 10])("selecting a row highlights all %i Quantity instance
   fireEvent.click(container.querySelector("tbody tr")!);
   const assertSelected = (scope: HTMLElement) => {
     const markers = scope.querySelectorAll('button[data-callout-id]');
-    expect(markers).toHaveLength(qty);
+    expect(markers).toHaveLength(1);
     for (const marker of markers) { expect(marker.getAttribute("aria-pressed")).toBe("true"); expect(marker.textContent).toBe("13"); }
     expect(scope.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(qty);
   };
@@ -241,7 +293,8 @@ test.each([{found:3,status:"Needs Review"},{found:4,status:"Complete"},{found:5,
     expect(within(rows[0] as HTMLElement).getByText(status)).toBeTruthy();
     fireEvent.click(rows[0]);
     const assertHighlights = (scope:HTMLElement) => {
-      expect(scope.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(found);
+      expect(scope.querySelectorAll('button[data-callout-id][aria-pressed="true"]')).toHaveLength(1);
+      expect(scope.querySelectorAll('[data-diagram-regions] path[data-selected]')).toHaveLength(found);
     };
     assertHighlights(container.querySelector("figure")!);
     fireEvent.click(screen.getByRole("button",{name:"Illustration full screen"}));

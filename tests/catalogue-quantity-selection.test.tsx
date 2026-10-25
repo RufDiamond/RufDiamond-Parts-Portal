@@ -36,13 +36,19 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
     const row = detail.rows.find(r=>r.figurePart.id===audit.figurePartId)!;
     const tableRow = container.querySelector(`[data-figure-part-id="${audit.figurePartId}"]`)!;
     expect(container.querySelectorAll(`[data-figure-part-id="${audit.figurePartId}"]`)).toHaveLength(1);
-    fireEvent.click(tableRow);
     const samePart = detail.rows.filter(r=>r.part.id===row.part.id);
     const expectedPointers = samePart.reduce((n,r)=>n+audited.find(a=>a.figurePartId===r.figurePart.id)!.found,0);
+    const figure = container.querySelector("figure")!;
+    const referencesForPart = () => Array.from(figure.querySelectorAll('button[data-callout-id]'))
+      .filter(marker => marker.getAttribute("aria-label")?.includes(`: ${row.part.partNumber} — `));
+    expect(referencesForPart()).toHaveLength(expectedPointers > 0 ? 1 : 0);
+    const componentCount = figure.querySelectorAll('path[role="button"]').length;
+    fireEvent.click(tableRow);
     const assertGroup = (figure:HTMLElement) => {
       const markers = Array.from(figure.querySelectorAll('button[data-callout-id]'));
       const selected = markers.filter(m=>m.getAttribute("aria-pressed")==="true");
-      expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers);
+      expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers > 0 ? 1 : 0);
+      expect(figure.querySelectorAll('path[role="button"]')).toHaveLength(componentCount);
       expect(selected.filter(marker => marker.classList.contains(markerStyles.active)),
         `${figureId}/${audit.figurePartId} highlighted reference`).toHaveLength(expectedPointers > 0 ? 1 : 0);
       for (const marker of selected) {
@@ -66,6 +72,7 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
     if (selectedMarker) fireEvent.click(selectedMarker);
     else fireEvent.click(tableRow);
     expect(container.querySelectorAll('figure button[data-callout-id][aria-pressed="true"]')).toHaveLength(0);
+    expect(referencesForPart()).toHaveLength(expectedPointers > 0 ? 1 : 0);
   }
 },30000);
 
