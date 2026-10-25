@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { startPostgres } from "../helpers/postgres.js";
+import { expectedMigrationCount, startPostgres } from "../helpers/postgres.js";
 import { is, sql } from "drizzle-orm";
 import { getTableConfig, PgTable } from "drizzle-orm/pg-core";
 import * as schema from "../../src/db/schema/index.js";
@@ -15,7 +15,7 @@ describe("PostgreSQL domain constraints", () => {
     await expect(postgres.migrate()).resolves.toBeUndefined();
     await expect(postgres.migrate()).resolves.toBeUndefined();
     const result = await postgres.pool.query("select count(*)::int as count from drizzle.__drizzle_migrations");
-    expect(result.rows[0].count).toBe(12);
+    expect(result.rows[0].count).toBe(expectedMigrationCount);
     expect((await postgres.pool.query("select count(*)::int as count from capability")).rows[0].count).toBe(45);
   });
 
@@ -108,6 +108,16 @@ describe("PostgreSQL domain constraints", () => {
       return { release, releasedPart };
     } finally { await connection.close(); }
   }
+
+  it("preserves all six decimal places in a commerce order discount snapshot", async () => {
+    const owner = await account();
+    const result = await postgres.pool.query(`insert into commerce_order(
+      company_id,submitted_by_user_id,reference,customer_po,vin,order_type,
+      shipping_address,billing_address,currency,list_total,discount_rate,discount_applied,net_total
+    ) values($1,$2,$3,'PO-precision','VIN-precision','regular','{}','{}','CAD',100,'0.123456',12.35,87.65)
+    returning discount_rate`, [owner.company,owner.user,`RD-${randomUUID()}`]);
+    expect(result.rows[0].discount_rate).toBe("0.123456");
+  });
 
   it("enforces decimal money, positive order quantities, and immutable submitted snapshots", async () => {
     const ids = await fixture();

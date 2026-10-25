@@ -8,7 +8,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool, type PoolClient } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { closePostgresPool, migrationsFolder, startPostgres } from "./helpers/postgres.js";
+import { closePostgresPool, expectedMigrationCount, migrationsFolder, startPostgres } from "./helpers/postgres.js";
 
 type TestPostgres = Awaited<ReturnType<typeof startPostgres>>;
 
@@ -147,7 +147,7 @@ describe("diagram mapping schema migration", () => {
       expect((await database.pool.query("select count(*)::int count from release_diagram_mapping")).rows[0].count).toBe(0);
       expect((await database.pool.query("select * from publication_release where id=$1", [ids.release])).rows[0]).toEqual(oldRelease);
       expect((await database.pool.query("select * from release_callout where release_id=$1 and id=$2", [ids.release, ids.releaseCallout])).rows[0]).toEqual(oldCallout);
-      expect((await database.pool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(12);
+      expect((await database.pool.query("select count(*)::int count from drizzle.__drizzle_migrations")).rows[0].count).toBe(expectedMigrationCount);
       expect((await database.pool.query("select * from drizzle.__drizzle_migrations order by id")).rows.slice(0, 7)).toEqual(oldHistory);
     } finally {
       await database.stop();

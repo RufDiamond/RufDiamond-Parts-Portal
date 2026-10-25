@@ -1,4 +1,5 @@
 import type { OutboxDelivery, DeliveryMessage } from "../outbox/worker.js";
+import type { QuoteNotificationResolver } from "./notification-recipient.js";
 
 export interface QuoteEmailMessage {
   kind: "quote.submitted" | "quote.notified" | "commerce-order.submitted";
@@ -70,15 +71,16 @@ export function createQuoteSubmittedDelivery(port: QuoteEmailPort): OutboxDelive
  * on the payload. An empty list fails. The RUF inbox is not a fallback.
  * Real sending stays off until QUOTE_EMAIL_SENDING=enabled.
  */
-export function createQuoteNotifiedDelivery(port: QuoteEmailPort): OutboxDelivery {
+export function createQuoteNotifiedDelivery(port: QuoteEmailPort, resolveTarget?: QuoteNotificationResolver): OutboxDelivery {
   return async (message: DeliveryMessage) => {
     requireSending();
     const payload = asRecord(message.payload);
-    const quoteNo = text(payload.quoteNo, "unknown");
-    const customerName = text(payload.customerName, "Customer");
-    const recipients = Array.isArray(payload.authorizedRecipients)
+    const target = resolveTarget ? await resolveTarget(message) : undefined;
+    const quoteNo = target?.quoteNo ?? text(payload.quoteNo, "unknown");
+    const customerName = target?.customerName ?? text(payload.customerName, "Customer");
+    const recipients = target?.to ?? (Array.isArray(payload.authorizedRecipients)
       ? payload.authorizedRecipients.filter((value): value is string => typeof value === "string" && value.includes("@"))
-      : [];
+      : []);
     if (recipients.length === 0) throw new Error("QUOTE_NOTIFY_RECIPIENTS_UNRESOLVED");
     await port.deliver({
       kind: "quote.notified",
@@ -118,7 +120,7 @@ export function createCommerceOrderSubmittedDelivery(port: QuoteEmailPort): Outb
   };
 }
 
-/** Console/log port used until SMTP credentials are configured. */
+/** Explicit local diagnostics only. The runtime worker never uses this port. */
 export function createLoggingQuoteEmailPort(log: (line: string) => void = console.info): QuoteEmailPort {
   return {
     async deliver(message) {
@@ -127,10 +129,14 @@ export function createLoggingQuoteEmailPort(log: (line: string) => void = consol
   };
 }
 
-export function quoteEmailDeliveries(port: QuoteEmailPort = createLoggingQuoteEmailPort()): Record<string, OutboxDelivery> {
+export function createUnconfiguredQuoteEmailPort(): QuoteEmailPort {
+  return { async deliver() { throw new Error("QUOTE_EMAIL_TRANSPORT_UNCONFIGURED"); } };
+}
+
+export function quoteEmailDeliveries(port: QuoteEmailPort = createUnconfiguredQuoteEmailPort(), resolveTarget?: QuoteNotificationResolver): Record<string, OutboxDelivery> {
   return {
     "quote.submitted.email": createQuoteSubmittedDelivery(port),
-    "quote.notified.email": createQuoteNotifiedDelivery(port),
+    "quote.notified.email": createQuoteNotifiedDelivery(port, resolveTarget),
     "commerce-order.submitted.email": createCommerceOrderSubmittedDelivery(port),
   };
 }
