@@ -38,16 +38,17 @@ afterEach(() => {
 });
 
 function customerSession(capabilities: string[]): MeResponse {
+  // A complete session, typed rather than cast: only `capabilities` matters to
+  // the page, but a partial object cast to MeResponse fails `next build`.
   return {
     id: "user-1",
     companyId: "co-demo",
-    loginId: "demo",
     displayName: "Demo",
     capabilities,
     csrfToken: "csrf-test",
-    company: { id: "co-demo", name: "Demo Co", discountRate: 0.1 },
-    scopes: { scopeVersion: "1", canViewPrices: true },
-  } as MeResponse;
+    company: { id: "co-demo", name: "Demo Co", type: "dealer", defaultShippingAddress: null, discountRate: "0.100000" },
+    scopes: { brandIds: "all", accountIds: "all", fleet: "all", environment: "published", priceTier: "list", scopeVersion: "1", canViewPrices: true },
+  };
 }
 
 describe("/quotes/admin authorization", () => {
