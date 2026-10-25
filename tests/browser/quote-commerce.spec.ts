@@ -25,8 +25,13 @@ test.describe("quote to order commerce path", () => {
     await expect(request).toHaveAttribute("href", /mailto:parts@rufdiamond\.com/);
   });
 
-  test("admin quote view is reachable from fixture demo", async ({ page }) => {
+  test("admin quote view requires staff quote capability in fixture mode", async ({ page }) => {
     await page.goto("/quotes/admin");
-    await expect(page.getByRole("heading", { name: /quote status/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole("heading", { name: /quote status — ruf diamond/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/quote capability is required/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /sign in/i })).toBeVisible();
+    await expect(page.getByText("Factory Price (CAD)")).toHaveCount(0);
+    await expect(page.getByText("6900.00")).toHaveCount(0);
   });
 });
+

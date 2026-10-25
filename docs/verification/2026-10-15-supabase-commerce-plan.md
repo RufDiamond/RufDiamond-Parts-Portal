@@ -3,6 +3,12 @@
 Date: 2026-10-15. Project: `ufvenudjvicjhwzdvxie` (Canada Central). Temporary
 staging Postgres only — not production, not OVH.
 
+**25 October readback:** the project has been restored and all 14 migrations
+through `0014_commerce_price_snapshot` match the remote ledger. Migration
+credentials are present locally; the runtime role remains NOLOGIN and live
+API/mail deployment is incomplete. See the [current readiness record](2026-10-25-commerce-readiness.md).
+The inventory and credential blocker below describe the original 15 October state.
+
 ## Current gap
 
 | Layer | Status |

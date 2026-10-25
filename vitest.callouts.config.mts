@@ -28,6 +28,8 @@ export default defineConfig({
       "tests/quote-status.test.tsx",
       "tests/quote-store.test.tsx",
       "tests/admin-quote-status.test.tsx",
+      "tests/admin-quote-page.test.tsx",
+
       "tests/checkout.test.tsx",
       "tests/brand-search.test.tsx",
       "tests/customer-money.test.tsx",
