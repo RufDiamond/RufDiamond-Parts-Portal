@@ -209,10 +209,10 @@ async function authorizationRows(tx: Transaction, userId: string) {
   return { base, capabilities, companyBrands, companyVariants, userBrands, userAccounts, userVariants, dealerAccounts };
 }
 
-export async function loadAuthorization(tx: Transaction, userId: string): Promise<AuthorizationContext> {
+async function resolveAccountAuthorization(tx: Transaction, userId: string, statuses: readonly string[]): Promise<AuthorizationContext> {
   const rows = await authorizationRows(tx, userId);
   const { base } = rows;
-  if (!base || base.user_status !== "active" || base.company_status !== "active"
+  if (!base || !statuses.includes(base.user_status) || base.company_status !== "active"
     || !base.brand_mode || !base.account_mode || !base.fleet_mode || !base.environment) forbidden();
 
   const capabilities = new Set(rows.capabilities.map(row => row.key)
@@ -302,6 +302,16 @@ async function safeTierKey(tx: Transaction, priceTierId: string | null): Promise
   if (!priceTierId) return "company";
   const result = await tx.execute(sql`SELECT key FROM price_tier WHERE id = ${priceTierId}`);
   return (result.rows[0] as { key: string } | undefined)?.key ?? "";
+}
+
+/** Ordinary authentication and resource authorization always require an active account. */
+export function loadAuthorization(tx: Transaction, userId: string): Promise<AuthorizationContext> {
+  return resolveAccountAuthorization(tx,userId,["active"]);
+}
+
+/** Introspection after account-management authorization, never a session resolver. */
+export function loadManagedAccountAuthorization(tx: Transaction, userId: string): Promise<AuthorizationContext> {
+  return resolveAccountAuthorization(tx,userId,["active","invited","disabled","suspended"]);
 }
 
 export function createDatabaseAuthorizationResolver(database: Database): AuthorizationResolver {

@@ -9,6 +9,13 @@ const config = { upstream: "http://127.0.0.1:3201", webOrigin: "http://127.0.0.1
 const request = (path: string, init?: RequestInit) => new Request(`${config.webOrigin}/api/v1/${path}`, init);
 
 describe("authenticated upstream boundary", () => {
+  it("proxies invitation completion through the public exact-origin write boundary", async () => {
+    const response = await proxyBackendRequest(request("auth/invitations/complete", {
+      method:"POST",headers:{origin:config.webOrigin,"content-type":"application/json"},
+      body:JSON.stringify({token:"synthetic-token-for-testing-only-32",newPassword:"Synthetic-test-password"}),
+    }),config,async()=>Response.json({completed:true}));
+    expect(response.status).toBe(200);expect(await response.json()).toEqual({completed:true});
+  });
   it("forwards only version-pinned private PNG bytes on image routes", async () => {
     const png = new Uint8Array([137,80,78,71,13,10,26,10,1]);
     const image = async () => new Response(png, { headers: { "content-type": "image/png" } });

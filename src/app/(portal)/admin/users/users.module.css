@@ -1,0 +1,14 @@
+.page { padding: 24px; max-width: 1400px; }
+.page h1, .page h2 { margin: 16px 0 12px; }
+.page p { margin: 12px 0; line-height: 1.5; }
+.page button { padding: 8px 12px; margin: 4px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.page button:disabled { opacity: .5; cursor: default; }
+.form { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); align-items: end; gap: 12px; margin: 16px 0 28px; }
+.page label { display: flex; flex-direction: column; gap: 6px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.page input,.page select,.page textarea { padding: 8px; border: 1px solid var(--mid); background: var(--paper); color: var(--ink); min-width: 0; }
+.table { overflow: auto; }
+.table table { border-collapse: collapse; width: 100%; }
+.table th,.table td { padding: 12px; text-align: left; border: 1px solid var(--mid); vertical-align: top; }
+.setup { margin: 20px 0; padding: 16px; border: 2px solid var(--ink); }
+.setup textarea { width: 100%; min-height: 70px; overflow-wrap: anywhere; }

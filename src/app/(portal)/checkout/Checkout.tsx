@@ -206,6 +206,7 @@ export function Checkout({ today }: { today: string }) {
   };
 
   const submit = async () => {
+    if (session && !session.capabilities.includes("orders.submit")) return;
     if (SECTIONS.some((section) => problems[section]) || lines.length === 0) return;
     setSubmitError(null);
     let orderNo = nextOrderNo();
@@ -273,6 +274,9 @@ export function Checkout({ today }: { today: string }) {
     setView("form");
   };
 
+  if (session && !session.capabilities.includes("orders.submit")) {
+    return <main className={styles.empty}><h1>Order access</h1><p>Your role can build requests. A purchaser must submit quotes and orders.</p><Link href="/request">View request list</Link></main>;
+  }
   if (!hydrated || !linesHydrated) return null;
 
   if (!submitted && lines.length === 0) {

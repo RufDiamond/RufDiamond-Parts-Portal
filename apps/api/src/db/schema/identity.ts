@@ -77,3 +77,9 @@ export const session = pgTable("session", {
 export const passwordResetToken = pgTable("password_reset_token", {
   id: id(), tokenHash: text("token_hash").notNull().unique(), userId: uuid("user_id").notNull().references(() => appUser.id), expiresAt: time("expires_at").notNull(), consumedAt: time("consumed_at"), ...mutable(),
 }, t => [index("reset_user").on(t.userId), versionCheck(t), check("reset_expiry", sql`${t.expiresAt} > ${t.createdAt}`)]);
+
+export const accountInvitation = pgTable("account_invitation", {
+  id: id(), userId: uuid("user_id").notNull().references(() => appUser.id),
+  tokenHash: text("token_hash").notNull().unique(), expiresAt: time("expires_at").notNull(),
+  consumedAt: time("consumed_at"), createdAt: time("created_at").notNull().defaultNow(),
+}, t => [index("account_invitation_user").on(t.userId)]);

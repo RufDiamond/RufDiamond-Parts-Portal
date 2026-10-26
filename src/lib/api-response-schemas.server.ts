@@ -10,6 +10,7 @@ import {
   DraftFigurePageSchema, DraftFigureMetadataSchema,SourceReviewDetailSchema,
   QuoteLinePageSchema, CustomerQuotePageSchema, QuoteLineSchema, SubmitQuoteResultSchema,
   SubmitCommerceOrderResultSchema, CompanyDiscountResultSchema, QuoteNoticeSchema,
+  AccountDirectorySchema, InvitedUserSchema, ManagedUserSchema, InvitationCompletedSchema,
 } from "@rufdiamond/contracts";
 import { CatalogApiError } from "./api-error";
 
@@ -26,6 +27,10 @@ export function apiResponseSchema(pathWithQuery: string, method: string, status:
   let schema: TSchema | undefined;
   let expectedStatus = 200;
   if (path === "me") schema = MeResponseSchema;
+  else if (path === "auth/invitations/complete") schema = InvitationCompletedSchema;
+  else if (path === "admin/users") { schema = method === "GET" ? AccountDirectorySchema : InvitedUserSchema; if(method === "POST") expectedStatus=201; }
+  else if (/^admin\/users\/[^/]+\/invitation$/.test(path)) schema = InvitedUserSchema;
+  else if (/^admin\/users\/[^/]+$/.test(path)) schema = ManagedUserSchema;
   else if(path.startsWith("admin/catalog-review/"))schema=SourceReviewDetailSchema;
   else if (path === "admin/figures") schema = DraftFigurePageSchema;
   else if (/^admin\/figures\/[^/]+$/.test(path)) schema = DraftFigureMetadataSchema;

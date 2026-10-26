@@ -5,3 +5,4 @@ export const dynamic = "force-dynamic";
 export const GET = handleBackendApiRequest;
 export const POST = handleBackendApiRequest;
 export const PUT = handleBackendApiRequest;
+export const PATCH = handleBackendApiRequest;

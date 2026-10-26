@@ -197,7 +197,10 @@ describe("transactional mutation primitives", () => {
       connection.withTransaction(tx => claimOutboxEvents(tx)),
     ]);
 
-    expect([left.length, right.length].sort((a, b) => a - b)).toEqual([5, 20]);
+    // SKIP LOCKED may interleave row acquisition; each batch stays bounded
+    // and their union must contain each available event exactly once.
+    expect(left.length + right.length).toBe(25);
+    for (const batch of [left, right]) { expect(batch.length).toBeGreaterThan(0); expect(batch.length).toBeLessThanOrEqual(20); }
     expect(new Set([...left, ...right].map(event => event.id)).size).toBe(25);
   });
 

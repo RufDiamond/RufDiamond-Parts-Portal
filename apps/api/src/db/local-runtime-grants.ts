@@ -1,4 +1,5 @@
 import type { Pool } from "pg";
+import { grantAccountRuntime } from "./account-runtime-grants.js";
 
 /** Setup authority only. Caller creates a fresh nonprivileged role in a disposable local DB.
  * Never loads environment files, changes a role's attributes, or provisions remote roles. */
@@ -33,4 +34,5 @@ export async function grantLocalRuntime(setup: Pool, role: string) {
   await setup.query(`GRANT UPDATE (quantity_semantics) ON TABLE figure_part TO ${target}`);
   await setup.query(`GRANT SELECT,INSERT ON TABLE catalog_depiction_review,release_depiction_review,release_source_reference TO ${target}`);
   await setup.query(`GRANT UPDATE (source_review_version) ON TABLE diagram_mapping TO ${target}`);
+  await grantAccountRuntime(setup,role);
 }

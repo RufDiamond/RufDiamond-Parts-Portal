@@ -4,6 +4,11 @@ const uuid = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-
 const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; publicWrite?: boolean; drawing?: boolean; image?: boolean }[] = [
   { path: /^me$/, method: "GET" },
   { path: /^auth\/(sign-in|password-reset\/(request|complete))$/, method: "POST", bytes: 16384, publicWrite: true },
+  { path: /^auth\/invitations\/complete$/, method: "POST", bytes: 16384, publicWrite: true },
+  { path: /^admin\/users$/, method: "GET", query: ["cursor"] },
+  { path: /^admin\/users$/, method: "POST", bytes: 16384 },
+  { path: new RegExp(`^admin/users/${uuid}$`), method: "PATCH", bytes: 4096 },
+  { path: new RegExp(`^admin/users/${uuid}/invitation$`), method: "POST", bytes: 4096 },
   { path: /^auth\/sign-out$/, method: "POST", bytes: 4096 },
   { path: /^catalog\/(product-lines|models|parts\/usage-index)$/, method: "GET", query: ["cursor", "limit"] },
   { path: /^catalog\/parts\/(search|usages)$/, method: "GET", query: ["q", "mode", "cursor", "limit"] },

@@ -264,6 +264,9 @@ describe("database authorization policy", () => {
     const password = "correct horse battery staple";
     const passwordHash = await argon2.hash(password, passwordOptions);
     await postgres.pool.query("update app_user set password_hash=$2,login_id='authorized@example.test',email='authorized@example.test' where id=$1", [ids.technicianUser, passwordHash]);
+    // Migration 0016 seeds pilot read access. Deliberately remove this grant
+    // here to verify building the application never restores revoked policy.
+    await postgres.pool.query("delete from role_capability where role_id=(select id from role where key='technician') and capability_key='catalog.model.view'");
     const app = await buildApp({ config, dependencies: { database, passwordOptions } });
     apps.push(app);
     expect((await postgres.pool.query("select count(*)::int count from role_capability rc join role r on r.id=rc.role_id where r.key='technician' and rc.capability_key='catalog.model.view'")).rows[0].count).toBe(0);

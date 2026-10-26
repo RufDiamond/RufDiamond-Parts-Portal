@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
+    "accounts:bootstrap": "tsx src/modules/accounts/bootstrap.ts",
     "drawings:cleanup": "tsx src/worker/drawing-cleanup.ts",
     "outbox:worker": "tsx src/worker/outbox.ts"
   },

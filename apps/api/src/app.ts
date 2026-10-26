@@ -5,6 +5,7 @@ import type { AppConfig } from "./config.js";
 import { createDatabase } from "./db/client.js";
 import { createDatabaseAuthorizationResolver } from "./modules/authorization/policy.js";
 import { registerIdentityRoutes } from "./modules/identity/routes.js";
+import { registerAccountRoutes } from "./modules/accounts/routes.js";
 import { registerMappingRoutes } from "./modules/diagram-mapping/routes.js";
 import { registerDrawingRoutes } from "./modules/drawings/routes.js";
 import { registerPublicationRoutes } from "./modules/publication/routes.js";
@@ -54,6 +55,7 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   });
   registerAuth(app, config, identity);
   registerIdentityRoutes(app, config, identity, now);
+  registerAccountRoutes(app, config, database.db, now, dependencies.passwordOptions);
   registerMappingRoutes(app, config, database.db, now);
   const ownedStorage = dependencies.drawingStorage ? null : createS3DrawingStorage(config.s3);
   if (ownedStorage) app.addHook("onClose", async () => ownedStorage.close());

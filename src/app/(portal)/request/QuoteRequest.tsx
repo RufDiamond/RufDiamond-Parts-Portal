@@ -103,11 +103,13 @@ export function QuoteRequest({
 
   const savedAddress = company?.defaultShippingAddress ?? null;
   const session = useCustomerSession();
+  const canSubmit = !session || session.capabilities.includes("orders.submit");
   const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
+    if (!canSubmit) return;
     setSubmitError(null);
     const details = {
       comments,
@@ -458,7 +460,7 @@ export function QuoteRequest({
         >
           Add more parts
         </button>
-        <button
+        {canSubmit && <button
           type="button"
           className={styles.primary}
           onClick={() => void onSubmit()}
@@ -470,7 +472,7 @@ export function QuoteRequest({
           }
         >
           {submitting ? "Submitting…" : "Submit quote request"}
-        </button>
+        </button>}
       </div>
     </div>
   );
