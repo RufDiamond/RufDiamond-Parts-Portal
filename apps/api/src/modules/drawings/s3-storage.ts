@@ -1,11 +1,11 @@
 import { DeleteObjectsCommand, GetBucketAclCommand, GetBucketPolicyCommand, GetBucketVersioningCommand, GetObjectCommand, HeadObjectCommand, ListObjectVersionsCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { Readable } from "node:stream";
-import type { AppConfig } from "../../config.js";
+import type { S3Config } from "../../config.js";
 import { isPinnedVersion, MAX_DRAWING_BYTES, type DrawingStorage } from "./storage.js";
 
 /** Shared provider policy check for narrow PNG and catalogue-source adapters. */
-export async function requirePrivateVersionedBucket(client: S3Client, config: AppConfig["s3"]) {
+export async function requirePrivateVersionedBucket(client: S3Client, config: S3Config) {
   const Bucket = config.bucket, timeout = () => ({ abortSignal: AbortSignal.timeout(15_000) });
   const versioning = await client.send(new GetBucketVersioningCommand({ Bucket }), timeout());
   if (versioning.Status !== "Enabled") throw new Error("Bucket versioning is required");
@@ -21,7 +21,7 @@ export async function requirePrivateVersionedBucket(client: S3Client, config: Ap
 }
 
 /** Provider credentials never leave the API. Bucket configuration is verified, never silently changed. */
-export function createS3DrawingStorage(config: AppConfig["s3"]): DrawingStorage & { close(): void } {
+export function createS3DrawingStorage(config: S3Config): DrawingStorage & { close(): void } {
   const client = new S3Client({ endpoint: config.endpoint, region: config.region, forcePathStyle: true, credentials: { accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey }, maxAttempts: 2, requestChecksumCalculation: "WHEN_REQUIRED", responseChecksumValidation: "WHEN_REQUIRED" });
   const Bucket = config.bucket;
   const timeout = () => ({ abortSignal: AbortSignal.timeout(15_000) });

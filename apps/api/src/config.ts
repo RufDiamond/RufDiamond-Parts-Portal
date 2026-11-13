@@ -11,15 +11,17 @@ export interface AppConfig {
     activeKeyId: string;
     keys: Readonly<Record<string, string>>;
   };
-  s3: {
-    provider?: "s3" | "minio";
-    endpoint: string;
-    region: string;
-    bucket: string;
-    accessKeyId: string;
-    secretAccessKey: string;
-  };
+  s3?: S3Config;
   drawingScanner?: { host: string; port: number; timeoutMs: number };
+}
+
+export interface S3Config {
+  provider?: "s3" | "minio";
+  endpoint: string;
+  region: string;
+  bucket: string;
+  accessKeyId: string;
+  secretAccessKey: string;
 }
 
 type Environment = Record<string, string | undefined>;
@@ -112,6 +114,11 @@ export function loadConfig(environment: Environment): AppConfig {
     }
   }
 
+  const storageDisabled = environment.RUF_STORAGE_DISABLED === "true";
+  if (environment.RUF_STORAGE_DISABLED !== undefined && !["true", "false"].includes(environment.RUF_STORAGE_DISABLED)) {
+    throw new Error("RUF_STORAGE_DISABLED must be true or false");
+  }
+
   let drawingScanner: AppConfig["drawingScanner"];
   if (environment.S3_PROVIDER && !["s3", "minio"].includes(environment.S3_PROVIDER)) throw new Error("S3_PROVIDER must be s3 or minio");
   if (environment.DRAWING_SCANNER_HOST || environment.DRAWING_SCANNER_PORT || environment.DRAWING_SCANNER_TIMEOUT_MS) {
@@ -129,7 +136,7 @@ export function loadConfig(environment: Environment): AppConfig {
     allowInsecureLoopbackCookie,
     deliveryEncryption: deliveryEncryption(environment),
     drawingScanner,
-    s3: {
+    s3: storageDisabled ? undefined : {
       provider: environment.S3_PROVIDER === "minio" ? "minio" : "s3",
       endpoint: validHttpUrl(required(environment, "S3_ENDPOINT"), "S3_ENDPOINT"),
       region: required(environment, "S3_REGION"),

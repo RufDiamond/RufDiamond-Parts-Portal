@@ -38,6 +38,30 @@ describe("GET /health/live", () => {
   });
 });
 
+describe("API without drawing storage", () => {
+  const environment = {
+    NODE_ENV: "test",
+    PORT: "3001",
+    DATABASE_URL: config.databaseUrl,
+    SESSION_SECRET: config.sessionSecret,
+    WEB_ORIGIN: config.webOrigin,
+    DELIVERY_ENCRYPTION_KEY_ID: "test",
+    DELIVERY_ENCRYPTION_KEYS_JSON: JSON.stringify(config.deliveryEncryption.keys),
+    RUF_STORAGE_DISABLED: "true",
+  };
+
+  it("starts the real API with authentication enforced and no object store", async () => {
+    const app = await buildApp({ config: loadConfig(environment) });
+    apps.push(app);
+    expect((await app.inject({ url: "/health/live" })).statusCode).toBe(200);
+    expect((await app.inject({ url: "/api/v1/me" })).statusCode).toBe(401);
+  });
+
+  it("still rejects incomplete storage settings when storage is required", () => {
+    expect(() => loadConfig({ ...environment, RUF_STORAGE_DISABLED: "false" })).toThrow("S3_ENDPOINT");
+  });
+});
+
 describe("configuration", () => {
   it("rejects a non-HTTP web origin", () => {
     expect(() => loadConfig({

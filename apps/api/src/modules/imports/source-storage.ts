@@ -5,7 +5,7 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
-import type { AppConfig } from "../../config.js";
+import type { S3Config } from "../../config.js";
 import { requirePrivateVersionedBucket } from "../drawings/s3-storage.js";
 import { isPinnedVersion } from "../drawings/storage.js";
 import { MAX_IMPORT_BYTES } from "./parser.js";
@@ -24,7 +24,7 @@ export const importContentType = (format: "csv" | "xlsx") =>
     ? "text/csv"
     : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 export function createS3ImportStorage(
-  config: AppConfig["s3"],
+  config: S3Config,
 ): ImportSourceStorage & { close(): void } {
   const client = new S3Client({
     endpoint: config.endpoint,

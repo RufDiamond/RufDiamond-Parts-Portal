@@ -19,7 +19,7 @@ import type { DrawingScanner, DrawingStorage } from "./modules/drawings/storage.
 import { createIdentityService, type AuthorizationResolver } from "./modules/identity/service.js";
 import { registerQuoteRoutes } from "./modules/quotes/routes.js";
 import { registerAuth } from "./plugins/auth.js";
-import { registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
+import { AppError, registerErrorHandler, registerNotFoundHandler } from "./plugins/error-handler.js";
 import { registerRequestContext } from "./plugins/request-context.js";
 
 export interface AppDependencies {
@@ -37,6 +37,24 @@ export interface BuildAppOptions {
   config: AppConfig;
   dependencies?: Partial<AppDependencies>;
 }
+
+function storageUnavailable(): never {
+  throw new AppError("PRIVATE_STORAGE_UNAVAILABLE", 503, "Private storage is unavailable.");
+}
+
+const unavailableDrawings: DrawingStorage = {
+  createUpload: async () => storageUnavailable(),
+  inspect: async () => storageUnavailable(),
+  read: async function* () { storageUnavailable(); },
+  createDownload: async () => storageUnavailable(),
+  deleteQuarantine: async () => storageUnavailable(),
+};
+
+const unavailableImports: ImportSourceStorage = {
+  put: async () => storageUnavailable(),
+  read: async () => storageUnavailable(),
+  remove: async () => storageUnavailable(),
+};
 
 export async function buildApp({ config, dependencies = {} }: BuildAppOptions): Promise<FastifyInstance> {
   const ownedDatabase = dependencies.database ? null : createDatabase(config.databaseUrl);
@@ -57,15 +75,17 @@ export async function buildApp({ config, dependencies = {} }: BuildAppOptions): 
   registerIdentityRoutes(app, config, identity, now);
   registerAccountRoutes(app, config, database.db, now, dependencies.passwordOptions);
   registerMappingRoutes(app, config, database.db, now);
-  const ownedStorage = dependencies.drawingStorage ? null : createS3DrawingStorage(config.s3);
+  const ownedStorage = config.s3 && !dependencies.drawingStorage ? createS3DrawingStorage(config.s3) : null;
   if (ownedStorage) app.addHook("onClose", async () => ownedStorage.close());
-  registerDrawingRoutes(app, config, database.db, dependencies.drawingStorage ?? ownedStorage!, dependencies.drawingScanner ?? createClamdScanner(config.drawingScanner), now);
+  const drawingStorage = dependencies.drawingStorage ?? ownedStorage ?? unavailableDrawings;
+  registerDrawingRoutes(app, config, database.db, drawingStorage, dependencies.drawingScanner ?? createClamdScanner(config.drawingScanner), now);
   registerPublicationRoutes(app, config, database.db, now);
-  const ownedImportStorage = dependencies.importStorage ? null : createS3ImportStorage(config.s3);
+  const ownedImportStorage = config.s3 && !dependencies.importStorage ? createS3ImportStorage(config.s3) : null;
   if (ownedImportStorage) app.addHook("onClose", async () => ownedImportStorage.close());
-  registerImportRoutes(app, config, database.db, dependencies.importStorage ?? ownedImportStorage!, dependencies.importScanner ?? createClamdImportScanner(config.drawingScanner), now);
-  registerCatalogReviewRoutes(app,config,database.db,dependencies.importStorage ?? ownedImportStorage!,now);
-  registerCatalogRoutes(app, database.db, dependencies.drawingStorage ?? ownedStorage!);
+  const importStorage = dependencies.importStorage ?? ownedImportStorage ?? unavailableImports;
+  registerImportRoutes(app, config, database.db, importStorage, dependencies.importScanner ?? createClamdImportScanner(config.drawingScanner), now);
+  registerCatalogReviewRoutes(app,config,database.db,importStorage,now);
+  registerCatalogRoutes(app, database.db, drawingStorage);
   registerQuoteRoutes(app, config, database.db, now);
   registerErrorHandler(app);
   registerNotFoundHandler(app);
