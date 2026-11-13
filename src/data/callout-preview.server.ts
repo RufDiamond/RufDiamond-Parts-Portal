@@ -17,12 +17,6 @@ import { loadFrontendBackendConfig } from "@/lib/backend-config.server";
 // root. Avoid import.meta URL arithmetic here: Turbopack treats literal
 // `new URL()` paths as bundled asset dependencies.
 const REPOSITORY_ROOT = process.cwd();
-const REVIEW_PATH = path.join(
-  REPOSITORY_ROOT,
-  "tools/callouts/review/proposals.json",
-);
-const CATALOGUE_PATH = path.join(REPOSITORY_ROOT, "src/data/ft3-wagon.ts");
-const PUBLIC_ROOT = path.join(REPOSITORY_ROOT, "public");
 const FAILURE_NOTICE =
   "Local preview — unapproved marker positions; not for ordering. Preview unavailable because validation failed; repository data is unchanged.";
 
@@ -116,20 +110,26 @@ export async function loadCalloutPreview(
     (process.env.NODE_ENV === "production" && flag !== "0");
   if (!allow) return { detail, notice: null };
 
-  const base = await loadValidatedPreview(detail);
-  const result = base.notice?.includes("Preview unavailable")
-    ? base
-    : await addPartHighlightReview(detail, base);
+  const result = await loadSourceCheckedCallouts(detail, REPOSITORY_ROOT);
   return surface === "hosted-review"
     ? { ...result, notice: result.notice?.replace("Local preview", "Marker review") ?? null }
     : result;
 }
 
-async function loadValidatedPreview(detail: FigureDetail): Promise<CalloutPreview> {
+/** Used for the fixture viewer and the separately authorized Fat Truck preview. */
+export async function loadSourceCheckedCallouts(detail: FigureDetail, assetRoot: string): Promise<CalloutPreview> {
+  const base = await loadValidatedPreview(detail, assetRoot);
+  return base.notice?.includes("Preview unavailable")
+    ? base
+    : addPartHighlightReview(detail, base, assetRoot);
+}
+
+async function loadValidatedPreview(detail: FigureDetail, assetRoot: string): Promise<CalloutPreview> {
+  const publicRoot = path.join(assetRoot, "public");
   try {
     const [reviewBytes, catalogueBytes] = await Promise.all([
-      fs.readFile(REVIEW_PATH),
-      fs.readFile(CATALOGUE_PATH),
+      fs.readFile(path.join(assetRoot, "tools/callouts/review/proposals.json")),
+      fs.readFile(path.join(assetRoot, "src/data/ft3-wagon.ts")),
     ]);
     const source = parseReviewSource(JSON.parse(reviewBytes.toString()));
     if (!source) return { detail, notice: unavailable("review source mismatch") };
@@ -161,8 +161,8 @@ async function loadValidatedPreview(detail: FigureDetail): Promise<CalloutPrevie
       return { detail, notice: unavailable("drawing dimensions mismatch") };
     }
 
-    const drawingPath = path.resolve(PUBLIC_ROOT, proposal.drawingPath.slice("public/".length));
-    if (!drawingPath.startsWith(`${PUBLIC_ROOT}${path.sep}`)) {
+    const drawingPath = path.resolve(publicRoot, proposal.drawingPath.slice("public/".length));
+    if (!drawingPath.startsWith(`${publicRoot}${path.sep}`)) {
       return { detail, notice: unavailable("drawing path mismatch") };
     }
     const drawingBytes = await fs.readFile(drawingPath);

@@ -34,7 +34,7 @@ export default async function FigurePage({
   return (
     <FigureWorkspace
       detail={preview.detail}
-      previewNotice={repo ? fatTruckPreviewNotice : null}
+      previewNotice={repo ? [fatTruckPreviewNotice, detail.mappingNotice?.replace(/^Local preview — /, "Mapping review — ")].filter(Boolean).join(" ") : null}
       usage={usage}
       sheet={index === -1 ? "—" : `${pad(index + 1)} / ${pad(total)}`}
       index={index === -1 ? 0 : index}

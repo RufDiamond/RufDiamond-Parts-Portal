@@ -23,7 +23,7 @@ Build with API settings and, if desired, `RUF_NEXT_DIST_DIR=tmp/next-customer-bu
 RUF_REPOSITORY_MODE=api RUF_NEXT_DIST_DIR=tmp/next-customer-build node tools/package-api-frontend.mjs /absolute/new/customer-frontend-artifact
 ```
 
-The packager copies standalone output and static chunks into the actual custom dist path, excludes environment files and review/catalogue tracing, and copies only public presentation folders (brand, home, nav, models, systems, toolbar). Original drawings, masks and review assets remain untouched in the checkout. Do not copy the whole `public` folder into an API artifact. The runtime proxy also rejects direct catalogue/review assets and disallowed optimizer paths, including double-encoded path characters.
+The packager copies standalone output and static chunks into the actual custom dist path, excludes environment files and review/catalogue tracing, and copies only public presentation folders (brand, home, nav, models, systems, toolbar). The authorized Fat Truck preview bundles its source drawings and mapping evidence under `private-fat-truck`. Only the session-checked drawing route serves these images. Do not copy the whole `public` folder into an API artifact. The runtime proxy also rejects direct catalogue/review assets and disallowed optimizer paths, including double-encoded path characters.
 
 Start the packaged `server.js` with the API settings, `HOSTNAME` and `PORT`; its embedded dist configuration must match the build. Verify CSS/chunk responses and protected/direct-private routes on the actual package, not just `next dev`.
 

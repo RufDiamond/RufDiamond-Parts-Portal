@@ -21,18 +21,27 @@ export async function packageApiFrontend(root, destination, dist = ".next") {
   await fs.cp(path.join(build, "standalone"), destination, { recursive: true, filter: file => !path.basename(file).startsWith(".env") && !file.includes("/public/drawings/") && !file.includes("/tools/callouts/review/") });
   await fs.cp(path.join(build, "static"), path.join(destination, dist, "static"), { recursive: true });
   await copyPublicPresentation(path.join(root, "public"), path.join(destination, "public"));
-  const drawings = path.join(root, "public", "drawings", "ft3w");
   const preview = path.join(destination, "private-fat-truck");
-  await fs.mkdir(preview);
-  const entries = await fs.readdir(drawings, { withFileTypes: true }).catch(error => {
-    if (error.code !== "ENOENT") throw error;
-    return [];
+  const drawings = path.join("public", "drawings", "ft3w");
+  const review = path.join("tools", "callouts", "review");
+  for (const directory of [drawings, review, path.join("src", "data")]) {
+    await fs.mkdir(path.join(preview, directory), { recursive: true });
+  }
+  // Keep the same relative paths used by the source hashes, outside public.
+  await fs.cp(path.join(root, drawings), path.join(preview, drawings), {
+    recursive: true,
+    filter: async file => {
+      const entry = await fs.lstat(file);
+      return entry.isDirectory() || (entry.isFile() && /^ft3w-[\w-]+\.png$/.test(path.basename(file)));
+    },
   });
-  for (const entry of entries) {
-    if (entry.isFile() && /^ft3w-[\w-]+\.png$/.test(entry.name)) {
-      await fs.copyFile(path.join(drawings, entry.name), path.join(preview, entry.name));
+  for (const name of await fs.readdir(path.join(root, review))) {
+    if (/^(?:proposals|source-corrections|part-highlights(?:-[\w-]+)?)\.json$/.test(name)) {
+      await fs.copyFile(path.join(root, review, name), path.join(preview, review, name));
     }
   }
+  const catalogue = path.join("src", "data", "ft3-wagon.ts");
+  await fs.copyFile(path.join(root, catalogue), path.join(preview, catalogue));
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

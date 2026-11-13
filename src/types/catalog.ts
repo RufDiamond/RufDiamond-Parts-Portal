@@ -238,6 +238,8 @@ export interface FigurePartRow {
 
 /** Everything needed to render one figure screen. */
 export interface FigureDetail {
+  /** Review status for the authorized catalogue preview. */
+  mappingNotice?: string | null;
   release?: ReleaseRef;
   mapping?: ReleasedDetail["mapping"];
   figure: Figure;

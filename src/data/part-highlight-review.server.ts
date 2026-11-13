@@ -43,8 +43,6 @@ interface FigureReview {
     crop: { x: number; y: number; width: number; height: number };
   } };
 }
-const ROOT = process.cwd();
-const PUBLIC = path.join(ROOT, "public");
 const record = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === "object" && !Array.isArray(value);
 const percent = (value: unknown): value is number =>
@@ -83,9 +81,10 @@ function artwork(value: unknown): value is Artwork {
     Number.isInteger(value.height) && (value.height as number) > 0;
 }
 
-async function verifyArtwork(item: Artwork) {
-  const absolute = path.resolve(PUBLIC, item.path.slice("public/".length));
-  if (!absolute.startsWith(`${PUBLIC}${path.sep}`)) throw new Error("drawing path mismatch");
+async function verifyArtwork(item: Artwork, assetRoot: string) {
+  const publicRoot = path.join(assetRoot, "public");
+  const absolute = path.resolve(publicRoot, item.path.slice("public/".length));
+  if (!absolute.startsWith(`${publicRoot}${path.sep}`)) throw new Error("drawing path mismatch");
   const bytes = await fs.readFile(absolute);
   if (digest(bytes) !== item.sha256) throw new Error("drawing hash mismatch");
   if (bytes.length < 24 || bytes.subarray(0, 8).toString("hex") !== "89504e470d0a1a0a" ||
@@ -112,8 +111,7 @@ function pathFor(polygons: Point[][]): string | null {
   ).join(" ") : null;
 }
 
-/** Called only after the development/explicit hosted-review surface gate. */
-export async function addPartHighlightReview(original: FigureDetail, base: CalloutPreview): Promise<CalloutPreview> {
+export async function addPartHighlightReview(original: FigureDetail, base: CalloutPreview, assetRoot: string): Promise<CalloutPreview> {
   let result = base;
   let validationFailed = false;
   for (const filename of ["part-highlights.json", "part-highlights-chassis.json", "source-corrections.json",
@@ -122,14 +120,14 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
     if (supplement && validationFailed) continue;
     let manifestFound = false;
     try {
-      const bytes = await fs.readFile(path.join(ROOT, "tools/callouts/review", filename));
+      const bytes = await fs.readFile(path.join(assetRoot, "tools/callouts/review", filename));
       manifestFound = true;
       const value: unknown = JSON.parse(bytes.toString());
       if (!record(value) || value.schemaVersion !== 1 || value.status !== "NOT_FOR_CUSTOMER_USE" ||
         value.reviewer !== null || !Array.isArray(value.figures)) throw new Error("review envelope mismatch");
       const matches = value.figures.filter((item) => record(item) && item.figureId === original.figure.id);
       if (!matches.length) continue;
-      if (matches.length !== 1 || value.catalogueSha256 !== digest(await fs.readFile(path.join(ROOT, "src/data/ft3-wagon.ts")))) {
+      if (matches.length !== 1 || value.catalogueSha256 !== digest(await fs.readFile(path.join(assetRoot, "src/data/ft3-wagon.ts")))) {
         throw new Error("catalogue identity mismatch");
       }
       const entry = matches[0];
@@ -146,7 +144,7 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
       }
       if (!original.drawing || review.original.path !== `public${original.drawing.storagePath}` ||
         review.original.width !== original.drawing.width || review.original.height !== original.drawing.height) throw new Error("drawing identity mismatch");
-      await verifyArtwork(review.original);
+      await verifyArtwork(review.original, assetRoot);
       if (entry.replacement !== undefined) {
         if (!replacement(entry.replacement) ||
           (filename !== "source-corrections.json" && (!supplement ||
@@ -154,7 +152,7 @@ export async function addPartHighlightReview(original: FigureDetail, base: Callo
             result.detail.drawing.width !== entry.replacement.width || result.detail.drawing.height !== entry.replacement.height)) ||
           entry.replacement.path === review.original.path ||
           original.callouts.some((item) => item.x !== null || item.y !== null || item.maskPath !== null)) throw new Error("replacement evidence mismatch");
-        await verifyArtwork(entry.replacement);
+        await verifyArtwork(entry.replacement, assetRoot);
       }
       const sourceArtwork = review.replacement ?? review.original;
       if (supplement && (result.detail.drawing?.storagePath !== sourceArtwork.path.slice("public".length) ||

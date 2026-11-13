@@ -2,7 +2,11 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import * as fixture from "@/data/fixture-repository.server";
-import { drawingFiles, figures, parts } from "@/data/ft3-wagon";
+import { parts } from "@/data/ft3-wagon";
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { loadSourceCheckedCallouts } from "./callout-preview.server";
 import { fatTruckPreviewVariant } from "@/lib/fat-truck-preview";
 import type { Part } from "@/types/catalog";
 import type { CustomerRepository } from "./customer-composition.server";
@@ -21,10 +25,20 @@ export async function getFatTruckPreviewSession() {
     && session.capabilities.includes("parts.record.view") ? session : null;
 }
 
+const packagedAssets = path.join(process.cwd(), "private-fat-truck");
+const assetRoot = existsSync(packagedAssets) ? packagedAssets : process.cwd();
 
-export function getFatTruckPreviewDrawing(id: string) {
-  const figure = figures.find(candidate => candidate.id === id && candidate.variantId === fatTruckPreviewVariant);
-  return drawingFiles.find(drawing => drawing.id === figure?.drawingFileId);
+async function readMappedFigure(id: string) {
+  const detail = await fixture.getFigureDetail(id);
+  if (!detail || detail.figure.variantId !== fatTruckPreviewVariant) return null;
+  return loadSourceCheckedCallouts(detail, assetRoot);
+}
+
+export async function readFatTruckPreviewDrawing(id: string) {
+  const mapped = await readMappedFigure(id);
+  const drawingPath = mapped?.detail.drawing?.storagePath;
+  if (!drawingPath || !/^\/drawings\/ft3w\/(?:review-source-[0-9]+\/)?[\w-]+\.png$/.test(drawingPath)) return null;
+  return readFile(path.join(assetRoot, "public", drawingPath));
 }
 
 function visiblePart(part: Part, canViewPrices: boolean): Part {
@@ -38,11 +52,20 @@ export function getFatTruckPreviewPart(id: string, canViewPrices: boolean) {
 }
 
 export async function getFatTruckPreviewFigure(id: string, canViewPrices: boolean) {
-  const detail = await fixture.getFigureDetail(id);
-  if (!detail || detail.figure.variantId !== fatTruckPreviewVariant) notFound();
+  const mapped = await readMappedFigure(id);
+  if (!mapped) notFound();
+  const { detail, notice } = mapped;
+  const drawingUrl = `/api/fat-truck-preview/${id}/drawing`;
   return {
     ...detail,
-    drawing: detail.drawing && { ...detail.drawing, storagePath: `/api/fat-truck-preview/${id}/drawing` },
+    mappingNotice: notice,
+    drawing: detail.drawing && { ...detail.drawing, storagePath: drawingUrl },
+    callouts: detail.callouts.map(callout => {
+      const geometry = callout.componentGeometry;
+      return geometry && geometry.drawingPath === detail.drawing?.storagePath
+        ? { ...callout, componentGeometry: { ...geometry, drawingPath: drawingUrl } }
+        : callout;
+    }),
     rows: detail.rows.map(row => ({ ...row, part: visiblePart(row.part, canViewPrices) })),
   };
 }
