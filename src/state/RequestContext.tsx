@@ -164,7 +164,7 @@ export function requestReducer(
           const nextQty = existing.qty + qty;
           // API additions have just been revalidated. Do not preserve a stale
           // release snapshot or an old price that is now omitted by scope.
-          lines[index] = part.releasePartId ? toLine(part, nextQty, quoteNo, source) : {
+          lines[index] = part.releasePartId || quoteLineId ? toLine(part, nextQty, quoteNo, source) : {
             ...existing,
             qty: nextQty,
             ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * nextQty) }),
@@ -536,7 +536,9 @@ function RequestProviderState({
       if (!additions.length) return true;
       setRequestError("");
       try {
-        const fresh = apiKey ? await revalidateRequestIdentities(additions.map(({ part, qty = 1 }) => ({ partId: part.id, releasePartId: part.releasePartId ?? "", qty }))) : additions;
+        const fresh = apiKey ? await revalidateRequestIdentities(additions.map(({ part, qty = 1, quoteLineId }) => quoteLineId
+          ? { quoteLineId, qty }
+          : { partId: part.id, releasePartId: part.releasePartId ?? "", qty })) : additions;
         if (token !== lifetime.current) return false;
         return await new Promise<boolean>(resolve => {
           commits.current.push(resolve);
@@ -598,7 +600,7 @@ function RequestProviderState({
 
   const submit = useCallback(
     (details: RequestDetails, reference?: string): RequestConfirmation | null => {
-    if (apiKey) return null;
+    if (apiKey && !reference) return null;
     // Nothing ticked is nothing to send, even with parts on the list.
     if (includedLines.length === 0) return null;
 
@@ -622,7 +624,7 @@ function RequestProviderState({
 
   const value = useMemo<RequestContextValue>(
     () => ({
-      submissionAvailable: !apiKey,
+      submissionAvailable: !apiSession || apiSession.capabilities.includes("orders.submit"),
       requestError,
       hydrationError,
       retryHydration,
@@ -647,7 +649,7 @@ function RequestProviderState({
       submit,
     }),
     [
-      apiKey,
+      apiSession,
       requestError,
       hydrationError,
       discardSavedRequest,

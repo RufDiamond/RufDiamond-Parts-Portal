@@ -69,6 +69,7 @@ function toCsv(lines: CustomerQuoteLine[]): string {
  */
 export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuoteLine[]; today: string }) {
   const session = useCustomerSession();
+  const canOrder = !session || session.capabilities.includes("orders.submit");
   const canAdmin = Boolean(session?.capabilities.includes("orders.quote"));
   const api = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
   const { lines: cart, currency, discountRate, company } = useRequest();
@@ -79,22 +80,20 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
   const localNotices = useQuoteNotices();
   const [apiLines, setApiLines] = useState<CustomerQuoteLine[] | null>(null);
   const [apiNotices, setApiNotices] = useState<QuoteNotice[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const reload = useCallback(async () => {
-    if (!api) {
-      setApiLines(null);
-      setApiNotices(null);
-      return;
-    }
+    if (!api) return;
     try {
       const page = await api.listMine();
+      setLoadError(false);
       setApiLines(page.items.map((item) => {
         const qty = item.response?.newQty ?? item.qty;
         const partNumber = item.response?.newPartNumber ?? item.partNumber;
         const description = item.response?.newDescription ?? item.description;
         const unitPrice = item.response?.unitPrice ?? null;
         const released = item.response !== null;
-        const canOrder = Boolean(released && !item.expired && unitPrice && partNumber && description && qty && qty > 0);
+        const canOrder = Boolean(released && item.response?.available && !item.expired && unitPrice && partNumber && description && qty && qty > 0);
         return {
           ...item,
           requote: released && item.expired && partNumber && description && qty
@@ -118,23 +117,26 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
       }));
       setApiNotices(page.notices);
     } catch {
+      setLoadError(true);
       setApiLines(null);
       setApiNotices(null);
     }
   }, [api]);
 
-  useEffect(() => { void reload(); }, [reload]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => { void reload(); }, 0);
+    return () => window.clearTimeout(timer);
+  }, [reload]);
 
   const lines = useMemo(() => {
-    if (apiLines) return apiLines;
+    if (api) return apiLines ?? [];
     return mergeCustomerLines(serverLines, Object.values(stored), companyId, today);
-  }, [apiLines, serverLines, stored, companyId, today]);
+  }, [api, apiLines, serverLines, stored, companyId, today]);
 
-  const notices = apiNotices ?? localNotices;
-  const fresh = useMemo(
-    () => new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).flatMap((notice) => notice.lineIds)),
-    [notices, companyId],
-  );
+  const fresh = useMemo(() => {
+    const notices = api ? apiNotices ?? [] : localNotices;
+    return new Set(notices.filter((notice) => notice.companyId === companyId && !notice.seen).flatMap((notice) => notice.lineIds));
+  }, [api, apiNotices, localNotices, companyId]);
   useMarkNoticesSeenOnLeave(companyId, api ? () => { void api.markNoticesSeen(); } : undefined);
 
   const [requested, setRequested] = useState<string | null>(null);
@@ -184,7 +186,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
     });
 
   /** Ticked lines that can be ordered and are not already on the cart. */
-  const toAdd = lines.filter((line) => ticked.has(line.id) && line.orderable && !onCart.has(cartId(line)));
+  const toAdd = lines.filter((line) => canOrder && ticked.has(line.id) && line.orderable && !onCart.has(cartId(line)));
   const [confirming, setConfirming] = useState<RequestPartInput[] | null>(null);
 
   const email = () => {
@@ -235,6 +237,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
           After this period, prices and availability may be subject to change and should be reconfirmed before placing an order.
         </p>
 
+        {loadError && <p role="alert">Quote Status could not be loaded. <button type="button" onClick={() => void reload()}>Retry</button></p>}
         {addition.error ? <p role="alert" className={styles.error}>{addition.error}</p> : null}
         {requested ? <p role="status" className={styles.done}>{requested}</p> : null}
         {fresh.size > 0 ? (
@@ -280,7 +283,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
                           type="checkbox"
                           className={styles.checkbox}
                           checked={ticked.has(line.id) || added}
-                          disabled={!line.orderable || added}
+                          disabled={!canOrder || !line.orderable || added}
                           onChange={() => toggle(line.id)}
                           aria-label={`Select ${line.response?.newPartNumber ?? line.partNumber ?? "line"} from ${line.quoteNo}`}
                           title={

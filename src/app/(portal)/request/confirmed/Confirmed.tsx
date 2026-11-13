@@ -18,7 +18,7 @@ export function Confirmed({ usage }: ConfirmedProps) {
   const { lastConfirmation, confirmationHydrated, submissionAvailable } = useRequest();
   const [savingPdf, setSavingPdf] = useState(false);
   const [pdfError, setPdfError] = useState("");
-  if (!submissionAvailable) return <main><h1>Quote submission unavailable</h1><p>The request service is not connected. No request has been submitted.</p><Link href="/request">Return to saved parts</Link></main>;
+  if (!submissionAvailable) return <main><h1>Quote submission requires a Purchaser</h1><Link href="/request">Return to saved parts</Link></main>;
 
   if (!confirmationHydrated) {
     return <p className={styles.loading}>Loading…</p>;

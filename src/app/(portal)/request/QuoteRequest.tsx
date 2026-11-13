@@ -143,10 +143,7 @@ export function QuoteRequest({
             };
           }),
         });
-        const confirmation = submit(details, result.quoteNo);
-        if (confirmation) {
-          registerQuoteRequest(confirmation, company?.id ?? session?.companyId ?? "guest", usage);
-        }
+        submit(details, result.quoteNo);
         router.push("/request/confirmed");
       } catch (error) {
         setSubmitError(error instanceof Error ? error.message : "Quote submit failed.");
@@ -197,7 +194,7 @@ export function QuoteRequest({
 
   return (
     <div className={styles.screen}>
-      {!submissionAvailable && <p role="status">Quote submission is unavailable while the request service is not connected. No request will be sent.</p>}
+      {!submissionAvailable && <p role="status">A Purchaser must submit this quote request.</p>}
       {requestError && <p role="alert">{requestError}</p>}
       {submitError && <p role="alert">{submitError}</p>}
       <ZeroPriceNotice prices={lines.map(line => line.unitPriceSnapshot)} />

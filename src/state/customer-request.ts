@@ -1,28 +1,61 @@
-import { PageSchema, PartUsageRowSchema, type ReleaseRef } from "@rufdiamond/contracts";
+import "@/lib/contract-formats";
+import { CustomerQuotePageSchema, PageSchema, PartUsageRowSchema, type ReleaseRef } from "@rufdiamond/contracts";
 import { Value } from "@sinclair/typebox/value";
 import type { OrderLine, Part } from "@/types/catalog";
+import type { RequestPartInput } from "./RequestContext";
 
-export type RequestIdentity = { partId: string; releasePartId: string; qty: number };
+export type RequestIdentity = { partId: string; releasePartId: string; qty: number } | { quoteLineId: string; qty: number };
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function readRequestIdentities(key: string): RequestIdentity[] {
   try {
     const value: unknown = JSON.parse(sessionStorage.getItem(key) ?? "[]");
     if (!Array.isArray(value) || value.length > 200) return [];
-    return value.filter((row): row is RequestIdentity => typeof row === "object" && row !== null && uuid.test(row.partId) && typeof row.releasePartId === "string" && Number.isFinite(row.qty) && row.qty > 0 && row.qty <= 100000);
+    return value.filter((row): row is RequestIdentity => {
+      if (!row || typeof row !== "object" || !Number.isSafeInteger(row.qty) || row.qty < 1 || row.qty > 100000) return false;
+      return ("quoteLineId" in row && uuid.test(row.quoteLineId))
+        || (uuid.test(row.partId) && typeof row.releasePartId === "string");
+    });
   } catch { return []; }
 }
 export function writeRequestIdentities(key: string, lines: OrderLine[]) {
-  try { sessionStorage.setItem(key, JSON.stringify(lines.filter(line => line.releasePartId).map(line => ({ partId: line.partId, releasePartId: line.releasePartId, qty: line.qty })))); } catch { /* Storage is optional. */ }
+  try { sessionStorage.setItem(key, JSON.stringify(lines.filter(line => line.quoteLineId || line.releasePartId).map(line => line.quoteLineId
+    ? { quoteLineId: line.quoteLineId, qty: line.qty }
+    : { partId: line.partId, releasePartId: line.releasePartId, qty: line.qty }))); } catch { /* Storage is optional. */ }
+}
+
+async function loadCurrentQuotes() {
+  const response = await fetch("/api/v1/quotes/mine", { cache: "no-store", credentials: "same-origin" });
+  if (!response.ok) throw new Error("Quote data is unavailable.");
+  const value: unknown = await response.json();
+  if (!Value.Check(CustomerQuotePageSchema, value)) throw new Error("Quote data is unavailable.");
+  return value.items;
 }
 
 /** Resolve identities against current authorized snapshots before showing any stored line. */
-export async function revalidateRequestIdentities(identities: RequestIdentity[]): Promise<{ part: Part; qty: number }[]> {
-  const result: { part: Part; qty: number }[] = [];
+export async function revalidateRequestIdentities(identities: RequestIdentity[]): Promise<RequestPartInput[]> {
+  const result: RequestPartInput[] = [];
+  let quotes: Awaited<ReturnType<typeof loadCurrentQuotes>> | undefined;
   const releases = new Map<string, ReleaseRef>();
   for (const identity of identities) {
+    if ("quoteLineId" in identity) {
+      quotes ??= await loadCurrentQuotes();
+      const line = quotes.find(row => row.id === identity.quoteLineId);
+      if (!line || line.expired || !line.response?.available || !line.response.unitPrice
+        || !line.partNumber || !line.description || !line.qty || identity.qty > line.qty) {
+        throw new Error("A saved quote is no longer orderable. Reload Quote Status.");
+      }
+      result.push({
+        quoteLineId: line.id, quoteNo: line.quoteNo, qty: identity.qty,
+        part: { id: `quote:${line.id}`, partNumber: line.partNumber, description: line.description,
+          listPrice: line.response.unitPrice, currency: "CAD", manufacturer: null,
+          status: "active", supersededByPartId: null, requires: [] },
+      });
+      continue;
+    }
     if (!uuid.test(identity.partId)) throw new Error("Request contains an unavailable catalogue identity.");
     let cursor: string | null = null;
     let found: Part | undefined;
+    let releaseId: string | undefined;
     const cursors = new Set<string>();
     for (let page = 0; page < 100; page++) {
       const response = await fetch(`/api/v1/catalog/parts/${identity.partId}/usages?limit=100${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`, { cache: "no-store", credentials: "same-origin" });
@@ -36,12 +69,17 @@ export async function revalidateRequestIdentities(identities: RequestIdentity[])
         releases.set(ref.modelId, ref);
       }
       found = value.items.find(row => row.part.id === identity.partId && row.part.releasePartId === identity.releasePartId)?.part;
-      if (found || !value.nextCursor) break;
+      if (found) {
+        // A single release on the matching page establishes the row's owner.
+        if (value.releases.length === 1) releaseId = value.releases[0].releaseId;
+        break;
+      }
+      if (!value.nextCursor) break;
       if (cursors.has(value.nextCursor)) throw new Error("Request catalogue data is unavailable.");
       cursors.add(value.nextCursor); cursor = value.nextCursor;
     }
     if (!found) throw new Error("A saved part's release is no longer available. Add it again from the current catalogue.");
-    result.push({ part: found, qty: identity.qty });
+    result.push({ part: found, qty: identity.qty, releaseId });
   }
   return result;
 }

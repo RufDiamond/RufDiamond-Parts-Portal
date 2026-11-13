@@ -141,3 +141,23 @@ it("rejects an entire request refresh when activation changes a contributing mod
   });
   await expect(revalidateRequestIdentities(ids.map((partId, i) => ({ partId, releasePartId: `rp${i + 1}`, qty: 1 })))).rejects.toThrow(/changed/);
 });
+
+it("restores a quoted item with its current authorized price", async () => {
+  const quoteLineId = "10000000-0000-4000-8000-000000000003";
+  const quote = { id: quoteLineId, quoteNo: "RD-00003", requestDate: "2026-11-13", customer: "Test", user: "Test",
+    partNumber: "Q-1", description: "Quoted item", qty: 2, priceValidUntil: "2026-12-13", expired: false,
+    response: { available: "yes", estAvailability: null, newPartNumber: null, newDescription: null, newQty: null,
+      unitPrice: "12.5000", totalPrice: "25.00", comments: "" } };
+  const fetcher = vi.fn(async () => Response.json({ items: [quote], notices: [], nextCursor: null }));
+  vi.stubGlobal("fetch", fetcher);
+  writeRequestIdentities("quote-cart", [{ partId: `quote:${quoteLineId}`, quoteLineId, qty: 2,
+    descriptionSnapshot: "old description", partNumberSnapshot: "old part", unitPriceSnapshot: 99, lineTotal: 198 }]);
+  const { readRequestIdentities } = await import("@/state/customer-request");
+  const identities = readRequestIdentities("quote-cart");
+  expect(identities).toEqual([{ quoteLineId, qty: 2 }]);
+  const [line] = await revalidateRequestIdentities(identities);
+  expect(line).toMatchObject({ quoteLineId, quoteNo: "RD-00003", qty: 2, part: { description: "Quoted item", listPrice: "12.5000" } });
+  expect(fetcher).toHaveBeenCalledWith("/api/v1/quotes/mine", expect.any(Object));
+  quote.expired = true;
+  await expect(revalidateRequestIdentities(identities)).rejects.toThrow(/quote/i);
+});

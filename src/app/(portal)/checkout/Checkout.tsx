@@ -164,7 +164,7 @@ function AddressForm({ kind, address, onChange }: {
 export function Checkout({ today }: { today: string }) {
   const session = useCustomerSession();
   const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
-  const { lines, currency, discountRate, clear, linesHydrated, company } = useRequest();
+  const { lines, currency, discountRate, clear, linesHydrated, company, hydrationError, retryHydration, discardSavedRequest } = useRequest();
   const companyId = company?.id ?? session?.companyId ?? "guest";
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -209,7 +209,7 @@ export function Checkout({ today }: { today: string }) {
     if (session && !session.capabilities.includes("orders.submit")) return;
     if (SECTIONS.some((section) => problems[section]) || lines.length === 0) return;
     setSubmitError(null);
-    let orderNo = nextOrderNo();
+    let orderNo: string;
     if (quoteApi) {
       setSubmitting(true);
       try {
@@ -251,6 +251,8 @@ export function Checkout({ today }: { today: string }) {
         return;
       }
       setSubmitting(false);
+    } else {
+      orderNo = nextOrderNo();
     }
     const order: SubmittedOrder = {
       orderNo,
@@ -277,7 +279,12 @@ export function Checkout({ today }: { today: string }) {
   if (session && !session.capabilities.includes("orders.submit")) {
     return <main className={styles.empty}><h1>Order access</h1><p>Your role can build requests. A purchaser must submit quotes and orders.</p><Link href="/request">View request list</Link></main>;
   }
-  if (!hydrated || !linesHydrated) return null;
+  if (hydrationError) return <main className={styles.empty}>
+    <p role="alert">{hydrationError}</p>
+    <button type="button" onClick={retryHydration}>Retry saved cart</button>
+    <button type="button" onClick={discardSavedRequest}>Discard saved cart</button>
+  </main>;
+  if (!hydrated || !linesHydrated) return <p>Loading checkout…</p>;
 
   if (!submitted && lines.length === 0) {
     return (
@@ -303,7 +310,7 @@ export function Checkout({ today }: { today: string }) {
           </h1>
           {submitted ? (
             <p className={styles.localNote} role="note">
-              Recorded in this browser only. The order service is not connected yet, so this order has not been sent to RUF Diamond.
+              {session ? "Order submitted to the portal." : "Recorded in this browser only. The order has not been sent to RUF Diamond."}
             </p>
           ) : null}
 

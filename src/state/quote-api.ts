@@ -94,14 +94,19 @@ export function apiLineToRecord(line: QuoteLine): QuoteStatusRecord {
 }
 
 export function createQuoteApi(csrfToken: string) {
+  const pendingKeys = new Map<string, { body: string; key: string }>();
+  async function submit<T>(path: string, input: unknown) {
+    const body = JSON.stringify(input);
+    const pending = pendingKeys.get(path);
+    const key = pending?.body === body ? pending.key : idempotencyKey(path);
+    pendingKeys.set(path, { body, key });
+    const result = await send<T>(path, { method: "POST", csrfToken, body: input, key });
+    if (pendingKeys.get(path)?.key === key) pendingKeys.delete(path);
+    return result;
+  }
   return {
     submitQuote(input: SubmitQuoteInput) {
-      return send<SubmitQuoteResult>("quotes", {
-        method: "POST",
-        csrfToken,
-        body: input,
-        key: idempotencyKey("quote-submit"),
-      });
+      return submit<SubmitQuoteResult>("quotes", input);
     },
     listMine() {
       return send<CustomerQuotePage>("quotes/mine", { method: "GET" });
@@ -138,12 +143,7 @@ export function createQuoteApi(csrfToken: string) {
       return send<{ ok: true }>("quotes/notices/seen", { method: "POST", csrfToken });
     },
     submitCommerceOrder(input: SubmitCommerceOrderInput) {
-      return send<SubmitCommerceOrderResult>("commerce-orders", {
-        method: "POST",
-        csrfToken,
-        body: input,
-        key: idempotencyKey("commerce-order"),
-      });
+      return submit<SubmitCommerceOrderResult>("commerce-orders", input);
     },
   };
 }
