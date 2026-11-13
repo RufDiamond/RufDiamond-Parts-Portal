@@ -20,6 +20,7 @@ export async function readCustomerSession(): Promise<MeResponse> {
 
 export async function signInCustomer(loginId: string, password: string): Promise<void> {
   const response = await fetch("/api/v1/auth/sign-in", { method: "POST", credentials: "same-origin", cache: "no-store", headers: { "content-type": "application/json" }, body: JSON.stringify({ loginId, password }) });
+  if (response.status >= 500) throw new Error("Sign-in is temporarily unavailable. Please try again later.");
   if (!response.ok) throw new Error("Sign-in failed. Check your details and try again.");
 }
 

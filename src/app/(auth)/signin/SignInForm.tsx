@@ -78,7 +78,7 @@ export function SignInForm({ date, apiMode = false }: { date: string; apiMode?: 
             if (!apiMode) { router.push("/"); return; }
             setBusy(true); setError("");
             try { await signInCustomer(username, password); setPassword(""); resetCustomerNavigation("/"); }
-            catch { setError("Sign-in failed. Check your details and try again."); setBusy(false); }
+            catch (error) { setError(error instanceof Error ? error.message : "Sign-in failed."); setBusy(false); }
           }}
         >
           <p className={styles.formTitle}>Account access</p>

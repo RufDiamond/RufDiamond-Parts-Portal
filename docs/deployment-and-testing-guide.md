@@ -18,8 +18,10 @@ to its final report and independent review; none of this establishes remote
 staging or production acceptance.
 
 The placeholder-only settings are in [frontend-api.env.example](frontend-api.env.example).
-`RUF_REPOSITORY_MODE=fixture` (the current local default) makes the proxy return404,
-never seed data. Explicit `api` mode requires `RUF_API_UPSTREAM_URL` and
+Local development defaults to fixtures. A local production build may use fixtures
+only with `RUF_REPOSITORY_MODE=fixture` and `RUF_DEPLOYMENT_ENV=local`. Vercel
+deployments reject fixture mode. Production defaults to authenticated API mode
+and never falls back to fixture data. API mode requires `RUF_API_UPSTREAM_URL` and
 `RUF_WEB_ORIGIN`, both exact origins without paths, queries, user information or
 wildcards. HTTPS is required except explicit HTTP loopback for local work. The
 API's `WEB_ORIGIN` must exactly equal the frontend `RUF_WEB_ORIGIN`. Set

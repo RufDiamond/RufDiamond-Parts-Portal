@@ -16,14 +16,30 @@ export function validateBackendConfig(config: BackendConfig): BackendConfig {
   return { upstream: origin(config.upstream), webOrigin: origin(config.webOrigin) };
 }
 
-export function loadFrontendBackendConfig(environment: Record<string, string | undefined>): BackendConfig | null {
-  const mode = environment.RUF_REPOSITORY_MODE ?? "fixture";
-  const deployment = environment.RUF_DEPLOYMENT_ENV ?? "local";
-  if (!["fixture", "api"].includes(mode) || !["local", "staging", "production"].includes(deployment) || deployment !== "local" && mode !== "api") {
-    throw new CatalogApiError(503, "INVALID_BACKEND_CONFIGURATION", "Connected staging and production require API mode.");
+type Environment = Record<string, string | undefined>;
+
+function hosted(environment: Environment) {
+  return environment.VERCEL === "1" || ["production", "preview"].includes(environment.VERCEL_ENV ?? "");
+}
+
+export function usesFixtureMode(environment: Environment) {
+  if (hosted(environment)) return false;
+  const deployment = environment.RUF_DEPLOYMENT_ENV;
+  const mode = environment.RUF_REPOSITORY_MODE;
+  if (deployment !== undefined && deployment !== "local") return false;
+  if (mode === "fixture") return environment.NODE_ENV !== "production" || deployment === "local";
+  return mode === undefined && environment.NODE_ENV !== "production";
+}
+
+export function loadFrontendBackendConfig(environment: Environment): BackendConfig | null {
+  const deployment = environment.RUF_DEPLOYMENT_ENV ?? (hosted(environment) || environment.NODE_ENV === "production" ? "production" : "local");
+  const mode = environment.RUF_REPOSITORY_MODE;
+  if (!["local", "staging", "production"].includes(deployment) || mode !== undefined && mode !== "fixture" && mode !== "api") {
+    throw new CatalogApiError(503, "INVALID_BACKEND_CONFIGURATION", "Invalid catalogue deployment settings.");
   }
-  if (mode === "fixture") return null;
+  if (usesFixtureMode(environment)) return null;
+  if (mode === "fixture") throw new CatalogApiError(503, "INVALID_BACKEND_CONFIGURATION", "Hosted deployments require API mode.");
   const config = validateBackendConfig({ upstream: environment.RUF_API_UPSTREAM_URL ?? "", webOrigin: environment.RUF_WEB_ORIGIN ?? "" });
-  if (deployment !== "local" && !config.webOrigin.startsWith("https://")) throw new CatalogApiError(503, "INVALID_BACKEND_CONFIGURATION");
+  if ((hosted(environment) || deployment !== "local") && !config.webOrigin.startsWith("https://")) throw new CatalogApiError(503, "INVALID_BACKEND_CONFIGURATION");
   return config;
 }

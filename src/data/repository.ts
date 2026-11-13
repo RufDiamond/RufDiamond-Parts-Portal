@@ -1,5 +1,5 @@
 import "server-only";
-import { loadFrontendBackendConfig } from "@/lib/backend-config.server";
+import { usesFixtureMode } from "@/lib/backend-config.server";
 import { getBackendApiRepository } from "@/lib/backend-api.server";
 import { CatalogApiError } from "@/lib/api-error";
 import type { PartFilters } from "@/types/admin";
@@ -8,7 +8,7 @@ import { composeApiRead, type CustomerRepository } from "./customer-composition.
 import { scopeKey } from "@/state/customer-session";
 
 export type PartSearchMode = "part" | "description" | "any";
-export const isApiMode = () => loadFrontendBackendConfig(process.env) !== null;
+export const isApiMode = () => !usesFixtureMode(process.env);
 const fixture = () => import("./fixture-repository.server");
 
 export async function composeCustomerRead<T>(load: (repo: CustomerRepository) => Promise<T>): Promise<T> {

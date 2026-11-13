@@ -101,6 +101,13 @@ describe("authenticated upstream boundary", () => {
     const response = await proxyBackendRequest(request("me"), config, async () => new Response("a".repeat(8 * 1024 * 1024 + 1), { headers: { "content-type": "application/json" } }));
     expect(response.status).toBe(502);
   });
+  it("never serves fixtures in a hosted build and defaults production to the authenticated API", () => {
+    const hosted = { NODE_ENV: "production", RUF_API_UPSTREAM_URL: "https://api.example", RUF_WEB_ORIGIN: "https://portal.example" };
+    expect(loadFrontendBackendConfig(hosted)).toEqual({ upstream: "https://api.example", webOrigin: "https://portal.example" });
+    expect(() => loadFrontendBackendConfig({ NODE_ENV: "production" })).toThrow();
+    expect(() => loadFrontendBackendConfig({ ...hosted, VERCEL: "1", RUF_REPOSITORY_MODE: "fixture", RUF_DEPLOYMENT_ENV: "local" })).toThrow();
+    expect(loadFrontendBackendConfig({ NODE_ENV: "production", RUF_REPOSITORY_MODE: "fixture", RUF_DEPLOYMENT_ENV: "local" })).toBeNull();
+  });
   it("requires explicit connected mode and exact trusted server origins", () => {
     expect(loadFrontendBackendConfig({})).toBeNull();
     expect(() => loadFrontendBackendConfig({ RUF_REPOSITORY_MODE: "other" })).toThrow();
