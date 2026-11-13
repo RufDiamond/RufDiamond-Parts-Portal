@@ -1,0 +1,54 @@
+.screen {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
+}
+
+.panel {
+  display: grid;
+  justify-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.logo {
+  width: 192px;
+  max-width: 100%;
+  height: auto;
+}
+
+.status {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  font: var(--weight-semibold) var(--text-sm) / 1.4 var(--font-ui);
+}
+
+.status p {
+  margin: 0;
+}
+
+.status a {
+  color: var(--deck-on-dark);
+  text-underline-offset: 3px;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #666;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: rotate 850ms linear infinite;
+}
+
+@keyframes rotate {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}

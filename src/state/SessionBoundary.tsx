@@ -1,8 +1,11 @@
 "use client";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { MeResponse } from "@rufdiamond/contracts";
 import { readCustomerSession, resetCustomerNavigation, scopeKey, signOutCustomer } from "./customer-session";
+
+import styles from "./SessionBoundary.module.css";
 
 const SessionContext = createContext<MeResponse | null>(null);
 export const useCustomerSession = () => useContext(SessionContext);
@@ -44,7 +47,24 @@ export function SessionBoundary({ session, children }: { session: MeResponse | n
   }, [identity, route, session]);
   const checking = Boolean(session && (invalidated || verified !== `${identity}:${route}`));
   return <SessionContext.Provider value={session}>
-    {checking && <main role="status">{failure ? <a href="/signin">Session unavailable. Sign in again.</a> : "Checking catalogue access…"}</main>}
+    {checking && (
+      <main className={styles.screen}>
+        <div className={styles.panel}>
+          <Image className={styles.logo} src="/brand/header-logo-with-flag.png" alt="RUF Diamond" width={930} height={360} unoptimized />
+          {failure ? (
+            <div className={styles.status} role="alert">
+              <p>Session unavailable.</p>
+              <a href="/signin">Sign in again</a>
+            </div>
+          ) : (
+            <div className={styles.status} role="status">
+              <span className={styles.spinner} aria-hidden="true" />
+              <span>Checking catalogue access…</span>
+            </div>
+          )}
+        </div>
+      </main>
+    )}
     <div key={identity} hidden={checking} inert={checking} aria-hidden={checking || undefined} style={{ display: checking ? "none" : "contents" }}>
       {invalidated ? null : children}
     </div>
