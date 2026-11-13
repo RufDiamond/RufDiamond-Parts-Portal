@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { isApiMode } from "@/data/repository";
+import { getFatTruckPreviewIndex, getFatTruckPreviewSession } from "@/data/fat-truck-preview.server";
 import { notFound } from "next/navigation";
 import { BRANDS } from "@/lib/brands";
 import {
@@ -27,6 +30,20 @@ export default async function BrandPage({
   const { brand } = await params;
   const name = BRANDS[brand];
   if (!name) notFound();
+  if (brand === "fat-truck" && isApiMode() && await getFatTruckPreviewSession()) {
+    const systems = (await getFatTruckPreviewIndex()).filter(entry => entry.figures.length);
+    return <main style={{ padding: 24, background: "#fff", color: "#202020" }}>
+      <h1>Fat Truck · FT3 Wagon</h1>
+      <p>Catalogue preview. Open a figure to view its exploded drawing and parts list.</p>
+      {systems.map(({ system, figures }) => <section key={system.id}>
+        <h2>{system.name}</h2>
+        <ul>{figures.map(figure => <li key={figure.id}>
+          <Link href={`/parts/fat-truck/preview/${figure.id}`}>Fig. {figure.groupNo} · {figure.name}</Link>
+        </li>)}</ul>
+      </section>)}
+    </main>;
+  }
+
 
   const { productLine, entries } = await composeCustomerRead(async repo => {
   const lines = await repo.getProductLines();

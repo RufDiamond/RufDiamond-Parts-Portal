@@ -21,6 +21,18 @@ export async function packageApiFrontend(root, destination, dist = ".next") {
   await fs.cp(path.join(build, "standalone"), destination, { recursive: true, filter: file => !path.basename(file).startsWith(".env") && !file.includes("/public/drawings/") && !file.includes("/tools/callouts/review/") });
   await fs.cp(path.join(build, "static"), path.join(destination, dist, "static"), { recursive: true });
   await copyPublicPresentation(path.join(root, "public"), path.join(destination, "public"));
+  const drawings = path.join(root, "public", "drawings", "ft3w");
+  const preview = path.join(destination, "private-fat-truck");
+  await fs.mkdir(preview);
+  const entries = await fs.readdir(drawings, { withFileTypes: true }).catch(error => {
+    if (error.code !== "ENOENT") throw error;
+    return [];
+  });
+  for (const entry of entries) {
+    if (entry.isFile() && /^ft3w-[\w-]+\.png$/.test(entry.name)) {
+      await fs.copyFile(path.join(drawings, entry.name), path.join(preview, entry.name));
+    }
+  }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
