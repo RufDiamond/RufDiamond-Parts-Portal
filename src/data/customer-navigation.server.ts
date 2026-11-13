@@ -1,5 +1,7 @@
 import "server-only";
-import { composeCustomerRead } from "./repository";
+import { fatTruckPreviewVariant } from "@/lib/fat-truck-preview";
+import { getFatTruckPreviewRepository } from "./fat-truck-preview.server";
+import { composeCustomerRead, isApiMode } from "./repository";
 import type { CustomerRepository } from "./customer-composition.server";
 
 export async function selectedMachine(repo: CustomerRepository, variantId: string) {
@@ -15,8 +17,16 @@ function sectionNumber(groups: string[]) {
   return numbers.length ? Math.min(...numbers) : null;
 }
 
+async function readMachine<T>(variantId: string, load: (repo: CustomerRepository) => Promise<T>) {
+  if (isApiMode() && variantId === fatTruckPreviewVariant) {
+    const preview = await getFatTruckPreviewRepository();
+    return preview ? load(preview) : null;
+  }
+  return composeCustomerRead(load);
+}
+
 export async function loadSystems(variantId: string) {
-  return composeCustomerRead(async repo => {
+  return readMachine(variantId, async repo => {
     const machine = await selectedMachine(repo, variantId);
     if (!machine) return null;
     const systems = await repo.getSystems(variantId);
@@ -30,7 +40,7 @@ export async function loadSystems(variantId: string) {
 }
 
 export async function loadFigures(variantId: string, systemId: string) {
-  return composeCustomerRead(async repo => {
+  return readMachine(variantId, async repo => {
     const machine = await selectedMachine(repo, variantId);
     if (!machine) return null;
     const system = (await repo.getSystems(variantId)).find(s => s.id === systemId);

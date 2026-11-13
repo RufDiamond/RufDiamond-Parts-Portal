@@ -1,4 +1,5 @@
-import { getPartUsageIndex } from "@/data/repository";
+import { getFatTruckPreviewRepository } from "@/data/fat-truck-preview.server";
+import { getPartUsageIndex, isApiMode } from "@/data/repository";
 import { Confirmed } from "./Confirmed";
 
 /**
@@ -8,6 +9,7 @@ import { Confirmed } from "./Confirmed";
  * index is resolved on the server, as on the request screen itself.
  */
 export default async function ConfirmedPage() {
-  const usage = await getPartUsageIndex();
+  const preview = isApiMode() ? await getFatTruckPreviewRepository() : null;
+  const usage = await (preview?.getPartUsageIndex ?? getPartUsageIndex)();
   return <Confirmed usage={usage} />;
 }

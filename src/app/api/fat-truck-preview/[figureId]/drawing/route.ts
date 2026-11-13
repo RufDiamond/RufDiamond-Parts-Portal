@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { getFatTruckPreviewFigure, getFatTruckPreviewSession } from "@/data/fat-truck-preview.server";
+import { getFatTruckPreviewDrawing, getFatTruckPreviewSession } from "@/data/fat-truck-preview.server";
 
 export async function GET(_: Request, { params }: { params: Promise<{ figureId: string }> }) {
   if (!await getFatTruckPreviewSession()) return new Response(null, { status: 404 });
   const { figureId } = await params;
-  const { drawing } = await getFatTruckPreviewFigure(figureId);
+  const drawing = getFatTruckPreviewDrawing(figureId);
   if (!drawing || !/^\/drawings\/ft3w\/[\w-]+\.png$/.test(drawing.storagePath)) {
     return new Response(null, { status: 404 });
   }

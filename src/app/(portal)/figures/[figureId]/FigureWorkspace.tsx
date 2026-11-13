@@ -269,6 +269,7 @@ export function FigureWorkspace({
       {addition.pending && <p role="status">Validating selected parts…</p>}
       {addition.error && !quoting && <p role="alert">{addition.error}</p>}
       {releasedDrawing.error && <p role="alert">{releasedDrawing.error}</p>}
+      {!reviewOnly && previewNotice && <p className={styles.previewNotice}>{previewNotice}</p>}
       <Trail
         steps={[
           { label: machineLabel, href: `/systems${variantQuery}` },
@@ -674,7 +675,7 @@ export function FigureWorkspace({
           markers={markers}
           document={regions}
           selectionActivation={activation}
-          previewNotice={reviewOnly ? previewNotice : null}
+          previewNotice={previewNotice}
           selectedPartIds={selectedPartIds}
           hoveredPartId={hoveredPartId}
           onSelectPart={selectPart}

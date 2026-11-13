@@ -11,6 +11,7 @@ import {
 import { formatAmount } from "@/lib/format";
 import { createQuoteApi } from "@/state/quote-api";
 import { computeTotals, useRequest } from "@/state/RequestContext";
+import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
 import { useCustomerSession } from "@/state/SessionBoundary";
 import type { Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
 import styles from "./checkout.module.css";
@@ -285,6 +286,12 @@ export function Checkout({ today }: { today: string }) {
     <button type="button" onClick={discardSavedRequest}>Discard saved cart</button>
   </main>;
   if (!hydrated || !linesHydrated) return <p>Loading checkout…</p>;
+  if (!submitted && session && lines.some(line => isFatTruckPreviewPartId(line.partId))) {
+    return <main className={styles.empty}>
+      <EmptyState title="A priced quote is required" description="Request a quote for preview parts. Add the priced response from Quote Status when it is ready."
+        action={<Link href="/request">Open request list</Link>} />
+    </main>;
+  }
 
   if (!submitted && lines.length === 0) {
     return (

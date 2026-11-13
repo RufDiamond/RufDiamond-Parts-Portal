@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { isApiMode } from "@/data/repository";
-import { getFatTruckPreviewIndex, getFatTruckPreviewSession } from "@/data/fat-truck-preview.server";
+import { getFatTruckPreviewRepository } from "@/data/fat-truck-preview.server";
 import { notFound } from "next/navigation";
+import { fatTruckPreviewNotice } from "@/lib/fat-truck-preview";
+import type { CustomerRepository } from "@/data/customer-composition.server";
 import { BRANDS } from "@/lib/brands";
 import {
   composeCustomerRead,
@@ -30,45 +31,32 @@ export default async function BrandPage({
   const { brand } = await params;
   const name = BRANDS[brand];
   if (!name) notFound();
-  if (brand === "fat-truck" && isApiMode() && await getFatTruckPreviewSession()) {
-    const systems = (await getFatTruckPreviewIndex()).filter(entry => entry.figures.length);
-    return <main style={{ padding: 24, background: "#fff", color: "#202020" }}>
-      <h1>Fat Truck · FT3 Wagon</h1>
-      <p>Catalogue preview. Open a figure to view its exploded drawing and parts list.</p>
-      {systems.map(({ system, figures }) => <section key={system.id}>
-        <h2>{system.name}</h2>
-        <ul>{figures.map(figure => <li key={figure.id}>
-          <Link href={`/parts/fat-truck/preview/${figure.id}`}>Fig. {figure.groupNo} · {figure.name}</Link>
-        </li>)}</ul>
-      </section>)}
-    </main>;
-  }
+  const preview = brand === "fat-truck" && isApiMode() ? await getFatTruckPreviewRepository() : null;
+  const load = async (repo: CustomerRepository) => {
+    const lines = await repo.getProductLines();
+    const productLine = lines.find((line) => line.name === name);
+    if (!productLine) notFound();
 
+    const models = await repo.getModels();
+    const mine = models.filter((m) => m.productLineId === productLine.id);
 
-  const { productLine, entries } = await composeCustomerRead(async repo => {
-  const lines = await repo.getProductLines();
-  const productLine = lines.find((line) => line.name === name);
-  if (!productLine) notFound();
-
-  const models = await repo.getModels();
-  const mine = models.filter((m) => m.productLineId === productLine.id);
-
-  const entries: BrandModel[] = await Promise.all(
-    mine.map(async (model) => {
-      const variants = await repo.getVariants(model.id);
-      let figureCount = 0;
-      for (const variant of variants) {
-        for (const system of await repo.getSystems(variant.id)) {
-          figureCount += (await repo.getFigures(variant.id, system.id)).length;
+    const entries: BrandModel[] = await Promise.all(
+      mine.map(async (model) => {
+        const variants = await repo.getVariants(model.id);
+        let figureCount = 0;
+        for (const variant of variants) {
+          for (const system of await repo.getSystems(variant.id)) {
+            figureCount += (await repo.getFigures(variant.id, system.id)).length;
+          }
         }
-      }
-      return { model, variants, photo: PHOTOS[model.id] ?? null, figureCount };
-    }),
-  );
-  return { productLine, entries };
-  });
+        return { model, variants, photo: PHOTOS[model.id] ?? null, figureCount };
+      }),
+    );
+    return { productLine, entries };
+  };
+  const { productLine, entries } = preview ? await load(preview) : await composeCustomerRead(load);
 
   return (
-    <BrandParts productLine={productLine} models={entries} slug={brand} />
+    <BrandParts productLine={productLine} models={entries} slug={brand} previewNotice={preview ? fatTruckPreviewNotice : undefined} />
   );
 }

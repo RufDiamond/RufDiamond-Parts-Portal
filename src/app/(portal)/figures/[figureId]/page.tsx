@@ -1,3 +1,5 @@
+import { getFatTruckPreviewRepository } from "@/data/fat-truck-preview.server";
+import { fatTruckPreviewNotice } from "@/lib/fat-truck-preview";
 import { notFound } from "next/navigation";
 import { loadCalloutPreview } from "@/data/callout-preview.server";
 import {
@@ -19,7 +21,10 @@ export default async function FigurePage({
   params: Promise<{ figureId: string }>;
 }) {
   const { figureId } = await params;
-  const workspace = await composeCustomerRead(repo => readFigureWorkspace(repo, figureId));
+  const hostedPreview = isApiMode() && figureId.startsWith("fig-");
+  const repo = hostedPreview ? await getFatTruckPreviewRepository() : null;
+  if (hostedPreview && !repo) notFound();
+  const workspace = repo ? await readFigureWorkspace(repo, figureId) : await composeCustomerRead(repository => readFigureWorkspace(repository, figureId));
   if (!workspace) notFound();
   const { detail, siblings, usage } = workspace;
   const preview = isApiMode() ? { detail, notice: null } : await loadCalloutPreview(detail);
@@ -29,7 +34,7 @@ export default async function FigurePage({
   return (
     <FigureWorkspace
       detail={preview.detail}
-      previewNotice={null}
+      previewNotice={repo ? fatTruckPreviewNotice : null}
       usage={usage}
       sheet={index === -1 ? "—" : `${pad(index + 1)} / ${pad(total)}`}
       index={index === -1 ? 0 : index}

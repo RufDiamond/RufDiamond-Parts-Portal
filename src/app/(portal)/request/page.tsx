@@ -1,4 +1,5 @@
-import { getPartUsageIndex } from "@/data/repository";
+import { getFatTruckPreviewRepository } from "@/data/fat-truck-preview.server";
+import { getPartUsageIndex, isApiMode } from "@/data/repository";
 import { QuoteRequest } from "./QuoteRequest";
 
 /**
@@ -8,6 +9,7 @@ import { QuoteRequest } from "./QuoteRequest";
  * from the catalogue, so the index is resolved on the server and handed down.
  */
 export default async function RequestPage() {
-  const usage = await getPartUsageIndex();
+  const preview = isApiMode() ? await getFatTruckPreviewRepository() : null;
+  const usage = await (preview?.getPartUsageIndex ?? getPartUsageIndex)();
   return <QuoteRequest usage={usage} />;
 }

@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { initialRequestState, requestReducer, RequestProvider, useRequest } from "@/state/RequestContext";
 import type { MeResponse } from "@rufdiamond/contracts";
-import { revalidateRequestIdentities, writeRequestIdentities } from "@/state/customer-request";
+import { readRequestIdentities, revalidateRequestIdentities, writeRequestIdentities } from "@/state/customer-request";
 import { scopeKey } from "@/state/customer-session";
 import { MachineProvider } from "@/state/MachineContext";
 import { QuoteRequest } from "@/app/(portal)/request/QuoteRequest";
@@ -152,7 +152,6 @@ it("restores a quoted item with its current authorized price", async () => {
   vi.stubGlobal("fetch", fetcher);
   writeRequestIdentities("quote-cart", [{ partId: `quote:${quoteLineId}`, quoteLineId, qty: 2,
     descriptionSnapshot: "old description", partNumberSnapshot: "old part", unitPriceSnapshot: 99, lineTotal: 198 }]);
-  const { readRequestIdentities } = await import("@/state/customer-request");
   const identities = readRequestIdentities("quote-cart");
   expect(identities).toEqual([{ quoteLineId, qty: 2 }]);
   const [line] = await revalidateRequestIdentities(identities);
@@ -160,4 +159,20 @@ it("restores a quoted item with its current authorized price", async () => {
   expect(fetcher).toHaveBeenCalledWith("/api/v1/quotes/mine", expect.any(Object));
   quote.expired = true;
   await expect(revalidateRequestIdentities(identities)).rejects.toThrow(/quote/i);
+});
+
+it("stores a Fat Truck preview part by identity and reloads it through the protected catalogue", async () => {
+  const part = { id: "prt-82-00127", partNumber: "82-00127", description: "Pintle hook",
+    manufacturer: null, currency: "CAD", supersededByPartId: null, requires: [], status: "active" };
+  writeRequestIdentities("preview-request", [
+    { partId: part.id, partNumberSnapshot: "outdated", descriptionSnapshot: "outdated", qty: 2, unitPriceSnapshot: 99 },
+  ]);
+  const saved = readRequestIdentities("preview-request");
+  expect(saved).toEqual([{ previewPartId: part.id, qty: 2 }]);
+  const fetcher = vi.fn(async () => Response.json(part));
+  vi.stubGlobal("fetch", fetcher);
+  expect(await revalidateRequestIdentities(saved)).toEqual([{ part, qty: 2 }]);
+  expect(fetcher).toHaveBeenCalledWith("/api/fat-truck-preview/parts/prt-82-00127", expect.objectContaining({ cache: "no-store" }));
+  vi.stubGlobal("fetch", async () => new Response(null, { status: 404 }));
+  await expect(revalidateRequestIdentities(saved)).rejects.toThrow(/unavailable/i);
 });

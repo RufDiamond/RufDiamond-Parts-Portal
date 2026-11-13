@@ -17,6 +17,12 @@
   color: var(--deck-on-dark);
 }
 
+.previewNotice {
+  margin: 0 0 var(--space-4);
+  font: var(--type-body-sm);
+  color: var(--deck-on-dark);
+}
+
 .empty {
   margin: 0;
   padding: var(--space-8) var(--space-6);

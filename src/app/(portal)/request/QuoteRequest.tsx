@@ -10,6 +10,7 @@ import { useMachine } from "@/state/MachineContext";
 import { createQuoteApi } from "@/state/quote-api";
 import { registerQuoteRequest } from "@/state/quote-store";
 import { useRequest } from "@/state/RequestContext";
+import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
 import { useCustomerSession } from "@/state/SessionBoundary";
 import type { PartUsageSummary } from "@/types/catalog";
 import styles from "./quote.module.css";
@@ -122,12 +123,13 @@ export function QuoteRequest({
       setSubmitting(true);
       try {
         const place = (partId: string) => usage[partId];
+        const preview = includedLines.some(line => isFatTruckPreviewPartId(line.partId));
         const result = await quoteApi.submitQuote({
           productLine: "Fat Truck",
           shipping: details.shipping
             ? { address: details.shipping.address, method: (details.shipping.method ?? "standard") as "standard" | "expedited" }
             : null,
-          generalComment: general,
+          generalComment: preview ? ["Catalogue preview. Verify parts before fulfillment.", general].filter(Boolean).join("\n").slice(0, 2000) : general,
           lines: includedLines.map((line) => {
             const at = place(line.partId);
             return {

@@ -1,7 +1,11 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { getFigureDetail, getFigures, getSystems } from "@/data/fixture-repository.server";
+import * as fixture from "@/data/fixture-repository.server";
+import { drawingFiles, figures, parts } from "@/data/ft3-wagon";
+import { fatTruckPreviewVariant } from "@/lib/fat-truck-preview";
+import type { Part } from "@/types/catalog";
+import type { CustomerRepository } from "./customer-composition.server";
 import { requireCustomerSession } from "@/lib/customer-session.server";
 
 const meetingCompanies = new Set([
@@ -17,17 +21,41 @@ export async function getFatTruckPreviewSession() {
     && session.capabilities.includes("parts.record.view") ? session : null;
 }
 
-const variant = "var-ft3-wagon-99ft3w";
 
-export async function getFatTruckPreviewIndex() {
-  return Promise.all((await getSystems(variant)).map(async system => ({
-    system,
-    figures: await getFigures(variant, system.id),
-  })));
+export function getFatTruckPreviewDrawing(id: string) {
+  const figure = figures.find(candidate => candidate.id === id && candidate.variantId === fatTruckPreviewVariant);
+  return drawingFiles.find(drawing => drawing.id === figure?.drawingFileId);
 }
 
-export async function getFatTruckPreviewFigure(id: string) {
-  const detail = await getFigureDetail(id);
-  if (!detail || detail.figure.variantId !== variant) notFound();
-  return detail;
+function visiblePart(part: Part, canViewPrices: boolean): Part {
+  if (!canViewPrices) return { ...part, listPrice: undefined };
+  return typeof part.listPrice === "number" ? { ...part, listPrice: part.listPrice.toFixed(2) } : part;
+}
+
+export function getFatTruckPreviewPart(id: string, canViewPrices: boolean) {
+  const part = parts.find(candidate => candidate.id === id);
+  return part ? visiblePart(part, canViewPrices) : null;
+}
+
+export async function getFatTruckPreviewFigure(id: string, canViewPrices: boolean) {
+  const detail = await fixture.getFigureDetail(id);
+  if (!detail || detail.figure.variantId !== fatTruckPreviewVariant) notFound();
+  return {
+    ...detail,
+    drawing: detail.drawing && { ...detail.drawing, storagePath: `/api/fat-truck-preview/${id}/drawing` },
+    rows: detail.rows.map(row => ({ ...row, part: visiblePart(row.part, canViewPrices) })),
+  };
+}
+
+export async function getFatTruckPreviewRepository(): Promise<CustomerRepository | null> {
+  const session = await getFatTruckPreviewSession();
+  if (!session) return null;
+  const canViewPrices = session.scopes.canViewPrices;
+  return {
+    ...fixture,
+    getFigureDetail: id => getFatTruckPreviewFigure(id, canViewPrices),
+    searchParts: async query => (await fixture.searchParts(query)).map(part => visiblePart(part, canViewPrices)),
+    searchPartUsages: async (query, mode) => (await fixture.searchPartUsages(query, mode))
+      .map(row => ({ ...row, part: visiblePart(row.part, canViewPrices) })),
+  };
 }

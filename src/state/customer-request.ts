@@ -1,10 +1,13 @@
 import "@/lib/contract-formats";
-import { CustomerQuotePageSchema, PageSchema, PartUsageRowSchema, type ReleaseRef } from "@rufdiamond/contracts";
+import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
+import { CustomerQuotePageSchema, PageSchema, PartUsageRowSchema, PartSchema, type ReleaseRef } from "@rufdiamond/contracts";
+import { Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import type { OrderLine, Part } from "@/types/catalog";
 import type { RequestPartInput } from "./RequestContext";
 
-export type RequestIdentity = { partId: string; releasePartId: string; qty: number } | { quoteLineId: string; qty: number };
+export type RequestIdentity = { partId: string; releasePartId: string; qty: number } | { quoteLineId: string; qty: number } | { previewPartId: string; qty: number };
+const previewPartSchema = Type.Omit(PartSchema, ["releasePartId"]);
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function readRequestIdentities(key: string): RequestIdentity[] {
   try {
@@ -13,14 +16,19 @@ export function readRequestIdentities(key: string): RequestIdentity[] {
     return value.filter((row): row is RequestIdentity => {
       if (!row || typeof row !== "object" || !Number.isSafeInteger(row.qty) || row.qty < 1 || row.qty > 100000) return false;
       return ("quoteLineId" in row && uuid.test(row.quoteLineId))
+        || ("previewPartId" in row && isFatTruckPreviewPartId(row.previewPartId))
         || (uuid.test(row.partId) && typeof row.releasePartId === "string");
     });
   } catch { return []; }
 }
 export function writeRequestIdentities(key: string, lines: OrderLine[]) {
-  try { sessionStorage.setItem(key, JSON.stringify(lines.filter(line => line.quoteLineId || line.releasePartId).map(line => line.quoteLineId
-    ? { quoteLineId: line.quoteLineId, qty: line.qty }
-    : { partId: line.partId, releasePartId: line.releasePartId, qty: line.qty }))); } catch { /* Storage is optional. */ }
+  const identities = lines.flatMap<RequestIdentity>(line => {
+    const { qty, quoteLineId, partId, releasePartId } = line;
+    if (quoteLineId) return [{ quoteLineId, qty }];
+    if (isFatTruckPreviewPartId(partId)) return [{ previewPartId: partId, qty }];
+    return releasePartId ? [{ partId, releasePartId, qty }] : [];
+  });
+  try { sessionStorage.setItem(key, JSON.stringify(identities)); } catch { /* Storage is optional. */ }
 }
 
 async function loadCurrentQuotes() {
@@ -37,6 +45,15 @@ export async function revalidateRequestIdentities(identities: RequestIdentity[])
   let quotes: Awaited<ReturnType<typeof loadCurrentQuotes>> | undefined;
   const releases = new Map<string, ReleaseRef>();
   for (const identity of identities) {
+    if ("previewPartId" in identity) {
+      if (!isFatTruckPreviewPartId(identity.previewPartId)) throw new Error("Preview part is unavailable.");
+      const response = await fetch(`/api/fat-truck-preview/parts/${encodeURIComponent(identity.previewPartId)}`, { cache: "no-store", credentials: "same-origin" });
+      if (!response.ok) throw new Error("Preview part is unavailable.");
+      const part: unknown = await response.json();
+      if (!Value.Check(previewPartSchema, part) || part.id !== identity.previewPartId) throw new Error("Preview part is unavailable.");
+      result.push({ part, qty: identity.qty });
+      continue;
+    }
     if ("quoteLineId" in identity) {
       quotes ??= await loadCurrentQuotes();
       const line = quotes.find(row => row.id === identity.quoteLineId);

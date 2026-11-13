@@ -22,13 +22,14 @@ export interface BrandPartsProps {
   /** This screen's own URL slug, e.g. "fat-truck". Carried into the search so
    *  the results screen has a working way back. */
   slug: string;
+  previewNotice?: string;
 }
 
 /**
  * A product line's landing screen, per slide 10: pick a model from the photo
  * grid, or go straight in by part number or description (slides 16–27).
  */
-export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
+export function BrandParts({ productLine, models, slug, previewNotice }: BrandPartsProps) {
   const router = useRouter();
   const { setMachine } = useMachine();
   const [partNo, setPartNo] = useState("");
@@ -54,6 +55,7 @@ export function BrandParts({ productLine, models, slug }: BrandPartsProps) {
     <div className={styles.screen}>
       <div className={styles.gridPanel}>
         <p className={styles.label}>Search by Model</p>
+        {previewNotice && <p className={styles.previewNotice}>{previewNotice}</p>}
 
         {models.length === 0 ? (
         <p className={styles.empty}>

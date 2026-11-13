@@ -86,7 +86,7 @@ export function SystemsGrid({ data, requestedVariant }: { data: SystemsData; req
               )}
               <span className={styles.art}>
                 {icon ? (
-                  <Image src={icon} alt="" className={styles.icon} />
+                  <Image src={icon} alt="" unoptimized className={styles.icon} />
                 ) : null}
               </span>
               <span className={styles.label}>

@@ -8,6 +8,8 @@ import { formatAmount } from "@/lib/format";
 import { Icon } from "./Icon";
 import { QuantityStepper } from "./QuantityStepper";
 import styles from "./CheckCart.module.css";
+import { useCustomerSession } from "@/state/SessionBoundary";
+import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
 
 export interface CheckCartProps {
   /** The toolbar's own button styling, so this matches its neighbours. */
@@ -25,6 +27,8 @@ export interface CheckCartProps {
  */
 export function CheckCart({ buttonClassName, iconClassName, disabled = false, placement = "below" }: CheckCartProps) {
   const { lines, currency, updateQty, removeLine, clear } = useRequest();
+  const session = useCustomerSession();
+  const needsQuote = !!session && lines.some(line => isFatTruckPreviewPartId(line.partId));
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -122,12 +126,12 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
 
           <div className={styles.links}>
             <Link
-              href="/checkout"
+              href={needsQuote ? "/request" : "/checkout"}
               className={styles.checkout}
               aria-disabled={lines.length === 0 || undefined}
               onClick={(event) => { if (lines.length === 0) event.preventDefault(); else setOpen(false); }}
             >
-              Checkout
+              {needsQuote ? "Request a quote" : "Checkout"}
             </Link>
             <Link href="/request" className={styles.cart} onClick={() => setOpen(false)}>
               Your cart

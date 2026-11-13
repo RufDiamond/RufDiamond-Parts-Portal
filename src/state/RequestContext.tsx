@@ -11,6 +11,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
 import type { Company, Currency, OrderLine, Part } from "@/types/catalog";
 import type { MeResponse } from "@rufdiamond/contracts";
 import { scopeKey } from "./customer-session";
@@ -164,7 +165,7 @@ export function requestReducer(
           const nextQty = existing.qty + qty;
           // API additions have just been revalidated. Do not preserve a stale
           // release snapshot or an old price that is now omitted by scope.
-          lines[index] = part.releasePartId || quoteLineId ? toLine(part, nextQty, quoteNo, source) : {
+          lines[index] = part.releasePartId || quoteLineId || isFatTruckPreviewPartId(part.id) ? toLine(part, nextQty, quoteNo, source) : {
             ...existing,
             qty: nextQty,
             ...(existing.unitPriceSnapshot === undefined ? {} : { lineTotal: round2(Number(existing.unitPriceSnapshot) * nextQty) }),
@@ -536,9 +537,11 @@ function RequestProviderState({
       if (!additions.length) return true;
       setRequestError("");
       try {
-        const fresh = apiKey ? await revalidateRequestIdentities(additions.map(({ part, qty = 1, quoteLineId }) => quoteLineId
-          ? { quoteLineId, qty }
-          : { partId: part.id, releasePartId: part.releasePartId ?? "", qty })) : additions;
+        const fresh = apiKey ? await revalidateRequestIdentities(additions.map(({ part, qty = 1, quoteLineId }) => {
+          if (quoteLineId) return { quoteLineId, qty };
+          if (isFatTruckPreviewPartId(part.id)) return { previewPartId: part.id, qty };
+          return { partId: part.id, releasePartId: part.releasePartId ?? "", qty };
+        })) : additions;
         if (token !== lifetime.current) return false;
         return await new Promise<boolean>(resolve => {
           commits.current.push(resolve);

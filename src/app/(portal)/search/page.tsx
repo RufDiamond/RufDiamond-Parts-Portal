@@ -1,4 +1,5 @@
-import { searchPartUsages, type PartSearchMode } from "@/data/repository";
+import { getFatTruckPreviewRepository } from "@/data/fat-truck-preview.server";
+import { isApiMode, searchPartUsages, type PartSearchMode } from "@/data/repository";
 import { isBrandSlug } from "@/lib/brands";
 import { SearchResults } from "./SearchResults";
 
@@ -32,7 +33,8 @@ export default async function SearchPage({
   const raw = first(params.brand);
   const brand = isBrandSlug(raw) ? raw : "";
 
-  const rows = query ? await searchPartUsages(query, mode) : [];
+  const preview = brand === "fat-truck" && isApiMode() ? await getFatTruckPreviewRepository() : null;
+  const rows = query ? await (preview?.searchPartUsages ?? searchPartUsages)(query, mode) : [];
 
   return (
     <SearchResults query={query} mode={mode} brand={brand} rows={rows} />
