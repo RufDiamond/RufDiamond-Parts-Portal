@@ -9,6 +9,24 @@ const config = { upstream: "http://127.0.0.1:3201", webOrigin: "http://127.0.0.1
 const request = (path: string, init?: RequestInit) => new Request(`${config.webOrigin}/api/v1/${path}`, init);
 
 describe("authenticated upstream boundary", () => {
+  it("accepts valid quote response UUIDs and rejects invalid IDs", async () => {
+    const submit = () => request("quotes", {
+      method: "POST",
+      headers: { origin: config.webOrigin, "content-type": "application/json", "x-csrf-token": "fixture" },
+      body: "{}",
+    });
+    const response = (id: string) => async () => Response.json({ quoteNo: "RD-00001", lineIds: [id] }, { status: 201 });
+    expect((await proxyBackendRequest(submit(), config, response("00000000-0000-4000-8000-000000000001"))).status).toBe(201);
+    expect((await proxyBackendRequest(submit(), config, response("not-a-uuid"))).status).toBe(502);
+  });
+  it("validates quote notice timestamps returned by the backend", async () => {
+    const id = "00000000-0000-4000-8000-000000000001";
+    const response = (at: string) => async () => Response.json({ items: [], nextCursor: null,
+      notices: [{ id, companyId: id, customer: "Fixture", quoteNo: "RD-00001", lineIds: [id], at, seen: false }],
+    });
+    expect((await proxyBackendRequest(request("quotes/mine"), config, response("2026-11-12T12:00:00.000Z"))).status).toBe(200);
+    expect((await proxyBackendRequest(request("quotes/mine"), config, response("2026-02-30T12:00:00.000Z"))).status).toBe(502);
+  });
   it("proxies invitation completion through the public exact-origin write boundary", async () => {
     const response = await proxyBackendRequest(request("auth/invitations/complete", {
       method:"POST",headers:{origin:config.webOrigin,"content-type":"application/json"},

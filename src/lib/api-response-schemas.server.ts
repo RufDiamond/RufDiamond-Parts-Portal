@@ -1,5 +1,5 @@
 import "server-only";
-import { Type, type TSchema } from "@sinclair/typebox";
+import { FormatRegistry, Type, type TSchema } from "@sinclair/typebox";
 import {
   MeResponseSchema, PageSchema, ProductLineSchema, ModelSchema, VariantSchema,
   SystemSchema, ReleasedFigureSchema, FigureDetailSchema, PartSchema,
@@ -13,6 +13,16 @@ import {
   AccountDirectorySchema, InvitedUserSchema, ManagedUserSchema, InvitationCompletedSchema,
 } from "@rufdiamond/contracts";
 import { CatalogApiError } from "./api-error";
+
+// The commerce contracts use JSON Schema formats, which TypeBox does not
+// register automatically. Keep validation in place at the portal boundary.
+FormatRegistry.Set("uuid", (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value));
+FormatRegistry.Set("date-time", (value) => {
+  // Quote notices are serialized by the API as UTC ISO timestamps.
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value)) return false;
+  const time = Date.parse(value);
+  return Number.isFinite(time) && new Date(time).toISOString() === value;
+});
 
 // Exact identity route DTOs; the API's identity/schemas.ts owns the corresponding wire shape.
 const signedIn = Type.Object({ csrfToken: Type.String({ minLength: 1 }) }, { additionalProperties: false });
