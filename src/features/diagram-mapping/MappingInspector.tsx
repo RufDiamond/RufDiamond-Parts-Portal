@@ -36,7 +36,15 @@ export function MappingInspector({ state, disabled, canMap, dispatch }: { state:
       <label>Source evidence<textarea disabled={disabled} value={selected.evidence} onChange={event => dispatch({ type: "setEvidence", evidence: event.target.value })} /></label>
       <LabelFields state={state} key={selected.calloutId} occurrence={selected} disabled={disabled || !!state.openRing} dispatch={dispatch} />
       <fieldset disabled={disabled}><legend>Component polygons</legend>
-        {selected.regions.map((r, index) => <label key={r.id}><input type="radio" name="selected-region" checked={state.selectedRegion === r.id} onChange={() => dispatch({ type: "selectRegion", regionId: r.id })} />Region {index + 1} · {r.outer.length} vertices · {r.holes.length} holes</label>)}
+        {selected.regions.length > 1 && <p>Give polygons of the same physical component the same group. Assign a new group for each separately verified component.</p>}
+        {selected.regions.map((r, index) => <div key={r.id}>
+          <label><input type="radio" name="selected-region" checked={state.selectedRegion === r.id} onChange={() => dispatch({ type: "selectRegion", regionId: r.id })} />Region {index + 1} · {r.outer.length} vertices · {r.holes.length} holes</label>
+          {selected.regions.length > 1 && <label>Physical group for region {index + 1}
+            <select value={r.physicalInstance ?? 1} disabled={!!state.openRing} onChange={event => dispatch({ type: "setPhysicalInstance", regionId: r.id, physicalInstance: Number(event.target.value) })}>
+              {[...new Set([...Array.from({ length: selected.regions.length }, (_, group) => group + 1), ...selected.regions.map(region => region.physicalInstance ?? 1)])].sort((a, b) => a - b).map(group => <option key={group} value={group}>{group}</option>)}
+            </select>
+          </label>}
+        </div>)}
         <button onClick={() => dispatch({ type: "startRing", kind: "polygon", regionId: crypto.randomUUID() })} disabled={!!state.openRing}>Add region</button>
         <button onClick={() => state.selectedRegion && dispatch({ type: "startRing", kind: "hole", regionId: state.selectedRegion })} disabled={!state.selectedRegion || !!state.openRing}>Add hole</button>
         <button onClick={() => state.selectedRegion && dispatch({ type: "startRing", kind: "redraw", regionId: state.selectedRegion })} disabled={!state.selectedRegion || !!state.openRing}>Redraw selected region</button>

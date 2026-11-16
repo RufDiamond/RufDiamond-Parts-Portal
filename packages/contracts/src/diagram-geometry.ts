@@ -360,6 +360,12 @@ export function validateMappingGeometry(document: DiagramMappingDocument): Mappi
         regionIds.add(rawRegion.id);
       }
 
+      if (rawRegion.physicalInstance !== undefined &&
+          (typeof rawRegion.physicalInstance !== "number" || !Number.isInteger(rawRegion.physicalInstance) ||
+            rawRegion.physicalInstance < 1 || rawRegion.physicalInstance > 32)) {
+        issues.push(issue(`${currentRegionPath}.physicalInstance`, "invalid_physical_instance", "Physical component group must be an integer from 1 to 32"));
+      }
+
       const outer = validateRing(
         rawRegion.outer,
         `${currentRegionPath}.outer`,

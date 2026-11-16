@@ -43,6 +43,7 @@ export function DiagramRegions({ document, selectedPartIds, onSelect }: DiagramR
           vectorEffect="non-scaling-stroke" role="button" tabIndex={onSelect ? 0 : -1}
           aria-label={`Component ${occurrence.refNo}: ${occurrence.partNumber}`}
           aria-pressed={selectedPartIds.has(occurrence.partId)} aria-disabled={!onSelect}
+          data-callout-id={occurrence.calloutId}
           data-selected={selectedPartIds.has(occurrence.partId) || undefined}
           onKeyDown={(event) => {
             if (onSelect && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); activate(occurrence.figurePartId); }

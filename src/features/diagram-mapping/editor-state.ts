@@ -25,6 +25,7 @@ export type EditorAction =
   | ({ type: "moveVertex"; point: ImagePoint } & Vertex)
   | ({ type: "removeVertex" } & Vertex)
   | { type: "deleteRegion"; regionId: string }
+  | { type: "setPhysicalInstance"; regionId: string; physicalInstance: number }
   | { type: "setLabel"; label: OccurrenceMapping["labelRegion"] }
   | { type: "setLabelInput"; values: LabelInput }
   | { type: "applyLabelInput" | "discardLabelInput" }
@@ -126,6 +127,10 @@ export function editorReducer(s: EditorState, a: EditorAction): EditorState {
     }
     case "setLabel": return s.openRing ? s : updateOccurrence(s, o => ({ ...o, labelRegion: a.label }));
     case "deleteRegion": return s.openRing ? s : { ...updateOccurrence(s, o => ({ ...o, regions: o.regions.filter(r => r.id !== a.regionId) })), selectedRegion: null, selectedVertex: null };
+    case "setPhysicalInstance": return s.openRing ? s : updateOccurrence(s, o => ({
+      ...o,
+      regions: o.regions.map(region => region.id === a.regionId ? { ...region, physicalInstance: a.physicalInstance } : region),
+    }));
     case "moveVertex":
     case "removeVertex": {
       if (s.openRing) return s;

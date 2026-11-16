@@ -316,3 +316,10 @@
 }
 
 .notices { display: grid; gap: 6px; }
+
+.mappingStatus {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  font-size: 0.8125rem;
+}

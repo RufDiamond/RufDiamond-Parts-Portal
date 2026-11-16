@@ -5,6 +5,7 @@ import { writeAuditLog, type MutationContext } from "../audit/repository.js";
 import { loadAuthorization, requireCapability } from "../authorization/policy.js";
 import { canonicalJsonHash, withIdempotency } from "../outbox/idempotency.js";
 import { enqueueOutboxEvent } from "../outbox/repository.js";
+import { publisher } from "../publication/validation.js";
 import { catalogueBindingSha256, initialDocument, requireCurrentSource, sourceConflict, sourceContext, validateDocument } from "./binding.js";
 import { currentRevision, historicalRevision, insertApproval, insertRevision, listRevisions, loadGraph, mappingTransaction, updateAssociations } from "./repository.js";
 
@@ -12,14 +13,15 @@ export type MappingContext = { userId: string; requestId: string };
 type StoredMutation = { revision: MappingRevision; requiresMap: boolean };
 
 async function authorize(tx: Transaction, ctx: MappingContext, operation: "read" | "save" | "approve") {
-  const current = await loadAuthorization(tx, ctx.userId);
+  const current = operation === "approve"
+    ? await publisher(tx, ctx.userId, "publish.execute")
+    : await loadAuthorization(tx, ctx.userId);
   requireCapability(current, "publish.draft.view");
   requireCapability(current, "catalog.figure.view");
   if (!current.canViewDraft) throw new AppError("FORBIDDEN", 403, "Draft catalogue access is required.");
   if (operation !== "read") requireCapability(current, "catalog.callout.manage");
   if (operation === "approve") {
     requireCapability(current, "catalog.callout.map");
-    requireCapability(current, "publish.execute");
   }
   return current;
 }

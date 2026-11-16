@@ -1,5 +1,7 @@
 # Drawing source review
 
+Follow the [exploded drawing quality standard](exploded-view-quality.md) for source reconciliation, browser checks and release sign-off.
+
 RUFDiamond parts portal · FT3 Wagon pilot · September 2026
 
 Findings from the three sources the client supplied on 3 September 2026:

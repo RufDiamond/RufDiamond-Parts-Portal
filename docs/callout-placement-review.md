@@ -1,5 +1,7 @@
 # Exploded drawing placement review
 
+Follow the [exploded drawing quality standard](exploded-view-quality.md) for source reconciliation, browser checks and release sign-off.
+
 **8 September update:** [Component highlighting review](part-highlight-review.md)
 adds source-bound part silhouettes and correct PDF-derived Bumper 2.1/Motor 3.1
 drawings on the read-only review surface. Historical blocker/coverage statements

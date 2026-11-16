@@ -14,6 +14,9 @@ export function adaptFigureDetail(value: ReleasedDetail): FigureDetail {
       return { ...callout, ...(occurrence && drawing ? { componentGeometry: {
         drawingPath: drawing.storagePath, drawingSha256: value.mapping!.document.drawingSha256,
         imageWidth: drawing.width, imageHeight: drawing.height, regions: occurrence.regions,
+        ...(occurrence.regions.some(region => region.physicalInstance !== undefined) ? {
+          instanceIds: occurrence.regions.map(region => `${callout.id}-physical-${region.physicalInstance ?? 1}`),
+        } : {}),
       } } : {}) };
     }),
   };

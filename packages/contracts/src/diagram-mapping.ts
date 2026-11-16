@@ -21,6 +21,7 @@ export const ComponentRegionSchema = Type.Object(
     id: Type.String(),
     outer: RingSchema,
     holes: Type.Array(RingSchema, { maxItems: 16 }),
+    physicalInstance: Type.Optional(Type.Integer({ minimum: 1, maximum: 32 })),
   },
   { $id: "ComponentRegion", additionalProperties: false },
 );

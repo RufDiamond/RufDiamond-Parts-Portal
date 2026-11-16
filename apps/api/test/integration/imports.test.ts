@@ -725,7 +725,9 @@ describe("scoped canonical staged imports with non-owner runtime", () => {
     notShown[1] = "P-NOT-SHOWN";
     notShown[11] = "34";
     notShown[15] = "NOT SHOWN";
-    const job = await staged(csv([raw, base, notShown]));
+    const depicted = [...base];
+    depicted[10] = "1";
+    const job = await staged(csv([raw, depicted, notShown]));
     await write(job.id, "validate", job.version);
     const qurl = `/api/v1/admin/catalog-review/imports/${job.id}`,
       qr = (await app.inject({ method: "GET", url: qurl, headers })).json(),

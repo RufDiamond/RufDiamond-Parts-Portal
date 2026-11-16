@@ -189,6 +189,18 @@ it("bounds serializable publication retries to three attempts and leaves no rele
     expect((await pg.pool.query("select count(*)::int n from publication_release")).rows[0].n).toBe(0);
   } finally { await pg.pool.query("drop trigger retry_publication_fixture on model; drop function retry_publication_fixture(); drop sequence publication_attempts"); }
 });
+it("rechecks current installed counts on historically approved mappings before publishing", async () => {
+  await approve();
+  // Simulate a historically approved mapping that did not reconcile quantity.
+  await pg.pool.query("update figure_part set qty=3 where id=$1", [ids.row]);
+  const result = await publish();
+  expect(result.statusCode, result.body).toBe(422);
+  expect(result.json().issues).toContainEqual(expect.objectContaining({
+    code: "INVALID_MAPPING", message: expect.stringContaining("3 installed, with 2 source-mapped"),
+  }));
+  expect((await pg.pool.query("select count(*)::int n from publication_release")).rows[0].n).toBe(0);
+});
+
 it("hides all prices from technician semantics even with a granted price capability", async () => {
   await approve(); expect((await publish()).statusCode).toBe(201);
   await pg.pool.query("update company set technician_pricing_visible=false where id=$1", [ids.company]);

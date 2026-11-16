@@ -65,7 +65,10 @@ export async function validateModel(tx: Transaction, ctx: AuthorizationContext, 
       requireCurrentSource(graph, revision.document); validateDocument(graph, revision.document, true);
       if (canonicalJsonHash(revision.document) !== revision.checksum) add("MAPPING_CHECKSUM_INVALID", "Approved document checksum does not match.");
       graphs.push({ graph, revision });
-    } catch (error) { if (error instanceof AppError) add(error.code, error.message); else throw error; }
+    } catch (error) {
+      if (!(error instanceof AppError)) throw error;
+      add(error.code, error.issues?.find(detail => detail.code === "occurrence_quantity_mismatch")?.message ?? error.message);
+    }
   }
   // Follow the complete approved relationship/supersession closure, including parts
   // without a figure row; no same-release FK can point back into working tables.

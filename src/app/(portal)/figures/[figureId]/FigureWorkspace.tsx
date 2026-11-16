@@ -112,6 +112,10 @@ export function FigureWorkspace({
     [rows, callouts],
   );
   const regions = useMemo(() => buildDiagramRegions(rows, callouts, drawing), [rows, callouts, drawing]);
+  const selectedLabelOnly = markers.filter(marker =>
+    selectedPartIds.has(marker.partId) && !marker.maskPath &&
+    !regions?.occurrences.some(occurrence => occurrence.calloutId === marker.id && occurrence.regions.length > 0),
+  ).length;
   const quantityReports = useMemo(() => {
     const reports = reportQuantityOccurrences(
       rows,
@@ -613,6 +617,11 @@ export function FigureWorkspace({
           </div>
 
           <div className={styles.list}>
+            {selectedLabelOnly > 0 && (
+              <p role="status" className={styles.mappingStatus}>
+                {selectedLabelOnly === 1 ? "1 selected occurrence has a reference label only." : `${selectedLabelOnly} selected occurrences have reference labels only.`}
+              </p>
+            )}
             {rows.length === 0 ? (
               <p className={styles.empty}>
                 The drawing for this figure is loaded, but its parts have not been

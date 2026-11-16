@@ -57,7 +57,7 @@ describe("scoped diagram mapping API", () => {
     await pg.pool.query("insert into figure(id,variant_id,system_id,drawing_file_id,name,source_key) values($1,$2,$3,$4,'Frame','one'),($5,$2,$3,$4,'Other','two')", [ids.figure, ids.variant, ids.system, ids.drawing, ids.otherFigure]);
     await pg.pool.query("insert into diagram_mapping(figure_id) values($1),($2)", [ids.figure, ids.otherFigure]);
     await pg.pool.query("insert into part(id,part_number,normalized_part_number,description,list_price) values($1,'P1','P1','Frame bracket',999.99)", [ids.part]);
-    await pg.pool.query("insert into figure_part(id,figure_id,part_id,source_row_key,qty) values($1,$2,$3,'row-1',2),($4,$5,$3,'row-1',1)", [ids.row, ids.figure, ids.part, ids.otherRow, ids.otherFigure]);
+    await pg.pool.query("insert into figure_part(id,figure_id,part_id,source_row_key,qty) values($1,$2,$3,'row-1',1),($4,$5,$3,'row-1',1)", [ids.row, ids.figure, ids.part, ids.otherRow, ids.otherFigure]);
     await pg.pool.query("insert into callout(id,figure_id,figure_part_id,source_key,number,mask_path) values($1,$2,$3,'callout-1','7','M 1 1 L 2 2')", [ids.callout, ids.figure, ids.row]);
     await pg.pool.query("insert into company(id,name,type) values($1,'Mapping team','internal')", [ids.company]);
     await pg.pool.query("insert into app_user(id,company_id,name,login_id,email,password_hash,role_id) select $1,$2,'Mapper','mapper@example.test','mapper@example.test',$3,id from role where key='catalog_admin'", [ids.actor, ids.company, await argon2.hash("test password", passwordOptions)]);
@@ -81,7 +81,7 @@ describe("scoped diagram mapping API", () => {
     const response = await read();
     expect(response.statusCode).toBe(200);
     expect(Value.Check(MappingEditorDocumentSchema, response.json())).toBe(true);
-    expect(response.json()).toMatchObject({ version: 1, revision: null, sourceConflict: false, source: { figure: { id: ids.figure, name: "Frame", version: 1 }, rows: [{ id: ids.row, partId: ids.part, qty: 2, partNumber: "P1", refLabels: ["7"] }] }, document: { figureId: ids.figure, imageWidth: 640, occurrences: [{ calloutId: ids.callout, figurePartId: ids.row, labelRegion: null, regions: [] }] } });
+    expect(response.json()).toMatchObject({ version: 1, revision: null, sourceConflict: false, source: { figure: { id: ids.figure, name: "Frame", version: 1 }, rows: [{ id: ids.row, partId: ids.part, qty: 1, partNumber: "P1", refLabels: ["7"] }] }, document: { figureId: ids.figure, imageWidth: 640, occurrences: [{ calloutId: ids.callout, figurePartId: ids.row, labelRegion: null, regions: [] }] } });
     expect(response.body).not.toMatch(/private-secret|objectKey|999.99|listPrice|password|signedUrl/);
   });
   it("lists bounded nonoverlapping immutable history and reads exact revisions under current scope", async () => {
@@ -213,6 +213,52 @@ describe("scoped diagram mapping API", () => {
     await revoke("catalog.callout.map"); expect((await save(d, 2, key)).statusCode).toBe(403);
     await revoke("catalog.callout.manage"); expect((await save(changed.json().document, 3)).statusCode).toBe(403);
   });
+  it("rejects an unexplained same-figure row substitution", async () => {
+    const neighbor = randomUUID();
+    await pg.pool.query("insert into figure_part(id,figure_id,part_id,source_row_key,qty) values($1,$2,$3,'neighbor',1)", [neighbor, ids.figure, ids.part]);
+    const draft = await completeDocument();
+    draft.occurrences[0].figurePartId = neighbor;
+    draft.occurrences[0].evidence = "";
+    const rejected = await save(draft);
+    expect(rejected.statusCode).toBe(422);
+    expect(rejected.json().issues).toContainEqual(expect.objectContaining({ code: "association_evidence_required" }));
+    expect((await read()).json().source.occurrences[0].figurePartId).toBe(ids.row);
+  });
+
+  it("blocks approval when all source callouts are traced but the installed count is unexplained", async () => {
+    await pg.pool.query("update figure_part set qty=3,version=version+1 where id=$1", [ids.row]);
+    await pg.pool.query("insert into callout(figure_id,figure_part_id,source_key,number) values($1,$2,'callout-2','7')", [ids.figure, ids.row]);
+    const draft = await completeDocument();
+    draft.occurrences[1] = {
+      ...draft.occurrences[1],
+      labelRegion: { x: 100, y: 10, width: 20, height: 20 },
+      regions: [{ id: "component-2", outer: [[100, 40], [140, 40], [140, 80], [100, 80]], holes: [] }],
+      evidence: "A second source instance is independently traced.",
+    };
+    const saved = await save(draft);
+    expect(saved.statusCode, saved.body).toBe(200);
+    const rejected = await approve(saved.json());
+    expect(rejected.statusCode, rejected.body).toBe(422);
+    expect(rejected.json().issues).toContainEqual(expect.objectContaining({ code: "occurrence_quantity_mismatch" }));
+  });
+
+  it("counts source-identified components instead of counting disconnected polygons", async () => {
+    await pg.pool.query("update figure_part set qty=2,version=version+1 where id=$1", [ids.row]);
+    const draft = await completeDocument();
+    const occurrence = draft.occurrences[0];
+    occurrence.regions.push({ id: "second-face", outer: [[100, 40], [140, 40], [140, 80], [100, 80]], holes: [] });
+    const oneGroup = await save(draft);
+    expect(oneGroup.statusCode, oneGroup.body).toBe(200);
+    expect((await approve(oneGroup.json())).json().issues).toContainEqual(expect.objectContaining({ code: "occurrence_quantity_mismatch" }));
+    occurrence.regions[1].physicalInstance = 2;
+    occurrence.evidence = "Source drawing shows two separate brackets. Left bracket group 1 and right bracket group 2 verified independently.";
+    const twoGroups = await save(draft, oneGroup.json().version);
+    expect(twoGroups.statusCode, twoGroups.body).toBe(200);
+    const approved = await approve(twoGroups.json());
+    expect(approved.statusCode, approved.body).toBe(200);
+    expect(approved.json().document.occurrences[0].regions[1].physicalInstance).toBe(2);
+  });
+
   it("requires complete current revision and named publisher; new saves have no prior approval", async () => {
     const incomplete = (await save(await document())).json(); expect((await approve(incomplete)).statusCode).toBe(422);
     const full = (await save(await completeDocument(), 2)).json();

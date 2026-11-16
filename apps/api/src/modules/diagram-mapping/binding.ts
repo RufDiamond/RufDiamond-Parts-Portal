@@ -51,6 +51,7 @@ export function validateDocument(graph: MappingGraph, document: DiagramMappingDo
   if (complete && graph.occurrences.length === 0) throw new AppError("EMPTY_MAPPING", 422, "A mapping with no source occurrences cannot be approved.", [{ path: "occurrences", code: "empty_mapping", message: "Source-backed occurrences are required before review." }]);
   const issues: MappingIssue[] = validateMappingGeometry(document).map(i => ({ ...i, path: identifiedPath(i.path, document) }));
   let changesAssociation = false;
+  const tracedByRow = new Map<string, number>();
   const issue = (path: string, code: string, message: string) => issues.push({ path, code, message });
   for (const occurrence of document.occurrences) {
     const path = `occurrences[${JSON.stringify(occurrence.calloutId)}]`;
@@ -58,16 +59,37 @@ export function validateDocument(graph: MappingGraph, document: DiagramMappingDo
     if (!stored) { issue(path, "unknown_occurrence", "Occurrence does not belong to this figure."); continue; }
     if (occurrence.refNo !== stored.number) issue(`${path}.refNo`, "reference_mismatch", "Reference must match its source occurrence.");
     if (occurrence.figurePartId !== null && !graph.rows.some(({ row }) => row.id === occurrence.figurePartId)) issue(`${path}.figurePartId`, "unknown_row", "Row does not belong to this figure.");
-    if (occurrence.figurePartId !== stored.figurePartId) changesAssociation = true;
+    if (occurrence.figurePartId !== stored.figurePartId) {
+      changesAssociation = true;
+      if (!complete && occurrence.figurePartId !== null && !occurrence.evidence.trim()) {
+        issue(`${path}.evidence`, "association_evidence_required", "Changing the source row requires evidence for the exact reference and part.");
+      }
+    }
     if (complete) {
       if (occurrence.figurePartId === null || occurrence.figurePartId !== stored.figurePartId) issue(`${path}.figurePartId`, "unresolved_row", "An exact established row association is required.");
       if (!occurrence.labelRegion) issue(`${path}.labelRegion`, "missing_label", "A label rectangle is required.");
       if (occurrence.regions.length === 0) issue(`${path}.regions`, "missing_regions", "A physical component region is required.");
       if (!occurrence.evidence.trim()) issue(`${path}.evidence`, "missing_evidence", "Source evidence is required.");
+      if (occurrence.figurePartId && stored.figurePartId === occurrence.figurePartId) {
+        // The printed callout can point to several documented components. Multiple
+        // polygons of any one component share a group (group 1 on older mappings).
+        const traced = new Set(occurrence.regions.map(region => region.physicalInstance ?? 1)).size;
+        tracedByRow.set(occurrence.figurePartId, (tracedByRow.get(occurrence.figurePartId) ?? 0) + traced);
+      }
     }
   }
   if (complete) for (const occurrence of graph.occurrences) {
     if (!document.occurrences.some(c => c.calloutId === occurrence.id)) issue(`occurrences[${JSON.stringify(occurrence.id)}]`, "missing_occurrence", "Every source occurrence must be reviewed.");
+  }
+  if (complete) {
+    for (const { row, part } of graph.rows) {
+      if (row.quantitySemantics !== "known" || graph.sourceReview.excludedRowIds.has(row.id)) continue;
+      const count = tracedByRow.get(row.id) ?? 0;
+      if (row.qty !== count) {
+        issue(`rows[${JSON.stringify(row.id)}].qty`, "occurrence_quantity_mismatch",
+          `${part.partNumber} lists ${row.qty} installed, with ${count} source-mapped physical components. Reconcile the source before approval.`);
+      }
+    }
   }
   if (issues.length) throw new AppError("INVALID_MAPPING", 422, "The mapping needs correction.", issues);
   return changesAssociation;
