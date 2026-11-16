@@ -347,3 +347,22 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.headerCart {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  border: 1px solid var(--deck-pill);
+  border-radius: 5px;
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
+  font: inherit;
+  cursor: pointer;
+}
+.headerCartIcon { width: 22px; height: 22px; object-fit: contain; }
+@media (max-width: 600px) {
+  .dateBlock { justify-content: center; }
+}

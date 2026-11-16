@@ -63,7 +63,6 @@ export function FullIllustration({
   onClose,
 }: FullIllustrationProps) {
   const [zoom, setZoom] = useState(1);
-  const [revealRequest, setRevealRequest] = useState(0);
 
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
@@ -100,7 +99,6 @@ export function FullIllustration({
           </div>
 
           <div className={styles.actions}>
-            <button type="button" className={`${styles.action} ${styles.textAction}`} disabled={!selectedPartIds?.size} onClick={() => setRevealRequest((value) => value + 1)} title="Bring all selected parts into view on the drawing">Show selection in drawing</button>
             {onClearSelection ? <button type="button" className={`${styles.action} ${styles.textAction}`} onClick={onClearSelection}>Clear selection</button> : null}
             <button
               type="button"
@@ -181,7 +179,6 @@ export function FullIllustration({
             document={document}
             onSelectPart={onSelectPart}
             selectionActivation={selectionActivation}
-            revealRequest={revealRequest}
             selectedPartIds={selectedPartIds}
             hoveredPartId={hoveredPartId}
             onTogglePart={onTogglePart}

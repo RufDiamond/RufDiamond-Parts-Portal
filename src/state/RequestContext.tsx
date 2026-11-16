@@ -245,9 +245,8 @@ export function requestReducer(
        * back, so it stays on the list as a fresh working set rather than being
        * silently submitted or silently dropped.
        */
-      const kept = state.lines.filter((line) =>
-        state.excluded.includes(line.partId),
-      );
+      const submitted = new Set(action.confirmation.lines.map(line => line.partId));
+      const kept = state.lines.filter(line => !submitted.has(line.partId));
       return {
         ...state,
         lines: kept,
@@ -435,7 +434,7 @@ export interface RequestContextValue extends RequestTotals {
   removeLine: (partId: string) => void;
   clear: () => void;
   /** Empties the list into a confirmation. Null when there is nothing to send. */
-  submit: (details: RequestDetails, reference?: string) => RequestConfirmation | null;
+  submit: (details: RequestDetails, reference?: string, partIds?: ReadonlySet<string>) => RequestConfirmation | null;
 }
 
 const RequestContext = createContext<RequestContextValue | null>(null);
@@ -602,18 +601,19 @@ function RequestProviderState({
   );
 
   const submit = useCallback(
-    (details: RequestDetails, reference?: string): RequestConfirmation | null => {
+    (details: RequestDetails, reference?: string, partIds?: ReadonlySet<string>): RequestConfirmation | null => {
     if (apiKey && !reference) return null;
     // Nothing ticked is nothing to send, even with parts on the list.
-    if (includedLines.length === 0) return null;
+    const submittedLines = partIds ? includedLines.filter(line => partIds.has(line.partId)) : includedLines;
+    if (submittedLines.length === 0) return null;
 
     const confirmation: RequestConfirmation = {
       // Prefer a server-allocated quote number when the quote API answered.
       reference: reference ?? buildReference(new Date(), Math.random()),
       details,
       submittedAt: new Date().toISOString(),
-      lines: includedLines,
-      totals: computeTotals(includedLines, discountRate),
+      lines: submittedLines,
+      totals: computeTotals(submittedLines, discountRate),
       discountRate,
       companyName: company?.name ?? null,
       currency: state.currency,

@@ -8,6 +8,7 @@ import { useQuoteNotices } from "@/state/quote-store";
 import { useRequestCompany } from "@/state/RequestContext";
 import { useMemo, type ReactNode } from "react";
 import styles from "./PortalShell.module.css";
+import { CheckCart } from "./CheckCart";
 import { SignOutButton, useCustomerSession } from "@/state/SessionBoundary";
 
 /**
@@ -227,7 +228,7 @@ export function PortalShell({ children, date }: PortalShellProps) {
         <header className={styles.header}>
           <h1 className={styles.title}>Parts &amp; Service Portal</h1>
 
-          <span className={styles.dateBlock}>
+          <div className={styles.dateBlock}>
             <Image
               src="/brand/calendar-light.png"
               alt=""
@@ -236,12 +237,13 @@ export function PortalShell({ children, date }: PortalShellProps) {
               className={styles.calendar}
             />
             <span className={styles.date}>{date}</span>
+            {session && <CheckCart buttonClassName={styles.headerCart} iconClassName={styles.headerCartIcon} placement="header" />}
             {session?.scopes.environment === "draft" && ["publish.draft.view", "catalog.figure.view"].every(key => session.capabilities.includes(key)) && <Link href="/admin">Draft administration</Link>}
             {session?.capabilities.includes("orders.quote") && <Link href="/quotes/admin">Quote admin</Link>}
             {session?.capabilities.includes("users.all.manage") && <Link href="/admin/discounts">Dealer discounts</Link>}
             {session?.capabilities.includes("users.all.manage") && <Link href="/admin/users">User accounts</Link>}
             <SignOutButton />
-          </span>
+          </div>
         </header>
 
         <div

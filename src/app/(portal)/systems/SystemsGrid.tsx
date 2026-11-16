@@ -2,6 +2,7 @@
 
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import { fatTruckModelLabel } from "@/lib/fat-truck-models";
 import cabin from "../../../../public/systems/cabin.png";
 import cowlingFender from "../../../../public/systems/cowling-fender.png";
 import driveSystem from "../../../../public/systems/drive-system.png";
@@ -68,7 +69,7 @@ export function SystemsGrid({ data, requestedVariant }: { data: SystemsData; req
     );
   }
 
-  const machine = data.model.name;
+  const machine = fatTruckModelLabel(data.model.name)?.name ?? data.model.name;
 
   return (
     <div className={styles.screen}>

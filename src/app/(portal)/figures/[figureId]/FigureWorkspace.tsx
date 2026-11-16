@@ -180,7 +180,6 @@ export function FigureWorkspace({
 
   /** Plate zoom. Markers are placed in percentages, so they scale with it. */
   const [zoom, setZoom] = useState(1);
-  const [revealRequest, setRevealRequest] = useState(0);
   const stepZoom = (direction: 1 | -1) =>
     setZoom((current) => {
       const i = ZOOM_STEPS.indexOf(current);
@@ -381,9 +380,6 @@ export function FigureWorkspace({
 
         <span className={styles.spacer} />
 
-        <button type="button" className={styles.button} title="Bring all selected parts into view on the drawing" onClick={() => setRevealRequest((value) => value + 1)} disabled={selectedPartIds.size === 0}>
-          Show selection in drawing
-        </button>
         <button type="button" className={styles.button} onClick={clearSelection} disabled={selectedPartIds.size === 0}>
           Clear selection
         </button>
@@ -528,7 +524,6 @@ export function FigureWorkspace({
               markers={markers}
               document={regions}
               selectionActivation={activation}
-              revealRequest={revealRequest}
               selectedPartIds={selectedPartIds}
               hoveredPartId={hoveredPartId}
               onSelectPart={selectPart}

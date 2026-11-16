@@ -28,11 +28,10 @@ const doc = { imageWidth:400, imageHeight:1000, occurrences:[
 function App() {
   const focus = useDiagramSelection({ figureId:"tall", releaseKey:"synthetic", rows });
   const [zoom, setZoom] = useState(1);
-  const [request, setRequest] = useState(0);
   return <><h1>Isolated synthetic tall PNG (not catalogue content)</h1>
     <button onClick={() => setZoom(ZOOM_STEPS[Math.min(4, ZOOM_STEPS.indexOf(zoom)+1)])}>Zoom in</button>
     <button onClick={() => setZoom(ZOOM_STEPS[Math.max(0, ZOOM_STEPS.indexOf(zoom)-1)])}>Zoom out</button>
-    <button onClick={() => setRequest((n) => n+1)}>Show selection in drawing</button><button onClick={focus.clear}>Clear selection</button>
+    <button onClick={focus.clear}>Clear selection</button>
     <div style={{ display:"grid", gridTemplateColumns:"500px 600px", height:500 }}>
       <DrawingViewer label="Synthetic tall PNG" src={src} width={400} height={1000} document={doc}
         markers={mixed ? [
@@ -41,7 +40,7 @@ function App() {
           { id:"mixed-marker", number:40, partId:"part-39", figurePartId:"row-39", x:50, y:98 },
           { id:"mixed-unrelated", number:40, partId:"part-0", figurePartId:"row-0", x:10, y:5 },
         ] : [{ id:"c0", number:40, partId:"part-39", figurePartId:"row-39", x:15, y:85 }]}
-        selectedPartIds={focus.selectedPartIds} onSelectPart={focus.selectPart} selectionActivation={focus.activation} revealRequest={request}
+        selectedPartIds={focus.selectedPartIds} onSelectPart={focus.selectPart} selectionActivation={focus.activation}
         zoom={zoom} onZoomChange={setZoom} />
       <PartsTable rows={rows} selectedPartIds={focus.selectedPartIds} onSelectPart={focus.selectPart}
         selectedFigurePartId={focus.selection?.figurePartId} selectionActivation={focus.activation} />

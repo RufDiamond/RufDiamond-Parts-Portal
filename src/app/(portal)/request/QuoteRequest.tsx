@@ -2,6 +2,7 @@
 import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Link from "next/link";
+import { canOrderRequestLine } from "@/lib/order-eligibility";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { EmptyState, Icon } from "@/components";
@@ -25,6 +26,7 @@ export interface QuoteRequestProps {
    * off, and "Add more parts" goes back to the plate instead of the catalogue.
    */
   embedded?: boolean;
+  quoteRequiredOnly?: boolean;
   onAddMoreParts?: () => void;
 }
 
@@ -44,17 +46,17 @@ const NONE = "—";
 export function QuoteRequest({
   usage,
   embedded = false,
+  quoteRequiredOnly = false,
   onAddMoreParts,
 }: QuoteRequestProps) {
   const router = useRouter();
   const { selectedModel, selectedVariant } = useMachine();
   const {
-    lines,
-    includedLines,
+    lines: requestLines,
+    includedLines: requestIncluded,
     isIncluded,
     toggleIncluded,
     setAllIncluded,
-    itemCount,
     linesHydrated,
     updateQty,
     submit,
@@ -65,6 +67,12 @@ export function QuoteRequest({
     retryHydration,
     discardSavedRequest,
   } = useRequest();
+
+  const session = useCustomerSession();
+  const needsQuote = (line: (typeof requestLines)[number]) => !canOrderRequestLine(line, Boolean(session));
+  const lines = quoteRequiredOnly ? requestLines.filter(needsQuote) : requestLines;
+  const includedLines = quoteRequiredOnly ? requestIncluded.filter(needsQuote) : requestIncluded;
+  const itemCount = includedLines.reduce((sum, line) => sum + line.qty, 0);
 
   const machineName = selectedModel?.name ?? "Catalogue";
   /* Every model in the pilot is a Fat Truck; the other lines have no data. */
@@ -103,14 +111,14 @@ export function QuoteRequest({
   const [method, setMethod] = useState<ShippingMethod | null>(null);
 
   const savedAddress = company?.defaultShippingAddress ?? null;
-  const session = useCustomerSession();
   const canSubmit = !session || session.capabilities.includes("orders.submit");
   const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const onSubmit = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !includedLines.length) return;
+    const partIds = new Set(includedLines.map(line => line.partId));
     setSubmitError(null);
     const details = {
       comments,
@@ -145,7 +153,7 @@ export function QuoteRequest({
             };
           }),
         });
-        submit(details, result.quoteNo);
+        submit(details, result.quoteNo, partIds);
         router.push("/request/confirmed");
       } catch (error) {
         setSubmitError(error instanceof Error ? error.message : "Quote submit failed.");
@@ -154,7 +162,7 @@ export function QuoteRequest({
       }
       return;
     }
-    const confirmation = submit(details);
+    const confirmation = submit(details, undefined, partIds);
     if (!confirmation) return;
     registerQuoteRequest(confirmation, company?.id ?? "guest", usage);
     router.push("/request/confirmed");
@@ -202,7 +210,7 @@ export function QuoteRequest({
       <ZeroPriceNotice prices={lines.map(line => line.unitPriceSnapshot)} />
       {embedded ? null : (
       <div className={styles.bar}>
-        <span className={styles.title}>Request a quote</span>
+        <span className={styles.title}>{quoteRequiredOnly ? "Request a quote for items that need pricing" : "Request a quote"}</span>
         <span className={styles.count}>
           {includedLines.length} of {lines.length}{" "}
           {lines.length === 1 ? "part" : "parts"} · {itemCount}{" "}
@@ -221,7 +229,12 @@ export function QuoteRequest({
                     type="checkbox"
                     className={styles.checkbox}
                     checked={allIncluded}
-                    onChange={() => setAllIncluded(!allIncluded)}
+                    onChange={() => {
+                      if (!quoteRequiredOnly) setAllIncluded(!allIncluded);
+                      else for (const line of lines) {
+                        if (isIncluded(line.partId) === allIncluded) toggleIncluded(line.partId);
+                      }
+                    }}
                     aria-label="Include every part in the request"
                   />
                 </th>

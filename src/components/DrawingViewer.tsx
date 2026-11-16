@@ -46,8 +46,6 @@ export interface DrawingViewerProps {
   document?: DiagramRegionDocument;
   onSelectPart?: SelectDiagramPart;
   selectionActivation?: SelectionActivation;
-  /** Incremented by the explicit Show selected part action. */
-  revealRequest?: number;
   /**
    * Every occurrence retains its original reference. All selected components
    * light together, while one reference label per selected part number goes solid.
@@ -113,7 +111,6 @@ export function DrawingViewer({
   document,
   onSelectPart,
   selectionActivation,
-  revealRequest = 0,
   selectedPartIds = NO_SELECTION,
   hoveredPartId = null,
   onTogglePart,
@@ -143,12 +140,20 @@ export function DrawingViewer({
     if (marker.partNumber) partNumberByPartId.set(marker.partId, marker.partNumber);
   }
   const partNumberFor = (marker: DrawingMarker) => partNumberByPartId.get(marker.partId) ?? marker.partId;
+  const [preferredLabels, setPreferredLabels] = useState<Record<string, string>>({});
   const selectedLabelByPartNumber = new Map<string, string>();
   for (const marker of markers) {
     if (!selectedPartIds.has(marker.partId)) continue;
     const partNumber = partNumberFor(marker);
-    if (!selectedLabelByPartNumber.has(partNumber)) selectedLabelByPartNumber.set(partNumber, marker.id);
+    if (!selectedLabelByPartNumber.has(partNumber) || preferredLabels[partNumber] === marker.id) {
+      selectedLabelByPartNumber.set(partNumber, marker.id);
+    }
   }
+  // Keep the unselected layout stable while removing duplicate selected badges.
+  const visibleMarkers = markers.filter(marker => {
+    const representative = selectedLabelByPartNumber.get(partNumberFor(marker));
+    return !selectedPartIds.has(marker.partId) || representative === marker.id;
+  });
   const labelPositions = layoutDrawingMarkers(markers, displaySize.width, displaySize.height, labelGap);
   const markerState = (marker: DrawingMarker) => {
     const selectedLabel = selectedLabelByPartNumber.get(partNumberFor(marker));
@@ -271,16 +276,12 @@ export function DrawingViewer({
   const moved = useRef(false);
   const [dragging, setDragging] = useState(false);
 
-  const reveal = useRef<{ activation?: SelectionActivation; request: number; pending: boolean }>({ request:0, pending:false });
+  const reveal = useRef<{ activation?: SelectionActivation; pending: boolean }>({ pending: false });
   useEffect(() => {
     const previous = reveal.current;
     if (previous.activation !== selectionActivation) {
       previous.activation = selectionActivation;
       previous.pending = selectionActivation?.origin === "table";
-    }
-    if (previous.request !== revealRequest) {
-      previous.request = revealRequest;
-      previous.pending = true;
     }
     if (!src || !selectedPartIds.size) previous.pending = false;
     if (!previous.pending) return;
@@ -323,6 +324,11 @@ export function DrawingViewer({
         if (represented.has(marker.id)) continue;
         const legacy = legacyPaths.get(marker.id)?.getBoundingClientRect();
         if (legacy && (legacy.width || legacy.height)) targets.push(legacy);
+        else if (!label) {
+          const x = plate.left + marker.x * plate.width / 100;
+          const y = plate.top + marker.y * plate.height / 100;
+          targets.push({ left: x, right: x, top: y, bottom: y });
+        }
         represented.add(marker.id);
       }
       previous.pending = false;
@@ -345,7 +351,7 @@ export function DrawingViewer({
     };
     frame = requestAnimationFrame(run);
     return () => cancelAnimationFrame(frame);
-  }, [selectionActivation, revealRequest, src, numericDocument, markers, selectedPartIds, zoom, onZoomChange]);
+  }, [selectionActivation, src, numericDocument, markers, selectedPartIds, zoom, onZoomChange]);
 
   /*
    * Ordinary vertical wheel input and trackpad pinches share the existing zoom
@@ -511,14 +517,14 @@ export function DrawingViewer({
         ) : null}
 
         <svg className={styles.instanceLeaders} viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-          {markers.map((marker) => {
+          {visibleMarkers.map((marker) => {
             const position = labelPositions.get(marker.id);
             if (!position || (position.x === marker.x && position.y === marker.y)) return null;
             return <line key={marker.id} data-callout-id={marker.id} data-selected={selectedPartIds.has(marker.partId) || undefined}
               x1={marker.x} y1={marker.y} x2={position.x} y2={position.y} />;
           })}
         </svg>
-        {markers.map((marker) => (
+        {visibleMarkers.map((marker) => (
           <CalloutMarker
             key={marker.id}
             occurrenceId={marker.id}
@@ -539,10 +545,13 @@ export function DrawingViewer({
                 ? true
                 : undefined
             }
-            onActivate={
-              onSelectPart && marker.figurePartId ? () => onSelectPart(marker.figurePartId!, "label")
-                : onTogglePart ? () => onTogglePart(marker.partId) : undefined
-            }
+            onActivate={onSelectPart && marker.figurePartId || onTogglePart ? () => {
+              if (!selectedPartIds.has(marker.partId)) {
+                setPreferredLabels(current => ({ ...current, [partNumberFor(marker)]: marker.id }));
+              }
+              if (onSelectPart && marker.figurePartId) onSelectPart(marker.figurePartId, "label");
+              else onTogglePart?.(marker.partId);
+            } : undefined}
             onHoverChange={
               onHoverPart
                 ? (hovering) => onHoverPart(hovering ? marker.partId : null)

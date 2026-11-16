@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { fatTruckModelLabel } from "@/lib/fat-truck-models";
 import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -37,7 +38,7 @@ export function FiguresGrid({ systemId, data, requestedVariant }: { systemId: st
   }
 
   const system = data?.system ?? null;
-  const machine = data.model.name;
+  const machine = fatTruckModelLabel(data.model.name)?.name ?? data.model.name;
   const systemStep = system
     ? `${data?.number ?? ""} ${system.name}`.trim()
     : "";

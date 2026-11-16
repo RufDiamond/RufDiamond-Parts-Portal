@@ -89,3 +89,16 @@ it("shows no discount line to an account without a discount", () => {
   expect(within(foot).queryByText(/Subtotal/)).toBeNull();
   expect(within(foot).getByText("559.93")).toBeTruthy();
 });
+
+it("retains quantity for the quote-only nut and keeps it out of the priced total", async () => {
+  const nut = part("nut", "12-210000-12", 0);
+  const onConfirm = vi.fn(async () => true);
+  render(<AddToCartDialog parts={[{ part: heater }, { part: nut, qty: 3 }]} currency="CAD" discountRate={0.1} onConfirm={onConfirm} onClose={() => {}} />);
+  const row = (await screen.findByText(nut.partNumber)).closest("tr")!;
+  expect(within(row).getByText("Quote required")).toBeTruthy();
+  expect(within(row).queryByText("0.00")).toBeNull();
+  fireEvent.click(within(row).getByRole("button", { name: "Increase Quantity for 12-210000-12" }));
+  fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+  expect(onConfirm).toHaveBeenCalledWith([{ part: heater, qty: 1 }, { part: nut, qty: 4 }]);
+  expect((await screen.findByRole("link", { name: "Request a quote for remaining items" })).getAttribute("href")).toBe("/request?quoteRequired=1");
+});

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { compareCatalogueModels, fatTruckModelLabel } from "@/lib/fat-truck-models";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components";
@@ -51,6 +52,11 @@ export function BrandParts({ productLine, models, slug, previewNotice }: BrandPa
     );
   };
 
+  const hasImportedWagon = models.some(entry => entry.model.id === "mdl-ft3-wagon" && entry.figureCount > 0);
+  const visibleModels = slug === "fat-truck" ? models
+    .filter(entry => !(hasImportedWagon && entry.model.id === "mdl-ft-2-8-wagon" && !entry.variants.length && !entry.figureCount))
+    .sort((a, b) => compareCatalogueModels(a.model.name, b.model.name)) : models;
+
   return (
     <div className={styles.screen}>
       <div className={styles.gridPanel}>
@@ -64,7 +70,8 @@ export function BrandParts({ productLine, models, slug, previewNotice }: BrandPa
         </p>
         ) : (
           <div className={styles.grid}>
-            {models.map((entry, index) => {
+            {visibleModels.map((entry, index) => {
+            const label = slug === "fat-truck" ? fatTruckModelLabel(entry.model.name) : undefined;
             const ready = entry.figureCount > 0 && entry.variants.length > 0;
             return (
               <button
@@ -75,7 +82,7 @@ export function BrandParts({ productLine, models, slug, previewNotice }: BrandPa
                 disabled={!ready}
                 title={
                   ready
-                    ? `Open ${entry.model.name}`
+                    ? `Open ${label?.name ?? entry.model.name}`
                     : "Catalogue not yet imported for this model"
                 }
               >
@@ -95,8 +102,9 @@ export function BrandParts({ productLine, models, slug, previewNotice }: BrandPa
                   )}
                 </span>
                 <span className={styles.tileName}>
-                  {productLine.name} {entry.model.name}
+                  {label?.name ?? `${productLine.name} ${entry.model.name}`}
                 </span>
+                {label && <span className={styles.tileSubtitle}>{label.subtitle}</span>}
                 {ready ? null : (
                   <span className={styles.tileNote}>Catalogue in preparation</span>
                 )}

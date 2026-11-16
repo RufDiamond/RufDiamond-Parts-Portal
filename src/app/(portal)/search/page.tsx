@@ -37,6 +37,6 @@ export default async function SearchPage({
   const rows = query ? await (preview?.searchPartUsages ?? searchPartUsages)(query, mode) : [];
 
   return (
-    <SearchResults query={query} mode={mode} brand={brand} rows={rows} />
+    <SearchResults key={JSON.stringify([query, mode, brand])} query={query} mode={mode} brand={brand} rows={rows} />
   );
 }

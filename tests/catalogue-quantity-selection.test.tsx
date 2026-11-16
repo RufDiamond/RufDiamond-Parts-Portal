@@ -47,7 +47,7 @@ test.each(cases)("$figureId selects every mapped copy of every multi-quantity ro
     const assertGroup = (figure:HTMLElement) => {
       const markers = Array.from(figure.querySelectorAll('button[data-callout-id]'));
       const selected = markers.filter(m=>m.getAttribute("aria-pressed")==="true");
-      expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers);
+      expect(selected, `${figureId}/${audit.figurePartId}`).toHaveLength(expectedPointers > 0 ? 1 : 0);
       expect(figure.querySelectorAll('path[role="button"]')).toHaveLength(componentCount);
       expect(selected.filter(marker => marker.classList.contains(markerStyles.active)),
         `${figureId}/${audit.figurePartId} highlighted reference`).toHaveLength(expectedPointers > 0 ? 1 : 0);

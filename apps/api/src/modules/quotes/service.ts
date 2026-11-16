@@ -192,7 +192,7 @@ async function priceOrderLines(
       newPartNumber: row.newPartNumber,
       newDescription: row.newDescription,
     });
-    if (missing.length || !row.customerPrice) throw new AppError("QUOTE_NOT_ORDERABLE", 422, "This quote line cannot be ordered.");
+    if (missing.length || !row.customerPrice || parseDecimal(row.customerPrice, 4) <= BigInt(0)) throw new AppError("QUOTE_NOT_ORDERABLE", 422, "This quote line cannot be ordered.");
     const quotedQty = row.newQty ?? row.requested?.qty ?? 0;
     if (demand.qty > quotedQty) {
       throw new AppError("QUOTE_QUANTITY_PENDING", 422, "Ordering more than the quoted quantity is waiting on RUF confirmation.");

@@ -2,6 +2,9 @@
 import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Image from "next/image";
+import Link from "next/link";
+import { fatTruckModelLabel } from "@/lib/fat-truck-models";
+import { sortPartUsages, usageColumns, type UsageSortKey } from "@/lib/part-usage-sort";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AddToCartDialog, CheckCart, EmptyState } from "@/components";
@@ -48,6 +51,16 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
     `${row.part.id}:${row.figureId ?? "none"}:${index}`;
 
   const [ticked, setTicked] = useState<ReadonlySet<string>>(() => new Set());
+  const [sort, setSort] = useState<{ key: UsageSortKey; direction: "ascending" | "descending" }>({ key: "model", direction: "ascending" });
+  const baseline = useMemo(() => sortPartUsages(rows.map((row, index) => ({ row, index })), "model", "ascending")
+    .map(({ row }, index) => ({ row, index })), [rows]);
+  const sorted = useMemo(() => sortPartUsages(baseline, sort.key, sort.direction), [baseline, sort]);
+  const columnStyles: Partial<Record<UsageSortKey, string>> = {
+    no: styles.noHead, partNo: styles.partNoHead, price: styles.priceHead,
+    model: styles.modelHead, serial: styles.serialHead, system: styles.systemHead,
+    page: styles.pageHead, assembly: styles.assemblyHead,
+  };
+
 
   const toggle = (key: string) => {
     if (addition.pending) return;
@@ -65,18 +78,18 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
     if (addition.pending) return;
     setAdded(null);
     setTicked(
-      allTicked ? new Set() : new Set(rows.map((row, i) => keyOf(row, i))),
+      allTicked ? new Set() : new Set(baseline.map(({ row, index }) => keyOf(row, index))),
     );
   };
 
   /** The parts behind the ticked rows, each counted once. */
   const tickedParts = useMemo(() => {
     const seen = new Map<string, PartUsageRow["part"]>();
-    rows.forEach((row, index) => {
+    baseline.forEach(({ row, index }) => {
       if (ticked.has(keyOf(row, index))) seen.set(row.part.id, row.part);
     });
     return [...seen.values()];
-  }, [rows, ticked]);
+  }, [baseline, ticked]);
 
   const onCart = useMemo(
     () => new Set(lines.map((line) => line.partId)),
@@ -277,22 +290,19 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
                       aria-label="Select every result"
                     />
                   </th>
-                  <th scope="col" className={styles.noHead}>No.</th>
-                  <th scope="col" className={styles.partNoHead}>Part no.</th>
-                  <th scope="col">Description</th>
-                  <th scope="col" className={styles.priceHead}>Unit price</th>
-                  <th scope="col" className={styles.modelHead}>Model</th>
-                  <th scope="col" className={styles.serialHead}>Serial</th>
-                  <th scope="col" className={styles.systemHead}>System</th>
-                  <th scope="col" className={styles.pageHead}>Page</th>
-                  <th scope="col" className={styles.assemblyHead}>
-                    Assembly name
-                  </th>
+                  {usageColumns.map(([key, label]) => (
+                    <th key={key} scope="col" className={columnStyles[key]} aria-sort={sort.key === key ? sort.direction : undefined}>
+                      <button type="button" className={styles.sort}
+                        onClick={() => setSort(current => ({ key, direction: current.key === key && current.direction === "ascending" ? "descending" : "ascending" }))}>
+                        {label} <span aria-hidden="true">{sort.key === key ? sort.direction === "ascending" ? "↑" : "↓" : "↕"}</span>
+                      </button>
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
               <tbody>
-                {rows.map((row, index) => {
+                {sorted.map(({ row, index }) => {
                   const key = keyOf(row, index);
                   const on = ticked.has(key);
                   const { part } = row;
@@ -302,7 +312,12 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
                       key={key}
                       className={styles.row}
                       data-active={on || undefined}
-                      onClick={() => toggle(key)}
+                      data-figure={row.figureId ? true : undefined}
+                      onClick={row.figureId ? (event) => {
+                        if (!(event.target instanceof Element) || event.target.closest("input, button, a, label")) return;
+                        if (window.getSelection()?.toString()) return;
+                        router.push(`/figures/${encodeURIComponent(row.figureId!)}`);
+                      } : undefined}
                     >
                       <td className={styles.tickCell}>
                         <input
@@ -328,25 +343,15 @@ export function SearchResults({ query, mode, brand, rows }: SearchResultsProps) 
                           </span>
                         </span>
                       </td>
-                      <td className={styles.model}>{row.modelName ?? NONE}</td>
+                      <td className={styles.model}>{row.modelName ? fatTruckModelLabel(row.modelName)?.name ?? row.modelName : NONE}</td>
                       <td className={styles.serial}>{row.serial ?? NONE}</td>
                       <td className={styles.system}>{row.systemName ?? NONE}</td>
                       <td className={styles.page}>
-                        {row.figureId && row.groupNo ? (
-                          <button
-                            type="button"
-                            className={styles.pageLink}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              router.push(`/figures/${row.figureId}`);
-                            }}
-                            title="Open this figure"
-                          >
-                            {formatFigureRef(row.groupNo)}
-                          </button>
-                        ) : (
-                          NONE
-                        )}
+                        {row.figureId ? (
+                          <Link href={`/figures/${encodeURIComponent(row.figureId)}`} className={styles.pageLink}>
+                            {row.groupNo ? formatFigureRef(row.groupNo) : "Open figure"}
+                          </Link>
+                        ) : NONE}
                       </td>
                       <td className={styles.assembly}>
                         {row.assemblyName ?? NONE}

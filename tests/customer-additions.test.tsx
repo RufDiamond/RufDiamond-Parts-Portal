@@ -34,16 +34,16 @@ it("keeps selected search rows pending and on rejection without announcing succe
   expect(screen.getByText("Committed 0")).toBeTruthy();
   expect(navigation.push).not.toHaveBeenCalled();
 });
-it("announces success and clears selection only after the addition commits", async () => {
+it("opens the quote-only list and clears selection only after the addition commits", async () => {
   let complete!: (response: Response) => void;
   vi.stubGlobal("fetch", () => new Promise<Response>(resolve => { complete = resolve; }));
   render(tree()); await screen.findByText("Committed 0");
   fireEvent.click(screen.getByRole("checkbox", { name: "Select P" }));
   fireEvent.click(screen.getByRole("button", { name: /Add to cart/ }));
-  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Add to cart" }));
+  fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Request a quote" }));
   expect(screen.queryByText(/added to the cart/)).toBeNull();
   await act(async () => complete(response()));
-  await screen.findByText(/added to the cart/);
+  await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/request?quoteRequired=1"));
   expect(screen.getByText("Committed 1")).toBeTruthy();
   expect((screen.getByRole("checkbox", { name: "Select P" }) as HTMLInputElement).checked).toBe(false);
 });

@@ -200,3 +200,8 @@
 .tile, .gridPanel, .search, .empty { border-radius: 12px; }
 /* The rail cards set the house radius at 12px; these follow it. */
 .input, .go { border-radius: 12px; }
+
+.tileSubtitle {
+  font: var(--weight-regular) var(--text-sm) / 1.25 var(--font-ui);
+  text-align: center;
+}

@@ -155,3 +155,11 @@
 .cart:hover {
   background: var(--ink);
 }
+
+@media (max-width: 600px) {
+  .menu[data-placement="header"] {
+    position: fixed;
+    top: auto;
+    right: var(--space-4);
+  }
+}

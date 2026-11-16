@@ -5,6 +5,7 @@ import { FirstDrawingUpload } from "@/features/diagram-mapping/FirstDrawingUploa
 import { PublisherQueue, blockerFigureLink } from "@/features/diagram-mapping/PublisherQueue";
 import { MappingApiError } from "@/features/diagram-mapping/api-client";
 import type { PublishInput } from "@rufdiamond/contracts";
+import { RequestProvider } from "@/state/RequestContext";
 import { PortalShell } from "@/components/PortalShell";
 const authority = vi.hoisted(()=>({capabilities:["publish.draft.view","catalog.figure.view"],scopes:{environment:"draft"}}));
 vi.mock("next/navigation",()=>({usePathname:()=>"/"}));
@@ -13,13 +14,13 @@ vi.mock("@/state/SessionBoundary",()=>({useCustomerSession:()=>authority,SignOut
 const id = "11111111-1111-4111-8111-111111111111";
 afterEach(cleanup);
 it("links authenticated draft administration only with both capabilities and draft scope",()=>{
-  const view=render(<PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell>);
+  const view=render(<RequestProvider><PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell></RequestProvider>);
   expect(screen.getByRole("link",{name:"Draft administration"}).getAttribute("href")).toBe("/admin");
   authority.scopes.environment="published";
-  view.rerender(<PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell>);
+  view.rerender(<RequestProvider><PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell></RequestProvider>);
   expect(screen.queryByRole("link",{name:"Draft administration"})).toBeNull();
   authority.scopes.environment="draft"; authority.capabilities=["catalog.figure.view"];
-  view.rerender(<PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell>);
+  view.rerender(<RequestProvider><PortalShell date="Synthetic date"><p>Catalogue</p></PortalShell></RequestProvider>);
   expect(screen.queryByRole("link",{name:"Draft administration"})).toBeNull();
   authority.capabilities=["publish.draft.view","catalog.figure.view"];
 });

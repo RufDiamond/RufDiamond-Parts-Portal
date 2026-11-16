@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCustomerSession } from "@/state/SessionBoundary";
+import { canOrderRequestPart, quoteRequiredHref } from "@/lib/order-eligibility";
 import { useEffect, useMemo, useState } from "react";
 import { computeTotals, type RequestPartInput } from "@/state/RequestContext";
 import { downloadRequestCsv } from "@/lib/csv";
@@ -38,6 +42,8 @@ export function AddToCartDialog({
   onConfirm,
   onClose,
 }: AddToCartDialogProps) {
+  const router = useRouter();
+  const hosted = Boolean(useCustomerSession());
   // Snapshot the parts on open, so a selection changing behind the dialog
   // does not rewrite what the reader is confirming.
   const [items] = useState(parts);
@@ -77,14 +83,22 @@ export function AddToCartDialog({
 
   // Prices withheld from this account mean no money columns at all, rather
   // than columns of blanks that read as zero.
-  const priced = lines.every((line) => line.lineTotal !== undefined);
-  const totals = computeTotals(lines, discountRate);
+  const orderableIds = new Set(items.filter(item => canOrderRequestPart(item, hosted)).map(item => item.part.id));
+  const orderableLines = lines.filter(line => orderableIds.has(line.partId));
+  const quoteCount = lines.length - orderableLines.length;
+  const priced = orderableLines.length > 0;
+  const totals = computeTotals(orderableLines, discountRate);
 
   const confirm = async () => {
     setStatus("adding");
     const committed = await onConfirm(
       items.map((item) => ({ ...item, qty: qty[item.part.id] ?? 1 })),
     );
+    if (committed && !priced) {
+      onClose();
+      router.push(quoteRequiredHref);
+      return;
+    }
     setStatus(committed ? "added" : "confirming");
   };
 
@@ -95,7 +109,9 @@ export function AddToCartDialog({
           <p className={styles.doneTitle}>Parts Portal</p>
           <p className={styles.doneBody} role="status">
             Selected part(s) successfully added to order list.
+            {quoteCount > 0 && " Items that need a quote are saved separately from checkout."}
           </p>
+          {quoteCount > 0 && <p><Link href={quoteRequiredHref} onClick={onClose}>Request a quote for remaining items</Link></p>}
           <button type="button" className={styles.primary} onClick={onClose} autoFocus>
             OK
           </button>
@@ -119,7 +135,8 @@ export function AddToCartDialog({
           <button
             type="button"
             className={styles.secondary}
-            onClick={() => downloadRequestCsv({ lines, discountRate, filename: "cart-addition" })}
+            onClick={() => downloadRequestCsv({ lines: orderableLines, discountRate, filename: "cart-addition" })}
+            disabled={!priced || status === "adding"}
           >
             Export to Excel
           </button>
@@ -132,7 +149,7 @@ export function AddToCartDialog({
             onClick={() => { void confirm(); }}
             disabled={status === "adding"}
           >
-            {status === "adding" ? "Adding…" : "Add to cart"}
+            {status === "adding" ? "Adding…" : priced ? "Add to cart" : "Request a quote"}
           </button>
         </div>
 
@@ -153,9 +170,9 @@ export function AddToCartDialog({
             </thead>
             <tbody>
               {lines.map((line) => (
-                <tr key={line.partId}>
+                <tr key={line.partId} data-quote-required={!orderableIds.has(line.partId) || undefined}>
                   <td className={styles.mono}>{line.partNumberSnapshot}</td>
-                  <td>{line.descriptionSnapshot}</td>
+                  <td>{line.descriptionSnapshot}{!orderableIds.has(line.partId) && <span className={styles.quoteRequired}>Quote required</span>}</td>
                   <td className={styles.qty}>
                     <QuantityStepper
                       value={line.qty}
@@ -167,8 +184,8 @@ export function AddToCartDialog({
                   </td>
                   {priced ? (
                     <>
-                      <td className={styles.money}>{formatAmount(line.unitPriceSnapshot, currency)}</td>
-                      <td className={styles.money}>{formatAmount(line.lineTotal, currency)}</td>
+                      <td className={styles.money}>{orderableIds.has(line.partId) ? formatAmount(line.unitPriceSnapshot, currency) : "—"}</td>
+                      <td className={styles.money}>{orderableIds.has(line.partId) ? formatAmount(line.lineTotal, currency) : "—"}</td>
                     </>
                   ) : null}
                 </tr>
@@ -177,14 +194,14 @@ export function AddToCartDialog({
             {priced ? (
               <tfoot>
                 {/* Individual customers have no discount, so no discount line (14 Oct). */}
-                {discountRate > 0 ? (
+                {totals.discountApplied ? (
                   <>
                     <tr>
                       <th scope="row" colSpan={4}>Subtotal ({currency})</th>
                       <td className={styles.money}>{formatAmount(totals.listTotal, currency)}</td>
                     </tr>
                     <tr>
-                      <th scope="row" colSpan={4}>Discount ({Math.round(discountRate * 100)}%)</th>
+                      <th scope="row" colSpan={4}>Discount</th>
                       <td className={styles.money}>{formatAmount(totals.discountApplied, currency)}</td>
                     </tr>
                   </>
@@ -198,9 +215,8 @@ export function AddToCartDialog({
           </table>
         </div>
 
-        <p className={styles.note}>
-          Prices exclude taxes, which depend on the province the order ships to.
-        </p>
+        {quoteCount > 0 && <p className={styles.note}>Items marked Quote required stay in your request list and are excluded from checkout.</p>}
+        {priced && <p className={styles.note}>Prices exclude taxes, which depend on the province the order ships to.</p>}
       </div>
     </div>
   );

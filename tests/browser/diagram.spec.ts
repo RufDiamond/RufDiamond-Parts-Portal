@@ -145,19 +145,16 @@ test("fullscreen text actions wrap and retain keyboard selection controls on a n
   await page.goto(base + "/figures/fig-cabin-6-1");
   await figure(page).getByRole("button", { name: /^Callout 2:/ }).first().click();
   await page.getByRole("button", { name: "Illustration full screen", exact: true }).click();
-  const desktopAction = page.getByRole("dialog").getByRole("button", { name: "Show selection in drawing", exact: true });
-  expect(await desktopAction.evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(36);
+  await expect(page.getByRole("button", { name: "Show selection in drawing", exact: true })).toHaveCount(0);
   await page.setViewportSize({ width: 360, height: 760 });
-  const dialog = page.getByRole("dialog");
-  const show = dialog.getByRole("button", { name: "Show selection in drawing", exact: true });
-  const clear = dialog.getByRole("button", { name: "Clear selection", exact: true });
-  const dimensions = await show.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, parentWidth: el.parentElement!.getBoundingClientRect().width, parentScroll: el.parentElement!.scrollWidth }));
+  const clear = page.getByRole("dialog").getByRole("button", { name: "Clear selection", exact: true });
+  const dimensions = await clear.evaluate(el => ({ height: el.getBoundingClientRect().height, width: el.getBoundingClientRect().width, parentWidth: el.parentElement!.getBoundingClientRect().width, parentScroll: el.parentElement!.scrollWidth }));
   expect(dimensions.height).toBeGreaterThanOrEqual(36);
   expect(dimensions.width).toBeGreaterThan(70);
   expect(dimensions.parentScroll).toBeLessThanOrEqual(dimensions.parentWidth + 1);
-  await show.focus(); await page.keyboard.press("Enter");
-  await clear.focus(); await page.keyboard.press("Enter");
-  await expect(show).toBeDisabled();
+  await clear.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("dialog").locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(0);
 });
 
 test("synthetic editor: native coordinates, drag, keyboard, zoom and image mismatch gate", async ({ page }, info) => {
@@ -333,7 +330,6 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
     await label.click(); await page.mouse.move(0,0);
     await expect(label).toHaveAttribute("aria-pressed","true");
     for (let i=0;i<4;i++) await page.getByRole("button", {name:"Zoom in",exact:true}).click();
-    await page.getByRole("button", {name:"Show selection in drawing",exact:true}).click();
     await settled(page);
     await page.getByRole("button", { name:"Clear selection", exact:true }).click();
     await expect(label).toHaveAttribute("aria-pressed","false");
@@ -357,7 +353,6 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   await page.getByRole("button", { name:"Zoom in", exact:true }).click();
   await settled(page);
   measurements.push({ state:"zoom", ...await geometry(figure(page)) });
-  await page.getByRole("button", { name:"Show selection in drawing", exact:true }).click();
   await settled(page);
   await page.getByRole("button", { name:"Illustration full screen", exact:true }).click();
   const full = page.getByRole("dialog").locator("figure");
@@ -367,7 +362,6 @@ for (const fixture of cases) test(`${fixture.name}: native input and pixel geome
   await page.getByRole("dialog").getByRole("button", { name:"Zoom in", exact:true }).click();
   await settled(page);
   measurements.push({ state:"fullscreen zoom", ...await geometry(full) });
-  await page.getByRole("dialog").getByRole("button", { name:"Show selection in drawing", exact:true }).click();
   await page.setViewportSize({ width:1280, height:900 });
   await settled(page);
   measurements.push({ state:"fullscreen resized", ...await geometry(full) });
@@ -421,11 +415,6 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await expect.poll(() => sheet.evaluate((el) => el.scrollTop)).toBeGreaterThan(500);
   expect(await zoom(scope)).toBe(4);
   measurements.push({ state:"synthetic tall revealed zoom", ...await geometry(scope) });
-  // Explicit reveal also restores a deliberately displaced viewport at 4x.
-  await sheet.evaluate((el) => { el.scrollTop=0;el.scrollLeft=0; });
-  await page.getByRole("button", { name:"Show selection in drawing", exact:true }).click();
-  await expect.poll(() => sheet.evaluate((el) => el.scrollTop)).toBeGreaterThan(500);
-  expect(await zoom(scope)).toBe(4);
   await page.locator('tr[data-figure-part-id="row-1"]').click();
   await expect.poll(() => zoom(scope)).toBe(1);
   await expect.poll(() => scope.locator('path[data-selected]').evaluateAll((paths) => paths.length > 0 && paths.every(path => {
@@ -473,14 +462,14 @@ test("synthetic tall PNG: own-container row reveal, union fitting, drag cancella
   await info.attach("synthetic-tall.png", { body:await page.screenshot(), contentType:"image/png" });
 });
 
-test("mixed occurrence union reveals all components and every original reference", async ({ page }, info) => {
+test("mixed occurrence union reveals all components and one selected reference", async ({ page }, info) => {
   await page.emulateMedia({ reducedMotion:"reduce" });
   await page.goto("http://localhost:3101/?mixed");
   const scope = figure(page);
   await expect(scope.locator("img")).toBeVisible();
   for (let i=0;i<4;i++) await page.getByRole("button", { name:"Zoom in", exact:true }).click();
   await page.locator('tr[data-figure-part-id="row-39"]').click();
-  await expect(scope.locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(3);
+  await expect(scope.locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(1);
   await expect.poll(() => scope.evaluate((root) => {
     const image=root.querySelector("img")!;
     const sheet=image.parentElement!.parentElement!;

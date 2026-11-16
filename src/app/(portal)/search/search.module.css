@@ -294,3 +294,18 @@
   color: var(--deck-accent-edge);
   font-weight: var(--weight-bold);
 }
+
+.sort {
+  width: 100%;
+  padding: 4px 2px;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+}
+.sort:hover { text-decoration: underline; }
+.sort:focus-visible { outline: 2px solid currentColor; outline-offset: -1px; }
+.row[data-figure] { cursor: pointer; }
+.row:not([data-figure]) { cursor: default; }

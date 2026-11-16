@@ -93,7 +93,7 @@ export function QuoteStatus({ lines: serverLines, today }: { lines: CustomerQuot
         const description = item.response?.newDescription ?? item.description;
         const unitPrice = item.response?.unitPrice ?? null;
         const released = item.response !== null;
-        const canOrder = Boolean(released && item.response?.available && !item.expired && unitPrice && partNumber && description && qty && qty > 0);
+        const canOrder = Boolean(released && item.response?.available && !item.expired && unitPrice && Number(unitPrice) > 0 && partNumber && description && qty && qty > 0);
         return {
           ...item,
           requote: released && item.expired && partNumber && description && qty

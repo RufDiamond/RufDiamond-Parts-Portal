@@ -103,7 +103,7 @@ it("walks a first order through every section, saves the address, and offers it 
   expect(screen.getByText("Via: Purolator Ground")).toBeTruthy();
   expect(screen.getByText("VIN: 9924P250416")).toBeTruthy();
 
-  fireEvent.click(screen.getByRole("button", { name: "Submit" }));
+  fireEvent.click(screen.getByRole("button", { name: "Submit order" }));
   const done = screen.getByRole("dialog", { name: "Order Confirmation" });
   expect(within(done).getByText("Your order has been submitted successfully.")).toBeTruthy();
   fireEvent.click(within(done).getByRole("button", { name: "OK" }));
@@ -143,4 +143,38 @@ it("keeps every other answer when the order type changes (14 Oct)", async () => 
   fireEvent.click(screen.getByRole("radio", { name: "Schedule" }));
   expect(screen.getByRole("alert").textContent).toMatch(/Choose the date/);
   expect((screen.getByLabelText("PO No.:") as HTMLInputElement).value).toBe("4500689756");
+});
+
+it("keeps quote-required lines in the request list after submitting the eligible lines", async () => {
+  const priced = { id:"eligible", partNumber:"TEST-1", description:"Eligible part", manufacturer:null, currency:"CAD",
+    status:"active", supersededByPartId:null, requires:[], listPrice:50 } as Part;
+  const nut = { ...priced, id:"nut", partNumber:"12-210000-12", description:"M10 nut", listPrice:0 };
+  function MixedCart() {
+    const { addParts, lines, linesHydrated } = useRequest();
+    return <><button type="button" disabled={!linesHydrated} onClick={() => void addParts([{ part: priced }, { part: nut, qty: 2 }])}>Add mixed cart</button>
+      <output>{lines.map(line => line.partNumberSnapshot).join(",")}</output><Checkout today={TODAY} /></>;
+  }
+  render(<RequestProvider><MixedCart /></RequestProvider>);
+  const add = screen.getByRole("button", { name: "Add mixed cart" }) as HTMLButtonElement;
+  await vi.waitFor(() => expect(add.disabled).toBe(false));
+  fireEvent.click(add);
+  expect(await screen.findByRole("button", { name: /Next step: Continue to order type detail/ })).toBeTruthy();
+  expect(screen.queryByText("A priced quote is required")).toBeNull();
+  expect(screen.getByText("TEST-1,12-210000-12")).toBeTruthy();
+  fireEvent.click(screen.getByRole("radio", { name: "Regular Order" }));
+  next(/Continue to order type detail/);
+  fireEvent.change(screen.getByLabelText("PO No.:"), { target: { value: "TEST-PO" } });
+  fireEvent.change(screen.getByLabelText("VIN No.:"), { target: { value: "9924P250416" } });
+  next(/Continue to shipping method/);
+  fireEvent.click(screen.getByRole("radio", { name: "Purolator Ground" }));
+  next(/Continue to shipping and billing address/);
+  fillAddress("shipping", address);
+  fireEvent.click(screen.getByRole("checkbox", { name: "Shipping address is same as billing address" }));
+  next(/Continue to special instructions/);
+  next(/Review order/);
+  expect(screen.getByText("Eligible part")).toBeTruthy();
+  expect(screen.queryByText("M10 nut")).toBeNull();
+  expect(screen.getByRole("link", { name: "View those items" }).getAttribute("href")).toBe("/request?quoteRequired=1");
+  fireEvent.click(screen.getByRole("button", { name: "Submit order" }));
+  expect(screen.getByText("12-210000-12")).toBeTruthy();
 });

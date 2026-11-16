@@ -8,8 +8,9 @@ import { QuoteRequest } from "./QuoteRequest";
  * The list itself lives in the browser, but the columns beside each part come
  * from the catalogue, so the index is resolved on the server and handed down.
  */
-export default async function RequestPage() {
+export default async function RequestPage({ searchParams }: { searchParams: Promise<{ quoteRequired?: string | string[] }> }) {
+  const { quoteRequired } = await searchParams;
   const preview = isApiMode() ? await getFatTruckPreviewRepository() : null;
   const usage = await (preview?.getPartUsageIndex ?? getPartUsageIndex)();
-  return <QuoteRequest usage={usage} />;
+  return <QuoteRequest usage={usage} quoteRequiredOnly={quoteRequired === "1"} />;
 }

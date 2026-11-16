@@ -9,7 +9,7 @@ import { Icon } from "./Icon";
 import { QuantityStepper } from "./QuantityStepper";
 import styles from "./CheckCart.module.css";
 import { useCustomerSession } from "@/state/SessionBoundary";
-import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
+import { canOrderRequestLine, quoteRequiredHref } from "@/lib/order-eligibility";
 
 export interface CheckCartProps {
   /** The toolbar's own button styling, so this matches its neighbours. */
@@ -17,7 +17,7 @@ export interface CheckCartProps {
   iconClassName: string;
   disabled?: boolean;
   /** Where the cart opens — "above" when the button sits at the foot of a screen. */
-  placement?: "below" | "above";
+  placement?: "below" | "above" | "header";
 }
 
 /**
@@ -28,7 +28,10 @@ export interface CheckCartProps {
 export function CheckCart({ buttonClassName, iconClassName, disabled = false, placement = "below" }: CheckCartProps) {
   const { lines, currency, updateQty, removeLine, clear } = useRequest();
   const session = useCustomerSession();
-  const needsQuote = !!session && lines.some(line => isFatTruckPreviewPartId(line.partId));
+  const orderable = lines.filter(line => canOrderRequestLine(line, Boolean(session)));
+  const orderableIds = new Set(orderable.map(line => line.partId));
+  const quoteCount = lines.length - orderable.length;
+  const quoteOnly = lines.length > 0 && !orderable.length;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +52,8 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
   }, [open]);
 
   const pieces = lines.reduce((sum, line) => sum + line.qty, 0);
-  const priced = lines.length > 0 && lines.every((line) => line.lineTotal !== undefined);
-  const subtotal = Math.round(lines.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0) * 100) / 100;
+  const priced = orderable.length > 0;
+  const subtotal = Math.round(orderable.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0) * 100) / 100;
 
   return (
     <div className={styles.root} ref={rootRef}>
@@ -63,7 +66,7 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
         aria-haspopup="dialog"
       >
         <Image src="/toolbar/check-cart.png" alt="" width={40} height={40} className={iconClassName} />
-        Check cart · {lines.length}
+        {placement === "header" ? "Cart" : "Check cart"} · {lines.length}
       </button>
 
       {open ? (
@@ -78,11 +81,11 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
                     {line.descriptionSnapshot}
                     <span className={styles.number}> ({line.partNumberSnapshot})</span>
                   </p>
-                  {line.unitPriceSnapshot !== undefined ? (
+                  {orderableIds.has(line.partId) ? (
                     <p className={styles.price}>
                       {currency} {formatAmount(line.unitPriceSnapshot, currency)} × {line.qty}
                     </p>
-                  ) : null}
+                  ) : <p className={styles.price}>Quote required</p>}
                   <div className={styles.controls}>
                     <QuantityStepper
                       value={line.qty}
@@ -126,13 +129,14 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
 
           <div className={styles.links}>
             <Link
-              href={needsQuote ? "/request" : "/checkout"}
+              href={quoteOnly ? quoteRequiredHref : "/checkout"}
               className={styles.checkout}
               aria-disabled={lines.length === 0 || undefined}
               onClick={(event) => { if (lines.length === 0) event.preventDefault(); else setOpen(false); }}
             >
-              {needsQuote ? "Request a quote" : "Checkout"}
+              {quoteOnly ? "Request a quote" : "Checkout"}
             </Link>
+            {quoteCount > 0 && !quoteOnly && <Link href={quoteRequiredHref} className={styles.cart} onClick={() => setOpen(false)}>Request a quote</Link>}
             <Link href="/request" className={styles.cart} onClick={() => setOpen(false)}>
               Your cart
             </Link>

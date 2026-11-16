@@ -54,7 +54,7 @@ test("image activation scrolls its own table only, by the nearest edge, includin
   expect(scroller.scrollTop).toBe(0);
 });
 
-test("table activation and Show selected reveal numeric regions at existing zoom; hover and image activation never pan", async () => {
+test("table activation reveals numeric regions at existing zoom; hover and image activation never pan", async () => {
   const props = { label:"Test", src:"/test.png", width:100, height:100, markers:[], zoom:4,
     selectedPartIds:new Set(["part"]), document:{ imageWidth:100, imageHeight:100, occurrences:[{
       calloutId:"callout", figurePartId:"row", partId:"part", partNumber:"P", refNo:"1",
@@ -76,7 +76,7 @@ test("table activation and Show selected reveal numeric regions at existing zoom
   view.rerender(<DrawingViewer {...props} selectionActivation={activation} hoveredPartId="part" />);
   await new Promise((resolve) => setTimeout(resolve, 80));
   expect(sheet.scrollTop).toBe(0);
-  view.rerender(<DrawingViewer {...props} selectionActivation={activation} revealRequest={1} />);
+  view.rerender(<DrawingViewer {...props} selectionActivation={{ origin:"table", sequence:3 }} />);
   await waitFor(() => expect(sheet.scrollTop).toBe(260));
 });
 

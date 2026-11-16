@@ -11,7 +11,7 @@ import {
 import { formatAmount } from "@/lib/format";
 import { createQuoteApi } from "@/state/quote-api";
 import { computeTotals, useRequest } from "@/state/RequestContext";
-import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
+import { canOrderRequestLine, quoteRequiredHref } from "@/lib/order-eligibility";
 import { useCustomerSession } from "@/state/SessionBoundary";
 import type { Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
 import styles from "./checkout.module.css";
@@ -165,7 +165,10 @@ function AddressForm({ kind, address, onChange }: {
 export function Checkout({ today }: { today: string }) {
   const session = useCustomerSession();
   const quoteApi = useMemo(() => (session ? createQuoteApi(session.csrfToken) : null), [session]);
-  const { lines, currency, discountRate, clear, linesHydrated, company, hydrationError, retryHydration, discardSavedRequest } = useRequest();
+  const { lines: requestLines, currency, discountRate, removeLine, linesHydrated, company, hydrationError, retryHydration, discardSavedRequest } = useRequest();
+  const hosted = Boolean(session);
+  const lines = useMemo(() => requestLines.filter(line => canOrderRequestLine(line, hosted)), [requestLines, hosted]);
+  const quoteCount = requestLines.length - lines.length;
   const companyId = company?.id ?? session?.companyId ?? "guest";
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -178,6 +181,10 @@ export function Checkout({ today }: { today: string }) {
   const [editing, setEditing] = useState({ shipping: false, billing: false });
   const [view, setView] = useState<"form" | "review">("form");
   const [announce, setAnnounce] = useState(false);
+  const [focusTarget, setFocusTarget] = useState<{ id: string } | null>(null);
+  useEffect(() => {
+    if (focusTarget) document.getElementById(focusTarget.id)?.focus();
+  }, [focusTarget]);
 
   // A refresh mid-order must not lose what was typed. Read after mount.
   useEffect(() => {
@@ -197,13 +204,23 @@ export function Checkout({ today }: { today: string }) {
   const advance = (index: number) => {
     const section = SECTIONS[index];
     setTried((current) => new Set(current).add(section));
-    if (problems[section]) return;
+    if (problems[section]) {
+      setFocusTarget({ id: `${section}-problem` });
+      return;
+    }
     if (index === SECTIONS.length - 1) {
       const first = SECTIONS.findIndex((item) => problems[item]);
-      if (first === -1) setView("review");
+      if (first === -1) {
+        setView("review");
+        setFocusTarget({ id: "order-heading" });
+      } else {
+        setTried(current => new Set(current).add(SECTIONS[first]));
+        setFocusTarget({ id: `${SECTIONS[first]}-problem` });
+      }
       return;
     }
     dispatch({ type: "reach", index: index + 1 });
+    setFocusTarget({ id: `${SECTIONS[index + 1]}-title` });
   };
 
   const submit = async () => {
@@ -265,7 +282,7 @@ export function Checkout({ today }: { today: string }) {
     write(ORDER_STORAGE_KEY, order);
     saveAddressesFrom(companyId, draft);
     write(DRAFT_STORAGE_KEY, null);
-    clear();
+    for (const line of lines) removeLine(line.partId);
     dispatch({ type: "submitted", order });
     setAnnounce(true);
   };
@@ -286,10 +303,10 @@ export function Checkout({ today }: { today: string }) {
     <button type="button" onClick={discardSavedRequest}>Discard saved cart</button>
   </main>;
   if (!hydrated || !linesHydrated) return <p>Loading checkout…</p>;
-  if (!submitted && session && lines.some(line => isFatTruckPreviewPartId(line.partId))) {
+  if (!submitted && quoteCount > 0 && lines.length === 0) {
     return <main className={styles.empty}>
-      <EmptyState title="A priced quote is required" description="Request a quote for preview parts. Add the priced response from Quote Status when it is ready."
-        action={<Link href="/request">Open request list</Link>} />
+      <EmptyState title="A priced quote is required" description="Request a quote for these parts. Add the priced response from Quote Status when it is ready."
+        action={<Link href={quoteRequiredHref}>Request a quote</Link>} />
     </main>;
   }
 
@@ -312,7 +329,7 @@ export function Checkout({ today }: { today: string }) {
     return (
       <div className={styles.review}>
         <section className={styles.summary} aria-labelledby="order-heading">
-          <h1 id="order-heading" className={styles.orderTitle}>
+          <h1 id="order-heading" className={styles.orderTitle} tabIndex={-1}>
             {order.orderNo ? `Order No: ${order.orderNo}` : "Order Confirmation"}
           </h1>
           {submitted ? (
@@ -321,8 +338,20 @@ export function Checkout({ today }: { today: string }) {
             </p>
           ) : null}
 
-          <h2 className={styles.blockTitle}>Billing Address</h2>
-          <p className={styles.address}><AddressLines address={billing} /></p>
+          <div className={styles.reviewAddresses}>
+            <section>
+              <h2 className={styles.blockTitle}>Shipping Address</h2>
+              <p className={styles.address}><AddressLines address={order.draft.shipping} /></p>
+            </section>
+            <section>
+              <h2 className={styles.blockTitle}>Billing Address</h2>
+              <p className={styles.address}><AddressLines address={billing} /></p>
+            </section>
+          </div>
+          {!submitted && quoteCount > 0 && <p className={styles.taxNote}>
+            {quoteCount} {quoteCount === 1 ? "item needs" : "items need"} a quote and will stay in your request list.
+            {" "}<Link href={quoteRequiredHref}>View those items</Link>
+          </p>}
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -370,9 +399,6 @@ export function Checkout({ today }: { today: string }) {
             </>
           ) : null}
 
-          <h2 className={styles.blockTitle}>Shipping Address</h2>
-          <p className={styles.address}><AddressLines address={order.draft.shipping} /></p>
-
           <p className={styles.orderFacts}>
             <strong>{type.toUpperCase()}</strong>
             {order.draft.orderType === "schedule" ? <strong>Ship on: {order.draft.scheduleDate}</strong> : null}
@@ -392,7 +418,7 @@ export function Checkout({ today }: { today: string }) {
                 <button type="button" className={styles.back} onClick={() => setView("form")}>Back</button>
                 {submitError ? <p role="alert">{submitError}</p> : null}
                 <button type="button" className={styles.submit} onClick={() => void submit()} disabled={submitting}>
-                  {submitting ? "Submitting…" : "Submit"}
+                  {submitting ? "Submitting…" : "Submit order"}
                 </button>
               </>
             )}
@@ -441,17 +467,14 @@ export function Checkout({ today }: { today: string }) {
     return (
       <section key={section} className={`${styles.section} ${className}`} data-state={stateOf(index)} aria-labelledby={`${section}-title`}>
         <div className={styles.sectionBody}>
-          <h2 id={`${section}-title`} className={styles.sectionTitle}>{TITLES[section]}</h2>
+          <h2 id={`${section}-title`} className={styles.sectionTitle} tabIndex={-1}>{TITLES[section]}</h2>
           {body}
-          {message ? <p className={styles.problem} role="alert">{message}</p> : null}
-        </div>
-        {index === reached || last ? (
+          {message ? <p id={`${section}-problem`} tabIndex={-1} className={styles.problem} role="alert">{message}</p> : null}
           <button type="button" className={styles.next} onClick={() => advance(index)}
-            aria-label={last ? "Review order" : `Continue to ${TITLES[SECTIONS[index + 1]].toLowerCase()}`}
-            title={last ? "Review order" : "Continue"}>
-            <span aria-hidden="true">➜</span>
+            aria-label={last ? "Next step: Review order" : `Next step: Continue to ${TITLES[SECTIONS[index + 1]].toLowerCase()}`}>
+            Next step <span aria-hidden="true">→</span>
           </button>
-        ) : null}
+        </div>
       </section>
     );
   };

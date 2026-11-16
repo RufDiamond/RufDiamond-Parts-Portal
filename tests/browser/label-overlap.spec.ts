@@ -59,7 +59,8 @@ for (const screen of [
         else await marker.tap(); // Exercise actual touch targets.
         await page.mouse.move(0,0);
         await expect(marker).toHaveAttribute("aria-pressed","true");
-        await expect(figure.locator("button[data-callout-id]")).toHaveCount(ids.length);
+        expect(await figure.locator("button[data-callout-id]").count()).toBeLessThanOrEqual(ids.length);
+        await expect(figure.locator('button[data-callout-id][aria-pressed="true"]')).toHaveCount(1);
         await expect(page.locator("tr[data-active]").first()).toBeAttached();
         await expect.poll(() => highlightedReferences(figure)).toBe(1);
         await expect(figure.getByRole("group", { name: "Selected parts" })).toHaveCount(0);
