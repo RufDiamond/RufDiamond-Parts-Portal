@@ -1,4 +1,4 @@
-import { expect, test, type Locator } from "@playwright/test";
+import { expect, test, type APIRequestContext, type BrowserContext, type Locator } from "@playwright/test";
 
 // These cases are independently established in the source audits under tools/callouts/review.
 const mapped = [
@@ -47,15 +47,37 @@ for (const device of ["desktop", "phone"] as const) {
       hasTouch: phone, isMobile: phone,
       ...(hosted ? { trace: "off", screenshot: "off" } as const : {}),
     });
-    test.beforeEach(async ({ context }) => {
+    let hostedSession: APIRequestContext | undefined;
+    let cookies: Awaited<ReturnType<BrowserContext["cookies"]>> = [];
+    let csrfToken: string | undefined;
+    const origin = hosted ? new URL(process.env.RUF_E2E_BASE_URL!).origin : "";
+    test.beforeAll(async ({ playwright }) => {
       if (!hosted) return;
       const password = process.env.RUF_E2E_PASSWORD;
       if (!password) throw new Error("Provide RUF_E2E_PASSWORD securely for authenticated Render verification.");
-      const origin = new URL(process.env.RUF_E2E_BASE_URL!).origin;
-      const login = await context.request.post("/api/v1/auth/sign-in", {
+      hostedSession = await playwright.request.newContext({ baseURL: origin });
+      const login = await hostedSession.post("/api/v1/auth/sign-in", {
         headers: { origin }, data: { loginId: process.env.RUF_E2E_LOGIN ?? "demo-purchaser", password },
       });
       expect(login.status()).toBe(200);
+      ({ cookies } = await hostedSession.storageState());
+      ({ csrfToken } = await login.json());
+    });
+    test.beforeEach(async ({ context }) => {
+      if (cookies.length) await context.addCookies(cookies);
+    });
+    test.afterAll(async () => {
+      try {
+        if (hostedSession && csrfToken) {
+          const logout = await hostedSession.post("/api/v1/auth/sign-out", {
+            headers: { origin, "x-csrf-token": csrfToken }, data: {},
+          });
+          expect(logout.status()).toBe(200);
+        }
+      } finally {
+        await hostedSession?.dispose();
+        cookies = [];
+      }
     });
 
     for (const entry of mapped) {
