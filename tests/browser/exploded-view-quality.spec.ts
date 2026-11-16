@@ -8,6 +8,7 @@ const mapped = [
   { figure: "fig-tire-wheel-5-1", ref: 4, row: "fp-5-1-04", part: "10-208040-121", count: 16, sourceId: "co-5-1-0106" },
 ];
 const hosted = !!process.env.RUF_E2E_BASE_URL;
+if (hosted) test.use({ trace: "off", screenshot: "off" });
 const marker = 'button[data-callout-id]';
 const component = 'path[role="button"][data-callout-id]';
 
@@ -45,7 +46,6 @@ for (const device of ["desktop", "phone"] as const) {
     test.use({
       viewport: phone ? { width: 390, height: 844 } : { width: 1440, height: 1000 },
       hasTouch: phone, isMobile: phone,
-      ...(hosted ? { trace: "off", screenshot: "off" } as const : {}),
     });
     let hostedSession: APIRequestContext | undefined;
     let cookies: Awaited<ReturnType<BrowserContext["cookies"]>> = [];
