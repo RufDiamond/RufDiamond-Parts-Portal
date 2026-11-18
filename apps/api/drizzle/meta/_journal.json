@@ -77,6 +77,7 @@
     { "idx": 12, "version": "7", "when": 1789500000000, "tag": "0013_quote_commerce", "breakpoints": true },
     { "idx": 13, "version": "7", "when": 1789600000000, "tag": "0014_commerce_price_snapshot", "breakpoints": true },
     { "idx": 14, "version": "7", "when": 1792950000000, "tag": "0015_commerce_discount_precision", "breakpoints": true },
-    { "idx": 15, "version": "7", "when": 1793036400000, "tag": "0016_account_invitations", "breakpoints": true }
+    { "idx": 15, "version": "7", "when": 1793036400000, "tag": "0016_account_invitations", "breakpoints": true },
+    { "idx": 16, "version": "7", "when": 1795020000000, "tag": "0017_ordering_catalogue", "breakpoints": true }
   ]
 }

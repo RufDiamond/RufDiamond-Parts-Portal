@@ -252,6 +252,10 @@ export function Checkout({ today }: { today: string }) {
                 qty: line.qty,
               };
             }
+            if (line.orderingCataloguePartId && line.catalogueRevision) {
+              return { kind: "supplier-catalogue" as const, cataloguePartId: line.orderingCataloguePartId,
+                catalogueRevision: line.catalogueRevision, qty: line.qty };
+            }
             if (!line.releaseId || !line.releasePartId) {
               throw new Error("Reload the catalogue part before ordering. Its release is not on this line.");
             }
@@ -306,7 +310,7 @@ export function Checkout({ today }: { today: string }) {
   if (!hydrated || !linesHydrated) return <p>Loading checkout…</p>;
   if (!submitted && pendingApproval.length > 0 && lines.length === 0) {
     return <main className={styles.empty}>
-      <EmptyState title="Catalogue approval pending" description="These items have listed prices. They will be ready for checkout once RUF approves the catalogue. Your selections are saved in your cart."
+      <EmptyState title="Ordering setup incomplete" description="These priced items need their ordering records refreshed. Reload the catalogue and add them again. Your current selections are saved in your cart."
         action={<Link href="/request">View request list</Link>} />
       {quoteCount > 0 && <p>{quoteCount} {quoteCount === 1 ? "item needs" : "items need"} pricing. <Link href={quoteRequiredHref}>Request a quote</Link></p>}
     </main>;
@@ -342,7 +346,7 @@ export function Checkout({ today }: { today: string }) {
           </h1>
           {submitted ? (
             <p className={styles.localNote} role="note">
-              {session ? "Order submitted to the portal." : "Recorded in this browser only. The order has not been sent to RUF Diamond."}
+              {session ? <>Order submitted to the portal. <Link href="/orders">View saved orders</Link></> : "Recorded in this browser only. The order has not been sent to RUF Diamond."}
             </p>
           ) : null}
 
@@ -357,7 +361,7 @@ export function Checkout({ today }: { today: string }) {
             </section>
           </div>
           {!submitted && pendingApproval.length > 0 && <p className={styles.taxNote}>
-            {pendingApproval.length} priced {pendingApproval.length === 1 ? "item is" : "items are"} awaiting catalogue approval and will stay in your cart.
+            {pendingApproval.length} priced {pendingApproval.length === 1 ? "item is" : "items are"} waiting for ordering records to be refreshed and will stay in your cart.
           </p>}
           {!submitted && quoteCount > 0 && <p className={styles.taxNote}>
             {quoteCount} {quoteCount === 1 ? "item needs" : "items need"} a quote and will stay in your request list.

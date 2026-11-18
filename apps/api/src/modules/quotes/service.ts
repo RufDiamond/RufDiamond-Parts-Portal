@@ -1,4 +1,5 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { ft3CatalogueCompanyIds } from "@rufdiamond/contracts";
 import type {
   AddFactoryQuoteLineInput,
   NotifyQuoteInput,
@@ -17,6 +18,7 @@ import {
   appUser,
   commerceOrder,
   commerceOrderLine,
+  orderingCataloguePart,
   company,
   publicationRelease,
   quoteLine,
@@ -149,7 +151,9 @@ type PricedLine = {
   listExtended: string;
   catalogPartId: string | null;
   quoteNo: string | null;
-  priceSource: "quote" | "catalogue";
+  priceSource: "quote" | "catalogue" | "supplier-catalogue";
+  orderingCataloguePartId?: string;
+  catalogueRevision?: string;
   quoteLineId: string | null;
   releaseId: string | null;
   releasePartId: string | null;
@@ -163,6 +167,7 @@ async function priceOrderLines(
   companyId: string,
   lines: SubmitCommerceOrderInput["lines"],
   now: Date,
+  currency: string,
 ): Promise<PricedLine[]> {
   const quoteQty = new Map<string, { qty: number; expectedVersion?: number }>();
   for (const line of lines) {
@@ -260,6 +265,33 @@ async function priceOrderLines(
     }
   }
 
+  const suppliedPrices = new Map<string, PricedLine>();
+  const supplied = lines.filter(line => line.kind === "supplier-catalogue");
+  if (supplied.length) {
+    const auth = await requireOrderingCatalogue(tx, actor);
+    requireCapability(auth, "orders.submit");
+    if (!auth.canViewPrices) throw new AppError("FORBIDDEN", 403, "This account cannot submit priced catalogue orders.");
+    const discountRate = auth.discountRate;
+    for (const line of supplied) {
+      const [part] = await tx.select().from(orderingCataloguePart).where(and(
+        eq(orderingCataloguePart.id, line.cataloguePartId), eq(orderingCataloguePart.catalogueKey, "ft3-wagon"),
+        eq(orderingCataloguePart.enabled, true),
+      ));
+      if (!part) throw new AppError("CATALOGUE_PART_NOT_FOUND", 404, "The catalogue part is unavailable.");
+      if (part.sourceRevision !== line.catalogueRevision) throw new AppError("CATALOGUE_CHANGED", 409, "Catalogue pricing changed. Refresh the cart before ordering.");
+      if (part.currency !== currency) throw new AppError("CURRENCY_MISMATCH", 422, "Order currency must match the catalogue.");
+      if (!part.listPrice || parseDecimal(part.listPrice, 2) <= BigInt(0)) throw new AppError("CATALOGUE_PRICE_UNAVAILABLE", 422, "Request a quote for this part's price.");
+      const list = parseDecimal(part.listPrice, 4), net = applyDiscount(list, discountRate, 4);
+      suppliedPrices.set(part.id, {
+        partNumber: part.partNumber, description: part.description, qty: line.qty,
+        unitPrice: formatDecimal(net, 4), lineTotal: lineTotal(net, line.qty), listExtended: lineTotal(list, line.qty),
+        catalogPartId: null, quoteNo: null, priceSource: "supplier-catalogue", quoteLineId: null,
+        releaseId: null, releasePartId: null, orderingCataloguePartId: part.id, catalogueRevision: part.sourceRevision,
+        listPriceSnapshot: formatDecimal(list, 4), discountRateSnapshot: discountRate,
+      });
+    }
+  }
+
   const merged: PricedLine[] = [];
   const seenQuote = new Set<string>();
   for (const line of lines) {
@@ -267,6 +299,11 @@ async function priceOrderLines(
       if (seenQuote.has(line.quoteLineId)) continue;
       seenQuote.add(line.quoteLineId);
       merged.push(quotePrices.get(line.quoteLineId)!);
+    } else if (line.kind === "supplier-catalogue") {
+      const priced = suppliedPrices.get(line.cataloguePartId)!;
+      merged.push({ ...priced, qty: line.qty,
+        lineTotal: lineTotal(parseDecimal(priced.unitPrice, 4), line.qty),
+        listExtended: lineTotal(parseDecimal(priced.listPriceSnapshot!, 4), line.qty) });
     } else {
       merged.push(cataloguePriced.find((priced) => priced.releasePartId === line.releasePartId && priced.qty === line.qty)!);
     }
@@ -274,8 +311,46 @@ async function priceOrderLines(
   return merged;
 }
 
+async function requireOrderingCatalogue(tx: Transaction, actor: QuoteActor) {
+  const auth = await loadAuthorization(tx, actor.userId);
+  requireCapability(auth, "catalog.figure.view");
+  requireCapability(auth, "parts.record.view");
+  if (!ft3CatalogueCompanyIds.some(id => id === auth.companyId)) throw new AppError("CATALOGUE_NOT_FOUND", 404, "The catalogue is unavailable.");
+  return auth;
+}
+
 export function createQuoteService(database: Database, now: () => Date = () => new Date()) {
   return {
+    async orderingCatalogue(actor: QuoteActor) {
+      return database.transaction(async tx => {
+        const auth = await requireOrderingCatalogue(tx, actor);
+        const parts = await tx.select().from(orderingCataloguePart).where(and(
+          eq(orderingCataloguePart.catalogueKey, "ft3-wagon"), eq(orderingCataloguePart.enabled, true),
+        )).orderBy(orderingCataloguePart.sourceKey);
+        return { items: parts.map(part => ({
+          id: part.id, sourceKey: part.sourceKey, partNumber: part.partNumber, description: part.description,
+          currency: part.currency as "CAD" | "USD", revision: part.sourceRevision,
+          ...(auth.canViewPrices && part.listPrice !== null ? { listPrice: part.listPrice } : {}),
+        })) };
+      });
+    },
+    async ordersMine(actor: QuoteActor) {
+      return database.transaction(async tx => {
+        const auth = await loadAuthorization(tx, actor.userId);
+        requireCapability(auth, "orders.own.view");
+        const orders = await tx.select().from(commerceOrder).where(eq(commerceOrder.companyId, auth.companyId))
+          .orderBy(desc(commerceOrder.submittedAt), desc(commerceOrder.id)).limit(100);
+        const lines = orders.length ? await tx.select().from(commerceOrderLine).where(inArray(commerceOrderLine.orderId, orders.map(order => order.id))) : [];
+        return { items: orders.map(order => ({
+          id: order.id, reference: order.reference, status: order.status, submittedAt: order.submittedAt!.toISOString(),
+          customerPo: order.customerPo, vin: order.vin, currency: order.currency, netTotal: auth.canViewPrices ? order.netTotal : "",
+          lines: lines.filter(line => line.orderId === order.id).map(line => ({
+            partNumber: line.partNumber, description: line.description, qty: line.qty,
+            unitPrice: auth.canViewPrices ? line.unitPrice : "", lineTotal: auth.canViewPrices ? line.lineTotal : "",
+          })),
+        })) };
+      });
+    },
     async submit(actor: QuoteActor, input: SubmitQuoteInput, idempotencyKey: string): Promise<SubmitQuoteResult> {
       validateKey(idempotencyKey);
       return mappingTransaction(database, async (tx) => {
@@ -593,7 +668,7 @@ export function createQuoteService(database: Database, now: () => Date = () => n
           if (input.orderType !== "schedule" && !input.shippingMethod) {
             throw new AppError("SHIPPING_METHOD_REQUIRED", 400, "Regular and urgent orders require a shipping method.");
           }
-          const priced = await priceOrderLines(tx, actor, auth.companyId, input.lines, now());
+          const priced = await priceOrderLines(tx, actor, auth.companyId, input.lines, now(), input.currency);
           const listTotal = priced.reduce((sum, line) => sum + parseDecimal(line.listExtended, 2), BigInt(0));
           const netTotalUnits = priced.reduce((sum, line) => sum + parseDecimal(line.lineTotal, 2), BigInt(0));
           const discountApplied = listTotal - netTotalUnits;
@@ -632,6 +707,8 @@ export function createQuoteService(database: Database, now: () => Date = () => n
               quoteLineId: line.quoteLineId,
               releaseId: line.releaseId,
               releasePartId: line.releasePartId,
+              orderingCataloguePartId: line.orderingCataloguePartId,
+              catalogueRevision: line.catalogueRevision,
               listPriceSnapshot: line.listPriceSnapshot,
               discountRateSnapshot: line.discountRateSnapshot,
             });

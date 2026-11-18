@@ -7,7 +7,11 @@ import type { OrderLine, Part } from "@/types/catalog";
 import type { RequestPartInput } from "./RequestContext";
 
 export type RequestIdentity = { partId: string; releasePartId: string; qty: number } | { quoteLineId: string; qty: number } | { previewPartId: string; qty: number };
-const previewPartSchema = Type.Omit(PartSchema, ["releasePartId"]);
+const previewPartSchema = Type.Object({
+  ...Type.Omit(PartSchema, ["releasePartId"]).properties,
+  orderingCataloguePartId: Type.Optional(Type.String({ format: "uuid" })),
+  catalogueRevision: Type.Optional(Type.String({ pattern: "^[a-f0-9]{64}$" })),
+}, { additionalProperties: false });
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function readRequestIdentities(key: string): RequestIdentity[] {
   try {

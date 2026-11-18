@@ -114,6 +114,8 @@ export interface Part {
   manufacturer: string | null;
   listPrice?: number | string;
   releasePartId?: string;
+  orderingCataloguePartId?: string;
+  catalogueRevision?: string;
   /** Contributors to the validated read, not a guessed per-part release owner. */
   contributingReleases?: ReleaseRef[];
   currency: Currency;
@@ -207,6 +209,8 @@ export interface Company {
 export interface OrderLine {
   partId: string;
   releasePartId?: string;
+  orderingCataloguePartId?: string;
+  catalogueRevision?: string;
   partNumberSnapshot: string;
   descriptionSnapshot: string;
   qty: number;

@@ -72,8 +72,8 @@ test("staff controls and mixed-price cart work on desktop and phone", async ({ p
     await expect(page.getByText("12-210000-12", { exact: true })).toBeVisible();
     await expect(page.getByText("82-00127", { exact: true })).toHaveCount(0);
     await page.goto("/checkout");
-    await expect(page.getByText("Catalogue approval pending", { exact: true })).toBeVisible();
-    await expect(page.getByText(/1 item needs pricing/)).toBeVisible();
+    await expect(page.getByRole("radio", { name: "Regular Order" })).toBeVisible();
+    await expect(page.getByText("Ordering setup incomplete", { exact: true })).toHaveCount(0);
     await expect(page.getByText("A priced quote is required", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Submit order", exact: true })).toHaveCount(0);
     await signOut.click();

@@ -230,6 +230,12 @@ export const CatalogueOrderLineInputSchema = Type.Object(
 export const CommerceOrderLineInputSchema = Type.Union([
   QuotedOrderLineInputSchema,
   CatalogueOrderLineInputSchema,
+  Type.Object({
+    kind: Type.Literal("supplier-catalogue"),
+    cataloguePartId: Type.String({ format: "uuid" }),
+    catalogueRevision: Type.String({ pattern: "^[a-f0-9]{64}$" }),
+    qty: QuantitySchema,
+  }, { additionalProperties: false }),
 ]);
 
 export const AddressDtoSchema = Type.Object(
@@ -299,3 +305,20 @@ export const CompanyDiscountResultSchema = Type.Object(
 export type PatchCompanyDiscountInput = Static<typeof PatchCompanyDiscountInputSchema>;
 export type CompanyDiscountResult = Static<typeof CompanyDiscountResultSchema>;
 export type SubmitCommerceOrderResult = Static<typeof SubmitCommerceOrderResultSchema>;
+
+export const CommerceOrderReceiptSchema = Type.Object({
+  id: Type.String({ format: "uuid" }),
+  reference: Type.String(),
+  status: Type.String(),
+  submittedAt: Type.String({ format: "date-time" }),
+  customerPo: Type.String(),
+  vin: Type.String(),
+  currency: Type.String(),
+  netTotal: Type.String(),
+  lines: Type.Array(Type.Object({
+    partNumber: Type.String(), description: Type.String(), qty: QuantitySchema,
+    unitPrice: Type.String(), lineTotal: Type.String(),
+  }, { additionalProperties: false })),
+}, { additionalProperties: false });
+export const CommerceOrderPageSchema = Type.Object({ items: Type.Array(CommerceOrderReceiptSchema) }, { additionalProperties: false });
+export type CommerceOrderPage = Static<typeof CommerceOrderPageSchema>;

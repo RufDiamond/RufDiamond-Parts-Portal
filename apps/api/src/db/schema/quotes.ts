@@ -32,6 +32,22 @@ export type CommerceAddress = {
 };
 
 export const quoteReferenceSeq = pgSequence("quote_reference_seq");
+export const orderingCataloguePart = pgTable("ordering_catalogue_part", {
+  id: id(),
+  sourceKey: text("source_key").notNull().unique(),
+  catalogueKey: text("catalogue_key").notNull(),
+  sourceRevision: text("source_revision").notNull(),
+  partNumber: text("part_number").notNull(),
+  description: text("description").notNull(),
+  currency: text("currency").notNull().default("CAD"),
+  listPrice: money("list_price"),
+  enabled: boolean("enabled").notNull().default(true),
+  ...mutable(),
+}, (t) => [versionCheck(t), currencyCheck(t.currency),
+  check("ordering_catalogue_price", sql`${t.listPrice} IS NULL OR ${t.listPrice}>=0`),
+  check("ordering_catalogue_revision", sql`${t.sourceRevision} ~ '^[a-f0-9]{64}$'`),
+]);
+
 export const commerceOrderReferenceSeq = pgSequence("commerce_order_reference_seq");
 
 export const quoteLine = pgTable("quote_line", {
@@ -123,10 +139,12 @@ export const commerceOrderLine = pgTable("commerce_order_line", {
   lineTotal: money("line_total").notNull(),
   catalogPartId: uuid("catalog_part_id").references(() => part.id),
   quoteNo: text("quote_no"),
-  priceSource: text("price_source", { enum: ["quote", "catalogue"] }),
+  priceSource: text("price_source", { enum: ["quote", "catalogue", "supplier-catalogue"] }),
   quoteLineId: uuid("quote_line_id").references(() => quoteLine.id),
   releaseId: uuid("release_id"),
   releasePartId: uuid("release_part_id"),
+  orderingCataloguePartId: uuid("ordering_catalogue_part_id").references(() => orderingCataloguePart.id),
+  catalogueRevision: text("catalogue_revision"),
   listPriceSnapshot: numeric("list_price_snapshot", { precision: 14, scale: 4 }),
   discountRateSnapshot: numeric("discount_rate_snapshot", { precision: 14, scale: 6 }),
   ...mutable(),
@@ -135,5 +153,5 @@ export const commerceOrderLine = pgTable("commerce_order_line", {
   index("commerce_order_line_quote").on(t.quoteLineId),
   versionCheck(t),
   check("commerce_order_line_qty", sql`${t.qty} > 0`),
-  check("commerce_order_line_source", sql`${t.priceSource} IS NULL OR ${t.priceSource} IN ('quote','catalogue')`),
+  check("commerce_order_line_source", sql`${t.priceSource} IS NULL OR ${t.priceSource} IN ('quote','catalogue','supplier-catalogue')`),
 ]);

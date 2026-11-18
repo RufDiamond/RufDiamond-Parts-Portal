@@ -1,4 +1,6 @@
 import {
+  OrderingCataloguePageSchema,
+  CommerceOrderPageSchema,
   AddFactoryQuoteLineInputSchema,
   CompanyDiscountResultSchema,
   CustomerQuotePageSchema,
@@ -121,6 +123,19 @@ export function registerQuoteRoutes(app: FastifyInstance, config: AppConfig, dat
     const result = await service.markNoticesSeen(actor(request));
     reply.header("cache-control", "no-store");
     return result;
+  });
+
+  app.get("/api/v1/commerce-catalogue/ft3-wagon", {
+    onRequest, schema: { response: { 200: routeSchema(OrderingCataloguePageSchema) } },
+  }, async (request, reply) => {
+    reply.header("cache-control", "private, no-store");
+    return service.orderingCatalogue(actor(request));
+  });
+  app.get("/api/v1/commerce-orders/mine", {
+    onRequest, schema: { response: { 200: routeSchema(CommerceOrderPageSchema) } },
+  }, async (request, reply) => {
+    reply.header("cache-control", "private, no-store");
+    return service.ordersMine(actor(request));
   });
 
   app.post<{ Body: SubmitCommerceOrderInput }>("/api/v1/commerce-orders", {

@@ -1,5 +1,9 @@
 import "server-only";
 
+import { ft3CatalogueCompanyIds, OrderingCataloguePageSchema, type OrderingCataloguePart } from "@rufdiamond/contracts";
+import { Value } from "@sinclair/typebox/value";
+import { getBackendApiRead } from "@/lib/backend-api.server";
+import { CatalogApiError } from "@/lib/api-error";
 import { notFound } from "next/navigation";
 import * as fixture from "@/data/fixture-repository.server";
 import { parts } from "@/data/ft3-wagon";
@@ -12,11 +16,7 @@ import type { Part } from "@/types/catalog";
 import type { CustomerRepository } from "./customer-composition.server";
 import { requireCustomerSession } from "@/lib/customer-session.server";
 
-const meetingCompanies = new Set([
-  "3a98c733-c616-4df3-bbaf-ea6e456f62eb",
-  "8a0b574e-b4b4-428b-861a-2b1e51581a7b",
-  "98a0777e-1a93-416f-a6ca-156add45b100",
-]);
+const meetingCompanies = new Set<string>(ft3CatalogueCompanyIds);
 
 export async function getFatTruckPreviewSession() {
   const session = await requireCustomerSession();
@@ -41,17 +41,26 @@ export async function readFatTruckPreviewDrawing(id: string) {
   return readFile(path.join(assetRoot, "public", drawingPath));
 }
 
-function visiblePart(part: Part, canViewPrices: boolean): Part {
-  if (!canViewPrices) return { ...part, listPrice: undefined };
-  return typeof part.listPrice === "number" ? { ...part, listPrice: part.listPrice.toFixed(2) } : part;
+async function currentOrderingParts() {
+  const read = await getBackendApiRead();
+  const response = await read("commerce-catalogue/ft3-wagon");
+  const data: unknown = await response.json();
+  if (!response.ok || !Value.Check(OrderingCataloguePageSchema, data)) throw new CatalogApiError(503, "CATALOGUE_UNAVAILABLE", "Current catalogue pricing is unavailable. Please retry.");
+  return new Map(data.items.map(part => [part.sourceKey, part]));
 }
 
-export function getFatTruckPreviewPart(id: string, canViewPrices: boolean) {
+function visiblePart(part: Part, canViewPrices: boolean, current: Map<string, OrderingCataloguePart>): Part {
+  const row = current.get(part.id);
+  return { ...part, listPrice: canViewPrices ? row?.listPrice : undefined,
+    ...(row ? { orderingCataloguePartId: row.id, catalogueRevision: row.revision } : {}) };
+}
+
+export async function getFatTruckPreviewPart(id: string, canViewPrices: boolean) {
   const part = parts.find(candidate => candidate.id === id);
-  return part ? visiblePart(part, canViewPrices) : null;
+  return part ? visiblePart(part, canViewPrices, await currentOrderingParts()) : null;
 }
 
-export async function getFatTruckPreviewFigure(id: string, canViewPrices: boolean) {
+export async function getFatTruckPreviewFigure(id: string, canViewPrices: boolean, current: Map<string, OrderingCataloguePart>) {
   const mapped = await readMappedFigure(id);
   if (!mapped) notFound();
   const { detail, notice } = mapped;
@@ -66,7 +75,7 @@ export async function getFatTruckPreviewFigure(id: string, canViewPrices: boolea
         ? { ...callout, componentGeometry: { ...geometry, drawingPath: drawingUrl } }
         : callout;
     }),
-    rows: detail.rows.map(row => ({ ...row, part: visiblePart(row.part, canViewPrices) })),
+    rows: detail.rows.map(row => ({ ...row, part: visiblePart(row.part, canViewPrices, current) })),
   };
 }
 
@@ -74,11 +83,12 @@ export async function getFatTruckPreviewRepository(): Promise<CustomerRepository
   const session = await getFatTruckPreviewSession();
   if (!session) return null;
   const canViewPrices = session.scopes.canViewPrices;
+  const current = await currentOrderingParts();
   return {
     ...fixture,
-    getFigureDetail: id => getFatTruckPreviewFigure(id, canViewPrices),
-    searchParts: async query => (await fixture.searchParts(query)).map(part => visiblePart(part, canViewPrices)),
+    getFigureDetail: id => getFatTruckPreviewFigure(id, canViewPrices, current),
+    searchParts: async query => (await fixture.searchParts(query)).map(part => visiblePart(part, canViewPrices, current)),
     searchPartUsages: async (query, mode) => (await fixture.searchPartUsages(query, mode))
-      .map(row => ({ ...row, part: visiblePart(row.part, canViewPrices) })),
+      .map(row => ({ ...row, part: visiblePart(row.part, canViewPrices, current) })),
   };
 }

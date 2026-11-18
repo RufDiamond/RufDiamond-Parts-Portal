@@ -1,0 +1,12 @@
+.page { padding: 20px; color: var(--ink); background: var(--paper); }
+.page h1 { margin: 0 0 20px; font-size: 24px; }
+.order { padding: 18px 0; border-top: 1px solid var(--rule); }
+.heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: center; }
+.heading h2 { margin: 0; font-size: 18px; }
+.heading span { padding: 5px 10px; border-radius: 4px; background: var(--sheet); }
+.order p { margin: 12px 0; }
+.tableWrap { overflow-x: auto; }
+.tableWrap table { width: 100%; border-collapse: collapse; }
+.tableWrap th, .tableWrap td { padding: 10px; text-align: left; border-bottom: 1px solid var(--rule); }
+.tableWrap th { background: var(--sheet); }
+.total { font-weight: 700; text-align: right; }

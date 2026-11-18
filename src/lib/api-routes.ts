@@ -35,6 +35,8 @@ const rules: { path: RegExp; method: string; query?: string[]; bytes?: number; p
   { path: /^quotes\/mine$/, method: "GET" },
   { path: /^quotes\/notices\/seen$/, method: "POST", bytes: 4096 },
   { path: /^commerce-orders$/, method: "POST", bytes: 65536 },
+  { path: /^commerce-orders\/mine$/, method: "GET" },
+  { path: /^commerce-catalogue\/ft3-wagon$/, method: "GET" },
   { path: /^admin\/quotes$/, method: "GET", query: ["productLine"] },
   { path: new RegExp(`^admin/quotes/${uuid}$`), method: "PATCH", bytes: 16384 },
   { path: /^admin\/quotes\/notify$/, method: "POST", bytes: 16384 },

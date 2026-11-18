@@ -10,7 +10,7 @@ export function canOrderRequestPart(input: RequestPartInput, hosted: boolean): b
   const { part, quoteLineId, releaseId } = input;
   if (!hasAvailablePrice(part.listPrice)) return false;
   if (!hosted) return true;
-  return Boolean(quoteLineId || (
+  return Boolean(quoteLineId || (part.orderingCataloguePartId && part.catalogueRevision) || (
     !isFatTruckPreviewPartId(part.id) && part.releasePartId && (releaseId || part.contributingReleases?.length)
   ));
 }
@@ -18,7 +18,7 @@ export function canOrderRequestPart(input: RequestPartInput, hosted: boolean): b
 export function canOrderRequestLine(line: OrderLine, hosted: boolean): boolean {
   if (!hasAvailablePrice(line.unitPriceSnapshot)) return false;
   if (!hosted) return true;
-  return Boolean(line.quoteLineId || (
+  return Boolean(line.quoteLineId || (line.orderingCataloguePartId && line.catalogueRevision) || (
     !isFatTruckPreviewPartId(line.partId) && line.releaseId && line.releasePartId
   ));
 }

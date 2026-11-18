@@ -147,14 +147,19 @@ it("keeps priced review items visible in the hosted cart and flags only the zero
   expect(within(cart).getByRole("link", { name: "Checkout" }).getAttribute("href")).toBe("/checkout");
 });
 
-it("explains catalogue approval separately from missing pricing at hosted checkout", async () => {
+it("identifies unrefreshed ordering records separately from missing pricing at hosted checkout", async () => {
   customer.hosted = true;
   render(<RequestProvider><SeedPreview /><Checkout today="2026-11-17" /></RequestProvider>);
   const add = screen.getByRole("button", { name: "Add preview parts" });
   await vi.waitFor(() => expect((add as HTMLButtonElement).disabled).toBe(false));
   fireEvent.click(add);
-  expect(await screen.findByText("Catalogue approval pending")).toBeTruthy();
+  expect(await screen.findByText("Ordering setup incomplete")).toBeTruthy();
   expect(screen.getByText(/1 item needs pricing/)).toBeTruthy();
   expect(screen.queryByText("A priced quote is required")).toBeNull();
   expect(screen.queryByRole("button", { name: "Submit order" })).toBeNull();
+});
+
+it("allows a priced FT3 cart line once it has a database ordering identity", () => {
+  expect(canOrderRequestLine({ partId: "prt-82-00127", partNumberSnapshot: "82-00127", descriptionSnapshot: "Pintle hook", qty: 1,
+    unitPriceSnapshot: "645.86", orderingCataloguePartId: "10000000-0000-4000-8000-000000000001", catalogueRevision: "a".repeat(64) }, true)).toBe(true);
 });

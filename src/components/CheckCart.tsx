@@ -31,7 +31,7 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
   const pricedLines = lines.filter(line => hasAvailablePrice(line.unitPriceSnapshot));
   const quoteCount = lines.length - pricedLines.length;
   const quoteOnly = lines.length > 0 && !pricedLines.length;
-  const awaitingApproval = pricedLines.some(line => !canOrderRequestLine(line, Boolean(session)));
+  const awaitingOrderingRecords = pricedLines.some(line => !canOrderRequestLine(line, Boolean(session)));
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -122,12 +122,12 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
 
           {priced ? (
             <p className={styles.subtotal}>
-              <span>{awaitingApproval ? "Listed subtotal" : "Subtotal"}</span>
+              <span>{awaitingOrderingRecords ? "Listed subtotal" : "Subtotal"}</span>
               <span>{currency} {formatAmount(subtotal, currency)}</span>
             </p>
           ) : null}
 
-          {awaitingApproval && <p className={styles.empty}>Some priced items are awaiting catalogue approval before checkout.</p>}
+          {awaitingOrderingRecords && <p className={styles.empty}>Some priced items need refreshed ordering records. Reload the catalogue before checkout.</p>}
           <div className={styles.links}>
             <Link
               href={quoteOnly ? quoteRequiredHref : "/checkout"}

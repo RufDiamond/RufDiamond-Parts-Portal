@@ -139,6 +139,9 @@ function toLine(part: Part, qty: number, quoteNo?: string, source?: { quoteLineI
     descriptionSnapshot: part.description,
     qty,
     ...(part.releasePartId ? { releasePartId: part.releasePartId } : {}),
+    ...(part.orderingCataloguePartId && part.catalogueRevision ? {
+      orderingCataloguePartId: part.orderingCataloguePartId, catalogueRevision: part.catalogueRevision,
+    } : {}),
     ...(part.listPrice === undefined ? {} : { unitPriceSnapshot: part.listPrice, lineTotal: round2(Number(part.listPrice) * qty) }),
   };
 }

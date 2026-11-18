@@ -2,6 +2,7 @@ import "server-only";
 import "./contract-formats";
 import { Type, type TSchema } from "@sinclair/typebox";
 import {
+  OrderingCataloguePageSchema, CommerceOrderPageSchema,
   MeResponseSchema, PageSchema, ProductLineSchema, ModelSchema, VariantSchema,
   SystemSchema, ReleasedFigureSchema, FigureDetailSchema, PartSchema,
   PartUsageRowSchema, PartUsageIndexEntrySchema, MappingEditorDocumentSchema,
@@ -61,6 +62,8 @@ export function apiResponseSchema(pathWithQuery: string, method: string, status:
   } else if (path === "quotes") { schema = SubmitQuoteResultSchema; expectedStatus = 201; }
   else if (path === "quotes/mine") schema = CustomerQuotePageSchema;
   else if (path === "quotes/notices/seen") schema = Type.Object({ ok: Type.Literal(true) }, { additionalProperties: false });
+  else if (path === "commerce-catalogue/ft3-wagon") schema = OrderingCataloguePageSchema;
+  else if (path === "commerce-orders/mine") schema = CommerceOrderPageSchema;
   else if (path === "commerce-orders") { schema = SubmitCommerceOrderResultSchema; expectedStatus = 201; }
   else if (path === "admin/quotes") schema = QuoteLinePageSchema;
   else if (path === "admin/quotes/notify") schema = Type.Object({ notices: Type.Array(QuoteNoticeSchema) }, { additionalProperties: false });
