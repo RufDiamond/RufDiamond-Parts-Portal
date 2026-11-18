@@ -67,7 +67,7 @@ test("staff controls and mixed-price cart work on desktop and phone", async ({ p
     await page.getByRole("button", { name: /^Cart · 2$/ }).click();
     const cart = page.getByRole("dialog", { name: "Cart", exact: true });
     await expect(cart.getByText("Quote required", { exact: true })).toHaveCount(1);
-    await expect(cart.getByText(/CAD 645.86/)).toBeVisible();
+    await expect(cart.getByText("CAD 645.86 × 1", { exact: true })).toBeVisible();
     await cart.getByRole("link", { name: "Request a quote", exact: true }).click();
     await expect(page.getByText("12-210000-12", { exact: true })).toBeVisible();
     await expect(page.getByText("82-00127", { exact: true })).toHaveCount(0);
