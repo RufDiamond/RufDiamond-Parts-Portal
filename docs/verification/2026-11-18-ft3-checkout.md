@@ -34,7 +34,7 @@ The disposable-database regression suite covers server pricing, immutable receip
 
 ```sh
 npm test -w @rufdiamond/api -- --maxWorkers=2 --testTimeout=20000
-npm run test:callout-preview
+RUF_REPOSITORY_MODE=fixture RUF_DEPLOYMENT_ENV=local npm run test:callout-preview -- --maxWorkers=2 --testTimeout=20000
 npm run typecheck
 npm run typecheck -w @rufdiamond/api
 # Supply the existing purchaser password in the process environment, never in this file.

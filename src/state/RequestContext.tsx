@@ -14,6 +14,7 @@ import {
 import { isFatTruckPreviewPartId } from "@/lib/fat-truck-preview";
 import type { Company, Currency, OrderLine, Part } from "@/types/catalog";
 import type { MeResponse } from "@rufdiamond/contracts";
+import { applyDiscount, formatDecimal, lineTotal as decimalLineTotal, parseDecimal } from "@rufdiamond/contracts";
 import { scopeKey } from "./customer-session";
 import { readRequestIdentities, writeRequestIdentities, revalidateRequestIdentities } from "./customer-request";
 
@@ -292,6 +293,19 @@ export function computeTotals(
   discountRate: number,
 ): RequestTotals {
   if (lines.some(line => line.lineTotal === undefined)) return {};
+  if (lines.some(line => line.orderingCataloguePartId)) {
+    // Match the API: discount units at four places, then round each extended line.
+    const rate = Math.min(1, Math.max(0, discountRate)).toFixed(6);
+    let listCents = BigInt(0), netCents = BigInt(0);
+    for (const line of lines) {
+      const unit = parseDecimal(Number(line.unitPriceSnapshot).toFixed(4), 4);
+      const net = line.quoteNo || line.quoteLineId ? unit : applyDiscount(unit, rate, 4);
+      listCents += parseDecimal(decimalLineTotal(unit, line.qty), 2);
+      netCents += parseDecimal(decimalLineTotal(net, line.qty), 2);
+    }
+    return { listTotal: Number(formatDecimal(listCents, 2)),
+      discountApplied: Number(formatDecimal(listCents - netCents, 2)), netTotal: Number(formatDecimal(netCents, 2)) };
+  }
   const listTotal = round2(lines.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0));
   const rate = Math.min(1, Math.max(0, discountRate));
   // A quoted price is already the price offered; only list prices are discounted.

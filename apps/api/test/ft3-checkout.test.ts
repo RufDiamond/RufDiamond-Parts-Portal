@@ -87,6 +87,15 @@ it("replays a retried submission exactly once and scopes saved orders by company
   expect((await app.inject({ method: "GET", url: "/api/v1/commerce-orders/mine", headers: outsider })).json().items).toEqual([]);
 });
 
+it("matches checkout's discounted multi-line half-cent totals", async () => {
+  await pg.pool.query("update ordering_catalogue_part set list_price=case when id=$1 then 6.42 else 5.95 end", [ids.priced]);
+  const input = payload();
+  input.lines = [ids.priced, ids.unpriced].map(cataloguePartId => ({ kind: "supplier-catalogue", cataloguePartId, catalogueRevision: revision, qty: 1 }));
+  const response = await submit(input);
+  expect(response.statusCode, response.body).toBe(201);
+  expect((await app.inject({ method: "GET", url: "/api/v1/commerce-orders/mine", headers: purchaser })).json().items[0].netTotal).toBe("11.14");
+});
+
 it("requires authentication, purchaser authority and the existing catalogue company scope", async () => {
   expect((await app.inject({ method: "GET", url: "/api/v1/commerce-catalogue/ft3-wagon" })).statusCode).toBe(401);
   expect((await submit(payload(), technician)).statusCode).toBe(403);

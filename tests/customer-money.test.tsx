@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { PartsTable } from "@/components/PartsTable";
 import { formatPrice } from "@/lib/format";
-import { requestReducer, initialRequestState } from "@/state/RequestContext";
+import { computeTotals, requestReducer, initialRequestState } from "@/state/RequestContext";
 import type { Part } from "@/types/catalog";
 
 const part: Part = { id: "part", releasePartId: "release-part", partNumber: "P", description: "Synthetic", currency: "CAD", manufacturer: null, supersededByPartId: null, requires: [], status: "active" };
@@ -30,5 +30,11 @@ describe("authorized money and reference presentation", () => {
     expect(state.lines[0]).toHaveProperty("releasePartId", "release-part");
     expect(state.lines[0]).not.toHaveProperty("unitPriceSnapshot");
     expect(state.lines[0]).not.toHaveProperty("lineTotal");
+  });
+  it("matches server line rounding for discounted FT3 supplier orders", () => {
+    const state = requestReducer(initialRequestState, { type: "add", parts: [6.42, 5.95].map((price, i) => ({
+      part: { ...part, id: `p${i}`, orderingCataloguePartId: `supplier-${i}`, catalogueRevision: "a".repeat(64), listPrice: price }, qty: 1,
+    })) });
+    expect(computeTotals(state.lines, 0.1)).toEqual({ listTotal: 12.37, discountApplied: 1.23, netTotal: 11.14 });
   });
 });

@@ -64,6 +64,8 @@ export function AddToCartDialog({
         const count = qty[part.id] ?? 1;
         return {
           partId: part.id,
+          orderingCataloguePartId: part.orderingCataloguePartId,
+          catalogueRevision: part.catalogueRevision,
           ...(quoteNo ? { quoteNo } : {}),
           partNumberSnapshot: part.partNumber,
           descriptionSnapshot: part.description,
