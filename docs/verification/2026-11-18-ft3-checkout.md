@@ -41,3 +41,15 @@ npm run typecheck -w @rufdiamond/api
 RUF_E2E_BASE_URL=https://rufdiamond-parts.onrender.com RUF_E2E_CHECKOUT=1 \
   npx playwright test --config playwright.hosted-checkout.config.ts ft3-live-checkout
 ```
+
+## Recorded result
+
+- API and portal release `c645f9421f5783c5a3b83bfb3f86e050080f111a` were both observed Live in Render.
+- All 452 frontend tests passed. The full 325-test API suite passed before the decimal helper extraction; the 15 affected API tests passed afterward, including the new multi-line rounding regression. API/web typechecks, changed-file lint and the API-mode production build passed. Independent review found the rounding mismatch, which was fixed and reviewed again without further material findings.
+- All three existing role accounts completed browser sign-in, loaded the 536-item authenticated catalogue and signed out with subsequent `/me` returning 401. Staff directory access was 200 for Catalog Admin and 403 for purchaser/technician. Technician had no `orders.submit` capability.
+- The opt-in purchaser browser checkout passed. Order `RD-00005` (`cfb4e0ea-452d-470e-bf7b-f4fe5c9feb5b`) contains one `82-00127` at CAD 645.86. It remained visible after signing out and signing in again. A direct owner read confirmed the immutable price, discount and source-revision snapshots.
+- `RD-00004` and `RD-00005` are clearly marked E2E test orders with `TEST-DO-NOT-FULFIL` VIN and explicit instructions not to fulfill. The first run completed ordering but its test checked logout before the async redirect finished; the corrected complete run passed. Both records were retained. Their email events have zero attempts and no completion, and mail sending remains disabled.
+- The responsive staff-header/mixed-cart browser test passed at desktop, tablet and phone widths. Only the zero-price nut is flagged for quotation, and priced lines reach real checkout after cart revalidation. Browser tests wait for revalidation and the logout redirect.
+- A catalogue request briefly returned 502 around rollout; subsequent direct API, proxy and all-role catalogue checks returned 200. No test order was submitted during that initial request failure.
+
+Browser evidence is in `output/hosted-checkout/` for purchaser checkout and `/tmp/ruf-ft3-cart-check/` for the mixed cart/header run. Traces, automatic screenshots and videos remain disabled around authentication; explicit screenshots show post-login pages only. Passwords are not stored in these artifacts.

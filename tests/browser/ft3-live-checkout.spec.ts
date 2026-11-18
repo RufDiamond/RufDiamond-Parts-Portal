@@ -38,7 +38,7 @@ test("purchaser checks out a priced FT3 part and reads the saved order after a f
     ["Address:", "1 Test Street"], ["City:", "Sudbury"], ["Postal Code:", "P3E 2C6"],
     ["Email:", "checkout-test@example.test"], ["Phone No.:", "7055550100"],
   ]) await shipping.getByLabel(label, { exact: true }).fill(value);
-  await shipping.getByLabel("Province:", { exact: true }).selectOption({ label: "Ontario" });
+  await shipping.getByRole("combobox", { name: "Province:", exact: true }).selectOption({ label: "Ontario" });
   await page.getByRole("checkbox", { name: "Shipping address is same as billing address" }).check();
   for (const save of await page.getByRole("checkbox", { name: "Save this new address", exact: true }).all()) await save.uncheck();
   await page.getByRole("button", { name: /Continue to special instructions/ }).click();
@@ -51,6 +51,7 @@ test("purchaser checks out a priced FT3 part and reads the saved order after a f
   const response = await submitted;
   expect(response.status(), await response.text()).toBe(201);
   const result = await response.json();
+  await page.getByRole("dialog", { name: "Order Confirmation", exact: true }).getByRole("button", { name: "OK", exact: true }).click();
   await expect(page.getByRole("link", { name: "View saved orders", exact: true })).toBeVisible();
   await page.screenshot({ path: info.outputPath("purchaser-order-submitted.png"), fullPage: true });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
@@ -70,5 +71,6 @@ test("purchaser checks out a priced FT3 part and reads the saved order after a f
   await info.attach("saved-order", { body: JSON.stringify(order, null, 2), contentType: "application/json" });
   await page.screenshot({ path: info.outputPath("purchaser-saved-order-after-login.png"), fullPage: true });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page).toHaveURL(/\/signin$/);
   expect((await context.request.get("/api/v1/me")).status()).toBe(401);
 });
