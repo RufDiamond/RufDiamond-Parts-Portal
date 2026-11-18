@@ -2,7 +2,7 @@
 import { ZeroPriceNotice } from "@/components/ZeroPriceNotice";
 
 import Link from "next/link";
-import { canOrderRequestLine } from "@/lib/order-eligibility";
+import { hasAvailablePrice } from "@/lib/order-eligibility";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { EmptyState, Icon } from "@/components";
@@ -69,7 +69,7 @@ export function QuoteRequest({
   } = useRequest();
 
   const session = useCustomerSession();
-  const needsQuote = (line: (typeof requestLines)[number]) => !canOrderRequestLine(line, Boolean(session));
+  const needsQuote = (line: (typeof requestLines)[number]) => !hasAvailablePrice(line.unitPriceSnapshot);
   const lines = quoteRequiredOnly ? requestLines.filter(needsQuote) : requestLines;
   const includedLines = quoteRequiredOnly ? requestIncluded.filter(needsQuote) : requestIncluded;
   const itemCount = includedLines.reduce((sum, line) => sum + line.qty, 0);

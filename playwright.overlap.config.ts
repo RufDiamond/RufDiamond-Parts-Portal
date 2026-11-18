@@ -5,7 +5,7 @@ process.env.DIAGRAM_BASE_URL = baseURL;
 const outputDir = process.env.RUF_E2E_OUTPUT ?? "output/overlap-e2e";
 export default defineConfig({
   testDir: "tests/browser",
-  testMatch: ["label-overlap.spec.ts", "exploded-view-quality.spec.ts", "diagram.spec.ts", "quote-commerce.spec.ts"],
+  testMatch: ["label-overlap.spec.ts", "exploded-view-quality.spec.ts", "cart-pricing-header.spec.ts", "diagram.spec.ts", "quote-commerce.spec.ts"],
   timeout: 90000,
   workers: 2,
   outputDir,

@@ -189,6 +189,7 @@
   align-items: center;
   gap: var(--space-2);
   justify-self: end;
+  justify-content: flex-end;
 }
 
 .calendar {
@@ -284,7 +285,7 @@
   .railLabel { font-size: 9px; }
 }
 @media (max-width: 1100px) and (min-width: 901px) {
-  .dateBlock { max-width: 165px; justify-content: flex-end; }
+  .dateBlock { max-width: 260px; justify-content: flex-end; }
   .calendar { display: none; }
 }
 @media (max-width: 900px) {
@@ -359,10 +360,56 @@
   border-radius: 5px;
   background: var(--deck-ground);
   color: var(--deck-on-dark);
-  font: inherit;
+  font: var(--weight-semibold) 14px / 1.2 var(--font-ui);
   cursor: pointer;
 }
 .headerCartIcon { width: 22px; height: 22px; object-fit: contain; }
 @media (max-width: 600px) {
   .dateBlock { justify-content: center; }
+}
+
+.staffNavigation {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--deck-panel);
+}
+
+.staffLink,
+.headerAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--deck-panel);
+  border-radius: 5px;
+  background: var(--deck-ground);
+  color: var(--deck-on-dark);
+  font: var(--weight-semibold) 14px / 1.2 var(--font-ui);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.staffLink:hover,
+.headerAction:hover,
+.staffLink[aria-current="page"] {
+  border-color: var(--deck-on-dark);
+  background: var(--graphite);
+}
+
+.staffLink:focus-visible,
+.headerAction:focus-visible {
+  outline: 2px solid var(--deck-on-dark);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .dateBlock { justify-content: center; }
+  .staffNavigation { justify-content: flex-start; }
+  .staffLink { flex: 1 1 auto; }
 }

@@ -11,7 +11,7 @@ import {
 import { formatAmount } from "@/lib/format";
 import { createQuoteApi } from "@/state/quote-api";
 import { computeTotals, useRequest } from "@/state/RequestContext";
-import { canOrderRequestLine, quoteRequiredHref } from "@/lib/order-eligibility";
+import { canOrderRequestLine, hasAvailablePrice, quoteRequiredHref } from "@/lib/order-eligibility";
 import { useCustomerSession } from "@/state/SessionBoundary";
 import type { Address, OrderDraft, SubmittedOrder } from "@/types/checkout";
 import styles from "./checkout.module.css";
@@ -168,7 +168,8 @@ export function Checkout({ today }: { today: string }) {
   const { lines: requestLines, currency, discountRate, removeLine, linesHydrated, company, hydrationError, retryHydration, discardSavedRequest } = useRequest();
   const hosted = Boolean(session);
   const lines = useMemo(() => requestLines.filter(line => canOrderRequestLine(line, hosted)), [requestLines, hosted]);
-  const quoteCount = requestLines.length - lines.length;
+  const quoteCount = requestLines.filter(line => !hasAvailablePrice(line.unitPriceSnapshot)).length;
+  const pendingApproval = requestLines.filter(line => hasAvailablePrice(line.unitPriceSnapshot) && !canOrderRequestLine(line, hosted));
   const companyId = company?.id ?? session?.companyId ?? "guest";
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -303,6 +304,13 @@ export function Checkout({ today }: { today: string }) {
     <button type="button" onClick={discardSavedRequest}>Discard saved cart</button>
   </main>;
   if (!hydrated || !linesHydrated) return <p>Loading checkout…</p>;
+  if (!submitted && pendingApproval.length > 0 && lines.length === 0) {
+    return <main className={styles.empty}>
+      <EmptyState title="Catalogue approval pending" description="These items have listed prices. They will be ready for checkout once RUF approves the catalogue. Your selections are saved in your cart."
+        action={<Link href="/request">View request list</Link>} />
+      {quoteCount > 0 && <p>{quoteCount} {quoteCount === 1 ? "item needs" : "items need"} pricing. <Link href={quoteRequiredHref}>Request a quote</Link></p>}
+    </main>;
+  }
   if (!submitted && quoteCount > 0 && lines.length === 0) {
     return <main className={styles.empty}>
       <EmptyState title="A priced quote is required" description="Request a quote for these parts. Add the priced response from Quote Status when it is ready."
@@ -348,6 +356,9 @@ export function Checkout({ today }: { today: string }) {
               <p className={styles.address}><AddressLines address={billing} /></p>
             </section>
           </div>
+          {!submitted && pendingApproval.length > 0 && <p className={styles.taxNote}>
+            {pendingApproval.length} priced {pendingApproval.length === 1 ? "item is" : "items are"} awaiting catalogue approval and will stay in your cart.
+          </p>}
           {!submitted && quoteCount > 0 && <p className={styles.taxNote}>
             {quoteCount} {quoteCount === 1 ? "item needs" : "items need"} a quote and will stay in your request list.
             {" "}<Link href={quoteRequiredHref}>View those items</Link>

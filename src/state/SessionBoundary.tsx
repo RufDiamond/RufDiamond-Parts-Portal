@@ -71,9 +71,9 @@ export function SessionBoundary({ session, children }: { session: MeResponse | n
   </SessionContext.Provider>;
 }
 
-export function SignOutButton() {
+export function SignOutButton({ className }: { className?: string } = {}) {
   const session = useCustomerSession();
   const [error, setError] = useState("");
   if (!session) return null;
-  return <span><button type="button" onClick={async () => { try { await signOutCustomer(); resetCustomerNavigation("/signin"); } catch { setError("Sign-out failed. Please retry."); } }}>Sign out</button>{error && <span role="alert">{error}</span>}</span>;
+  return <span><button className={className} type="button" onClick={async () => { try { await signOutCustomer(); resetCustomerNavigation("/signin"); } catch { setError("Sign-out failed. Please retry."); } }}>Sign out</button>{error && <span role="alert">{error}</span>}</span>;
 }

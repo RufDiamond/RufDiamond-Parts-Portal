@@ -4,7 +4,12 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { afterEach, expect, it, vi } from "vitest";
 import { AddToCartDialog, CheckCart } from "@/components";
 import { RequestProvider, useRequest } from "@/state/RequestContext";
+import { Checkout } from "@/app/(portal)/checkout/Checkout";
+import { canOrderRequestLine, hasAvailablePrice } from "@/lib/order-eligibility";
 import type { Company, Part } from "@/types/catalog";
+
+const customer = vi.hoisted(() => ({ hosted: false }));
+vi.mock("@/state/SessionBoundary", () => ({ useCustomerSession: () => customer.hosted ? { capabilities: ["orders.submit"], companyId: "company", csrfToken: "test" } : null }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
@@ -17,7 +22,7 @@ const heater = part("p1", "68-00032", 559.93);
 const fan = part("p2", "89-00026", 179.81);
 const company: Company = { id: "c", name: "Synthetic", discountRate: 0.1, defaultShippingAddress: null } as Company;
 
-afterEach(() => { cleanup(); sessionStorage.clear(); });
+afterEach(() => { cleanup(); sessionStorage.clear(); localStorage.clear(); customer.hosted = false; });
 
 it("confirms edited quantities with subtotal, discount and total before tax", async () => {
   const onConfirm = vi.fn(async () => true);
@@ -101,4 +106,55 @@ it("retains quantity for the quote-only nut and keeps it out of the priced total
   fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
   expect(onConfirm).toHaveBeenCalledWith([{ part: heater, qty: 1 }, { part: nut, qty: 4 }]);
   expect((await screen.findByRole("link", { name: "Request a quote for remaining items" })).getAttribute("href")).toBe("/request?quoteRequired=1");
+});
+
+it("shows a priced preview part in the cart confirmation without a quote-required label", () => {
+  customer.hosted = true;
+  const preview = { ...heater, id: "prt-68-00032", listPrice: "559.93" };
+  render(<AddToCartDialog parts={[{ part: preview, qty: 2 }]} currency="CAD" discountRate={0} onConfirm={async () => true} onClose={() => {}} />);
+  expect(screen.queryByText("Quote required")).toBeNull();
+  expect(screen.getByText("559.93")).toBeTruthy();
+  expect(screen.getByRole("button", { name: /^Add to cart$/ })).toBeTruthy();
+  // Publication eligibility remains enforced when the actual order is built.
+  expect(canOrderRequestLine({ partId: preview.id, partNumberSnapshot: preview.partNumber,
+    descriptionSnapshot: preview.description, qty: 2, unitPriceSnapshot: "559.93" }, true)).toBe(false);
+});
+
+it.each([0, "0.00", undefined, -1, "", "unavailable", Number.NaN, Number.POSITIVE_INFINITY])("requires a quote for unavailable price %s", price => {
+  expect(hasAvailablePrice(price)).toBe(false);
+});
+
+function SeedPreview() {
+  const { addParts, linesHydrated } = useRequest();
+  return <button disabled={!linesHydrated} onClick={() => { void addParts([
+    { part: { ...heater, id: "prt-68-00032" }, qty: 2 },
+    { part: { ...fan, id: "prt-89-00026", listPrice: 0 } },
+  ]); }}>Add preview parts</button>;
+}
+
+it("keeps priced review items visible in the hosted cart and flags only the zero-price item", async () => {
+  customer.hosted = true;
+  render(<RequestProvider><SeedPreview /><CheckCart buttonClassName="" iconClassName="" /></RequestProvider>);
+  const add = screen.getByRole("button", { name: "Add preview parts" });
+  await vi.waitFor(() => expect((add as HTMLButtonElement).disabled).toBe(false));
+  fireEvent.click(add);
+  fireEvent.click(await screen.findByRole("button", { name: "Check cart · 2" }));
+  const cart = screen.getByRole("dialog");
+  const priced = within(cart).getByText(/Part 68-00032/).closest("li")!;
+  expect(within(priced).getByText("CAD 559.93 × 2")).toBeTruthy();
+  expect(within(priced).queryByText("Quote required")).toBeNull();
+  expect(within(cart).getAllByText("Quote required")).toHaveLength(1);
+  expect(within(cart).getByRole("link", { name: "Checkout" }).getAttribute("href")).toBe("/checkout");
+});
+
+it("explains catalogue approval separately from missing pricing at hosted checkout", async () => {
+  customer.hosted = true;
+  render(<RequestProvider><SeedPreview /><Checkout today="2026-11-17" /></RequestProvider>);
+  const add = screen.getByRole("button", { name: "Add preview parts" });
+  await vi.waitFor(() => expect((add as HTMLButtonElement).disabled).toBe(false));
+  fireEvent.click(add);
+  expect(await screen.findByText("Catalogue approval pending")).toBeTruthy();
+  expect(screen.getByText(/1 item needs pricing/)).toBeTruthy();
+  expect(screen.queryByText("A priced quote is required")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Submit order" })).toBeNull();
 });

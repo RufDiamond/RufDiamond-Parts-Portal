@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCustomerSession } from "@/state/SessionBoundary";
-import { canOrderRequestPart, quoteRequiredHref } from "@/lib/order-eligibility";
+import { hasAvailablePrice, quoteRequiredHref } from "@/lib/order-eligibility";
 import { useEffect, useMemo, useState } from "react";
 import { computeTotals, type RequestPartInput } from "@/state/RequestContext";
 import { downloadRequestCsv } from "@/lib/csv";
@@ -43,7 +42,6 @@ export function AddToCartDialog({
   onClose,
 }: AddToCartDialogProps) {
   const router = useRouter();
-  const hosted = Boolean(useCustomerSession());
   // Snapshot the parts on open, so a selection changing behind the dialog
   // does not rewrite what the reader is confirming.
   const [items] = useState(parts);
@@ -83,11 +81,11 @@ export function AddToCartDialog({
 
   // Prices withheld from this account mean no money columns at all, rather
   // than columns of blanks that read as zero.
-  const orderableIds = new Set(items.filter(item => canOrderRequestPart(item, hosted)).map(item => item.part.id));
-  const orderableLines = lines.filter(line => orderableIds.has(line.partId));
-  const quoteCount = lines.length - orderableLines.length;
-  const priced = orderableLines.length > 0;
-  const totals = computeTotals(orderableLines, discountRate);
+  const pricedIds = new Set(items.filter(item => hasAvailablePrice(item.part.listPrice)).map(item => item.part.id));
+  const pricedLines = lines.filter(line => pricedIds.has(line.partId));
+  const quoteCount = lines.length - pricedLines.length;
+  const priced = pricedLines.length > 0;
+  const totals = computeTotals(pricedLines, discountRate);
 
   const confirm = async () => {
     setStatus("adding");
@@ -135,7 +133,7 @@ export function AddToCartDialog({
           <button
             type="button"
             className={styles.secondary}
-            onClick={() => downloadRequestCsv({ lines: orderableLines, discountRate, filename: "cart-addition" })}
+            onClick={() => downloadRequestCsv({ lines: pricedLines, discountRate, filename: "cart-addition" })}
             disabled={!priced || status === "adding"}
           >
             Export to Excel
@@ -170,9 +168,9 @@ export function AddToCartDialog({
             </thead>
             <tbody>
               {lines.map((line) => (
-                <tr key={line.partId} data-quote-required={!orderableIds.has(line.partId) || undefined}>
+                <tr key={line.partId} data-quote-required={!pricedIds.has(line.partId) || undefined}>
                   <td className={styles.mono}>{line.partNumberSnapshot}</td>
-                  <td>{line.descriptionSnapshot}{!orderableIds.has(line.partId) && <span className={styles.quoteRequired}>Quote required</span>}</td>
+                  <td>{line.descriptionSnapshot}{!pricedIds.has(line.partId) && <span className={styles.quoteRequired}>Quote required</span>}</td>
                   <td className={styles.qty}>
                     <QuantityStepper
                       value={line.qty}
@@ -184,8 +182,8 @@ export function AddToCartDialog({
                   </td>
                   {priced ? (
                     <>
-                      <td className={styles.money}>{orderableIds.has(line.partId) ? formatAmount(line.unitPriceSnapshot, currency) : "—"}</td>
-                      <td className={styles.money}>{orderableIds.has(line.partId) ? formatAmount(line.lineTotal, currency) : "—"}</td>
+                      <td className={styles.money}>{pricedIds.has(line.partId) ? formatAmount(line.unitPriceSnapshot, currency) : "—"}</td>
+                      <td className={styles.money}>{pricedIds.has(line.partId) ? formatAmount(line.lineTotal, currency) : "—"}</td>
                     </>
                   ) : null}
                 </tr>

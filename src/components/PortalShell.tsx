@@ -123,6 +123,13 @@ export interface PortalShellProps {
 export function PortalShell({ children, date }: PortalShellProps) {
   const session = useCustomerSession();
   const pathname = usePathname() ?? "/";
+  const staffLinks = [
+    { href: "/admin", label: "Draft administration", allowed: session?.scopes.environment === "draft" &&
+      ["publish.draft.view", "catalog.figure.view"].every(key => session.capabilities.includes(key)) },
+    { href: "/quotes/admin", label: "Quote admin", allowed: session?.capabilities.includes("orders.quote") },
+    { href: "/admin/discounts", label: "Dealer discounts", allowed: session?.capabilities.includes("users.all.manage") },
+    { href: "/admin/users", label: "User accounts", allowed: session?.capabilities.includes("users.all.manage") },
+  ].filter(link => link.allowed);
   const { selectedModel } = useMachine();
   const company = useRequestCompany();
 
@@ -238,12 +245,18 @@ export function PortalShell({ children, date }: PortalShellProps) {
             />
             <span className={styles.date}>{date}</span>
             {session && <CheckCart buttonClassName={styles.headerCart} iconClassName={styles.headerCartIcon} placement="header" />}
-            {session?.scopes.environment === "draft" && ["publish.draft.view", "catalog.figure.view"].every(key => session.capabilities.includes(key)) && <Link href="/admin">Draft administration</Link>}
-            {session?.capabilities.includes("orders.quote") && <Link href="/quotes/admin">Quote admin</Link>}
-            {session?.capabilities.includes("users.all.manage") && <Link href="/admin/discounts">Dealer discounts</Link>}
-            {session?.capabilities.includes("users.all.manage") && <Link href="/admin/users">User accounts</Link>}
-            <SignOutButton />
+            <SignOutButton className={styles.headerAction} />
           </div>
+          {staffLinks.length > 0 && (
+            <nav className={styles.staffNavigation} aria-label="Staff administration">
+              {staffLinks.map(link => (
+                <Link key={link.href} className={styles.staffLink} href={link.href}
+                  aria-current={pathname === link.href ? "page" : undefined}>
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </header>
 
         <div

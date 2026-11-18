@@ -9,7 +9,7 @@ import { Icon } from "./Icon";
 import { QuantityStepper } from "./QuantityStepper";
 import styles from "./CheckCart.module.css";
 import { useCustomerSession } from "@/state/SessionBoundary";
-import { canOrderRequestLine, quoteRequiredHref } from "@/lib/order-eligibility";
+import { canOrderRequestLine, hasAvailablePrice, quoteRequiredHref } from "@/lib/order-eligibility";
 
 export interface CheckCartProps {
   /** The toolbar's own button styling, so this matches its neighbours. */
@@ -28,10 +28,10 @@ export interface CheckCartProps {
 export function CheckCart({ buttonClassName, iconClassName, disabled = false, placement = "below" }: CheckCartProps) {
   const { lines, currency, updateQty, removeLine, clear } = useRequest();
   const session = useCustomerSession();
-  const orderable = lines.filter(line => canOrderRequestLine(line, Boolean(session)));
-  const orderableIds = new Set(orderable.map(line => line.partId));
-  const quoteCount = lines.length - orderable.length;
-  const quoteOnly = lines.length > 0 && !orderable.length;
+  const pricedLines = lines.filter(line => hasAvailablePrice(line.unitPriceSnapshot));
+  const quoteCount = lines.length - pricedLines.length;
+  const quoteOnly = lines.length > 0 && !pricedLines.length;
+  const awaitingApproval = pricedLines.some(line => !canOrderRequestLine(line, Boolean(session)));
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -52,8 +52,8 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
   }, [open]);
 
   const pieces = lines.reduce((sum, line) => sum + line.qty, 0);
-  const priced = orderable.length > 0;
-  const subtotal = Math.round(orderable.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0) * 100) / 100;
+  const priced = pricedLines.length > 0;
+  const subtotal = Math.round(pricedLines.reduce((sum, line) => sum + (line.lineTotal ?? 0), 0) * 100) / 100;
 
   return (
     <div className={styles.root} ref={rootRef}>
@@ -81,7 +81,7 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
                     {line.descriptionSnapshot}
                     <span className={styles.number}> ({line.partNumberSnapshot})</span>
                   </p>
-                  {orderableIds.has(line.partId) ? (
+                  {hasAvailablePrice(line.unitPriceSnapshot) ? (
                     <p className={styles.price}>
                       {currency} {formatAmount(line.unitPriceSnapshot, currency)} × {line.qty}
                     </p>
@@ -122,11 +122,12 @@ export function CheckCart({ buttonClassName, iconClassName, disabled = false, pl
 
           {priced ? (
             <p className={styles.subtotal}>
-              <span>Subtotal</span>
+              <span>{awaitingApproval ? "Listed subtotal" : "Subtotal"}</span>
               <span>{currency} {formatAmount(subtotal, currency)}</span>
             </p>
           ) : null}
 
+          {awaitingApproval && <p className={styles.empty}>Some priced items are awaiting catalogue approval before checkout.</p>}
           <div className={styles.links}>
             <Link
               href={quoteOnly ? quoteRequiredHref : "/checkout"}
